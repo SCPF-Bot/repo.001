@@ -1,0 +1,29 @@
+# --- Core Orchestration ---
+natsort==8.4.0
+pillow==10.2.0
+python-magic==0.4.27
+requests==2.31.0
+google-cloud-vision==3.7.2
+
+# --- OCR Engines ---
+pytesseract==0.3.10
+manga-ocr==0.1.11
+paddleocr==2.7.3
+paddlepaddle==2.6.0
+opencv-python-headless==4.9.0.80
+
+# --- TTS Engines ---
+edge-tts==6.1.10
+elevenlabs==0.2.27
+# MeloTTS requires specific versioning for CPU stability
+melo-tts @ git+https://github.com/myshell-ai/MeloTTS.git
+# ChatTTS and XTTS-v2 dependencies
+ChatTTS==0.1.1
+TTS==0.22.0
+scipy==1.12.0
+torch==2.2.1 --index-url https://download.pytorch.org/whl/cpu
+torchaudio==2.2.1 --index-url https://download.pytorch.org/whl/cpu
+
+# --- Utilities ---
+numpy==1.26.4
+asyncio==3.4.3
