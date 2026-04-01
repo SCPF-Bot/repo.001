@@ -57,7 +57,7 @@ Navigate to Settings > Secrets and variables > Actions and define the following 
  * Click Run workflow.
 Once finished, the video will appear in the Releases section of your repository.
 
-## 🧠 5. The "Zero-Fail" Engineering Logic
+## 🧠 5. The "Zero-Fail" Logic
  * Atomic Sync: We do not guess page timings. The pipeline uses ffprobe to measure the exact duration of the generated audio for every page, ensuring the image and voice never go out of sync.
  * Lazy Loading: Heavy models (like Manga-OCR or XTTS) are only loaded into RAM if you select them. This prevents "Out of Memory" crashes on GitHub's 7GB runners.
  * Silent Fallback: If a page contains no text (art-only pages), the pipeline automatically generates 1.5 seconds of silence to maintain the video's rhythmic integrity.
