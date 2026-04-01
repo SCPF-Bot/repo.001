@@ -14,15 +14,18 @@ sudo apt-get install -y --no-install-recommends \
     libglib2.0-0 \
     unzip \
     curl \
-    espeak-ng  # Required for MeloTTS
+    espeak-ng
 
 # 2. Clean up apt cache to save runner disk space
 sudo apt-get clean
 sudo rm -rf /var/lib/apt/lists/*
 
-# 3. Ensure the output and processing directories exist with proper permissions
-mkdir -p output processing scripts
-chmod +x scripts/*.sh
+# 3. Ensure directories exist
+mkdir -p output processing scripts engines
+touch engines/__init__.py
+
+# Make scripts executable
+chmod +x scripts/*.sh 2>/dev/null || true
 
 echo "--- System Dependencies Verified and Installed ---"
 
@@ -42,7 +45,6 @@ echo "--- Python Dependencies Installed ---"
 
 # 5. Verify installations
 python -c "import torch; print(f'✓ PyTorch {torch.__version__}')"
-python -c "import melo_tts; print('✓ MeloTTS')"
-python -c "import paddle; print(f'✓ PaddlePaddle {paddle.__version__}')"
+python -c "import cv2; print(f'✓ OpenCV {cv2.__version__}')"
 
 echo "--- All dependencies installed successfully ---"
