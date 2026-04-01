@@ -48,7 +48,7 @@ Navigate to Settings > Secrets and variables > Actions and define the following 
 
 ## 🎞 4. Execution via GitHub Actions
  * Navigate to the Actions tab in your repository.
- * Select Manga-To-Video-AI-Ultimate from the sidebar.
+ * Select Manga-To-Video from the sidebar.
  * Click the Run workflow dropdown.
  * Fill the Inputs:
    * URL: Provide a direct link to a .zip or .cbz file containing your manga pages.
