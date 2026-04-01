@@ -12,8 +12,15 @@ try:
 except ImportError:
     natsorted = sorted
 
-from engines.ocr_engines import OCREngine
-from engines.tts_engines import TTSEngine
+# Fixed import paths - assuming engines are in the same directory
+try:
+    from engines.ocr_engines import OCREngine
+    from engines.tts_engines import TTSEngine
+except ImportError:
+    # Fallback for local development
+    sys.path.insert(0, str(Path(__file__).parent))
+    from engines.ocr_engines import OCREngine
+    from engines.tts_engines import TTSEngine
 
 # Global Configuration
 BASE_DIR = Path("processing")
@@ -40,12 +47,15 @@ class MangaVideoOrchestrator:
         archive_path = BASE_DIR / "manga_archive.zip"
         try:
             # Use curl with -L to follow redirects (essential for Drive/Dropbox/GitHub links)
-            subprocess.run(["curl", "-L", url, "-o", str(archive_path)], check=True)
+            subprocess.run(["curl", "-L", url, "-o", str(archive_path)], check=True, timeout=300)
             # Unzip quietly; handle potential nested directories
-            subprocess.run(["unzip", "-o", "-q", str(archive_path), "-d", str(TEMP_IMG)], check=True)
+            subprocess.run(["unzip", "-o", "-q", str(archive_path), "-d", str(TEMP_IMG)], check=True, timeout=120)
             print(f"Successfully extracted assets to {TEMP_IMG}")
         except subprocess.CalledProcessError as e:
             print(f"CRITICAL FAIL: Download/Unzip failed. {e}")
+            sys.exit(1)
+        except subprocess.TimeoutExpired as e:
+            print(f"CRITICAL FAIL: Operation timed out. {e}")
             sys.exit(1)
 
     async def run(self, url):
@@ -70,26 +80,44 @@ class MangaVideoOrchestrator:
             print(f"Processing Page {i+1}/{len(images)}: {img_path.name}")
             
             # 1. OCR Extraction
-            text = self.ocr.get_text(str(img_path))
+            try:
+                text = self.ocr.get_text(str(img_path))
+                if not text or not text.strip():
+                    text = "No text detected on this page."
+                    print(f"  Warning: No text detected on page {i+1}")
+            except Exception as e:
+                print(f"  OCR Error on page {i+1}: {e}")
+                text = "Error processing text on this page."
             
             # 2. TTS Generation
             audio_file = TEMP_AUD / f"page_{i:04d}.mp3"
-            await self.tts.generate(text, str(audio_file))
+            try:
+                await self.tts.generate(text, str(audio_file))
+                if not audio_file.exists():
+                    raise Exception(f"Audio file not created: {audio_file}")
+            except Exception as e:
+                print(f"  TTS Error on page {i+1}: {e}")
+                # Create a silent audio file as fallback
+                subprocess.run([
+                    "ffmpeg", "-f", "lavfi", "-i", "anullsrc=channel_layout=stereo:sample_rate=44100",
+                    "-t", "2", "-c:a", "aac", str(audio_file), "-y"
+                ], check=True, capture_output=True)
 
             # 3. Precision Duration Check (using ffprobe)
-            # This is the heart of Zero-Fail sync.
             try:
                 duration = subprocess.check_output([
                     "ffprobe", "-v", "error", "-show_entries", "format=duration",
                     "-of", "default=noprint_wrappers=1:nokey=1", str(audio_file)
-                ]).decode().strip()
-                # If ffprobe returns nothing or error, default to 2 seconds
+                ], timeout=10).decode().strip()
                 duration = float(duration) if duration else 2.0
+                # Cap duration to reasonable limits
+                duration = min(max(duration, 1.0), 30.0)
             except Exception:
                 duration = 2.0
+                print(f"  Using fallback duration: {duration}s")
 
             # 4. Prepare FFmpeg Concatenation Strings
-            # Escape single quotes in paths for FFmpeg compatibility
+            # Escape paths for FFmpeg compatibility
             safe_img_path = str(img_path.resolve()).replace("'", "'\\''")
             safe_aud_path = str(audio_file.resolve()).replace("'", "'\\''")
             
@@ -116,25 +144,30 @@ class MangaVideoOrchestrator:
         final_video = OUT_DIR / "manga_ai_render.mp4"
 
         # 1. Combine all audio segments into one master track
-        subprocess.run([
-            "ffmpeg", "-f", "concat", "-safe", "0", "-i", str(aud_manifest),
-            "-c", "copy", str(master_audio), "-y"
-        ], check=True)
+        try:
+            subprocess.run([
+                "ffmpeg", "-f", "concat", "-safe", "0", "-i", str(aud_manifest),
+                "-c", "copy", str(master_audio), "-y"
+            ], check=True, capture_output=True, timeout=300)
+        except subprocess.CalledProcessError as e:
+            print(f"Audio concatenation failed: {e.stderr.decode() if e.stderr else str(e)}")
+            sys.exit(1)
 
         # 2. Stitch images to the master audio
-        # Using libx264 with yuv420p for maximum compatibility with social media/mobile
+        # Using libx264 with yuv420p for maximum compatibility
         cmd = [
             "ffmpeg", "-f", "concat", "-safe", "0", "-i", str(img_manifest),
             "-i", str(master_audio),
-            "-c:v", "libx264", "-pix_fmt", "yuv420p", "-preset", "slow", "-crf", "18",
+            "-c:v", "libx264", "-pix_fmt", "yuv420p", "-preset", "medium", "-crf", "23",
             "-c:a", "aac", "-b:a", "192k", "-shortest", str(final_video), "-y"
         ]
         
         try:
-            subprocess.run(cmd, check=True)
-            print(f"BUILD SUCCESSFUL: {final_video}")
+            subprocess.run(cmd, check=True, capture_output=True, timeout=600)
+            file_size = final_video.stat().st_size / (1024 * 1024)  # Size in MB
+            print(f"BUILD SUCCESSFUL: {final_video} ({file_size:.2f} MB)")
         except subprocess.CalledProcessError as e:
-            print(f"CRITICAL RENDER FAIL: {e}")
+            print(f"CRITICAL RENDER FAIL: {e.stderr.decode() if e.stderr else str(e)}")
             sys.exit(1)
 
 if __name__ == "__main__":
@@ -142,7 +175,7 @@ if __name__ == "__main__":
     parser.add_argument("--url", required=True, help="URL to CBZ/Zip")
     parser.add_argument("--ocr", default="tesseract", help="OCR Engine choice")
     parser.add_argument("--tts", default="edge_tts", help="TTS Engine choice")
-    args = parser.parse_argument_group().parser.parse_args()
+    args = parser.parse_args()
 
     orchestrator = MangaVideoOrchestrator(args.ocr, args.tts)
     asyncio.run(orchestrator.run(args.url))
