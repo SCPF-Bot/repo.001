@@ -15,7 +15,7 @@ opencv-python-headless==4.11.0.86
 # --- TTS Engines ---
 edge-tts==7.1.12
 elevenlabs==2.12.2
-# MeloTTS - using main branch (stable)
+# MeloTTS - using main branch (works with your installed espeak-ng)
 git+https://github.com/myshell-ai/MeloTTS.git@main
 
 # ChatTTS and XTTS-v2 dependencies
