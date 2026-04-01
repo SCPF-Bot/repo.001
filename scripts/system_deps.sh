@@ -18,8 +18,10 @@ sudo apt-get install -y --no-install-recommends \
     libsm6 \
     libxext6 \
     libxrender-dev \
-    libgomp1
-
+    libgomp1 \
+    espeak-ng \
+    libespeak-ng-dev
+    
 sudo apt-get clean
 sudo rm -rf /var/lib/apt/lists/*
 
