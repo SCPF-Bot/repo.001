@@ -1,0 +1,8 @@
+natsort
+pillow
+requests
+opencv-python-headless
+torch --extra-index-url https://download.pytorch.org/whl/cpu
+numpy
+aiofiles
+aiohttp
