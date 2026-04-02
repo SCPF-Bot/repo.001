@@ -1,3 +1,0 @@
-# MeloTTS requires a Git install (heavy). We use a fallback to edge_tts if unavailable.
-# To enable melo_tts, uncomment below (requires extra system deps):
-git+https://github.com/myshell-ai/MeloTTS.git
