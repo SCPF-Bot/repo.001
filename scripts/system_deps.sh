@@ -10,6 +10,7 @@ sudo apt-get install -y --no-install-recommends \
     libgl1 \
     libglib2.0-0 \
     libgomp1 \
-    wget
+    wget \
+    espeak-ng
 
 sudo apt-get clean
