@@ -1,4 +1,4 @@
-name: Manga To Video
+name: Manga To Video (Optimized)
 
 on:
   workflow_dispatch:
@@ -9,12 +9,12 @@ on:
       ocr_engine:
         type: choice
         description: 'Primary OCR Engine'
-        options: [google_vision, manga_ocr, paddle_ocr, comic_text_detector, tesseract]
+        options: [google_vision, manga_ocr, paddle_ocr, tesseract]
         default: 'tesseract'
       tts_engine:
         type: choice
         description: 'Primary TTS Engine'
-        options: [elevenlabs, fish_speech, xtts_v2, chat_tts, melo_tts, deepgram_aura, edge_tts]
+        options: [elevenlabs, edge_tts, xtts_v2, melo_tts]
         default: 'edge_tts'
 
 jobs:
@@ -28,37 +28,27 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
-          cache: 'pip' # Speeds up subsequent runs by ~3 minutes
 
-      - name: Free Disk Space
-        run: |
-          sudo rm -rf /usr/share/dotnet /opt/ghc /usr/local/share/boost
-          df -h
-
-      - name: Install System Dependencies
+      - name: Install Base System & Python Deps
         run: |
           chmod +x ./scripts/system_deps.sh
           ./scripts/system_deps.sh
+          pip install -r requirements/base.txt
 
-      - name: Install Python Dependencies
+      - name: JIT Engine Dependency Installation
         run: |
-          pip install --upgrade pip
-          pip install -r requirements.txt
+          # Dynamically installs only what is needed for the selected engines
+          python scripts/install_engine_deps.py --ocr ${{ github.event.inputs.ocr_engine }} --tts ${{ github.event.inputs.tts_engine }}
 
       - name: Run Manga Pipeline
         env:
-          # Mapping GitHub Secrets to Environment Variables for the Python scripts
           ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
-          DEEPGRAM_KEY: ${{ secrets.DEEPGRAM_KEY }}
-          FISH_KEY: ${{ secrets.FISH_KEY }}
-          GOOGLE_APPLICATION_CREDENTIALS_JSON: ${{ secrets.GOOGLE_CREDENTIALS }}
+          GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
         run: |
-          # Create a credentials file if the secret exists
-          if [ -n "$GOOGLE_APPLICATION_CREDENTIALS_JSON" ]; then
-            echo "$GOOGLE_APPLICATION_CREDENTIALS_JSON" > google_creds.json
+          if [ -n "$GOOGLE_CREDENTIALS" ]; then
+            echo "$GOOGLE_CREDENTIALS" > google_creds.json
             export GOOGLE_APPLICATION_CREDENTIALS=$(pwd)/google_creds.json
           fi
-
           python scripts/core_pipeline.py \
             --url "${{ github.event.inputs.url }}" \
             --ocr "${{ github.event.inputs.ocr_engine }}" \
@@ -70,6 +60,3 @@ jobs:
         with:
           files: output/*.mp4
           tag_name: build-${{ github.run_id }}
-          name: "Manga Export - ${{ github.run_number }}"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
