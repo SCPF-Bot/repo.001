@@ -1,0 +1,74 @@
+name: Manga To Video
+
+on:
+  workflow_dispatch:
+    inputs:
+      url:
+        description: 'Manga Download URL (CBZ/Zip)'
+        required: true
+      ocr_engine:
+        type: choice
+        description: 'Primary OCR Engine'
+        options: [google_vision, manga_ocr, paddle_ocr, tesseract]
+        default: 'tesseract'
+      tts_engine:
+        type: choice
+        description: 'Primary TTS Engine'
+        options: [elevenlabs, edge_tts, xtts_v2, melo_tts]
+        default: 'edge_tts'
+
+jobs:
+  build-and-render:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install System Dependencies
+        run: |
+          chmod +x "${{ github.workspace }}/scripts/system_deps.sh"
+          "${{ github.workspace }}/scripts/system_deps.sh"
+
+      - name: Install Base Python Dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r "${{ github.workspace }}/requirements/base.txt"
+
+      - name: JIT Install Engine Dependencies
+        run: |
+          python "${{ github.workspace }}/scripts/install_engine_deps.py" \
+            --ocr "${{ github.event.inputs.ocr_engine }}" \
+            --tts "${{ github.event.inputs.tts_engine }}"
+
+      - name: Setup Google Credentials
+        run: |
+          if [ -n "${{ secrets.GOOGLE_CREDENTIALS }}" ]; then
+            echo '${{ secrets.GOOGLE_CREDENTIALS }}' > "${{ github.workspace }}/google_creds.json"
+            echo "GOOGLE_APPLICATION_CREDENTIALS=${{ github.workspace }}/google_creds.json" >> $GITHUB_ENV
+          fi
+
+      - name: Run Manga Pipeline
+        env:
+          ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
+          DEEPGRAM_KEY: ${{ secrets.DEEPGRAM_KEY }}
+          FISH_KEY: ${{ secrets.FISH_KEY }}
+        run: |
+          python "${{ github.workspace }}/scripts/core_pipeline.py" \
+            --url "${{ github.event.inputs.url }}" \
+            --ocr "${{ github.event.inputs.ocr_engine }}" \
+            --tts "${{ github.event.inputs.tts_engine }}"
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        if: success()
+        with:
+          files: output/*.mp4
+          tag_name: build-${{ github.run_id }}
+          make_latest: true
