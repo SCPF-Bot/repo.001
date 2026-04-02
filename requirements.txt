@@ -19,6 +19,6 @@ TTS==0.22.0
 git+https://github.com/myshell-ai/MeloTTS.git@main
 
 # --- Utilities ---
-numpy==2.4.4  # Pinned to 1.x for compatibility with Paddle/Coqui TTS
+numpy==1.26.4  # Pinned to 1.x for compatibility with Paddle/Coqui TTS
 scipy==1.71.1
 torch==2.11.0 --extra-index-url https://download.pytorch.org/whl/cpu
