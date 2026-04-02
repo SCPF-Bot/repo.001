@@ -1,4 +1,4 @@
-name: Manga-To-Video
+name: Manga-To-Video (High Performance)
 
 on:
   workflow_dispatch:
@@ -6,190 +6,70 @@ on:
       url:
         description: 'Manga Download URL (CBZ/Zip)'
         required: true
-        default: ''
       ocr_engine:
         type: choice
         description: 'Primary OCR Engine'
-        options:
-          - google_vision
-          - manga_ocr
-          - paddle_ocr
-          - comic_text_detector
-          - tesseract
+        options: [google_vision, manga_ocr, paddle_ocr, comic_text_detector, tesseract]
         default: 'tesseract'
       tts_engine:
         type: choice
         description: 'Primary TTS Engine'
-        options:
-          - elevenlabs
-          - fish_speech
-          - xtts_v2
-          - chat_tts
-          - melo_tts
-          - deepgram_aura
-          - edge_tts
+        options: [elevenlabs, fish_speech, xtts_v2, chat_tts, melo_tts, deepgram_aura, edge_tts]
         default: 'edge_tts'
-      enable_debug:
-        description: 'Enable debug logging'
-        type: boolean
-        default: false
-
-permissions:
-  contents: write
-  actions: read
 
 jobs:
   build-and-render:
     runs-on: ubuntu-latest
-    timeout-minutes: 360
-    
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
-          fetch-depth: 1
+          python-version: '3.10'
+          cache: 'pip' # Speeds up subsequent runs by ~3 minutes
 
       - name: Free Disk Space
         run: |
-          sudo rm -rf /usr/share/dotnet
-          sudo rm -rf /opt/ghc
-          sudo rm -rf /usr/local/share/boost
-          sudo rm -rf "$AGENT_TOOLSDIRECTORY"
+          sudo rm -rf /usr/share/dotnet /opt/ghc /usr/local/share/boost
           df -h
 
       - name: Install System Dependencies
         run: |
-          sudo apt-get update
-          
-          # Install dependencies with corrected package names for Ubuntu 24.04+
-          sudo apt-get install -y --no-install-recommends \
-            ffmpeg \
-            tesseract-ocr \
-            libtesseract-dev \
-            libmagic1 \
-            libgl1 \
-            libglib2.0-0 \
-            unzip \
-            curl \
-            espeak-ng \
-            libsm6 \
-            libxext6 \
-            libxrender-dev \
-            libgomp1 \
-            libespeak-ng-dev
-          
-          ffmpeg -version | head -n1
-          tesseract --version
-          
-          sudo apt-get clean
-          sudo rm -rf /var/lib/apt/lists/*
+          chmod +x ./scripts/system_deps.sh
+          ./scripts/system_deps.sh
 
-      - name: Setup Python Environment
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.10'
-          cache: 'pip'
-          cache-dependency-path: requirements.txt
-
-      - name: Cache Model Files
-        id: cache-models
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/.cache/huggingface
-            ~/.cache/torch
-            ~/.cache/paddle
-          key: ${{ runner.os }}-models-${{ hashFiles('requirements.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-models-
-
-      - name: Install Python Requirements
+      - name: Install Python Dependencies
         run: |
-          python -m pip install --upgrade pip setuptools wheel
-          
-          # Install PyTorch separately to ensure compatibility
-          pip install torch==2.4.1 torchaudio==2.4.1 --index-url https://download.pytorch.org/whl/cpu
-          
-          for i in {1..3}; do
-            pip install -r requirements.txt && break || sleep 10
-          done
-          
-          python -c "import torch; print(f'PyTorch {torch.__version__}')"
-          python -c "import cv2; print(f'OpenCV {cv2.__version__}')"
+          pip install --upgrade pip
+          pip install -r requirements.txt
 
-      - name: Setup Google Credentials
-        if: github.event.inputs.ocr_engine == 'google_vision'
-        run: |
-          if [ -n "$GOOGLE_APPLICATION_CREDENTIALS_JSON" ]; then
-            echo "$GOOGLE_APPLICATION_CREDENTIALS_JSON" > google_creds.json
-            echo "GOOGLE_APPLICATION_CREDENTIALS=$(pwd)/google_creds.json" >> $GITHUB_ENV
-            echo "✓ Google credentials configured"
-          else
-            echo "⚠ Google credentials not found, will use fallback OCR"
-          fi
+      - name: Run Manga Pipeline
         env:
-          GOOGLE_APPLICATION_CREDENTIALS_JSON: ${{ secrets.GOOGLE_JSON }}
-
-      - name: Validate Inputs
-        run: |
-          if [ -z "${{ github.event.inputs.url }}" ]; then
-            echo "❌ Error: URL is required"
-            exit 1
-          fi
-          echo "✓ Input validation passed"
-
-      - name: Run Processing Pipeline
-        timeout-minutes: 300
-        env:
-          ELEVENLABS_API_KEY: ${{ secrets.EL_KEY }}
+          # Mapping GitHub Secrets to Environment Variables for the Python scripts
+          ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
           DEEPGRAM_KEY: ${{ secrets.DEEPGRAM_KEY }}
           FISH_KEY: ${{ secrets.FISH_KEY }}
-          PYTHONUNBUFFERED: 1
+          GOOGLE_APPLICATION_CREDENTIALS_JSON: ${{ secrets.GOOGLE_CREDENTIALS }}
         run: |
-          mkdir -p output processing
-          chmod +x scripts/system_deps.sh
-          ./scripts/system_deps.sh
-          
+          # Create a credentials file if the secret exists
+          if [ -n "$GOOGLE_APPLICATION_CREDENTIALS_JSON" ]; then
+            echo "$GOOGLE_APPLICATION_CREDENTIALS_JSON" > google_creds.json
+            export GOOGLE_APPLICATION_CREDENTIALS=$(pwd)/google_creds.json
+          fi
+
           python scripts/core_pipeline.py \
             --url "${{ github.event.inputs.url }}" \
             --ocr "${{ github.event.inputs.ocr_engine }}" \
-            --tts "${{ github.event.inputs.tts_engine }}" \
-            2>&1 | tee processing/pipeline.log
-          
-          if [ ! -f output/*.mp4 ] 2>/dev/null; then
-            echo "❌ No output video generated"
-            exit 1
-          fi
-
-      - name: Upload Pipeline Logs
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: pipeline-logs-${{ github.run_id }}
-          path: processing/pipeline.log
-          retention-days: 7
+            --tts "${{ github.event.inputs.tts_engine }}"
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
-        if: success() && hashFiles('output/*.mp4') != ''
+        if: success()
         with:
           files: output/*.mp4
           tag_name: build-${{ github.run_id }}
-          name: "Manga AI Export - Build ${{ github.run_number }}"
-          make_latest: true
+          name: "Manga Export - ${{ github.run_number }}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Upload to GitHub Artifacts
-        uses: actions/upload-artifact@v4
-        if: success() && hashFiles('output/*.mp4') != ''
-        with:
-          name: manga-video-${{ github.run_id }}
-          path: output/*.mp4
-          retention-days: 90
-
-      - name: Cleanup Workspace
-        if: always()
-        run: |
-          rm -rf processing/images processing/audio 2>/dev/null || true
-          df -h
