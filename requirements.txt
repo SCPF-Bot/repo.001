@@ -1,24 +1,25 @@
-# --- Core Orchestration ---
+# --- Core ---
 natsort==8.4.0
 pillow==10.4.0
-python-magic==0.4.27
 requests==2.32.3
 google-cloud-vision==3.7.4
 
-# --- OCR Engines ---
+# --- OCR ---
 pytesseract==0.3.10
 manga-ocr==0.1.10
 paddleocr==2.8.1
 paddlepaddle==2.6.1
 opencv-python-headless==4.10.0.84
 
-# --- TTS Engines ---
+# --- TTS ---
 edge-tts==6.1.9
 elevenlabs==1.2.0
-
-# MeloTTS - install via git
+TTS==0.22.0  # Required for XTTS-v2
+# MeloTTS via git remains
 git+https://github.com/myshell-ai/MeloTTS.git@main
 
 # --- Utilities ---
 numpy==1.26.4
 scipy==1.13.1
+torch==2.2.2 --extra-index-url https://download.pytorch.org/whl/c
+pu
