@@ -1,4 +1,4 @@
-name: Manga To Video
+name: Manga To Video (Optimized)
 
 on:
   workflow_dispatch:
@@ -21,7 +21,7 @@ jobs:
   build-and-render:
     runs-on: ubuntu-latest
     permissions:
-      contents: write   # needed to create releases
+      contents: write
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -45,12 +45,18 @@ jobs:
         run: |
           python scripts/install_engine_deps.py --ocr ${{ github.event.inputs.ocr_engine }} --tts ${{ github.event.inputs.tts_engine }}
 
+      - name: Setup Google Credentials
+        run: |
+          if [ -n "${{ secrets.GOOGLE_CREDENTIALS }}" ]; then
+            echo '${{ secrets.GOOGLE_CREDENTIALS }}' > google_creds.json
+            echo "GOOGLE_APPLICATION_CREDENTIALS=$(pwd)/google_creds.json" >> $GITHUB_ENV
+          fi
+
       - name: Run Manga Pipeline
         env:
           ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
           DEEPGRAM_KEY: ${{ secrets.DEEPGRAM_KEY }}
           FISH_KEY: ${{ secrets.FISH_KEY }}
-          GOOGLE_CREDENTIALS: ${{ steps.google_creds.outputs.path }}
         run: |
           python scripts/core_pipeline.py \
             --url "${{ github.event.inputs.url }}" \
