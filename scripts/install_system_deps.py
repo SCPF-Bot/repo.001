@@ -21,7 +21,7 @@ OCR_PACKAGES = {
 TTS_PACKAGES = {
     "elevenlabs": "",   # no extra package needed (uses requests)
     "xtts_v2": "TTS",
-    "melo_tts": "git+https://github.com/myshell-ai/MeloTTS.git",
+    "melo_tts": "git+https://github.com/myshell-ai/MeloTTS.git",  # <-- fixed
     "edge_tts": "edge-tts",
 }
 
@@ -29,7 +29,11 @@ def install_req(file_path: Path, fallback_pkg: str = None):
     if not file_path.exists():
         if fallback_pkg:
             logger.warning(f"Requirement file {file_path} not found. Installing {fallback_pkg} directly.")
-            subprocess.check_call([sys.executable, "-m", "pip", "install"] + fallback_pkg.split())
+            # Special handling for git URLs
+            if fallback_pkg.startswith("git+"):
+                subprocess.check_call([sys.executable, "-m", "pip", "install", fallback_pkg])
+            else:
+                subprocess.check_call([sys.executable, "-m", "pip", "install"] + fallback_pkg.split())
         else:
             logger.error(f"Missing requirement file {file_path} and no fallback provided. Skipping.")
         return
