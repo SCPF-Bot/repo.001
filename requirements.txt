@@ -8,7 +8,7 @@ google-cloud-vision==3.7.4
 pytesseract==0.3.10
 manga-ocr==0.1.10
 paddleocr==2.8.1
-paddlepaddle==2.6.1
+paddlepaddle==3.3.1
 opencv-python-headless==4.10.0.84
 
 # --- TTS ---
