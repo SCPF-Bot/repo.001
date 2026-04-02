@@ -1,4 +1,4 @@
-name: Manga To Video (Optimized)
+name: Manga To Video
 
 on:
   workflow_dispatch:
@@ -50,7 +50,7 @@ jobs:
           ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
           DEEPGRAM_KEY: ${{ secrets.DEEPGRAM_KEY }}
           FISH_KEY: ${{ secrets.FISH_KEY }}
-          GOOGLE_APPLICATION_CREDENTIALS: ${{ steps.google_creds.outputs.path }}
+          GOOGLE_CREDENTIALS: ${{ steps.google_creds.outputs.path }}
         run: |
           python scripts/core_pipeline.py \
             --url "${{ github.event.inputs.url }}" \
