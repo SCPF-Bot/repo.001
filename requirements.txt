@@ -1,25 +1,24 @@
-# --- Core ---
+# --- Core Orchestration ---
 natsort==8.4.0
-pillow==10.4.0
-requests==2.32.3
-google-cloud-vision==3.7.4
+pillow==11.3.0
+requests==2.32.4
+google-cloud-vision==3.13.0
 
-# --- OCR ---
-pytesseract==0.3.10
-manga-ocr==0.1.10
-paddleocr==2.8.1
-paddlepaddle==3.3.1
-opencv-python-headless==4.10.0.84
+# --- OCR Engines ---
+pytesseract==0.3.13
+manga-ocr==0.1.14
+paddleocr==3.0.2
+paddlepaddle==3.0.0b1
+opencv-python-headless==4.11.0.86
 
-# --- TTS ---
-edge-tts==6.1.9
-elevenlabs==1.2.0
-TTS==0.22.0  # Required for XTTS-v2
-# MeloTTS via git remains
+# --- TTS Engines ---
+edge-tts==7.2.8
+elevenlabs==2.40.0
+TTS==0.27.5
+# MeloTTS via git
 git+https://github.com/myshell-ai/MeloTTS.git@main
 
 # --- Utilities ---
-numpy==1.26.4
-scipy==1.13.1
-torch==2.2.2 --extra-index-url https://download.pytorch.org/whl/c
-pu
+numpy==1.26.4  # Pinned to 1.x for compatibility with Paddle/Coqui TTS
+scipy==1.17.1
+torch==2.6.0 --extra-index-url https://download.pytorch.org/whl/cpu
