@@ -3,14 +3,13 @@ natsort==8.4.0
 pillow==10.4.0
 python-magic==0.4.27
 requests==2.32.3
-google-cloud-vision==3.7.4
 
 # --- OCR Engines ---
 pytesseract==0.3.10
 manga-ocr==0.1.10
 paddleocr==2.8.1
-paddlepaddle==2.6.2
 opencv-python-headless==4.10.0.84
+google-cloud-vision==3.7.4
 
 # --- TTS Engines ---
 edge-tts==6.1.9
@@ -21,8 +20,11 @@ git+https://github.com/myshell-ai/MeloTTS.git@main
 ChatTTS==0.3.0
 TTS==0.22.0
 scipy==1.13.1
+
+# --- Common ML Dependencies (single version) ---
 torch==2.4.1
 torchaudio==2.4.1
-
-# --- Utilities ---
 numpy==1.26.4
+
+# PaddlePaddle (separate, doesn't conflict with PyTorch)
+paddlepaddle==2.6.2
