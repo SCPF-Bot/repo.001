@@ -63,3 +63,4 @@ jobs:
         with:
           files: output/*.mp4
           tag_name: build-${{ github.run_id }}
+          make_latest: true
