@@ -24,7 +24,7 @@ on:
 jobs:
   build-and-render:
     runs-on: ubuntu-latest
-    timeout-minutes: 360 # 6 hours max for long manga renders
+    timeout-minutes: 360 
     permissions:
       contents: write
       
@@ -36,18 +36,23 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
-          cache: 'pip' # Built-in pip caching
+          cache: 'pip'
+          # FIX: Explicitly point to your custom requirements folder
+          cache-dependency-path: |
+            requirements/base.txt
+            requirements/ocr_*.txt
+            requirements/tts_*.txt
 
       - name: Install System Dependencies
         run: |
+          # Use absolute path to the script to avoid directory confusion
           bash "${{ github.workspace }}/scripts/system_deps.sh"
 
       - name: Install Base Python Dependencies
         run: |
           python -m pip install --upgrade pip
-          if [ -f "${{ github.workspace }}/requirements/base.txt" ]; then
-            pip install -r "${{ github.workspace }}/requirements/base.txt"
-          fi
+          # We use -r to ensure pip records these for the cache
+          pip install -r "${{ github.workspace }}/requirements/base.txt"
 
       - name: JIT Install Engine Dependencies
         run: |
@@ -72,9 +77,9 @@ jobs:
           EDGE_TTS_VOICE: ${{ github.event.inputs.voice_id }}
           DEEPGRAM_KEY: ${{ secrets.DEEPGRAM_KEY }}
           FISH_KEY: ${{ secrets.FISH_KEY }}
-          PYTHONPATH: ${{ github.workspace }}
+          # Set PYTHONPATH so the runner finds your local modules
+          PYTHONPATH: ${{ github.workspace }}/scripts
         run: |
-          # Ensure output directory exists before running
           mkdir -p "${{ github.workspace }}/output"
           python "${{ github.workspace }}/scripts/core_pipeline.py" \
             --url "${{ github.event.inputs.url }}" \
@@ -83,7 +88,7 @@ jobs:
 
       - name: Upload Video Artifact
         uses: actions/upload-artifact@v4
-        if: always() # Upload even if the release step fails
+        if: always()
         with:
           name: manga-video-${{ github.run_id }}
           path: output/*.mp4
@@ -96,5 +101,5 @@ jobs:
           files: output/*.mp4
           tag_name: build-${{ github.run_id }}
           name: "Manga Video: ${{ github.run_id }}"
-          body: "Automated render using ${{ github.event.inputs.ocr_engine }} and ${{ github.event.inputs.tts_engine }}."
+          body: "Rendered using ${{ github.event.inputs.ocr_engine }} and ${{ github.event.inputs.tts_engine }}."
           make_latest: true
