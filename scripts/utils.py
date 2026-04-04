@@ -1,69 +1,93 @@
 import os
-import re
-import zipfile
-import requests
 import shutil
 import asyncio
-from pathlib import Path
-from natsort import natsorted
-from PIL import Image
+import zipfile
 import logging
-import aiofiles
+import subprocess
+from pathlib import Path
+from typing import List, Tuple, Set
+
 import aiohttp
+import aiofiles
+from PIL import Image
+from natsort import natsorted
 
 logger = logging.getLogger(__name__)
 
+# Use a single session for all downloads if possible, 
+# or use a helper that ensures proper closure.
 async def download_file(url: str, dest: Path) -> None:
     """Download a file asynchronously with streaming."""
-    logger.info(f"Downloading {url} -> {dest}")
+    logger.info(f"Downloading {url}")
     dest.parent.mkdir(parents=True, exist_ok=True)
-    async with aiohttp.ClientSession() as session:
-        async with session.get(url) as resp:
+    
+    # timeout prevents the action from hanging forever
+    timeout = aiohttp.ClientTimeout(total=600) 
+    async with aiohttp.ClientSession(timeout=timeout) as session:
+        async with session.get(url, allow_redirects=True) as resp:
             resp.raise_for_status()
             async with aiofiles.open(dest, 'wb') as f:
-                async for chunk in resp.content.iter_chunked(8192):
+                async for chunk in resp.content.iter_chunked(16384): # Larger chunks for speed
                     await f.write(chunk)
 
-async def extract_archive(archive_path: Path, extract_to: Path) -> list:
-    """Extract a ZIP/CBZ archive asynchronously and return sorted image paths."""
-    extract_to.mkdir(parents=True, exist_ok=True)
-    # Run extraction in thread pool to avoid blocking
-    loop = asyncio.get_event_loop()
-    await loop.run_in_executor(None, _sync_extract, archive_path, extract_to)
-    image_extensions = {'.png', '.jpg', '.jpeg', '.webp', '.bmp'}
-    images = [p for p in extract_to.rglob('*') if p.suffix.lower() in image_extensions]
-    return natsorted(images)
-
-def _sync_extract(archive_path: Path, extract_to: Path):
+def _sync_extract(archive_path: Path, extract_to: Path) -> List[Path]:
+    """Helper for extraction with hidden file filtering."""
+    image_extensions: Set[str] = {'.png', '.jpg', '.jpeg', '.webp', '.bmp'}
+    extracted_images = []
+    
     with zipfile.ZipFile(archive_path, 'r') as zip_ref:
-        zip_ref.extractall(extract_to)
+        for member in zip_ref.infolist():
+            # Skip metadata and hidden files
+            if member.is_dir() or "__MACOSX" in member.filename or member.filename.startswith('.'):
+                continue
+            
+            if Path(member.filename).suffix.lower() in image_extensions:
+                zip_ref.extract(member, extract_to)
+                extracted_images.append(extract_to / member.filename)
+                
+    return natsorted(extracted_images)
 
-def resize_and_pad(image_path: Path, output_path: Path, target_size=(1920, 1080)) -> None:
-    """Resize image to fit target size, adding black bars (letterbox)."""
-    img = Image.open(image_path).convert('RGB')
-    target_w, target_h = target_size
-    ratio = min(target_w / img.width, target_h / img.height)
-    new_w = int(img.width * ratio)
-    new_h = int(img.height * ratio)
-    img_resized = img.resize((new_w, new_h), Image.Resampling.LANCZOS)
-    new_img = Image.new('RGB', target_size, (0, 0, 0))
-    offset = ((target_w - new_w) // 2, (target_h - new_h) // 2)
-    new_img.paste(img_resized, offset)
-    new_img.save(output_path, 'JPEG', quality=90)
+async def extract_archive(archive_path: Path, extract_to: Path) -> List[Path]:
+    """Extract archive asynchronously and return clean, sorted image paths."""
+    extract_to.mkdir(parents=True, exist_ok=True)
+    loop = asyncio.get_running_loop()
+    # Offload the heavy Zip CPU work to a thread
+    return await loop.run_in_executor(None, _sync_extract, archive_path, extract_to)
 
-def get_audio_duration(audio_path: Path) -> float:
-    """Return duration in seconds using ffprobe."""
-    import subprocess
+def resize_and_pad(image_path: Path, output_path: Path, target_size: Tuple[int, int] = (1920, 1080)) -> None:
+    """Resize image to fit target size with high-quality letterboxing."""
+    with Image.open(image_path) as img:
+        img = img.convert('RGB')
+        img.thumbnail(target_size, Image.Resampling.LANCZOS) # thumbnail maintains aspect ratio
+        
+        # Create canvas
+        new_img = Image.new('RGB', target_size, (0, 0, 0))
+        # Center the image
+        offset = ((target_size[0] - img.width) // 2, (target_size[1] - img.height) // 2)
+        new_img.paste(img, offset)
+        
+        # Optimize for web (progressive saves a bit of space)
+        new_img.save(output_path, 'JPEG', quality=85, optimize=True, progressive=True)
+
+async def get_audio_duration(audio_path: Path) -> float:
+    """Return duration in seconds using an async subprocess call."""
     cmd = [
         'ffprobe', '-v', 'error', '-show_entries', 'format=duration',
         '-of', 'default=noprint_wrappers=1:nokey=1', str(audio_path)
     ]
-    result = subprocess.run(cmd, capture_output=True, text=True)
-    return float(result.stdout.strip())
+    # Async subprocess prevents the event loop from blocking
+    proc = await asyncio.create_subprocess_exec(
+        *cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
+    )
+    stdout, _ = await proc.communicate()
+    try:
+        return float(stdout.decode().strip())
+    except (ValueError, TypeError):
+        logger.warning(f"Could not determine duration for {audio_path}, defaulting to 1.0s")
+        return 1.0
 
-def cleanup_temp_dirs(*paths):
+def cleanup_temp_dirs(*paths: Path):
+    """Safely remove temporary directories."""
     for p in paths:
-        try:
-            shutil.rmtree(p)
-        except Exception:
-            pass
+        if p.exists():
+            shutil.rmtree(p, ignore_errors=True)
