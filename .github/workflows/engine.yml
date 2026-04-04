@@ -1,4 +1,4 @@
-name: Manga To Video
+name: Manga To Video (Optimized)
 
 on:
   workflow_dispatch:
@@ -16,12 +16,18 @@ on:
         description: 'Primary TTS Engine'
         options: [elevenlabs, edge_tts, xtts_v2, melo_tts]
         default: 'edge_tts'
+      voice_id:
+        description: 'Voice ID (Optional: ElevenLabs ID or EdgeTTS Name)'
+        required: false
+        default: 'en-US-AndrewNeural'
 
 jobs:
   build-and-render:
     runs-on: ubuntu-latest
+    timeout-minutes: 360 # 6 hours max for long manga renders
     permissions:
       contents: write
+      
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -30,16 +36,18 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
+          cache: 'pip' # Built-in pip caching
 
       - name: Install System Dependencies
         run: |
-          chmod +x "${{ github.workspace }}/scripts/system_deps.sh"
-          "${{ github.workspace }}/scripts/system_deps.sh"
+          bash "${{ github.workspace }}/scripts/system_deps.sh"
 
       - name: Install Base Python Dependencies
         run: |
-          pip install --upgrade pip
-          pip install -r "${{ github.workspace }}/requirements/base.txt"
+          python -m pip install --upgrade pip
+          if [ -f "${{ github.workspace }}/requirements/base.txt" ]; then
+            pip install -r "${{ github.workspace }}/requirements/base.txt"
+          fi
 
       - name: JIT Install Engine Dependencies
         run: |
@@ -48,27 +56,45 @@ jobs:
             --tts "${{ github.event.inputs.tts_engine }}"
 
       - name: Setup Google Credentials
+        if: github.event.inputs.ocr_engine == 'google_vision'
         run: |
-          if [ -n "${{ secrets.GOOGLE_CREDENTIALS }}" ]; then
-            echo '${{ secrets.GOOGLE_CREDENTIALS }}' > "${{ github.workspace }}/google_creds.json"
-            echo "GOOGLE_APPLICATION_CREDENTIALS=${{ github.workspace }}/google_creds.json" >> $GITHUB_ENV
+          if [ -z "${{ secrets.GOOGLE_CREDENTIALS }}" ]; then
+            echo "::error::Google Vision selected but GOOGLE_CREDENTIALS secret is missing!"
+            exit 1
           fi
+          echo '${{ secrets.GOOGLE_CREDENTIALS }}' > "${{ github.workspace }}/google_creds.json"
+          echo "GOOGLE_APPLICATION_CREDENTIALS=${{ github.workspace }}/google_creds.json" >> $GITHUB_ENV
 
       - name: Run Manga Pipeline
         env:
           ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
+          ELEVENLABS_VOICE_ID: ${{ github.event.inputs.voice_id }}
+          EDGE_TTS_VOICE: ${{ github.event.inputs.voice_id }}
           DEEPGRAM_KEY: ${{ secrets.DEEPGRAM_KEY }}
           FISH_KEY: ${{ secrets.FISH_KEY }}
+          PYTHONPATH: ${{ github.workspace }}
         run: |
+          # Ensure output directory exists before running
+          mkdir -p "${{ github.workspace }}/output"
           python "${{ github.workspace }}/scripts/core_pipeline.py" \
             --url "${{ github.event.inputs.url }}" \
             --ocr "${{ github.event.inputs.ocr_engine }}" \
             --tts "${{ github.event.inputs.tts_engine }}"
 
-      - name: Create Release
+      - name: Upload Video Artifact
+        uses: actions/upload-artifact@v4
+        if: always() # Upload even if the release step fails
+        with:
+          name: manga-video-${{ github.run_id }}
+          path: output/*.mp4
+          retention-days: 7
+
+      - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         if: success()
         with:
           files: output/*.mp4
           tag_name: build-${{ github.run_id }}
+          name: "Manga Video: ${{ github.run_id }}"
+          body: "Automated render using ${{ github.event.inputs.ocr_engine }} and ${{ github.event.inputs.tts_engine }}."
           make_latest: true
