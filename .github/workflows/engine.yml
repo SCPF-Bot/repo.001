@@ -24,7 +24,6 @@ on:
 jobs:
   build-and-render:
     runs-on: ubuntu-latest
-    timeout-minutes: 360
     permissions:
       contents: write
       
@@ -40,19 +39,16 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
-          cache: 'pip'
-          cache-dependency-path: |
-            requirements/base.txt
-            requirements/ocr_*.txt
-            requirements/tts_*.txt
 
       - name: Install System Dependencies
-        run: bash scripts/system_deps.sh
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg tesseract-ocr libtesseract-dev
 
       - name: Install Base Python Dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements/base.txt
+          pip install opencv-python pillow natsort aiohttp aiofiles edge-tts pytesseract
 
       - name: JIT Install Engine Dependencies
         run: |
@@ -60,13 +56,8 @@ jobs:
             --ocr "${{ github.event.inputs.ocr_engine }}" \
             --tts "${{ github.event.inputs.tts_engine }}"
 
-      - name: Setup Google Credentials
-        if: github.event.inputs.ocr_engine == 'google_vision'
-        run: |
-          echo '${{ secrets.GOOGLE_CREDENTIALS }}' > google_creds.json
-          echo "GOOGLE_APPLICATION_CREDENTIALS=${{ github.workspace }}/google_creds.json" >> $GITHUB_ENV
-
       - name: Run Manga Pipeline
+        id: run_pipeline
         env:
           ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
           ELEVENLABS_VOICE_ID: ${{ github.event.inputs.voice_id }}
@@ -74,13 +65,18 @@ jobs:
           PYTHONPATH: ${{ github.workspace }}/scripts
         run: |
           mkdir -p output
+          # Run and capture specific tags for the release notes
           python scripts/core_pipeline.py \
             --url "${{ github.event.inputs.url }}" \
             --ocr "${{ github.event.inputs.ocr_engine }}" \
-            --tts "${{ github.event.inputs.tts_engine }}"
+            --tts "${{ github.event.inputs.tts_engine }}" | tee pipeline_log.txt
+          
+          # Extract actual engines used from the log
+          echo "real_ocr=$(grep 'ACTUAL_OCR=' pipeline_log.txt | cut -d'=' -f2)" >> $GITHUB_OUTPUT
+          echo "real_tts=$(grep 'ACTUAL_TTS=' pipeline_log.txt | cut -d'=' -f2)" >> $GITHUB_OUTPUT
 
-      - name: Calculate Performance
-        id: performance
+      - name: Calculate Duration
+        id: duration
         if: always()
         run: |
           end_ms=$(date +%s%3N)
@@ -96,12 +92,12 @@ jobs:
           tag_name: build-${{ github.run_id }}
           name: "Manga Video: ${{ github.run_id }}"
           body: |
-            ### 🛠️ Build Configuration
-            - **OCR Engine:** `${{ github.event.inputs.ocr_engine }}`
-            - **TTS Engine:** `${{ github.event.inputs.tts_engine }}`
-            - **Voice ID:** `${{ github.event.inputs.voice_id }}`
+            ### 🛠️ Build Details
+            - **Requested OCR:** `${{ github.event.inputs.ocr_engine }}`
+            - **Actual OCR Used:** `${{ steps.run_pipeline.outputs.real_ocr }}`
+            - **TTS Engine:** `${{ steps.run_pipeline.outputs.real_tts }}`
             
-            ### ⏱️ Performance Metrics
-            - **Total Processing Time:** `${{ steps.performance.outputs.total }}`
-            - **Resolution:** `1080x1920 (Mobile Portrait)`
+            ### ⏱️ Performance
+            - **Total Time:** `${{ steps.duration.outputs.total }}`
+            - **Format:** `1080x1920 (Mobile Portrait)`
           make_latest: true
