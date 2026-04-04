@@ -29,10 +29,17 @@ class MangaToVideoPipeline:
     async def process_page(self, idx: int, orig_img: Path) -> Tuple[Path, Path, float]:
         proc_img = self.dirs["processed"] / f"page_{idx:04d}.jpg"
         await asyncio.to_thread(resize_and_pad, orig_img, proc_img, (1080, 1920))
+        
         text = await asyncio.to_thread(self.ocr.get_text, str(proc_img))
         audio_file = self.dirs["audio"] / f"audio_{idx:04d}.mp3"
-        await self.tts.generate(text or "...", str(audio_file))
+        
+        # If text is empty, the TTS engine will generate 1.5s of silence
+        await self.tts.generate(text.strip() if text else "", str(audio_file))
+        
         duration = await get_audio_duration(audio_file)
+        # Ensure silent/empty pages stay for exactly 1.5s
+        if duration < 0.2: duration = 1.5 
+        
         return proc_img, audio_file, duration
 
     async def run(self) -> Path:
@@ -74,7 +81,7 @@ async def main():
     args = parser.parse_args()
     try:
         p = MangaToVideoPipeline(args.url, args.ocr, args.tts)
-        print(f"SUCCESS: {await p.run()}")
+        await p.run()
     except Exception as e:
         logger.error(f"Failed: {e}"); sys.exit(1)
 
