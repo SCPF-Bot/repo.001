@@ -1,1 +1,4 @@
-TTS>=0.22.0
+TTS
+torch --extra-index-url https://download.pytorch.org/whl/cpu
+trainer
+
