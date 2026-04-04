@@ -1,33 +1,40 @@
-name: Manga To Video
+name: Manga To Video (Mobile Optimized)
 
 on:
   workflow_dispatch:
     inputs:
       url:
-        description: 'Manga Download URL'
+        description: 'Manga Download URL (CBZ/Zip)'
         required: true
       ocr_engine:
         type: choice
+        description: 'OCR Engine'
         options: [google_vision, manga_ocr, paddle_ocr, tesseract]
-        default: 'tesseract'
+        default: 'paddle_ocr'
       tts_engine:
         type: choice
+        description: 'TTS Engine'
         options: [elevenlabs, edge_tts, xtts_v2, melo_tts]
         default: 'edge_tts'
       voice_id:
+        description: 'Voice ID (Optional)'
         required: false
         default: 'en-US-AndrewNeural'
 
 jobs:
   build-and-render:
     runs-on: ubuntu-latest
-    timeout-minutes: 360 
+    timeout-minutes: 360
     permissions:
       contents: write
       
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+
+      - name: Start Timer
+        id: timer
+        run: echo "start_ms=$(date +%s%3N)" >> $GITHUB_OUTPUT
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -64,8 +71,6 @@ jobs:
           ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
           ELEVENLABS_VOICE_ID: ${{ github.event.inputs.voice_id }}
           EDGE_TTS_VOICE: ${{ github.event.inputs.voice_id }}
-          DEEPGRAM_KEY: ${{ secrets.DEEPGRAM_KEY }}
-          FISH_KEY: ${{ secrets.FISH_KEY }}
           PYTHONPATH: ${{ github.workspace }}/scripts
         run: |
           mkdir -p output
@@ -73,9 +78,15 @@ jobs:
             --url "${{ github.event.inputs.url }}" \
             --ocr "${{ github.event.inputs.ocr_engine }}" \
             --tts "${{ github.event.inputs.tts_engine }}"
-          
-          echo "Verifying Output Folder Content:"
-          ls -lh output/
+
+      - name: Calculate Performance
+        id: performance
+        if: always()
+        run: |
+          end_ms=$(date +%s%3N)
+          start_ms=${{ steps.timer.outputs.start_ms }}
+          elapsed=$(( (end_ms - start_ms) / 1000 ))
+          echo "total=${elapsed}s" >> $GITHUB_OUTPUT
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
@@ -84,4 +95,13 @@ jobs:
           files: output/final_manga_video.mp4
           tag_name: build-${{ github.run_id }}
           name: "Manga Video: ${{ github.run_id }}"
+          body: |
+            ### 🛠️ Build Configuration
+            - **OCR Engine:** `${{ github.event.inputs.ocr_engine }}`
+            - **TTS Engine:** `${{ github.event.inputs.tts_engine }}`
+            - **Voice ID:** `${{ github.event.inputs.voice_id }}`
+            
+            ### ⏱️ Performance Metrics
+            - **Total Processing Time:** `${{ steps.performance.outputs.total }}`
+            - **Resolution:** `1080x1920 (Mobile Portrait)`
           make_latest: true
