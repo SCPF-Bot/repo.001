@@ -3,7 +3,7 @@ import cv2
 import logging
 import importlib.util
 import re
-import google.generativeai as genai
+from google import genai  # Updated from google.generativeai
 from typing import List, Any
 
 # Global environment flags for Paddle optimization
@@ -21,29 +21,31 @@ class OCREngine:
             self.engines_to_try.append("tesseract")
             
         self._model = None
-        self._google_client = None
 
         if api_key:
-            genai.configure(api_key=api_key)
-            self.ai_model = genai.GenerativeModel('gemini-1.5-flash')
+            # New Client initialization for google-genai
+            self.ai_client = genai.Client(api_key=api_key)
         else:
-            self.ai_model = None
+            self.ai_client = None
 
     def _ai_clean_text(self, messy_text: str) -> str:
         """Uses Gemini AI to remove OCR artifacts and fix grammar."""
-        if not self.ai_model or len(messy_text) < 5:
+        if not self.ai_client or len(messy_text) < 5:
             return messy_text
 
         prompt = (
             "You are a manga translation assistant. Clean the following OCR text from a speech bubble. "
             "Remove garbled characters, OCR artifacts, and nonsensical symbols. "
             "Fix the grammar to make it natural English. "
-            "Only return the cleaned text, nothing else.\n\n"
-            f"OCR Output: {messy_text}"
+            "Only return the cleaned text, nothing else."
         )
         
         try:
-            response = self.ai_model.generate_content(prompt)
+            # Updated generation syntax for google-genai SDK
+            response = self.ai_client.models.generate_content(
+                model='gemini-1.5-flash',
+                contents=f"{prompt}\n\nOCR Output: {messy_text}"
+            )
             return response.text.strip()
         except Exception as e:
             logger.warning(f"AI Cleaning failed: {e}")
@@ -55,7 +57,6 @@ class OCREngine:
                 method = getattr(self, f"_ocr_{engine}")
                 text = method(image_path)
                 if text and len(text.strip()) > 1:
-                    # Clean the messy OCR output with AI
                     return self._ai_clean_text(text.strip())
             except Exception as e:
                 logger.error(f"Engine {engine} failed: {e}")
