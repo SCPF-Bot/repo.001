@@ -15,14 +15,10 @@ logger = logging.getLogger("MangaPipeline")
 class MangaToVideoPipeline:
     def __init__(self, url: str, ocr_engine: str, tts_engine: str):
         self.url = url
-        
-        # Fetch Gemini API key from environment variable
-        gemini_key = os.getenv("GOOGLE_API_KEY")
-        
-        # Pass the key to the OCR Engine for text cleaning
-        self.ocr = OCREngine(ocr_engine, api_key=gemini_key)
+        # Fetch key for AI correction
+        api_key = os.getenv("GOOGLE_API_KEY")
+        self.ocr = OCREngine(ocr_engine, api_key=api_key)
         self.tts = TTSEngine(tts_engine)
-        
         self.repo_root = SCRIPT_DIR.parent
         self.output_dir = self.repo_root / "output"
         self.output_dir.mkdir(exist_ok=True)
@@ -35,7 +31,7 @@ class MangaToVideoPipeline:
         proc_img = self.dirs["processed"] / f"page_{idx:04d}.jpg"
         await asyncio.to_thread(resize_and_pad, orig_img, proc_img, (1080, 1920))
         
-        # This now returns AI-cleaned text
+        # OCREngine now returns AI-corrected text
         text = await asyncio.to_thread(self.ocr.get_text, str(proc_img))
         
         audio_file = self.dirs["audio"] / f"audio_{idx:04d}.mp3"
@@ -87,8 +83,6 @@ async def main():
     try:
         p = MangaToVideoPipeline(args.url, args.ocr, args.tts)
         vid = await p.run()
-        print(f"ACTUAL_OCR={p.ocr.primary_engine}")
-        print(f"ACTUAL_TTS={p.tts.engine_type}")
     except Exception as e:
         logger.error(f"Failed: {e}"); sys.exit(1)
 
