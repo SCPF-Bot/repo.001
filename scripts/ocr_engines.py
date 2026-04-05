@@ -2,12 +2,12 @@ import os
 import sys
 import cv2
 import logging
-import importlib.util
+import importlib
 import re
-from google import genai  # Modernized Google AI SDK
+from google import genai 
 from typing import List, Any
 
-# Global environment flags for Paddle optimization
+# Global environment flags
 os.environ["PADDLE_PDX_DISABLE_MODEL_SOURCE_CHECK"] = "True"
 os.environ["FLAGS_allocator_strategy"] = "naive_best_fit"
 
@@ -17,35 +17,21 @@ class OCREngine:
     def __init__(self, engine_type: str = "tesseract", api_key: str = None):
         self.primary_engine = engine_type.lower()
         self.engines_to_try = [self.primary_engine]
-        
         if self.primary_engine != "tesseract":
             self.engines_to_try.append("tesseract")
             
         self._model = None
-
-        if api_key:
-            # New Client initialization for google-genai
-            self.ai_client = genai.Client(api_key=api_key)
-        else:
-            self.ai_client = None
+        self.ai_client = genai.Client(api_key=api_key) if api_key else None
 
     def _ai_clean_text(self, messy_text: str) -> str:
-        """Uses Gemini AI to remove OCR artifacts and fix grammar."""
         if not self.ai_client or len(messy_text) < 5:
             return messy_text
-
-        prompt = (
-            "You are a manga translation assistant. Clean the following OCR text from a speech bubble. "
-            "Remove garbled characters, OCR artifacts, and nonsensical symbols. "
-            "Fix the grammar to make it natural English. "
-            "Only return the cleaned text, nothing else."
-        )
         
+        prompt = "Clean this manga OCR text. Remove artifacts and fix grammar. Return only cleaned text."
         try:
-            # Updated generation syntax for google-genai SDK
             response = self.ai_client.models.generate_content(
                 model='gemini-1.5-flash',
-                contents=f"{prompt}\n\nOCR Output: {messy_text}"
+                contents=f"{prompt}\n\nTEXT: {messy_text}"
             )
             return response.text.strip()
         except Exception as e:
@@ -65,15 +51,22 @@ class OCREngine:
         return ""
 
     def _ocr_manga_ocr(self, image_path: str) -> str:
-        # Robust import to avoid local namespace collisions
-        try:
-            from manga_ocr import MangaOCR
-        except ImportError:
-            logger.error(f"Namespace collision detected. Current Path: {sys.path}")
-            raise
-
         if self._model is None:
-            self._model = MangaOCR()
+            # FORCE bypass of local directory to avoid namespace collisions
+            try:
+                # We specifically look for the site-packages version
+                spec = importlib.util.find_spec("manga_ocr")
+                if spec and "site-packages" in spec.origin:
+                    manga_module = importlib.import_module("manga_ocr")
+                    self._model = manga_module.MangaOCR()
+                else:
+                    # Fallback to standard but log path for debugging
+                    from manga_ocr import MangaOCR
+                    self._model = MangaOCR()
+            except Exception as e:
+                logger.error(f"Namespace collision detected. Path: {sys.path}")
+                raise ImportError(f"Could not find valid MangaOCR library: {e}")
+        
         return self._model(image_path)
 
     def _ocr_paddle_ocr(self, image_path: str) -> str:
