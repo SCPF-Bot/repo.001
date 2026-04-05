@@ -10,7 +10,7 @@ on:
         type: choice
         description: 'OCR Engine'
         options: [google_vision, manga_ocr, paddle_ocr, tesseract]
-        default: 'paddle_ocr'
+        default: 'manga_ocr'
       tts_engine:
         type: choice
         description: 'TTS Engine'
