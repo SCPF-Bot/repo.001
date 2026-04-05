@@ -2,7 +2,6 @@ import os
 import sys
 import cv2
 import logging
-import importlib
 import re
 from google import genai 
 from typing import List, Any
@@ -53,19 +52,17 @@ class OCREngine:
     def _ocr_manga_ocr(self, image_path: str) -> str:
         if self._model is None:
             # FORCE bypass of local directory to avoid namespace collisions
+            original_path = sys.path.copy()
             try:
-                # We specifically look for the site-packages version
-                spec = importlib.util.find_spec("manga_ocr")
-                if spec and "site-packages" in spec.origin:
-                    manga_module = importlib.import_module("manga_ocr")
-                    self._model = manga_module.MangaOCR()
-                else:
-                    # Fallback to standard but log path for debugging
-                    from manga_ocr import MangaOCR
-                    self._model = MangaOCR()
+                # Filter out the local repo paths temporarily
+                sys.path = [p for p in sys.path if 'repo.001' not in p]
+                from manga_ocr import MangaOCR
+                self._model = MangaOCR()
             except Exception as e:
-                logger.error(f"Namespace collision detected. Path: {sys.path}")
+                logger.error(f"Namespace collision detected. Path: {original_path}")
                 raise ImportError(f"Could not find valid MangaOCR library: {e}")
+            finally:
+                sys.path = original_path
         
         return self._model(image_path)
 
