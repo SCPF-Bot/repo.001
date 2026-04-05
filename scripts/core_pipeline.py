@@ -3,7 +3,9 @@ from pathlib import Path
 from typing import List, Tuple
 
 SCRIPT_DIR = Path(__file__).resolve().parent
-sys.path.insert(0, str(SCRIPT_DIR))
+# FIX: Append to path instead of inserting at 0 to avoid shadowing libraries
+if str(SCRIPT_DIR) not in sys.path:
+    sys.path.append(str(SCRIPT_DIR))
 
 from ocr_engines import OCREngine
 from tts_engines import TTSEngine
@@ -15,7 +17,6 @@ logger = logging.getLogger("MangaPipeline")
 class MangaToVideoPipeline:
     def __init__(self, url: str, ocr_engine: str, tts_engine: str):
         self.url = url
-        # Fetch key for AI correction
         api_key = os.getenv("GOOGLE_API_KEY")
         self.ocr = OCREngine(ocr_engine, api_key=api_key)
         self.tts = TTSEngine(tts_engine)
@@ -25,37 +26,34 @@ class MangaToVideoPipeline:
         self.output_video = self.output_dir / "final_manga_video.mp4"
         self.temp_dir = Path(tempfile.mkdtemp(prefix="manga_job_"))
         self.dirs = {k: self.temp_dir / k for k in ["images", "processed", "audio"]}
-        for d in self.dirs.values(): d.mkdir(parents=True, exist_ok=True)
+        for d in self.dirs.values(): d.mkdir(parents=True)
 
-    async def process_page(self, idx: int, orig_img: Path) -> Tuple[Path, Path, float]:
-        proc_img = self.dirs["processed"] / f"page_{idx:04d}.jpg"
-        await asyncio.to_thread(resize_and_pad, orig_img, proc_img, (1080, 1920))
-        
-        # OCREngine now returns AI-corrected text
-        text = await asyncio.to_thread(self.ocr.get_text, str(proc_img))
-        
-        audio_file = self.dirs["audio"] / f"audio_{idx:04d}.mp3"
-        await self.tts.generate(text or "", str(audio_file))
-        duration = await get_audio_duration(audio_file)
-        
-        if duration < 0.2: duration = 1.5 
-        return proc_img, audio_file, duration
-
-    async def run(self) -> Path:
+    async def run(self):
         try:
-            archive_path = self.temp_dir / "manga.archive"
+            print(f"ACTUAL_OCR={self.ocr.primary_engine}")
+            print(f"ACTUAL_TTS={self.tts.engine_type}")
+            
+            archive_path = self.temp_dir / "manga.zip"
             await download_file(self.url, archive_path)
             image_paths = await extract_archive(archive_path, self.dirs["images"])
-            sem = asyncio.Semaphore(4)
-            async def task(i, p):
-                async with sem: return await self.process_page(i, p)
-            segments = await asyncio.gather(*(task(i, p) for i, p in enumerate(image_paths)))
-            return await self._render_final_video(segments)
+            
+            segments = []
+            for i, img_path in enumerate(image_paths):
+                proc_path = self.dirs["processed"] / f"page_{i:03d}.jpg"
+                resize_and_pad(img_path, proc_path)
+                
+                text = self.ocr.get_text(str(img_path))
+                audio_path = self.dirs["audio"] / f"page_{i:03d}.mp3"
+                await self.tts.generate(text, str(audio_path))
+                
+                duration = await get_audio_duration(audio_path)
+                segments.append((proc_path, audio_path, duration))
+            
+            return await self._render_video(segments)
         finally:
-            await self.tts.cleanup()
             cleanup_temp_dirs(self.temp_dir)
 
-    async def _render_final_video(self, segments: List[Tuple[Path, Path, float]]) -> Path:
+    async def _render_video(self, segments):
         meta, audio_list = self.temp_dir / "meta.txt", self.temp_dir / "audio_list.txt"
         with open(meta, "w") as f1, open(audio_list, "w") as f2:
             for i, a, d in segments:
@@ -74,17 +72,12 @@ class MangaToVideoPipeline:
         await asyncio.to_thread(subprocess.run, cmd, check=True)
         return self.output_video
 
-async def main():
+if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--url", required=True)
-    parser.add_argument("--ocr", default="paddle_ocr")
+    parser.add_argument("--ocr", default="tesseract")
     parser.add_argument("--tts", default="edge_tts")
     args = parser.parse_args()
-    try:
-        p = MangaToVideoPipeline(args.url, args.ocr, args.tts)
-        vid = await p.run()
-    except Exception as e:
-        logger.error(f"Failed: {e}"); sys.exit(1)
-
-if __name__ == "__main__":
-    asyncio.run(main())
+    
+    pipeline = MangaToVideoPipeline(args.url, args.ocr, args.tts)
+    asyncio.run(pipeline.run())
