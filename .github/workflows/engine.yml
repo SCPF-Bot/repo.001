@@ -38,7 +38,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.10'
+          python-version: '3.11' # Upgraded to avoid Python 3.10 deprecation warnings
 
       - name: Install System Dependencies
         run: |
@@ -48,7 +48,8 @@ jobs:
       - name: Install Base Python Dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install opencv-python pillow natsort aiohttp aiofiles edge-tts pytesseract
+          # Added google-genai to support the updated AI layer
+          pip install opencv-python pillow natsort aiohttp aiofiles edge-tts pytesseract google-genai 
 
       - name: JIT Install Engine Dependencies
         run: |
@@ -59,21 +60,31 @@ jobs:
       - name: Run Manga Pipeline
         id: run_pipeline
         env:
+          GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
           ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
           ELEVENLABS_VOICE_ID: ${{ github.event.inputs.voice_id }}
           EDGE_TTS_VOICE: ${{ github.event.inputs.voice_id }}
           PYTHONPATH: ${{ github.workspace }}/scripts
         run: |
           mkdir -p output
-          # Run and capture specific tags for the release notes
           python scripts/core_pipeline.py \
             --url "${{ github.event.inputs.url }}" \
             --ocr "${{ github.event.inputs.ocr_engine }}" \
             --tts "${{ github.event.inputs.tts_engine }}" | tee pipeline_log.txt
           
-          # Extract actual engines used from the log
-          echo "real_ocr=$(grep 'ACTUAL_OCR=' pipeline_log.txt | cut -d'=' -f2)" >> $GITHUB_OUTPUT
-          echo "real_tts=$(grep 'ACTUAL_TTS=' pipeline_log.txt | cut -d'=' -f2)" >> $GITHUB_OUTPUT
+          # Extract metadata for the release body
+          echo "real_ocr=$(grep 'ACTUAL_OCR=' pipeline_log.txt | cut -d'=' -f2 || echo '${{ github.event.inputs.ocr_engine }}')" >> $GITHUB_OUTPUT
+          echo "real_tts=$(grep 'ACTUAL_TTS=' pipeline_log.txt | cut -d'=' -f2 || echo '${{ github.event.inputs.tts_engine }}')" >> $GITHUB_OUTPUT
+
+      - name: Check for Output File
+        id: check_file
+        run: |
+          if [ -f "output/final_manga_video.mp4" ]; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+            echo "::warning::Output video not found. Skipping release."
+          fi
 
       - name: Calculate Duration
         id: duration
@@ -86,7 +97,8 @@ jobs:
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
-        if: success()
+        # Only run if the pipeline succeeded AND the file actually exists
+        if: success() && steps.check_file.outputs.exists == 'true'
         with:
           files: output/final_manga_video.mp4
           tag_name: build-${{ github.run_id }}
