@@ -13,17 +13,22 @@ class TTSEngine:
 
     async def generate(self, text: str, path: str) -> bool:
         txt = text.replace('\n', ' ').strip()[:3000]
-        # If text is virtually empty, generate the 1.5s silence
         if len(txt) < 2: return await self._silence(path)
         
         try:
             if self.engine_type == "edge_tts":
                 from edge_tts import Communicate
-                await Communicate(txt, os.getenv("EDGE_TTS_VOICE", "en-US-AndrewNeural")).save(path)
+                # Added rate='-30%' to achieve ~0.7x speed
+                await Communicate(
+                    txt, 
+                    os.getenv("EDGE_TTS_VOICE", "en-US-AndrewNeural"),
+                    rate='-30%' 
+                ).save(path)
                 return True
             elif self.engine_type == "elevenlabs":
                 sess = await self._get_session()
                 url = f"https://api.elevenlabs.io/v1/text-to-speech/{os.getenv('ELEVENLABS_VOICE_ID')}"
+                # Note: ElevenLabs speed is controlled via the dashboard/voice settings
                 async with sess.post(url, json={"text": txt}, headers={"xi-api-key": os.getenv("ELEVENLABS_API_KEY")}) as r:
                     if r.status == 200:
                         with open(path, "wb") as f: f.write(await r.read())
@@ -34,11 +39,11 @@ class TTSEngine:
         return await self._silence(path)
 
     async def _silence(self, path):
-        # FIXED: Set to exactly 1.5 seconds as requested
         duration = 1.5
         cmd = ["ffmpeg", "-y", "-f", "lavfi", "-i", f"anullsrc=r=24000:cl=mono", "-t", str(duration), "-acodec", "libmp3lame", path]
-        p = await asyncio.create_subprocess_exec(*cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        await p.wait(); return True
+        subprocess.run(cmd, check=True, capture_output=True)
+        return True
 
     async def cleanup(self):
-        if self._session: await self._session.close()
+        if self._session and not self._session.closed:
+            await self._session.close()
