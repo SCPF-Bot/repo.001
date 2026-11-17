@@ -12,14 +12,10 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Text
@@ -33,29 +29,28 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
-import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.mlbb.assistant.presentation.common.theme.MLBBGold
 import com.mlbb.assistant.presentation.common.theme.OverlayBackground
 import com.mlbb.assistant.presentation.common.theme.SurfaceDark
 import com.mlbb.assistant.presentation.common.theme.SurfaceElevated
-import com.mlbb.assistant.presentation.common.theme.SurfaceMid
 import com.mlbb.assistant.presentation.common.theme.TextPrimary
 import kotlinx.coroutines.delay
 import org.json.JSONArray
 
 private val GuideGreen = Color(0xFF72D6A0)
 private const val ROAM_GUIDE_ASSET = "roam_guide.json"
-private val ReadableTextStyle = TextStyle(
-    shadow = Shadow(color = Color.Black, offset = Offset.Zero, blurRadius = 2f)
-)
+private const val WIDGET_ALPHA = 0.25f // 75% transparent
 
 private data class RoamStep(val startSeconds: Int, val endSeconds: Int, val description: String)
 private data class RoamPlan(
@@ -65,6 +60,43 @@ private data class RoamPlan(
     val heroes: String,
     val steps: List<RoamStep>
 )
+
+@Composable
+private fun OutlinedText(
+    text: String,
+    color: Color,
+    modifier: Modifier = Modifier,
+    fontSize: TextUnit = 9.sp,
+    fontWeight: FontWeight? = null,
+    maxLines: Int = Int.MAX_VALUE,
+    lineHeight: TextUnit = TextUnit.Unspecified
+) {
+    Box(modifier = modifier) {
+        Text(
+            text = text,
+            color = Color.Black,
+            maxLines = maxLines,
+            style = TextStyle(
+                fontSize = fontSize,
+                fontWeight = fontWeight,
+                lineHeight = lineHeight,
+                drawStyle = Stroke(width = 3f),
+                shadow = Shadow(color = Color.Black, offset = Offset.Zero, blurRadius = 1f)
+            )
+        )
+        Text(
+            text = text,
+            color = color,
+            maxLines = maxLines,
+            style = TextStyle(
+                fontSize = fontSize,
+                fontWeight = fontWeight,
+                lineHeight = lineHeight,
+                shadow = Shadow(color = Color.Black, offset = Offset.Zero, blurRadius = 1f)
+            )
+        )
+    }
+}
 
 private fun loadRoamPlans(context: Context): List<RoamPlan> = runCatching {
     val json = context.assets.open(ROAM_GUIDE_ASSET).bufferedReader().use { it.readText() }
@@ -105,14 +137,14 @@ fun RoamGuideBubble(onTap: () -> Unit) {
     Box(
         modifier = Modifier
             .width(56.dp)
-            .heightIn(min = 56.dp)
+            .height(56.dp)
             .clip(CircleShape)
             .background(SurfaceElevated)
             .border(2.dp, GuideGreen, CircleShape)
             .clickable(onClick = onTap),
         contentAlignment = Alignment.Center
     ) {
-        Text("R", color = GuideGreen, fontSize = 20.sp, fontWeight = FontWeight.Black, style = ReadableTextStyle)
+        OutlinedText("R", GuideGreen, fontSize = 20.sp, fontWeight = FontWeight.Black)
     }
 }
 
@@ -120,7 +152,7 @@ fun RoamGuideBubble(onTap: () -> Unit) {
 fun RoamGuideWidget(onBack: () -> Unit) {
     val context = LocalContext.current
     val screenWidthDp = LocalConfiguration.current.screenWidthDp
-    val widgetWidth = (screenWidthDp * 0.92f).dp
+    val widgetWidth = (screenWidthDp * 0.98f).dp
     val plans = remember(context) { loadRoamPlans(context) }
     var selectedPlanId by remember { mutableStateOf(plans.firstOrNull()?.id.orEmpty()) }
     var elapsedSeconds by remember { mutableIntStateOf(0) }
@@ -142,55 +174,48 @@ fun RoamGuideWidget(onBack: () -> Unit) {
     Column(
         modifier = Modifier
             .width(widgetWidth)
-            .background(OverlayBackground.copy(alpha = 0.9f), RoundedCornerShape(8.dp))
-            .border(1.dp, GuideGreen.copy(alpha = 0.65f), RoundedCornerShape(8.dp))
-            .clip(RoundedCornerShape(8.dp))
-            .padding(horizontal = 8.dp, vertical = 4.dp)
+            .background(OverlayBackground.copy(alpha = WIDGET_ALPHA), RoundedCornerShape(6.dp))
+            .border(1.dp, GuideGreen.copy(alpha = 0.55f), RoundedCornerShape(6.dp))
+            .clip(RoundedCornerShape(6.dp))
+            .padding(horizontal = 4.dp, vertical = 2.dp)
     ) {
         if (plans.isEmpty() || selectedPlan == null) {
-            Text(
-                "Roam guide unavailable",
-                color = TextPrimary,
-                fontSize = 10.sp,
-                style = ReadableTextStyle
-            )
+            OutlinedText("Roam guide unavailable", TextPrimary, fontSize = 9.sp)
             return@Column
         }
 
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(6.dp),
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
+            OutlinedText(
                 "%02d:%02d".format(elapsedSeconds / 60, elapsedSeconds % 60),
-                color = TextPrimary,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Black,
-                style = ReadableTextStyle
+                TextPrimary,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Black
             )
 
             Box(modifier = Modifier.weight(1f)) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clip(RoundedCornerShape(5.dp))
-                        .background(SurfaceDark.copy(alpha = 0.85f))
-                        .border(1.dp, GuideGreen.copy(alpha = 0.75f), RoundedCornerShape(5.dp))
+                        .clip(RoundedCornerShape(4.dp))
+                        .background(SurfaceDark.copy(alpha = WIDGET_ALPHA))
+                        .border(1.dp, GuideGreen.copy(alpha = 0.6f), RoundedCornerShape(4.dp))
                         .clickable { planMenuExpanded = true }
-                        .padding(horizontal = 7.dp, vertical = 4.dp),
+                        .padding(horizontal = 5.dp, vertical = 2.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Text(
+                    OutlinedText(
                         selectedPlan.label,
-                        color = GuideGreen,
-                        fontSize = 9.sp,
+                        GuideGreen,
+                        fontSize = 8.sp,
                         fontWeight = FontWeight.Bold,
-                        maxLines = 1,
-                        style = ReadableTextStyle
+                        maxLines = 1
                     )
-                    Text("▾", color = TextPrimary, fontSize = 10.sp, style = ReadableTextStyle)
+                    OutlinedText("▾", TextPrimary, fontSize = 9.sp)
                 }
                 DropdownMenu(
                     expanded = planMenuExpanded,
@@ -200,69 +225,72 @@ fun RoamGuideWidget(onBack: () -> Unit) {
                     plans.forEach { plan ->
                         DropdownMenuItem(
                             text = {
-                                Text(
+                                OutlinedText(
                                     plan.label,
-                                    color = if (plan.id == selectedPlan.id) GuideGreen else TextPrimary,
-                                    style = ReadableTextStyle
+                                    if (plan.id == selectedPlan.id) GuideGreen else TextPrimary,
+                                    fontSize = 9.sp
                                 )
                             },
                             onClick = {
                                 selectedPlanId = plan.id
                                 planMenuExpanded = false
-                            }
+                            },
+                            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp)
                         )
                     }
                 }
             }
 
-            Text(
+            OutlinedText(
                 selectedPlan.blessing,
-                color = MLBBGold,
-                fontSize = 9.sp,
+                MLBBGold,
+                fontSize = 8.sp,
                 fontWeight = FontWeight.Bold,
-                maxLines = 1,
-                style = ReadableTextStyle
+                maxLines = 1
             )
 
-            Button(
-                onClick = { isRunning = !isRunning },
-                colors = ButtonDefaults.buttonColors(containerColor = if (isRunning) SurfaceMid else GuideGreen),
-                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 1.dp),
-                modifier = Modifier.heightIn(min = 26.dp)
+            Box(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(4.dp))
+                    .background(Color.Black.copy(alpha = WIDGET_ALPHA))
+                    .border(1.dp, TextPrimary.copy(alpha = WIDGET_ALPHA), RoundedCornerShape(4.dp))
+                    .clickable { isRunning = !isRunning }
+                    .padding(horizontal = 6.dp, vertical = 2.dp)
             ) {
-                Text(
+                OutlinedText(
                     if (isRunning) "Pause" else "Start",
-                    color = Color(0xFF10151C),
-                    fontSize = 9.sp,
-                    fontWeight = FontWeight.Bold,
-                    style = ReadableTextStyle
+                    TextPrimary,
+                    fontSize = 8.sp,
+                    fontWeight = FontWeight.Bold
                 )
             }
 
-            Text(
+            OutlinedText(
                 "Back",
-                color = MLBBGold,
-                fontSize = 9.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.clickable(onClick = onBack).padding(horizontal = 3.dp, vertical = 4.dp),
-                style = ReadableTextStyle
+                MLBBGold,
+                modifier = Modifier.clickable(onClick = onBack).padding(horizontal = 2.dp, vertical = 2.dp),
+                fontSize = 8.sp,
+                fontWeight = FontWeight.Bold
             )
         }
 
-        Spacer(Modifier.height(3.dp))
+        Spacer(Modifier.height(2.dp))
 
         if (currentStep != null) {
-            Text(
-                currentStep.description,
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(GuideGreen.copy(alpha = 0.12f), RoundedCornerShape(5.dp))
-                    .border(1.dp, GuideGreen.copy(alpha = 0.28f), RoundedCornerShape(5.dp))
-                    .padding(horizontal = 8.dp, vertical = 4.dp),
-                color = TextPrimary,
-                fontSize = 9.sp,
-                style = TextStyle(lineHeight = 11.sp, shadow = ReadableTextStyle.shadow)
-            )
+                    .background(GuideGreen.copy(alpha = WIDGET_ALPHA), RoundedCornerShape(4.dp))
+                    .border(1.dp, GuideGreen.copy(alpha = 0.3f), RoundedCornerShape(4.dp))
+                    .padding(horizontal = 5.dp, vertical = 2.dp)
+            ) {
+                OutlinedText(
+                    currentStep.description,
+                    TextPrimary,
+                    fontSize = 8.sp,
+                    lineHeight = 10.sp
+                )
+            }
         }
     }
 }
