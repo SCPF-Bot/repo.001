@@ -95,11 +95,19 @@ object DatabaseModule {
         }
     }
 
+
+    /** v4→v5: stores the optional roam playstyle tag for roam-lane heroes. */
+    private val MIGRATION_4_5 = object : Migration(4, 5) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL("ALTER TABLE heroes ADD COLUMN roamType TEXT")
+        }
+    }
+
     @Provides
     @Singleton
     fun provideDatabase(@ApplicationContext context: Context): AppDatabase {
         return Room.databaseBuilder(context, AppDatabase::class.java, "mlbb_assistant.db")
-            .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
+            .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
             // P1 fix: fallbackToDestructiveMigration() covers upgrade paths whose starting
             // version is not in the migration chain (e.g. v0 → v4 on an old beta install).
             .fallbackToDestructiveMigration(dropAllTables = true)

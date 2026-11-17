@@ -30,7 +30,9 @@ data class Hero(
      * Defaults to false so existing callers and [HeroEntity.toDomain] do
      * not break before data is backfilled via the v2→v3 migration.
      */
-    val hasCCUlt: Boolean = false
+    val hasCCUlt: Boolean = false,
+    /** Roam-specific playstyle tag; null for non-roam heroes. */
+    val roamType: String? = null
 )
 
 /**

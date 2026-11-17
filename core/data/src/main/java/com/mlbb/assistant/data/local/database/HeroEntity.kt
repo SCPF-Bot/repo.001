@@ -32,7 +32,8 @@ data class HeroEntity(
      * TD-01: True when this hero has a crowd-control ultimate.
      * Added in DB schema v3 — defaults to 0 (false) via migration.
      */
-    val hasCCUlt: Boolean = false
+    val hasCCUlt: Boolean = false,
+    val roamType: String? = null
 ) {
     fun toDomain() = Hero(
         id                = id,
@@ -54,6 +55,7 @@ data class HeroEntity(
         flexLanes         = flexLanes.mapNotNull { l -> Lane.entries.firstOrNull { it.name == l } },
         isToxicMechanic   = isToxicMechanic,
         isOP              = isOP,
-        hasCCUlt          = hasCCUlt
+        hasCCUlt          = hasCCUlt,
+        roamType          = roamType
     )
 }

@@ -41,7 +41,9 @@ data class HeroDto(
     val coreItems: List<CoreItem> = emptyList(),
     val flexLanes: List<String> = emptyList(),
     val isToxicMechanic: Boolean = false,
-    val isOP: Boolean = false
+    val isOP: Boolean = false,
+    /** Role-specific roaming playstyle tag from the bundled hero dataset. */
+    val roamType: String? = null
 ) {
     fun toEntity() = HeroEntity(
         id = id, name = name, role = role,
@@ -50,6 +52,7 @@ data class HeroDto(
         banRate = banRate, imageUrl = imageUrl, counters = counters,
         counteredBy = counteredBy, synergies = synergies,
         recommendedSpells = recommendedSpells, coreItems = coreItems,
-        flexLanes = flexLanes, isToxicMechanic = isToxicMechanic, isOP = isOP
+        flexLanes = flexLanes, isToxicMechanic = isToxicMechanic, isOP = isOP,
+        roamType = roamType
     )
 }

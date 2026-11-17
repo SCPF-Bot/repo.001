@@ -71,6 +71,7 @@ class OverlayStateHolder @Inject constructor(
     val banSuggestions  = mutableStateListOf<BanSuggestion>()
     val enemyWarnings   = mutableStateListOf<String>()
     val isExpanded      = mutableStateOf(false)
+    val isRoamGuideExpanded = mutableStateOf(false)
     val isBanTurn       = mutableStateOf(false)
 
     // ── Self-status banners (todo.md §7) ──────────────────────────────────────

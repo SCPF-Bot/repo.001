@@ -27,7 +27,7 @@ import androidx.room.TypeConverters
         HeroPoolEntity::class,
         CounterLookupEntity::class
     ],
-    version = 4,
+    version = 5,
     exportSchema = true
 )
 @TypeConverters(Converters::class)

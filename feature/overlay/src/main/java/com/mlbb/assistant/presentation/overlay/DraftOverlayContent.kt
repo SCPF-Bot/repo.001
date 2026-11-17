@@ -3,6 +3,7 @@ package com.mlbb.assistant.presentation.overlay
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.unit.dp
 import com.mlbb.assistant.domain.engine.DraftSessionManager
 import com.mlbb.assistant.presentation.common.theme.MLBBAssistantTheme
 
@@ -36,30 +37,46 @@ fun DraftOverlayContent() {
     val session by dsm.session.collectAsState()
 
     MLBBAssistantTheme {
-        if (holder.isExpanded.value) {
-            MiniWidget(
-                session         = session,
-                recommendations = holder.recommendations.toList(),
-                banSuggestions  = holder.banSuggestions.toList(),
-                isBanTurn       = holder.isBanTurn.value,
-                enemyWarnings   = holder.enemyWarnings.toList(),
-                onMinimize      = { holder.isExpanded.value = false },
-                onClose         = { OverlayContentBridge.stopServiceCallback?.invoke() },
-                onUndo          = { holder.undo() },
-                onScoreDetails  = { holder.handleScoreDetails() },
-                onRestartDraft  = { holder.handleRestartDraft() },
-                onHeroSelected  = { hero -> holder.handleManualHeroSelection(hero) },
-                onStartDraft    = { ourTeamFirst -> holder.handleManualDraftStart(ourTeamFirst) },
-                onNextPhase     = { holder.handleManualPhaseAdvance() },
-                captureUnavailable = holder.captureUnavailable.value,
-                accessibilityOff   = holder.accessibilityOff.value,
-                metaStaleDays      = holder.metaStaleDays.value
-            )
-        } else {
-            FloatingBubble(
-                session = session,
-                onTap   = { holder.isExpanded.value = true }
-            )
+        when {
+            holder.isRoamGuideExpanded.value -> {
+                RoamGuideWidget(
+                    onBack = { holder.isRoamGuideExpanded.value = false }
+                )
+            }
+            holder.isExpanded.value -> {
+                MiniWidget(
+                    session         = session,
+                    recommendations = holder.recommendations.toList(),
+                    banSuggestions  = holder.banSuggestions.toList(),
+                    isBanTurn       = holder.isBanTurn.value,
+                    enemyWarnings   = holder.enemyWarnings.toList(),
+                    onMinimize      = { holder.isExpanded.value = false },
+                    onClose         = { OverlayContentBridge.stopServiceCallback?.invoke() },
+                    onUndo          = { holder.undo() },
+                    onScoreDetails  = { holder.handleScoreDetails() },
+                    onRestartDraft  = { holder.handleRestartDraft() },
+                    onHeroSelected  = { hero -> holder.handleManualHeroSelection(hero) },
+                    onStartDraft    = { ourTeamFirst -> holder.handleManualDraftStart(ourTeamFirst) },
+                    onNextPhase     = { holder.handleManualPhaseAdvance() },
+                    captureUnavailable = holder.captureUnavailable.value,
+                    accessibilityOff   = holder.accessibilityOff.value,
+                    metaStaleDays      = holder.metaStaleDays.value
+                )
+            }
+            else -> {
+                androidx.compose.foundation.layout.Row(
+                    horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(8.dp),
+                    verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
+                ) {
+                    FloatingBubble(
+                        session = session,
+                        onTap   = { holder.isExpanded.value = true }
+                    )
+                    RoamGuideBubble(
+                        onTap = { holder.isRoamGuideExpanded.value = true }
+                    )
+                }
+            }
         }
     }
 }
