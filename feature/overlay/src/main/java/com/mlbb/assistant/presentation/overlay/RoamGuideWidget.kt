@@ -37,6 +37,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -119,6 +120,8 @@ fun RoamGuideBubble(onTap: () -> Unit) {
 @Composable
 fun RoamGuideWidget(onBack: () -> Unit) {
     val context = LocalContext.current
+    val screenWidthDp = LocalConfiguration.current.screenWidthDp
+    val widgetWidth = (screenWidthDp * 0.92f).dp
     val plans = remember(context) { loadRoamPlans(context) }
     var selectedPlanId by remember { mutableStateOf(plans.firstOrNull()?.id.orEmpty()) }
     var elapsedSeconds by remember { mutableIntStateOf(0) }
@@ -139,11 +142,11 @@ fun RoamGuideWidget(onBack: () -> Unit) {
 
     Column(
         modifier = Modifier
-            .width(480.dp)
-            .background(OverlayBackground.copy(alpha = 0.25f), RoundedCornerShape(12.dp))
-            .border(1.dp, GuideGreen.copy(alpha = 0.65f), RoundedCornerShape(12.dp))
-            .clip(RoundedCornerShape(12.dp))
-            .padding(horizontal = 10.dp, vertical = 7.dp)
+            .width(widgetWidth)
+            .background(OverlayBackground.copy(alpha = 0.9f), RoundedCornerShape(8.dp))
+            .border(1.dp, GuideGreen.copy(alpha = 0.65f), RoundedCornerShape(8.dp))
+            .clip(RoundedCornerShape(8.dp))
+            .padding(horizontal = 8.dp, vertical = 4.dp)
     ) {
         if (plans.isEmpty() || selectedPlan == null) {
             Text(
@@ -157,13 +160,13 @@ fun RoamGuideWidget(onBack: () -> Unit) {
 
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
                 "%02d:%02d".format(elapsedSeconds / 60, elapsedSeconds % 60),
                 color = TextPrimary,
-                fontSize = 18.sp,
+                fontSize = 16.sp,
                 fontWeight = FontWeight.Black,
                 style = ReadableTextStyle
             )
@@ -172,23 +175,23 @@ fun RoamGuideWidget(onBack: () -> Unit) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clip(RoundedCornerShape(6.dp))
+                        .clip(RoundedCornerShape(5.dp))
                         .background(SurfaceDark.copy(alpha = 0.85f))
-                        .border(1.dp, GuideGreen.copy(alpha = 0.75f), RoundedCornerShape(6.dp))
+                        .border(1.dp, GuideGreen.copy(alpha = 0.75f), RoundedCornerShape(5.dp))
                         .clickable { planMenuExpanded = true }
-                        .padding(horizontal = 8.dp, vertical = 6.dp),
+                        .padding(horizontal = 7.dp, vertical = 4.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text(
                         selectedPlan.label,
                         color = GuideGreen,
-                        fontSize = 10.sp,
+                        fontSize = 9.sp,
                         fontWeight = FontWeight.Bold,
                         maxLines = 1,
                         style = ReadableTextStyle
                     )
-                    Text("▾", color = TextPrimary, fontSize = 11.sp, style = ReadableTextStyle)
+                    Text("▾", color = TextPrimary, fontSize = 10.sp, style = ReadableTextStyle)
                 }
                 DropdownMenu(
                     expanded = planMenuExpanded,
@@ -216,7 +219,7 @@ fun RoamGuideWidget(onBack: () -> Unit) {
             Text(
                 selectedPlan.blessing,
                 color = MLBBGold,
-                fontSize = 10.sp,
+                fontSize = 9.sp,
                 fontWeight = FontWeight.Bold,
                 maxLines = 1,
                 style = ReadableTextStyle
@@ -225,13 +228,13 @@ fun RoamGuideWidget(onBack: () -> Unit) {
             Button(
                 onClick = { isRunning = !isRunning },
                 colors = ButtonDefaults.buttonColors(containerColor = if (isRunning) SurfaceMid else GuideGreen),
-                contentPadding = PaddingValues(horizontal = 10.dp, vertical = 3.dp),
-                modifier = Modifier.heightIn(min = 28.dp)
+                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 1.dp),
+                modifier = Modifier.heightIn(min = 26.dp)
             ) {
                 Text(
                     if (isRunning) "Pause" else "Start",
                     color = Color(0xFF10151C),
-                    fontSize = 10.sp,
+                    fontSize = 9.sp,
                     fontWeight = FontWeight.Bold,
                     style = ReadableTextStyle
                 )
@@ -240,26 +243,26 @@ fun RoamGuideWidget(onBack: () -> Unit) {
             Text(
                 "Back",
                 color = MLBBGold,
-                fontSize = 10.sp,
+                fontSize = 9.sp,
                 fontWeight = FontWeight.Bold,
-                modifier = Modifier.clickable(onClick = onBack).padding(5.dp),
+                modifier = Modifier.clickable(onClick = onBack).padding(horizontal = 3.dp, vertical = 4.dp),
                 style = ReadableTextStyle
             )
         }
 
-        Spacer(Modifier.height(6.dp))
+        Spacer(Modifier.height(3.dp))
 
         if (currentStep != null) {
             Text(
                 currentStep.description,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(GuideGreen.copy(alpha = 0.12f), RoundedCornerShape(7.dp))
-                    .border(1.dp, GuideGreen.copy(alpha = 0.28f), RoundedCornerShape(7.dp))
-                    .padding(horizontal = 9.dp, vertical = 7.dp),
+                    .background(GuideGreen.copy(alpha = 0.12f), RoundedCornerShape(5.dp))
+                    .border(1.dp, GuideGreen.copy(alpha = 0.28f), RoundedCornerShape(5.dp))
+                    .padding(horizontal = 8.dp, vertical = 4.dp),
                 color = TextPrimary,
-                fontSize = 10.sp,
-                style = TextStyle(lineHeight = 13.sp, shadow = ReadableTextStyle.shadow)
+                fontSize = 9.sp,
+                style = TextStyle(lineHeight = 11.sp, shadow = ReadableTextStyle.shadow)
             )
         }
     }
