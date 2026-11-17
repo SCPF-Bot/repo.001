@@ -4,7 +4,6 @@ import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,12 +14,15 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.weight
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -33,9 +35,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shadow
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.mlbb.assistant.presentation.common.theme.MLBBGold
@@ -49,6 +53,9 @@ import org.json.JSONArray
 
 private val GuideGreen = Color(0xFF72D6A0)
 private const val ROAM_GUIDE_ASSET = "roam_guide.json"
+private val ReadableTextStyle = TextStyle(
+    shadow = Shadow(color = Color.Black, offset = Offset.Zero, blurRadius = 2f)
+)
 
 private data class RoamStep(val startSeconds: Int, val endSeconds: Int, val description: String)
 private data class RoamPlan(
@@ -105,10 +112,7 @@ fun RoamGuideBubble(onTap: () -> Unit) {
             .clickable(onClick = onTap),
         contentAlignment = Alignment.Center
     ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text("R", color = GuideGreen, fontSize = 20.sp, fontWeight = FontWeight.Black)
-            Text("ROAM", color = TextPrimary, fontSize = 7.sp, fontWeight = FontWeight.Bold)
-        }
+        Text("R", color = GuideGreen, fontSize = 20.sp, fontWeight = FontWeight.Black, style = ReadableTextStyle)
     }
 }
 
@@ -119,6 +123,7 @@ fun RoamGuideWidget(onBack: () -> Unit) {
     var selectedPlanId by remember { mutableStateOf(plans.firstOrNull()?.id.orEmpty()) }
     var elapsedSeconds by remember { mutableIntStateOf(0) }
     var isRunning by remember { mutableStateOf(false) }
+    var planMenuExpanded by remember { mutableStateOf(false) }
     val selectedPlan = plans.firstOrNull { it.id == selectedPlanId } ?: plans.firstOrNull()
 
     LaunchedEffect(isRunning) {
@@ -134,128 +139,128 @@ fun RoamGuideWidget(onBack: () -> Unit) {
 
     Column(
         modifier = Modifier
-            .width(240.dp)
+            .width(480.dp)
             .background(OverlayBackground.copy(alpha = 0.25f), RoundedCornerShape(12.dp))
             .border(1.dp, GuideGreen.copy(alpha = 0.65f), RoundedCornerShape(12.dp))
             .clip(RoundedCornerShape(12.dp))
-            .padding(horizontal = 8.dp, vertical = 6.dp)
+            .padding(horizontal = 10.dp, vertical = 7.dp)
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text("ROAM", color = GuideGreen, fontSize = 11.sp, fontWeight = FontWeight.Black)
-            Text(
-                "BACK",
-                color = MLBBGold,
-                fontSize = 9.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.clickable(onClick = onBack).padding(4.dp)
-            )
-        }
-
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                "%02d:%02d".format(elapsedSeconds / 60, elapsedSeconds % 60),
-                color = TextPrimary,
-                fontSize = 22.sp,
-                fontWeight = FontWeight.Black
-            )
-            Row(horizontalArrangement = Arrangement.spacedBy(4.dp), verticalAlignment = Alignment.CenterVertically) {
-                Button(
-                    onClick = { isRunning = !isRunning },
-                    colors = ButtonDefaults.buttonColors(containerColor = if (isRunning) SurfaceMid else GuideGreen),
-                    contentPadding = PaddingValues(horizontal = 9.dp, vertical = 3.dp),
-                    modifier = Modifier.heightIn(min = 28.dp)
-                ) {
-                    Text(if (isRunning) "Pause" else "Start", color = Color(0xFF10151C), fontSize = 10.sp, fontWeight = FontWeight.Bold)
-                }
-                Text(
-                    "Reset",
-                    color = TextPrimary,
-                    fontSize = 9.sp,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.clickable {
-                        isRunning = false
-                        elapsedSeconds = 0
-                    }.padding(4.dp)
-                )
-            }
-        }
-
         if (plans.isEmpty() || selectedPlan == null) {
             Text(
                 "Roam guide unavailable",
                 color = TextPrimary,
                 fontSize = 10.sp,
-                modifier = Modifier.padding(top = 6.dp)
+                style = ReadableTextStyle
             )
             return@Column
         }
 
         Row(
-            modifier = Modifier.fillMaxWidth().padding(top = 5.dp).horizontalScroll(rememberScrollState()),
-            horizontalArrangement = Arrangement.spacedBy(4.dp)
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            plans.forEach { plan ->
-                val selected = plan.id == selectedPlan.id
-                Box(
+            Text(
+                "%02d:%02d".format(elapsedSeconds / 60, elapsedSeconds % 60),
+                color = TextPrimary,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Black,
+                style = ReadableTextStyle
+            )
+
+            Box(modifier = Modifier.weight(1f)) {
+                Row(
                     modifier = Modifier
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(if (selected) GuideGreen.copy(alpha = 0.18f) else SurfaceDark.copy(alpha = 0.7f))
-                        .border(1.dp, if (selected) GuideGreen else SurfaceMid.copy(alpha = 0.8f), RoundedCornerShape(12.dp))
-                        .clickable { selectedPlanId = plan.id }
-                        .padding(horizontal = 7.dp, vertical = 4.dp)
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(6.dp))
+                        .background(SurfaceDark.copy(alpha = 0.85f))
+                        .border(1.dp, GuideGreen.copy(alpha = 0.75f), RoundedCornerShape(6.dp))
+                        .clickable { planMenuExpanded = true }
+                        .padding(horizontal = 8.dp, vertical = 6.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text(
-                        plan.label,
-                        color = if (selected) GuideGreen else TextPrimary,
-                        fontSize = 8.sp,
-                        fontWeight = FontWeight.Bold
+                        selectedPlan.label,
+                        color = GuideGreen,
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Bold,
+                        maxLines = 1,
+                        style = ReadableTextStyle
                     )
+                    Text("▾", color = TextPrimary, fontSize = 11.sp, style = ReadableTextStyle)
+                }
+                DropdownMenu(
+                    expanded = planMenuExpanded,
+                    onDismissRequest = { planMenuExpanded = false },
+                    modifier = Modifier.background(SurfaceElevated)
+                ) {
+                    plans.forEach { plan ->
+                        DropdownMenuItem(
+                            text = {
+                                Text(
+                                    plan.label,
+                                    color = if (plan.id == selectedPlan.id) GuideGreen else TextPrimary,
+                                    style = ReadableTextStyle
+                                )
+                            },
+                            onClick = {
+                                selectedPlanId = plan.id
+                                planMenuExpanded = false
+                            }
+                        )
+                    }
                 }
             }
+
+            Text(
+                selectedPlan.blessing,
+                color = MLBBGold,
+                fontSize = 10.sp,
+                fontWeight = FontWeight.Bold,
+                maxLines = 1,
+                style = ReadableTextStyle
+            )
+
+            Button(
+                onClick = { isRunning = !isRunning },
+                colors = ButtonDefaults.buttonColors(containerColor = if (isRunning) SurfaceMid else GuideGreen),
+                contentPadding = PaddingValues(horizontal = 10.dp, vertical = 3.dp),
+                modifier = Modifier.heightIn(min = 28.dp)
+            ) {
+                Text(
+                    if (isRunning) "Pause" else "Start",
+                    color = Color(0xFF10151C),
+                    fontSize = 10.sp,
+                    fontWeight = FontWeight.Bold,
+                    style = ReadableTextStyle
+                )
+            }
+
+            Text(
+                "Back",
+                color = MLBBGold,
+                fontSize = 10.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.clickable(onClick = onBack).padding(5.dp),
+                style = ReadableTextStyle
+            )
         }
 
         Spacer(Modifier.height(6.dp))
 
         if (currentStep != null) {
-            Column(
+            Text(
+                currentStep.description,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(GuideGreen.copy(alpha = 0.12f), RoundedCornerShape(8.dp))
-                    .border(1.dp, GuideGreen.copy(alpha = 0.28f), RoundedCornerShape(8.dp))
-                    .padding(horizontal = 8.dp, vertical = 7.dp)
-            ) {
-                Text(
-                    "CURRENT · ${formatRoamTime(currentStep.startSeconds)}–${formatRoamTime(currentStep.endSeconds)}",
-                    color = GuideGreen,
-                    fontSize = 8.sp,
-                    fontWeight = FontWeight.Black
-                )
-                Text(
-                    currentStep.description,
-                    color = TextPrimary,
-                    fontSize = 9.sp,
-                    style = TextStyle(lineHeight = 11.sp),
-                    modifier = Modifier.padding(top = 2.dp)
-                )
-            }
+                    .background(GuideGreen.copy(alpha = 0.12f), RoundedCornerShape(7.dp))
+                    .border(1.dp, GuideGreen.copy(alpha = 0.28f), RoundedCornerShape(7.dp))
+                    .padding(horizontal = 9.dp, vertical = 7.dp),
+                color = TextPrimary,
+                fontSize = 10.sp,
+                style = TextStyle(lineHeight = 13.sp, shadow = ReadableTextStyle.shadow)
+            )
         }
-
-        Text(
-            "BLESSING · ${selectedPlan.blessing}",
-            color = MLBBGold,
-            fontSize = 8.sp,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(top = 5.dp)
-        )
     }
 }
-
-private fun formatRoamTime(seconds: Int): String = "%02d:%02d".format(seconds / 60, seconds % 60)
