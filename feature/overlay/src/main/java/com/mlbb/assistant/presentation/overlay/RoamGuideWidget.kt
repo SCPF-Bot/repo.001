@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -34,9 +35,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -44,15 +48,15 @@ import kotlinx.coroutines.delay
 import org.json.JSONArray
 import org.json.JSONObject
 
-private val GuideBackground = Color(0xF20D1117)
-private val GuideSurface = Color(0xFF1B222D)
-private val GuideBorder = Color(0xFF2F3A46)
-private val GuideAccent = Color(0xFF58A6FF)
-private val GuideText = Color(0xFFE8EEF4)
-private val GuideMuted = Color(0xFF9AA7B4)
-private val GuideGold = Color(0xFFFFC94D)
+private val GuideBackground = Color(0x730D1117) // GitHub Dark #0d1117 at 45%
+private val GuideSurface = Color(0x73161B22) // GitHub Dark #161b22 at 45%
+private val GuideBorder = Color(0x7330363D) // GitHub Dark #30363d at 45%
+private val GuideAccent = Color(0xFF58A6FF) // GitHub Dark blue
+private val GuideText = Color(0xFFE6EDF3) // GitHub Dark primary
+private val GuideMuted = Color(0xFF8B949E) // GitHub Dark secondary
+private val GuideGold = Color(0xFFE3B341) // GitHub Dark yellow
 private val GuideGreen = Color(0xFF3FB950)
-private val GuideRed = Color(0xFFFF6B6B)
+private val GuideRed = Color(0xFFF85149) // GitHub Dark red
 
 // --- Widget width: matched to the green line in the reference photo ---
 // Measured from the photo (720px wide): green line runs x = 150 → 526,
@@ -347,12 +351,15 @@ fun RoamGuideWidget(onBack: () -> Unit) {
             it.name.equals(selectedPlan?.blessing?.substringBefore('/')?.trim(), ignoreCase = true)
     }
 
+    // Gap between the two widgets = exactly 1 physical pixel.
+    // 1.dp is NOT 1px (at 3x density 1.dp = 3px), so convert 1px -> dp.
+    val onePx = with(LocalDensity.current) { 1.toDp() }
     Column(
         modifier = Modifier
             .width(widgetWidth.dp),
         // No outer horizontal padding: the card itself is widgetWidth,
         // so its visible edges line up exactly with the green line.
-        verticalArrangement = Arrangement.spacedBy(6.dp)
+        verticalArrangement = Arrangement.spacedBy(onePx)
     ) {
         if (selectedPlan == null || currentStep == null) {
             GuideMessage("Roam guide unavailable — check roam_guide.json")
@@ -362,28 +369,24 @@ fun RoamGuideWidget(onBack: () -> Unit) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(GuideBackground, RoundedCornerShape(12.dp))
-                .border(1.dp, GuideBorder, RoundedCornerShape(12.dp))
-                .padding(horizontal = 8.dp, vertical = 8.dp),
-            verticalArrangement = Arrangement.spacedBy(6.dp)
+                .background(GuideBackground, RoundedCornerShape(8.dp))
+                .border(1.dp, GuideBorder, RoundedCornerShape(8.dp))
+                .padding(horizontal = 4.dp, vertical = 4.dp),
+            verticalArrangement = Arrangement.spacedBy(3.dp)
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                horizontalArrangement = Arrangement.spacedBy(3.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 GuideControl(
-                    label = formatGameTime(elapsedSeconds),
-                    color = GuideText,
-                    modifier = Modifier.width(56.dp),
+                    label = "${if (isRunning) "⏸ " else "▶ "}${formatGameTime(elapsedSeconds)}",
+                    color = if (isRunning) GuideGreen else GuideText,
+                    modifier = Modifier.width(62.dp),
                     fontWeight = FontWeight.Bold,
-                    onClick = {}
-                )
-                GuideControl(
-                    label = if (isRunning) "⏸" else "▶",
-                    color = GuideAccent,
                     onClick = { isRunning = !isRunning && elapsedSeconds < 18 * 60 },
                     contentDescription = if (isRunning) "Pause timer" else "Start timer"
+                    // Timer IS the play/pause button — tap the timer to start/pause. No separate button.
                 )
                 Box(modifier = Modifier.weight(1f)) {
                     GuideControl(
@@ -400,7 +403,7 @@ fun RoamGuideWidget(onBack: () -> Unit) {
                         plans.forEach { plan ->
                             DropdownMenuItem(
                                 text = {
-                                    Text(
+                                    OutlinedText(
                                         plan.label,
                                         maxLines = 1,
                                         overflow = TextOverflow.Ellipsis
@@ -442,7 +445,7 @@ fun RoamGuideWidget(onBack: () -> Unit) {
             }
 
             if (!descriptionHidden) {
-                Text(
+                OutlinedText(
                     text = buildString {
                         if (currentStep.phase.isNotBlank()) append("${currentStep.phase} · ")
                         append(currentStep.callout.ifBlank { objectiveText })
@@ -456,13 +459,13 @@ fun RoamGuideWidget(onBack: () -> Unit) {
                     modifier = Modifier.fillMaxWidth()
                 )
                 if (detailsExpanded) {
-                    Text(
+                    OutlinedText(
                         "${currentStep.timeLabel.ifBlank { "${formatGameTime(currentStep.startSeconds)}–${formatGameTime(currentStep.endSeconds)}" }}${guide.patch.takeIf(String::isNotBlank)?.let { " · $it" }.orEmpty()}",
                         color = GuideMuted,
                         fontSize = 9.sp
                     )
                     currentStep.checklist.forEach { item ->
-                        Text("• $item", color = GuideText, fontSize = 9.sp)
+                        OutlinedText("• $item", color = GuideText, fontSize = 9.sp)
                     }
                     if (currentStep.vision.isNotBlank()) GuideDetail("Vision", currentStep.vision)
                     if (currentStep.decision.isNotBlank()) GuideDetail("Decision", currentStep.decision)
@@ -474,8 +477,8 @@ fun RoamGuideWidget(onBack: () -> Unit) {
                         GuideDetail("Suggested heroes", selectedPlan.heroes.take(6).joinToString())
                     }
                     FlowRow(
-                        horizontalArrangement = Arrangement.spacedBy(6.dp),
-                        verticalArrangement = Arrangement.spacedBy(6.dp)
+                        horizontalArrangement = Arrangement.spacedBy(3.dp),
+                        verticalArrangement = Arrangement.spacedBy(3.dp)
                     ) {
                         GuideControl("−10s", GuideMuted) { elapsedSeconds = (elapsedSeconds - 10).coerceAtLeast(0) }
                         GuideControl("+10s", GuideMuted) { elapsedSeconds = (elapsedSeconds + 10).coerceAtMost(18 * 60) }
@@ -510,11 +513,11 @@ fun RoamGuideWidget(onBack: () -> Unit) {
                                 onDismissRequest = { hideMenuExpanded = false }
                             ) {
                                 DropdownMenuItem(
-                                    text = { Text("Show instructions") },
+                                    text = { OutlinedText("Show instructions") },
                                     onClick = { descriptionHidden = false; hideMenuExpanded = false }
                                 )
                                 DropdownMenuItem(
-                                    text = { Text("Hide instructions") },
+                                    text = { OutlinedText("Hide instructions") },
                                     onClick = { descriptionHidden = true; hideMenuExpanded = false }
                                 )
                             }
@@ -551,17 +554,60 @@ fun RoamGuideWidget(onBack: () -> Unit) {
 
 @Composable
 private fun GuideMessage(message: String) {
-    Text(
+    OutlinedText(
         text = message,
         color = GuideText,
-        fontSize = 10.sp,
+        fontSize = 9.sp,
         modifier = Modifier
-            .background(GuideBackground, RoundedCornerShape(12.dp))
-            .padding(8.dp)
+            .background(GuideBackground, RoundedCornerShape(8.dp))
+            .padding(6.dp)
     )
 }
 
 @Composable
+
+@Composable
+private fun OutlinedText(
+    text: String,
+    color: Color,
+    fontSize: TextUnit = TextUnit.Unspecified,
+    fontWeight: FontWeight = FontWeight.Normal,
+    maxLines: Int = Int.MAX_VALUE,
+    overflow: TextOverflow = TextOverflow.Clip,
+    textAlign: TextAlign? = null,
+    lineHeight: TextUnit = TextUnit.Unspecified,
+    letterSpacing: TextUnit = TextUnit.Unspecified,
+    modifier: Modifier = Modifier
+) {
+    // Black outline on every text so it stands out over the game.
+    Box(
+        modifier = modifier,
+        contentAlignment = when (textAlign) {
+            TextAlign.Center -> Alignment.Center
+            TextAlign.End -> Alignment.CenterEnd
+            else -> Alignment.CenterStart
+        }
+    ) {
+        val offsets = listOf(
+            -0.9f to -0.9f, 0.9f to -0.9f, -0.9f to 0.9f, 0.9f to 0.9f,
+            0f to -1f, 0f to 1f, -1f to 0f, 1f to 0f
+        )
+        offsets.forEach { (dx, dy) ->
+            androidx.compose.material3.Text(
+                text = text, color = Color.Black, fontSize = fontSize, fontWeight = fontWeight,
+                maxLines = maxLines, overflow = overflow, textAlign = textAlign,
+                lineHeight = lineHeight, letterSpacing = letterSpacing,
+                modifier = Modifier.offset(dx.dp, dy.dp)
+            )
+        }
+        androidx.compose.material3.Text(
+            text = text, color = color, fontSize = fontSize, fontWeight = fontWeight,
+            maxLines = maxLines, overflow = overflow, textAlign = textAlign,
+            lineHeight = lineHeight, letterSpacing = letterSpacing
+        )
+    }
+}
+
 private fun GuideControl(
     label: String,
     color: Color,
@@ -575,19 +621,19 @@ private fun GuideControl(
 ) {
     Box(
         modifier = modifier
-            .heightIn(min = 32.dp)
+            .heightIn(min = 24.dp)
             .clip(RoundedCornerShape(8.dp))
             .background(background)
             .border(1.dp, borderColor, RoundedCornerShape(8.dp))
             .clickable(onClick = onClick)
-            .padding(horizontal = 8.dp, vertical = 6.dp)
+            .padding(horizontal = 4.dp, vertical = 2.dp)
             .semantics { this.contentDescription = contentDescription },
         contentAlignment = Alignment.Center
     ) {
-        Text(
+        OutlinedText(
             text = label,
             color = color,
-            fontSize = 9.sp,
+            fontSize = 8.sp,
             fontWeight = fontWeight,
             maxLines = maxLines,
             overflow = TextOverflow.Ellipsis
@@ -598,7 +644,7 @@ private fun GuideControl(
 @Composable
 private fun GuideDetail(label: String, text: String) {
     Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-        Text(
+        OutlinedText(
             text = "$label:",
             color = GuideMuted,
             fontSize = 9.sp,
@@ -606,7 +652,7 @@ private fun GuideDetail(label: String, text: String) {
             fontWeight = FontWeight.Bold,
             maxLines = 1
         )
-        Text(
+        OutlinedText(
             text = text,
             color = GuideText,
             fontSize = 9.sp,

@@ -27,17 +27,18 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
-private val TrackerSurface = Color(0xF2161B22)
-private val TrackerSurfaceCooling = Color(0xFF2A2413)
-private val TrackerBorder = Color(0xFF30363D)
-private val TrackerGold = Color(0xFFFFC94D)
-private val TrackerText = Color(0xFFE6EDF3)
-private val TrackerMuted = Color(0xFF9AA7B4)
+private val TrackerSurface = Color(0x26161B22) // GitHub Dark #161b22 at 15%
+private val TrackerSurfaceCooling = Color(0x26161B22) // GitHub Dark #161b22 at 15% — gold fill drawn on top
+private val TrackerBorder = Color(0x2630363D) // GitHub Dark #30363d at 15%
+private val TrackerGold = Color(0xFFE3B341) // GitHub Dark yellow
+private val TrackerText = Color(0xFFE6EDF3) // GitHub Dark primary
+private val TrackerMuted = Color(0xFF8B949E) // GitHub Dark secondary
 
 private data class TrackedSpell(val name: String, val cooldownSeconds: Int)
 private data class TrackedLaneSpell(
@@ -98,6 +99,50 @@ private fun formatCooldown(seconds: Int): String = "%02d:%02d".format(seconds / 
  * width (~52% of screen in landscape), so each of the 5 cells stays ~1/5 of that.
  */
 @OptIn(ExperimentalFoundationApi::class)
+
+@Composable
+private fun OutlinedText(
+    text: String,
+    color: Color,
+    fontSize: TextUnit = TextUnit.Unspecified,
+    fontWeight: FontWeight = FontWeight.Normal,
+    maxLines: Int = Int.MAX_VALUE,
+    overflow: TextOverflow = TextOverflow.Clip,
+    textAlign: TextAlign? = null,
+    lineHeight: TextUnit = TextUnit.Unspecified,
+    letterSpacing: TextUnit = TextUnit.Unspecified,
+    modifier: Modifier = Modifier
+) {
+    // Black outline on every text so it stands out over the game.
+    Box(
+        modifier = modifier,
+        contentAlignment = when (textAlign) {
+            TextAlign.Center -> Alignment.Center
+            TextAlign.End -> Alignment.CenterEnd
+            else -> Alignment.CenterStart
+        }
+    ) {
+        val offsets = listOf(
+            -0.9f to -0.9f, 0.9f to -0.9f, -0.9f to 0.9f, 0.9f to 0.9f,
+            0f to -1f, 0f to 1f, -1f to 0f, 1f to 0f
+        )
+        offsets.forEach { (dx, dy) ->
+            androidx.compose.material3.Text(
+                text = text, color = Color.Black, fontSize = fontSize, fontWeight = fontWeight,
+                maxLines = maxLines, overflow = overflow, textAlign = textAlign,
+                lineHeight = lineHeight, letterSpacing = letterSpacing,
+                modifier = Modifier.offset(dx.dp, dy.dp)
+            )
+        }
+        androidx.compose.material3.Text(
+            text = text, color = color, fontSize = fontSize, fontWeight = fontWeight,
+            maxLines = maxLines, overflow = overflow, textAlign = textAlign,
+            lineHeight = lineHeight, letterSpacing = letterSpacing
+        )
+    }
+}
+
+
 @Composable
 fun EnemySpellTrackerWidget(elapsedSeconds: Int, modifier: Modifier = Modifier) {
     var trackedSpells by rememberSaveable { mutableStateOf(initialTrackedSpells()) }
@@ -105,7 +150,7 @@ fun EnemySpellTrackerWidget(elapsedSeconds: Int, modifier: Modifier = Modifier) 
 
     Column(
         modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(5.dp)
+        verticalArrangement = Arrangement.spacedBy(2.dp)
     ) {
         // Header replaces the old bottom hint, which truncated at 52% width.
         // It tells the gesture once, up top, where it never gets cut off.
@@ -114,18 +159,18 @@ fun EnemySpellTrackerWidget(elapsedSeconds: Int, modifier: Modifier = Modifier) 
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
+            OutlinedText(
                 text = "ENEMY SPELLS",
                 color = TrackerMuted,
-                fontSize = 7.sp,
+                fontSize = 6.5.sp,
                 fontWeight = FontWeight.Bold,
                 letterSpacing = 0.8.sp,
                 maxLines = 1
             )
-            Text(
+            OutlinedText(
                 text = "Tap = used  ·  Hold = change",
                 color = TrackerMuted,
-                fontSize = 7.sp,
+                fontSize = 6.5.sp,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 textAlign = TextAlign.End
@@ -134,7 +179,7 @@ fun EnemySpellTrackerWidget(elapsedSeconds: Int, modifier: Modifier = Modifier) 
 
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(4.dp)
+            horizontalArrangement = Arrangement.spacedBy(2.dp)
         ) {
             trackedSpells.forEach { laneSpell ->
                 val elapsedSinceUse = laneSpell.usedAtSeconds?.let { (elapsedSeconds - it).coerceAtLeast(0) }
@@ -151,13 +196,13 @@ fun EnemySpellTrackerWidget(elapsedSeconds: Int, modifier: Modifier = Modifier) 
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(38.dp)
-                            .clip(RoundedCornerShape(8.dp))
+                            .height(28.dp)
+                            .clip(RoundedCornerShape(6.dp))
                             .background(if (isCoolingDown) TrackerSurfaceCooling else TrackerSurface)
                             .border(
                                 1.dp,
                                 if (isCoolingDown) TrackerGold.copy(alpha = 0.85f) else TrackerBorder,
-                                RoundedCornerShape(8.dp)
+                                RoundedCornerShape(6.dp)
                             )
                             .combinedClickable(
                                 onClick = {
@@ -182,27 +227,27 @@ fun EnemySpellTrackerWidget(elapsedSeconds: Int, modifier: Modifier = Modifier) 
                         Column(
                             horizontalAlignment = Alignment.CenterHorizontally,
                             verticalArrangement = Arrangement.spacedBy(0.dp),
-                            modifier = Modifier.padding(horizontal = 2.dp)
+                            modifier = Modifier.padding(horizontal = 2.dp).zIndex(1f)
                         ) {
                             // Lane always visible. When cooling, also show the spell
                             // abbreviation so you don't lose which spell is on CD.
-                            Text(
+                            OutlinedText(
                                 text = if (isCoolingDown) {
                                     "${laneSpell.lane} · ${abbreviationFor(laneSpell.spell.name)}"
                                 } else {
                                     laneSpell.lane
                                 },
                                 color = if (isCoolingDown) TrackerGold else TrackerMuted,
-                                fontSize = 7.sp,
+                                fontSize = 6.5.sp,
                                 fontWeight = FontWeight.Bold,
                                 letterSpacing = 0.4.sp,
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis
                             )
-                            Text(
+                            OutlinedText(
                                 text = if (isCoolingDown) formatCooldown(remaining) else laneSpell.spell.name,
                                 color = if (isCoolingDown) TrackerGold else TrackerText,
-                                fontSize = if (isCoolingDown) 11.sp else 8.5.sp,
+                                fontSize = if (isCoolingDown) 11.sp else 8.sp,
                                 fontWeight = FontWeight.Bold,
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis,
@@ -210,44 +255,56 @@ fun EnemySpellTrackerWidget(elapsedSeconds: Int, modifier: Modifier = Modifier) 
                             )
                         }
 
-                        // Progress is now a thin bar at the bottom instead of a full
-                        // gold fill — the timer stays readable at any progress.
+                        // Gold bar fills the whole cell background from empty -> full.
+                        // progress = elapsed / cooldown (0 at click, 1 when ready).
+                        // Timer text is drawn on top, with black outline so it stays readable.
                         if (isCoolingDown) {
                             Box(
                                 modifier = Modifier
                                     .fillMaxWidth(progress)
-                                    .height(3.dp)
-                                    .background(TrackerGold, RoundedCornerShape(2.dp))
-                                    .align(Alignment.BottomStart)
+                                    .fillMaxHeight()
+                                    .background(TrackerGold.copy(alpha = 0.38f))
+                                    .align(Alignment.CenterStart)
+                                    .zIndex(0f)
                             )
                         }
                     }
 
                     DropdownMenu(
                         expanded = openPickerLane == laneSpell.lane,
+                        modifier = Modifier.width(260.dp),
                         onDismissRequest = { openPickerLane = null }
                     ) {
-                        availableSpells.forEach { spell ->
-                            val isSelected = spell.name == laneSpell.spell.name
-                            DropdownMenuItem(
-                                text = {
-                                    Text(
-                                        text = if (isSelected) "✓ ${spell.name} · ${spell.cooldownSeconds}s"
-                                        else "${spell.name} · ${spell.cooldownSeconds}s",
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis,
-                                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-                                        color = if (isSelected) TrackerGold else Color.Unspecified
-                                    )
-                                },
-                                onClick = {
-                                    trackedSpells = trackedSpells.map { current ->
-                                        if (current.lane == laneSpell.lane) current.copy(spell = spell, usedAtSeconds = null)
-                                        else current
+                        // Two columns: spells chunked into pairs, each pair is a Row with 2 items.
+                        availableSpells.chunked(2).forEach { pair ->
+                            Row(horizontalArrangement = Arrangement.spacedBy(2.dp)) {
+                                pair.forEach { spell ->
+                                    val isSelected = spell.name == laneSpell.spell.name
+                                    Box(modifier = Modifier.weight(1f)) {
+                                        DropdownMenuItem(
+                                            text = {
+                                                OutlinedText(
+                                                    text = if (isSelected) "✓ ${spell.name} ${spell.cooldownSeconds}s"
+                                                    else "${spell.name} ${spell.cooldownSeconds}s",
+                                                    maxLines = 1,
+                                                    overflow = TextOverflow.Ellipsis,
+                                                    fontSize = 11.sp,
+                                                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                                                    color = if (isSelected) TrackerGold else Color.Unspecified
+                                                )
+                                            },
+                                            onClick = {
+                                                trackedSpells = trackedSpells.map { current ->
+                                                    if (current.lane == laneSpell.lane) current.copy(spell = spell, usedAtSeconds = null)
+                                                    else current
+                                                }
+                                                openPickerLane = null
+                                            }
+                                        )
                                     }
-                                    openPickerLane = null
                                 }
-                            )
+                                if (pair.size == 1) Spacer(modifier = Modifier.weight(1f))
+                            }
                         }
                     }
                 }
