@@ -1,9 +1,11 @@
 package com.mlbb.assistant.presentation.overlay
 
 import android.content.Context
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -61,8 +63,40 @@ private val GithubGreen = Color(0xFF3FB950)
 private val GithubRed = Color(0xFFF85149)
 private const val ROAM_GUIDE_ASSET = "roam_guide.json"
 private const val WIDGET_ALPHA = 0.25f
+private const val ENEMY_SPELL_ALPHA = 0.15f // 85% transparent = 15% opaque
 
-// DYNAMIC TURTLE / LORD + VERIFIED IN-GAME ROAM TYPES - v2.8
+// ENEMY BATTLE SPELL TRACKER - v3.2 - Season 42, Patch 2.2.16, Liquipedia ledger
+// Tap = enemy used spell -> start CD bar (empty -> full). Tap again on CD = cancel (fix mis-tap).
+// Long-press = switch spell (e.g. Flicker -> Revitalize). Defaults: JG = Retribution, EXP/MID/GOLD/ROAM = Flicker.
+private data class BattleSpell(val name: String, val cooldown: Int)
+private val BATTLE_SPELLS = listOf(
+    BattleSpell("Flicker", 120),
+    BattleSpell("Retribution", 35),
+    BattleSpell("Purify", 90),
+    BattleSpell("Sprint", 100),
+    BattleSpell("Execute", 90),
+    BattleSpell("Petrify", 75),
+    BattleSpell("Inspire", 75),
+    BattleSpell("Aegis", 75),
+    BattleSpell("Vengeance", 75),
+    BattleSpell("Flameshot", 50),
+    BattleSpell("Arrival", 75),
+    BattleSpell("Revitalize", 75)
+)
+private data class EnemySpellTracker(val lane: String, val spell: BattleSpell, val usedAt: Int?)
+private fun defaultEnemySpells(): List<EnemySpellTracker> {
+    val flicker = BATTLE_SPELLS.first { it.name == "Flicker" }
+    val retri = BATTLE_SPELLS.first { it.name == "Retribution" }
+    return listOf(
+        EnemySpellTracker("EXP", flicker, null),
+        EnemySpellTracker("JG", retri, null),
+        EnemySpellTracker("MID", flicker, null),
+        EnemySpellTracker("GOLD", flicker, null),
+        EnemySpellTracker("ROAM", flicker, null)
+    )
+}
+
+// DYNAMIC TURTLE / LORD + VERIFIED IN-GAME ROAM TYPES - v3.2 - ENEMY SPELL TRACKER: 5 bottom buttons EXP/JG/MID/GOLD/ROAM, 85% transparent, tap=CD bar, long-press=switch spell
 // Roam types are now the verified in-game Hero Specialty tags, not guide archetypes:
 // Crowd Control (AoE, controls many), Initiator (starts fight, comeback), Charge (dash fast in),
 // Control (guaranteed single lock), Support/Guard (save allies), Heal/Regen (regenerate HP).
@@ -208,21 +242,27 @@ private fun formatTime(s: Int): String {
 }
 
 // CORE - dynamic objective state machine. Pure function, easy to test.
+// BUG FIX 2026-11-18: Lord slain early (e.g. 08:11 with only 1 Turtle) showed Lord in 01:39 instead of 02:39.
+// Cause: the elapsed>=480 branch treated ANY lastSlainAt as a Turtle slain and used +120s (Turtle->Lord delay).
+// A Lord slain must use Lord respawn: 180s before 18:00, 120s after 18:00. Fix: check lordSlain>0 FIRST, before any Turtle logic.
 private fun computeObjective(elapsed: Int, turtleSlain: Int, lordSlain: Int, lastSlainAt: Int?): ObjectiveStatus {
-    // LORD PHASE - already slain 3 Turtles
-    if (turtleSlain >= 3) {
-        if (lordSlain == 0) {
-            val lordSpawn = (lastSlainAt ?: 480) + 120
-            if (elapsed < lordSpawn) return ObjectiveStatus(ObjectiveType.LORD, 1, false, lordSpawn - elapsed, "Lord", lordSpawn)
-            return ObjectiveStatus(ObjectiveType.LORD, 1, true, 0, "Lord", lordSpawn)
-        } else {
-            val respawn = if ((lastSlainAt ?: 0) < 1080) 180 else 120
-            val next = (lastSlainAt ?: elapsed) + respawn
-            if (elapsed < next) return ObjectiveStatus(ObjectiveType.LORD, lordSlain + 1, false, next - elapsed, "Lord", next)
-            return ObjectiveStatus(ObjectiveType.LORD, lordSlain + 1, true, 0, "Lord", next)
-        }
+    // LORD ALREADY SLAIN - must come first, regardless of how many Turtles were slain.
+    // Example: Turtle 1 + Lord 1, Lord slain at 08:11 (491s), now 08:32 (512s) -> next Lord 11:11 (671s), in 02:39. NOT 10:11 / 01:39.
+    if (lordSlain > 0) {
+        val respawn = if ((lastSlainAt ?: 0) < 1080) 180 else 120
+        val next = (lastSlainAt ?: elapsed) + respawn
+        if (elapsed < next) return ObjectiveStatus(ObjectiveType.LORD, lordSlain + 1, false, next - elapsed, "Lord", next)
+        return ObjectiveStatus(ObjectiveType.LORD, lordSlain + 1, true, 0, "Lord", next)
     }
-    // TURTLE PHASE, but past 8:00 - Turtle auto-converts to Lord
+    // NO LORD SLAIN YET - remaining logic is Turtle -> Lord.
+    // LORD PHASE - already slain 3 Turtles, no Lord yet
+    if (turtleSlain >= 3) {
+        val lordSpawn = (lastSlainAt ?: 480) + 120
+        if (elapsed < lordSpawn) return ObjectiveStatus(ObjectiveType.LORD, 1, false, lordSpawn - elapsed, "Lord", lordSpawn)
+        return ObjectiveStatus(ObjectiveType.LORD, 1, true, 0, "Lord", lordSpawn)
+    }
+    // TURTLE PHASE, but past 8:00 - Turtle auto-converts to Lord, or last Turtle -> Lord in 120s
+    // Here lastSlainAt is guaranteed to be a Turtle slain (lordSlain==0 checked above), so +120 is correct.
     if (elapsed >= 480) {
         if (lastSlainAt != null) {
             val lordSpawn = lastSlainAt + 120
@@ -310,6 +350,7 @@ fun RoamGuideBubble(onTap: () -> Unit) {
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun RoamGuideWidget(onBack: () -> Unit) {
     val context = LocalContext.current
@@ -329,6 +370,9 @@ fun RoamGuideWidget(onBack: () -> Unit) {
     var lastSlainAt by remember { mutableStateOf<Int?>(null) }
     // For undo: keep last action
     var lastAction by remember { mutableStateOf<String?>(null) }
+    // ENEMY SPELL TRACKER - 5 lanes, survives plan switch, resets with game Reset
+    var enemySpells by remember { mutableStateOf(defaultEnemySpells()) }
+    var spellPickerLane by remember { mutableStateOf<String?>(null) }
 
     val selectedPlan = plans.firstOrNull { it.id == selectedPlanId } ?: plans.firstOrNull()
 
@@ -349,9 +393,20 @@ fun RoamGuideWidget(onBack: () -> Unit) {
     val isObjectiveAlive = objective.isAlive
     val contestText = if (objective.type == ObjectiveType.TURTLE) selectedPlan?.turtleContest.orEmpty() else selectedPlan?.lordContest.orEmpty()
     val tradeText = if (objective.type == ObjectiveType.TURTLE) selectedPlan?.turtleTrade.orEmpty() else selectedPlan?.lordTrade.orEmpty()
-    val dynamicCallout = if (isObjectiveAlive) "${objective.label} ${if (objective.type == ObjectiveType.TURTLE) objective.count else ""} UP".trim() else (currentStep?.callout.orEmpty())
+    // BUG FIX: when objective is on countdown (slain), collapsed must NOT show the step's pre-objective text
+    // e.g. after Lord slain at 08:11, it showed "Get vision at Lord, need more players - Lord appears at 8:00" even though Lord is dead.
+    // Now it shows "Lord slain - Next in 02:39" + "Next Lord in 02:39 at 11:11. Use this time to push, farm, vision, reset."
+    val dynamicCallout = if (isObjectiveAlive) {
+        "${objective.label} ${if (objective.type == ObjectiveType.TURTLE) objective.count else ""} UP".trim()
+    } else if (lastSlainAt != null) {
+        "${objective.label} slain - Next in ${formatTime(objective.secondsUntil)}"
+    } else {
+        currentStep?.callout.orEmpty()
+    }
     val dynamicDescription = if (isObjectiveAlive) {
         "CONTEST: $contestText OR TRADE: $tradeText"
+    } else if (lastSlainAt != null) {
+        "${objective.label} slain at ${formatTime(lastSlainAt ?: 0)}. Next ${objective.label} in ${formatTime(objective.secondsUntil)} at ${formatTime(objective.nextSpawnSeconds)}. Use this time to push, farm, vision, reset."
     } else {
         currentStep?.description.orEmpty()
     }
@@ -472,7 +527,7 @@ fun RoamGuideWidget(onBack: () -> Unit) {
                 Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                     OutlinedText("-10s", GithubMuted, modifier = Modifier.clip(RoundedCornerShape(5.dp)).background(GithubSurface.copy(alpha = WIDGET_ALPHA)).clickable { elapsedSeconds = (elapsedSeconds - 10).coerceIn(0, 18 * 60) }.padding(horizontal = 8.dp, vertical = 4.dp), fontSize = 10.sp, fontWeight = FontWeight.Bold)
                     OutlinedText("+10s", GithubMuted, modifier = Modifier.clip(RoundedCornerShape(5.dp)).background(GithubSurface.copy(alpha = WIDGET_ALPHA)).clickable { elapsedSeconds = (elapsedSeconds + 10).coerceIn(0, 18 * 60) }.padding(horizontal = 8.dp, vertical = 4.dp), fontSize = 10.sp, fontWeight = FontWeight.Bold)
-                    OutlinedText("Reset", GithubMuted, modifier = Modifier.clip(RoundedCornerShape(5.dp)).background(GithubSurface.copy(alpha = WIDGET_ALPHA)).clickable { elapsedSeconds = 0; isRunning = false; turtleSlain = 0; lordSlain = 0; lastSlainAt = null; lastAction = null }.padding(horizontal = 8.dp, vertical = 4.dp), fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                    OutlinedText("Reset", GithubMuted, modifier = Modifier.clip(RoundedCornerShape(5.dp)).background(GithubSurface.copy(alpha = WIDGET_ALPHA)).clickable { elapsedSeconds = 0; isRunning = false; turtleSlain = 0; lordSlain = 0; lastSlainAt = null; lastAction = null; enemySpells = defaultEnemySpells(); spellPickerLane = null }.padding(horizontal = 8.dp, vertical = 4.dp), fontSize = 10.sp, fontWeight = FontWeight.Bold)
                     OutlinedText("Back", GithubMuted, modifier = Modifier.clip(RoundedCornerShape(5.dp)).background(GithubSurface.copy(alpha = WIDGET_ALPHA)).clickable(onClick = onBack).padding(horizontal = 8.dp, vertical = 4.dp), fontSize = 10.sp, fontWeight = FontWeight.Bold)
                     if (lastSlainAt != null) {
                         OutlinedText("Undo Slain", GithubGold, modifier = Modifier.clip(RoundedCornerShape(5.dp)).background(GithubSurface.copy(alpha = WIDGET_ALPHA)).clickable {
@@ -494,5 +549,67 @@ fun RoamGuideWidget(onBack: () -> Unit) {
         Box(modifier = Modifier.fillMaxWidth().height(3.dp).background(GithubBorder.copy(alpha = 0.5f))) {
             Box(modifier = Modifier.fillMaxWidth(progress).height(3.dp).background(GithubAccent))
         }
+
+        // BOTTOM - ENEMY SPELL TRACKER - always visible, collapsed + expanded
+        // SIMPLIFIED per request:
+        // Not clicked: [EXP] [JG] [MID] [GOLD] [ROAM] - lane only, no spell name, no READY, no small bar.
+        // Clicked: [01:45 with GOLD BAR FILLING BACKGROUND] - timer only, gold fill is the button background itself (empty -> full).
+        // TAP = enemy used spell -> start CD. TAP again on CD = cancel. LONG-PRESS = switch spell (picker shows current spell + CD).
+        Spacer(Modifier.height(3.dp))
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+            enemySpells.forEach { tracker ->
+                val spell = tracker.spell
+                val elapsedSinceUse = tracker.usedAt?.let { elapsedSeconds - it } ?: Int.MAX_VALUE
+                val remaining = if (tracker.usedAt == null) 0 else (spell.cooldown - elapsedSinceUse).coerceAtLeast(0)
+                val isOnCooldown = tracker.usedAt != null && remaining > 0
+                // Gold fill = button background itself. 0 = empty (transparent), 1 = full gold.
+                val cdProgress = if (isOnCooldown) (elapsedSinceUse.toFloat() / spell.cooldown.toFloat()).coerceIn(0f, 1f) else 0f
+                Box(modifier = Modifier.weight(1f)) {
+                    Box(
+                        modifier = Modifier.fillMaxWidth()
+                            .height(28.dp)
+                            .clip(RoundedCornerShape(6.dp))
+                            .background(GithubSurface.copy(alpha = ENEMY_SPELL_ALPHA))
+                            .border(1.dp, if (isOnCooldown) GithubGold.copy(alpha = 0.8f) else GithubBorder.copy(alpha = 0.8f), RoundedCornerShape(6.dp))
+                            .combinedClickable(
+                                onClick = {
+                                    enemySpells = enemySpells.map {
+                                        if (it.lane == tracker.lane) it.copy(usedAt = if (isOnCooldown) null else elapsedSeconds) else it
+                                    }
+                                },
+                                onLongClick = { spellPickerLane = tracker.lane }
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        // GOLD BAR FILLING BACKGROUND - only when on CD, fills left -> right
+                        if (isOnCooldown) {
+                            Box(modifier = Modifier.fillMaxWidth(cdProgress).height(28.dp).background(GithubGold).align(Alignment.CenterStart))
+                        }
+                        // Text: lane when idle, timer when on CD. No spell name, no READY, no small bar.
+                        Text(
+                            text = if (isOnCooldown) formatTime(remaining) else tracker.lane,
+                            color = if (isOnCooldown) Color.Black else GithubText,
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Black,
+                            maxLines = 1
+                        )
+                    }
+                    // LONG-PRESS PICKER - switch spell for this lane
+                    DropdownMenu(expanded = spellPickerLane == tracker.lane, onDismissRequest = { spellPickerLane = null }, modifier = Modifier.background(GithubSurface)) {
+                        BATTLE_SPELLS.forEach { s ->
+                            DropdownMenuItem(
+                                text = { OutlinedText(if (s.name == spell.name) "✓ ${s.name.uppercase()} • ${s.cooldown}s" else "${s.name.uppercase()} • ${s.cooldown}s", if (s.name == spell.name) GithubGold else GithubText, fontSize = 9.sp) },
+                                onClick = {
+                                    enemySpells = enemySpells.map { if (it.lane == tracker.lane) it.copy(spell = s, usedAt = null) else it }
+                                    spellPickerLane = null
+                                },
+                                contentPadding = PaddingValues(horizontal = 10.dp, vertical = 2.dp)
+                            )
+                        }
+                    }
+                }
+            }
+        }
+        OutlinedText("Tap = enemy used spell  •  Tap again = cancel  •  Long-press = switch spell", GithubMuted, fontSize = 7.sp)
     }
 }
