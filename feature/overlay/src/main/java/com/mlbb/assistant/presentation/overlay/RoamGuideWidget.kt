@@ -347,7 +347,12 @@ fun RoamGuideWidget(onBack: () -> Unit) {
                 horizontalArrangement = Arrangement.spacedBy(5.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                GuideControl(formatGameTime(elapsedSeconds), GuideText, Modifier.width(58.dp))
+                GuideControl(
+                    label = formatGameTime(elapsedSeconds),
+                    color = GuideText,
+                    modifier = Modifier.width(58.dp),
+                    onClick = {}
+                )
                 GuideControl(if (isRunning) "Ⅱ" else "▶", GuideAccent) {
                     isRunning = !isRunning && elapsedSeconds < 18 * 60
                 }
