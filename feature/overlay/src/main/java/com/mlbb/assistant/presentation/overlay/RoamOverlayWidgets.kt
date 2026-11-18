@@ -59,9 +59,9 @@ import kotlinx.coroutines.delay
 import org.json.JSONArray
 import org.json.JSONObject
 
-private val GuideBackground = Color(0x730D1117) // GitHub Dark #0d1117 at 45%
-private val GuideSurface = Color(0x73161B22) // GitHub Dark #161b22 at 45%
-private val GuideBorder = Color(0x7330363D) // GitHub Dark #30363d at 45%
+private val GuideBackground = Color(0x4D0D1117) // V11: GitHub Dark #0d1117 at 30% (was 45% 0x73)
+private val GuideSurface = Color(0x4D161B22) // V11: GitHub Dark #161b22 at 30% (was 45%)
+private val GuideBorder = Color(0x4D30363D) // V11: GitHub Dark #30363d at 30% (was 45%)
 private val GuideAccent = Color(0xFF58A6FF) // GitHub Dark blue
 private val GuideText = Color(0xFFE6EDF3) // GitHub Dark primary
 private val GuideMuted = Color(0xFF8B949E) // GitHub Dark secondary
@@ -247,14 +247,14 @@ private fun computeObjective(
     lastSlainAt: Int?,
     lastSlainWasLord: Boolean = false
 ): ObjectiveStatus {
-    // V8 FIX: Lord/Turtle timer was wrong at 8:20.
-    // Bug: first Lord spawn was lastSlainAt + 120. If Turtle died at 7:30,
-    // Lord was scheduled for 9:30, so at 8:20 it still showed "Lord in 01:10".
-    // Truth: Turtle stops at 8:00, first Lord ALWAYS spawns at 8:00, no matter
-    // when the last Turtle died. The +120 only applies to Turtle respawns
-    // before 8:00 and to Lord respawns AFTER the first Lord was slain.
+    // V11 FIX: V8 was wrong ("first Lord ALWAYS at 8:00").
+    // Wiki: "First Lord will appear exactly 2 min after last Turtle slain.
+    // E.g. last Turtle 7:45 -> Lord 9:45." + "Turtle not slain after 8:00
+    // turns into Lord if no damage for 5s." + "No Turtle if last slain after 6:00."
+    // So: Turtle 7:30 -> Lord 9:30, NOT 8:00. Lord only at 8:00 if Turtle
+    // was never killed / still alive at 8:00 (it converts).
     if (lordSlain > 0) {
-        // Lord already slain once: respawn 180s (120s late game).
+        // Lord already slain once: respawn 180s (8-18min), 120s after 18:00.
         val slainAt = lastSlainAt ?: elapsedSeconds
         val nextSpawn = slainAt + if (slainAt < 18 * 60) 180 else 120
         return ObjectiveStatus(
@@ -264,23 +264,25 @@ private fun computeObjective(
             secondsUntil = (nextSpawn - elapsedSeconds).coerceAtLeast(0)
         )
     }
-    // First Lord not yet slain: at/after 8:00 it is ALWAYS UP.
-    if (elapsedSeconds >= 8 * 60) {
-        return ObjectiveStatus(ObjectiveType.LORD, 1, true, 0)
-    }
     if (elapsedSeconds < 2 * 60 && turtleSlain == 0) {
         return ObjectiveStatus(ObjectiveType.TURTLE, 1, false, 2 * 60 - elapsedSeconds)
     }
-    // 3 Turtles done -> next is Lord at 8:00.
+    // 3 Turtles done -> Lord = last slain + 120 (6:00 -> 8:00, 6:30 -> 8:30).
     if (turtleSlain >= 3) {
-        return ObjectiveStatus(ObjectiveType.LORD, 1, false, 8 * 60 - elapsedSeconds)
+        val lordSpawn = (lastSlainAt ?: 6 * 60) + 120
+        return ObjectiveStatus(ObjectiveType.LORD, 1, elapsedSeconds >= lordSpawn, (lordSpawn - elapsedSeconds).coerceAtLeast(0))
     }
-    // Next Turtle = last slain + 120, or 2:00 if none. If that would be at/after
-    // 8:00, show Lord at 8:00 instead (e.g. Turtle died 7:26 -> Lord in 00:34).
+    // Slain after 6:00 -> no more Turtle, next is Lord at slain + 120.
+    if (lastSlainAt != null && lastSlainAt > 6 * 60) {
+        val lordSpawn = lastSlainAt + 120
+        return ObjectiveStatus(ObjectiveType.LORD, 1, elapsedSeconds >= lordSpawn, (lordSpawn - elapsedSeconds).coerceAtLeast(0))
+    }
+    // Turtle still alive / never slain and we hit 8:00 -> it converts to Lord.
+    if (elapsedSeconds >= 8 * 60) {
+        return ObjectiveStatus(ObjectiveType.LORD, 1, true, 0)
+    }
+    // Otherwise next Turtle = last slain + 120, or 2:00 if none.
     val nextTurtle = lastSlainAt?.plus(120) ?: 2 * 60
-    if (nextTurtle >= 8 * 60) {
-        return ObjectiveStatus(ObjectiveType.LORD, 1, false, 8 * 60 - elapsedSeconds)
-    }
     return ObjectiveStatus(
         type = ObjectiveType.TURTLE,
         count = turtleSlain + 1,
@@ -313,7 +315,12 @@ fun RoamGuideWidget(onBack: () -> Unit) {
     var elapsedSeconds by rememberSaveable { mutableIntStateOf(0) }
     var isRunning by rememberSaveable { mutableStateOf(false) }
     var planMenuExpanded by remember { mutableStateOf(false) }
-    var detailsExpanded by rememberSaveable { mutableStateOf(false) }
+    // V11: 3-state cycle, replaces detailsExpanded (bool).
+    // 0 = default: short description (2 lines)
+    // 1 = expand: full description (6 lines) + details
+    // 2 = full collapsed: even short description hidden, only header left
+    // Loop: 0 -> 1 -> 2 -> 0. Key avoids restoring old Boolean (would crash).
+    var displayMode by rememberSaveable(key = "displayModeV11") { mutableIntStateOf(0) }
     var helpExpanded by rememberSaveable { mutableStateOf(false) }
     // V8 FIX (4): Hide instructions DELETED. It hid the description with no way
     // back (button lived inside expanded section, so once hidden you couldn't
@@ -369,7 +376,8 @@ fun RoamGuideWidget(onBack: () -> Unit) {
     val baseFraction = if (isLandscape) WIDGET_WIDTH_FRACTION_LANDSCAPE else WIDGET_WIDTH_FRACTION_PORTRAIT
     val maxFraction = if (isLandscape) 0.78f else 0.95f
     val adaptiveExtra = when {
-        detailsExpanded -> 0.16f
+        displayMode == 2 -> 0f // Hidden: no description, no extra width
+        displayMode == 1 -> 0.16f
         objectiveDescription.length > 140 -> 0.20f
         objectiveDescription.length > 110 -> 0.14f
         objectiveDescription.length > 85 -> 0.08f
@@ -436,7 +444,7 @@ fun RoamGuideWidget(onBack: () -> Unit) {
                         modifier = Modifier
                             .fillMaxWidth(stepProgress)
                             .height(28.dp)
-                            .background(GuideAccent.copy(alpha = 0.35f))
+                            .background(GuideAccent.copy(alpha = 0.30f)) // V11: timer progress 30% to match
                             .align(Alignment.CenterStart)
                     )
                     OutlinedText(
@@ -503,8 +511,24 @@ fun RoamGuideWidget(onBack: () -> Unit) {
                     contentDescription = if (objective.isAlive) "Mark ${objective.label} as slain" else objectiveText
                 )
                 // V8 FIX (5): Icon buttons are 28x28 squares, 14sp — was ~18dp / 8sp, too small.
-                GuideControl(if (detailsExpanded) "−" else "+", GuideMuted, modifier = Modifier.width(28.dp), fontSize = 14.sp, contentDescription = if (detailsExpanded) "Collapse details" else "Expand details") {
-                    detailsExpanded = !detailsExpanded
+                // V11: One button cycles 0 (short) -> 1 (full) -> 2 (hidden) -> 0.
+                // Label shows CURRENT mode: "+" = short, "−" = full, "≡" = hidden.
+                GuideControl(
+                    when (displayMode) {
+                        0 -> "+"
+                        1 -> "−"
+                        else -> "≡"
+                    },
+                    GuideMuted,
+                    modifier = Modifier.width(28.dp),
+                    fontSize = 14.sp,
+                    contentDescription = when (displayMode) {
+                        0 -> "Expand to full description"
+                        1 -> "Hide description completely"
+                        else -> "Back to short description"
+                    }
+                ) {
+                    displayMode = (displayMode + 1) % 3
                 }
                 // V7: ? help button between + / − and ×. Holds "Tap = used · Hold = change" + other tips.
                 Box {
@@ -534,7 +558,7 @@ fun RoamGuideWidget(onBack: () -> Unit) {
                             onClick = { helpExpanded = false }
                         )
                         DropdownMenuItem(
-                            text = { OutlinedText("Expand: Tap + for checklist / vision", color = GuideText, fontSize = 8.sp) },
+                            text = { OutlinedText("Mode: + = short · − = full · ≡ = hidden", color = GuideText, fontSize = 8.sp) },
                             onClick = { helpExpanded = false }
                         )
                     }
@@ -552,17 +576,21 @@ fun RoamGuideWidget(onBack: () -> Unit) {
                 // "Go Lord pit early, zone front. Save AoE Ultimate for Lord fight..."
                 // V6 tried first-sentence-only + displayMetrics width — that cut the
                 // key "Save AoE Ultimate..." part. V7 keeps full text + adaptive width.
-                if (objectiveDescription.isNotBlank()) {
+                // V11: Mode 2 hides even the short description.
+                // Mode 0 = short (2 lines), Mode 1 = full (6 lines) + details.
+                if (displayMode != 2 && objectiveDescription.isNotBlank()) {
                     val descFontSize = when {
-                        !detailsExpanded && objectiveDescription.length > 140 -> 7.5.sp
-                        !detailsExpanded && objectiveDescription.length > 110 -> 8.sp
-                        !detailsExpanded && objectiveDescription.length > 85 -> 8.5.sp
+                        displayMode == 1 -> 9.sp
+                        objectiveDescription.length > 140 -> 7.5.sp
+                        objectiveDescription.length > 110 -> 8.sp
+                        objectiveDescription.length > 85 -> 8.5.sp
                         else -> 9.sp
                     }
                     val descLineHeight = when {
-                        !detailsExpanded && objectiveDescription.length > 140 -> 10.sp
-                        !detailsExpanded && objectiveDescription.length > 110 -> 11.sp
-                        !detailsExpanded && objectiveDescription.length > 85 -> 11.sp
+                        displayMode == 1 -> 12.sp
+                        objectiveDescription.length > 140 -> 10.sp
+                        objectiveDescription.length > 110 -> 11.sp
+                        objectiveDescription.length > 85 -> 11.sp
                         else -> 12.sp
                     }
                     OutlinedText(
@@ -570,12 +598,12 @@ fun RoamGuideWidget(onBack: () -> Unit) {
                         color = GuideText,
                         fontSize = descFontSize,
                         lineHeight = descLineHeight,
-                        maxLines = if (detailsExpanded) 6 else 2,
+                        maxLines = if (displayMode == 1) 6 else 2,
                         overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.fillMaxWidth()
                     )
                 }
-                if (detailsExpanded) {
+                if (displayMode == 1) {
                     OutlinedText(
                         "${currentStep.timeLabel.ifBlank { "${formatGameTime(currentStep.startSeconds)}–${formatGameTime(currentStep.endSeconds)}" }}${guide.patch.takeIf(String::isNotBlank)?.let { " · $it" }.orEmpty()}",
                         color = GuideMuted,
@@ -648,9 +676,9 @@ fun RoamGuideWidget(onBack: () -> Unit) {
 // DELETE: RoamGuideWidget.kt, EnemySpellTrackerWidget.kt, RoamOverlayWidgets.kt
 //         (and any RoamOverlayWidgets_V*.kt). Keep ONLY this file + JetOverlay.kt.
 
-private val TrackerSurface = Color(0x73161B22) // V8: 45% like Guide — was 0xF2 (95%), made tracker opaque
-private val TrackerSurfaceCooling = Color(0x732A2413) // V8: 45% like Guide — was 0xFF (100%)
-private val TrackerBorder = Color(0x7330363D) // V8: 45% like Guide — was 0xFF (100%)
+private val TrackerSurface = Color(0x4D161B22) // V11: 30% like Guide (was 45% 0x73)
+private val TrackerSurfaceCooling = Color(0x4D2A2413) // V11: 30% like Guide (was 45%)
+private val TrackerBorder = Color(0x4D30363D) // V11: 30% like Guide (was 45%)
 private val TrackerGold = Color(0xFFFFC94D)
 private val TrackerText = Color(0xFFE6EDF3)
 private val TrackerMuted = Color(0xFF9AA7B4)
@@ -779,7 +807,9 @@ fun EnemySpellTrackerWidget(elapsedSeconds: Int, modifier: Modifier = Modifier) 
                         ) {
                             // Lane always visible. When cooling, also show the spell
                             // abbreviation so you don't lose which spell is on CD.
-                            Text(
+                            // V11: Text -> OutlinedText, black outline so lane stays
+                            // readable over the game at 30% opacity.
+                            OutlinedText(
                                 text = if (isCoolingDown) {
                                     "${laneSpell.lane} · ${abbreviationFor(laneSpell.spell.name)}"
                                 } else {
@@ -790,9 +820,12 @@ fun EnemySpellTrackerWidget(elapsedSeconds: Int, modifier: Modifier = Modifier) 
                                 fontWeight = FontWeight.Bold,
                                 letterSpacing = 0.4.sp,
                                 maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
+                                overflow = TextOverflow.Ellipsis,
+                                textAlign = TextAlign.Center
                             )
-                            Text(
+                            // V11: Text -> OutlinedText, black outline so spell /
+                            // cooldown number stays readable over the game.
+                            OutlinedText(
                                 text = if (isCoolingDown) formatCooldown(remaining) else laneSpell.spell.name,
                                 color = if (isCoolingDown) TrackerGold else TrackerText,
                                 fontSize = if (isCoolingDown) 11.sp else 8.5.sp,
