@@ -547,27 +547,27 @@ fun RoamGuideWidget(onBack: () -> Unit) {
                         onDismissRequest = { helpExpanded = false }
                     ) {
                         DropdownMenuItem(
-                            text = { OutlinedText("Timer: Tap timer to start / pause", fontSize = 8.sp) },
+                            text = { OutlinedText("Timer: Tap timer to start / pause", color = GuideText, fontSize = 8.sp) },
                             onClick = { helpExpanded = false }
                         )
                         DropdownMenuItem(
-                            text = { OutlinedText("Spell: Tap = used · Hold = change", fontSize = 8.sp) },
+                            text = { OutlinedText("Spell: Tap = used · Hold = change", color = GuideText, fontSize = 8.sp) },
                             onClick = { helpExpanded = false }
                         )
                         DropdownMenuItem(
-                            text = { OutlinedText("Spell: Tap again to cancel cooldown", fontSize = 8.sp) },
+                            text = { OutlinedText("Spell: Tap again to cancel cooldown", color = GuideText, fontSize = 8.sp) },
                             onClick = { helpExpanded = false }
                         )
                         DropdownMenuItem(
-                            text = { OutlinedText("Objective: Tap Turtle / Lord when slain", fontSize = 8.sp) },
+                            text = { OutlinedText("Objective: Tap Turtle / Lord when slain", color = GuideText, fontSize = 8.sp) },
                             onClick = { helpExpanded = false }
                         )
                         DropdownMenuItem(
-                            text = { OutlinedText("Plan: Tap plan name to switch plan", fontSize = 8.sp) },
+                            text = { OutlinedText("Plan: Tap plan name to switch plan", color = GuideText, fontSize = 8.sp) },
                             onClick = { helpExpanded = false }
                         )
                         DropdownMenuItem(
-                            text = { OutlinedText("Expand: Tap + for checklist / vision", fontSize = 8.sp) },
+                            text = { OutlinedText("Expand: Tap + for checklist / vision", color = GuideText, fontSize = 8.sp) },
                             onClick = { helpExpanded = false }
                         )
                     }
