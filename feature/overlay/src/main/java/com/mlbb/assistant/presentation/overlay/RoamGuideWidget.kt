@@ -420,7 +420,7 @@ fun RoamGuideWidget(onBack: () -> Unit) {
                 )
                 if (detailsExpanded) {
                     Text(
-                        "${currentStep.timeLabel.ifBlank { "${formatGameTime(currentStep.startSeconds)}–${formatGameTime(currentStep.endSeconds)}" }}${guide.patch.takeIf(String::isNotBlank)?.let { " · Patch $it" }.orEmpty()}",
+                        "${currentStep.timeLabel.ifBlank { "${formatGameTime(currentStep.startSeconds)}–${formatGameTime(currentStep.endSeconds)}" }}${guide.patch.takeIf(String::isNotBlank)?.let { " · $it" }.orEmpty()}",
                         color = GuideMuted,
                         fontSize = 9.sp
                     )
@@ -449,7 +449,7 @@ fun RoamGuideWidget(onBack: () -> Unit) {
                             previousObjective = null
                         }
                         if (previousObjective != null) {
-                            GuideControl("Undo slain", GuideGold) {
+                            GuideControl("Undo slain", GuideGold, onClick = {
                                 previousObjective?.let { snapshot ->
                                     turtleSlain = snapshot.turtleSlain
                                     lordSlain = snapshot.lordSlain
@@ -457,12 +457,14 @@ fun RoamGuideWidget(onBack: () -> Unit) {
                                     lastSlainWasLord = snapshot.lastSlainWasLord
                                 }
                                 previousObjective = null
-                            }
+                            })
                         }
                         Box {
-                            GuideControl(if (descriptionHidden) "Show text" else "Hide text", GuideMuted) {
-                                hideMenuExpanded = true
-                            }
+                            GuideControl(
+                                if (descriptionHidden) "Show text" else "Hide text",
+                                GuideMuted,
+                                onClick = { hideMenuExpanded = true }
+                            )
                             DropdownMenu(
                                 expanded = hideMenuExpanded,
                                 onDismissRequest = { hideMenuExpanded = false }
