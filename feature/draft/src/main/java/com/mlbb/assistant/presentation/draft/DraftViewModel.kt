@@ -17,6 +17,8 @@ import com.mlbb.assistant.domain.usecase.SaveDraftSessionUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -27,23 +29,27 @@ import javax.inject.Inject
 
 @HiltViewModel
 class DraftViewModel @Inject constructor(
-    private val getHeroesUseCase:      GetHeroesUseCase,
+    private val getHeroesUseCase: GetHeroesUseCase,
     private val getSuggestionsUseCase: GetSuggestionsUseCase,
     private val saveDraftSessionUseCase: SaveDraftSessionUseCase,
-    private val draftSessionManager:   DraftSessionManager,
-    private val preferencesDataStore:  PreferencesDataStore,
-    private val heroPoolDao:           HeroPoolDao
+    private val draftSessionManager: DraftSessionManager,
+    private val preferencesDataStore: PreferencesDataStore,
+    private val heroPoolDao: HeroPoolDao
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(DraftState())
     val state: StateFlow<DraftState> = _state.asStateFlow()
 
-    private var allHeroes:     List<Hero> = emptyList()
-    private var currentWeights            = ScoreWeights.DEFAULT
+    private var allHeroes: List<Hero> = emptyList()
+    private var currentWeights = ScoreWeights.DEFAULT
     private var poolMap: Map<Int, Proficiency> = emptyMap()
-    private var heroCollectJob: Job?      = null
-    private var suggestionsJob: Job?      = null
-    private var didSaveSession            = false
+    private var heroCollectJob: Job? = null
+    private var suggestionsJob: Job? = null
+    private var didSaveSession = false
+
+    // Accessed by refreshSuggestions callers and scoring jobs on different dispatchers.
+    private val suggestionsLock = Any()
+    private var suggestionGeneration = 0L
 
     init {
         loadHeroes()
@@ -52,9 +58,9 @@ class DraftViewModel @Inject constructor(
             draftSessionManager.session.collect { session ->
                 _state.update { s ->
                     s.copy(
-                        allies    = session.ourPickedHeroes,
-                        enemies   = session.enemyPickedHeroes,
-                        bans      = session.allBannedHeroes,
+                        allies = session.ourPickedHeroes,
+                        enemies = session.enemyPickedHeroes,
+                        bans = session.allBannedHeroes,
                         isLoading = false
                     )
                 }
@@ -78,8 +84,11 @@ class DraftViewModel @Inject constructor(
         heroCollectJob = viewModelScope.launch {
             _state.update { it.copy(isLoading = true) }
             getHeroesUseCase().collect { heroes ->
-                allHeroes = heroes
+                allHeroes = heroes.toList()
                 _state.update { it.copy(isLoading = false) }
+                // Session may have emitted before the hero flow; refresh here so
+                // recommendations are populated as soon as the hero corpus arrives.
+                refreshSuggestions(draftSessionManager.session.value)
             }
         }
     }
@@ -87,8 +96,7 @@ class DraftViewModel @Inject constructor(
     /**
      * Observes the user's scoring configuration so in-app recommendations match
      * what they tuned in Settings (weights) and the Hero Pool screen (personal
-     * pool). [PreferencesDataStore.scoreWeightsFlow] always emits a normalised,
-     * sum-to-1.0 [ScoreWeights], so no validation is needed here.
+     * pool). [PreferencesDataStore.scoreWeightsFlow] emits normalised weights.
      */
     private fun observeScoringConfig() {
         viewModelScope.launch {
@@ -106,20 +114,35 @@ class DraftViewModel @Inject constructor(
     }
 
     private fun refreshSuggestions(session: DraftSession) {
-        suggestionsJob?.cancel()
-        suggestionsJob = viewModelScope.launch(Dispatchers.Default) {
-            val scored = getSuggestionsUseCase(allHeroes, session, currentWeights, poolMap)
-            val warnings = CompositionAnalyzer.getCounterPickWarnings(
-                ourPicks   = session.ourPickedHeroes,
-                enemyPicks = session.enemyPickedHeroes
-            )
-            _state.update { it.copy(suggestions = scored, counterPickWarnings = warnings) }
+        val request: Long
+        val heroesSnapshot: List<Hero>
+        val weightsSnapshot: ScoreWeights
+        val poolSnapshot: Map<Int, Proficiency>
+        synchronized(suggestionsLock) {
+            request = ++suggestionGeneration
+            heroesSnapshot = allHeroes.toList()
+            weightsSnapshot = currentWeights
+            poolSnapshot = poolMap.toMap()
+            suggestionsJob?.cancel()
+            suggestionsJob = viewModelScope.launch(Dispatchers.Default) {
+                val scored = getSuggestionsUseCase(heroesSnapshot, session, weightsSnapshot, poolSnapshot)
+                val warnings = CompositionAnalyzer.getCounterPickWarnings(
+                    ourPicks = session.ourPickedHeroes,
+                    enemyPicks = session.enemyPickedHeroes
+                )
+                currentCoroutineContext().ensureActive()
+                synchronized(suggestionsLock) {
+                    // A cancelled or superseded computation must not overwrite newer UI state.
+                    if (request == suggestionGeneration) {
+                        _state.update { it.copy(suggestions = scored, counterPickWarnings = warnings) }
+                    }
+                }
+            }
         }
     }
 
     private fun saveSession(session: DraftSession) {
         // SaveDraftSessionUseCase owns dispatcher selection (withContext(Dispatchers.IO) inside).
-        // The ViewModel does not need to specify a dispatcher here.
         viewModelScope.launch {
             val rowId = saveDraftSessionUseCase(session)
             if (rowId >= 0) {
