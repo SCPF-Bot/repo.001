@@ -543,7 +543,9 @@ fun RoamGuideWidget(onBack: () -> Unit) {
             }
 
             // V8 FIX (4): Description ALWAYS visible — no hide toggle to trap you.
-            {
+            // V8 FIX (9): Bare brace block REMOVED — it was parsed as a trailing lambda
+            // to the header Row, so everything after it lost @Composable context.
+            // Description + details are now direct children of the Column.
                 // V7 FIX (3): Call-out REMOVED. Show FULL description directly.
                 // Old: "Setup · Guard buff, don't feed — Buy Roam boots..."
                 // Now: full turtle/lordContest or step description, e.g.
@@ -622,7 +624,6 @@ fun RoamGuideWidget(onBack: () -> Unit) {
                 }
                 // V7 FIX (2): Separate 4dp progress bar DELETED — now timer background.
                 // No extra bar below description.
-            }
         }
 
         // The spell cooldown panel is its own composable/file so it can be changed
