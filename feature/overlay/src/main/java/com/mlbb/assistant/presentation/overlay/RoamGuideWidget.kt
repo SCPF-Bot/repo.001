@@ -1,28 +1,18 @@
 package com.mlbb.assistant.presentation.overlay
 
 import android.content.Context
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.gestures.detectDragGestures
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -33,375 +23,268 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Shadow
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.text.withStyle
-import androidx.compose.ui.unit.TextUnit
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import kotlin.math.roundToInt
 import kotlinx.coroutines.delay
 import org.json.JSONArray
 import org.json.JSONObject
 
-private val GithubCanvas = Color(0xFF0D1117)
-private val GithubSurface = Color(0xFF161B22)
-private val GithubBorder = Color(0xFF30363D)
-private val GithubAccent = Color(0xFF58A6FF)
-private val GithubText = Color(0xFFC9D1D9)
-private val GithubMuted = Color(0xFF8B949E)
-private val GithubGold = Color(0xFFE3B341)
-private val GithubGreen = Color(0xFF3FB950)
-private val GithubRed = Color(0xFFF85149)
+private val GuideBackground = Color(0xE60D1117)
+private val GuideSurface = Color(0xCC161B22)
+private val GuideBorder = Color(0xFF30363D)
+private val GuideAccent = Color(0xFF58A6FF)
+private val GuideText = Color(0xFFC9D1D9)
+private val GuideMuted = Color(0xFF8B949E)
+private val GuideGold = Color(0xFFE3B341)
+private val GuideGreen = Color(0xFF3FB950)
+private val GuideRed = Color(0xFFF85149)
 private const val ROAM_GUIDE_ASSET = "roam_guide.json"
-// OPACITY - per request 2026-11-18 (see screenshot):
-// Main widget area (objective, game timer, Turtle/Lord pill, roam type, description) = 45% opaque (55% see-through) - changed 65% -> 45% per request
-// Spell tracker buttons = 15% opaque (85% transparent) - stays faint so it never blocks fight view
-// Pickers (roam type / spell) are temporary popups = 95% opaque so text stays readable over game
-private const val WIDGET_ALPHA = 0.45f // 45% opaque - main widget (was 65%)
-private const val MAIN_ALPHA = 0.45f // 45% - Area 1 only, Area 2 stays 15%
-private const val PICKER_ALPHA = 0.95f
-private const val ENEMY_SPELL_ALPHA = 0.15f // 15% opaque - spell tracker only
 
-// ENEMY BATTLE SPELL TRACKER - v3.2 - Season 42, Patch 2.2.16, Liquipedia ledger
-// Tap = enemy used spell -> start CD bar (empty -> full). Tap again on CD = cancel (fix mis-tap).
-// Long-press = switch spell (e.g. Flicker -> Revitalize). Defaults: JG = Retribution, EXP/MID/GOLD/ROAM = Flicker.
-private data class BattleSpell(val name: String, val cooldown: Int)
-private val BATTLE_SPELLS = listOf(
-    BattleSpell("Flicker", 120),
-    BattleSpell("Retribution", 35),
-    BattleSpell("Purify", 90),
-    BattleSpell("Sprint", 100),
-    BattleSpell("Execute", 90),
-    BattleSpell("Petrify", 75),
-    BattleSpell("Inspire", 75),
-    BattleSpell("Aegis", 75),
-    BattleSpell("Vengeance", 75),
-    BattleSpell("Flameshot", 50),
-    BattleSpell("Arrival", 75),
-    BattleSpell("Revitalize", 75)
+private data class RoamStep(
+    val startSeconds: Int,
+    val endSeconds: Int,
+    val description: String,
+    val timeLabel: String,
+    val phase: String,
+    val callout: String,
+    val checklist: List<String>,
+    val vision: String,
+    val decision: String,
+    val dont: String
 )
-private data class EnemySpellTracker(val lane: String, val spell: BattleSpell, val usedAt: Int?)
-private fun defaultEnemySpells(): List<EnemySpellTracker> {
-    val flicker = BATTLE_SPELLS.first { it.name == "Flicker" }
-    val retri = BATTLE_SPELLS.first { it.name == "Retribution" }
-    return listOf(
-        EnemySpellTracker("EXP", flicker, null),
-        EnemySpellTracker("JG", retri, null),
-        EnemySpellTracker("MID", flicker, null),
-        EnemySpellTracker("GOLD", flicker, null),
-        EnemySpellTracker("ROAM", flicker, null)
-    )
-}
 
-// DYNAMIC TURTLE / LORD + VERIFIED IN-GAME ROAM TYPES - v3.2 - ENEMY SPELL TRACKER: 5 bottom buttons EXP/JG/MID/GOLD/ROAM, 85% transparent, tap=CD bar, long-press=switch spell
-// Roam types are now the verified in-game Hero Specialty tags, not guide archetypes:
-// Crowd Control (AoE, controls many), Initiator (starts fight, comeback), Charge (dash fast in),
-// Control (guaranteed single lock), Support/Guard (save allies), Heal/Regen (regenerate HP).
-// Old mapping: Engage->Crowd Control, Pickoff->Control, Healer->Heal, Utility->Support, Damage->Charge, + NEW Initiator.
-// Widget loads roles dynamically from roam_guide.json, so no code change needed for new types - just JSON.
-// Verified timers - Season 42, patch 2.2.16a:
-// Turtle: first 2:00 exactly, respawn 120s after slain, max 3 per game.
-//   No new Turtle if last Turtle slain after 6:00 (360s).
-//   If not slain by 8:00 (480s) and no damage for 5s, Turtle turns into Lord after 5s, delayed up to 9:00.
-//   Rewards: 60/70/80 gold per hero for 1st/2nd/3rd + EXP + 120s shield. Last-hit: heal + self-repair shield.
-// Lord: first Lord is NOT fixed - exactly 120s after last Turtle slain. Ex: Turtle slain 7:45 -> Lord 9:45.
-//   If you never tap, widget falls back to 8:00.
-//   After Lord slain 8:00-18:00: respawn 180s. After 18:00: respawn 120s. Evolves at 18:00.
-// Pill: [00:00 | Plan | Turtle 2 in 01:23 | expand | X] when countdown
-//       [00:00 | Plan | Turtle 2 | expand | X] when alive - TAP pill when slain
-// Tap pill when ALIVE = mark slain, start countdown, description switches to post-objective.
-// When ALIVE, description is dynamic: CONTEST vs TRADE - go Turtle/Lord or rotate elsewhere.
+private data class RoamBlessing(
+    val id: String,
+    val name: String,
+    val effect: String
+)
 
-private data class RoamHero(val name: String, val archetype: String = "", val note: String = "")
-private data class RoamBlessing(val id: String, val name: String, val type: String = "", val effect: String = "", val cooldown: String = "", val unlock: String = "")
-private data class RoamStep(val startSeconds: Int, val endSeconds: Int, val description: String, val timeLabel: String = "", val phase: String = "", val callout: String = "", val checklist: List<String> = emptyList(), val vision: String = "", val decision: String = "", val dont: String = "")
-private data class RoamPlan(val id: String, val label: String, val blessing: String, val blessingId: String = "", val playstyle: String = "", val heroes: List<RoamHero> = emptyList(), val battleSpells: List<String> = emptyList(), val emblem: String = "", val winCondition: String = "", val steps: List<RoamStep> = emptyList(), val turtleContest: String = "", val turtleTrade: String = "", val lordContest: String = "", val lordTrade: String = "")
-private data class RoamMeta(val patch: String = "", val season: String = "")
-private data class RoamGuideData(val meta: RoamMeta = RoamMeta(), val blessings: List<RoamBlessing> = emptyList(), val plans: List<RoamPlan> = emptyList())
+private data class RoamPlan(
+    val id: String,
+    val label: String,
+    val blessing: String,
+    val blessingId: String,
+    val heroes: List<String>,
+    val emblem: String,
+    val steps: List<RoamStep>,
+    val turtleContest: String,
+    val turtleTrade: String,
+    val lordContest: String,
+    val lordTrade: String
+)
+
+private data class RoamGuideData(
+    val patch: String = "",
+    val blessings: List<RoamBlessing> = emptyList(),
+    val plans: List<RoamPlan> = emptyList()
+)
 
 private enum class ObjectiveType { TURTLE, LORD }
+
 private data class ObjectiveStatus(
     val type: ObjectiveType,
     val count: Int,
     val isAlive: Boolean,
-    val secondsUntil: Int,
-    val label: String,
-    val nextSpawnSeconds: Int
+    val secondsUntil: Int
+) {
+    val label: String get() = if (type == ObjectiveType.TURTLE) "Turtle" else "Lord"
+}
+
+private data class ObjectiveSnapshot(
+    val turtleSlain: Int,
+    val lordSlain: Int,
+    val lastSlainAt: Int?,
+    val lastSlainWasLord: Boolean
 )
 
-private fun JSONObject.optStringList(key: String): List<String> {
-    if (!has(key)) return emptyList()
-    val arr = optJSONArray(key) ?: return emptyList()
-    return buildList { for (i in 0 until arr.length()) add(arr.optString(i)) }
-}
-
-private fun parseHeroes(obj: JSONObject): List<RoamHero> {
-    obj.optJSONArray("heroes")?.let { arr ->
-        return buildList {
-            for (i in 0 until arr.length()) {
-                val h = arr.optJSONObject(i) ?: continue
-                add(RoamHero(name = h.optString("name"), archetype = h.optString("archetype"), note = h.optString("note")))
-            }
+private fun JSONObject.stringList(key: String): List<String> {
+    val values = optJSONArray(key) ?: return emptyList()
+    return buildList {
+        for (index in 0 until values.length()) {
+            values.optString(index).takeIf(String::isNotBlank)?.let(::add)
         }
     }
-    if (obj.has("heroes")) {
-        val raw = obj.optString("heroes")
-        if (raw.isNotBlank()) return raw.split(",").mapNotNull { val n = it.trim(); if (n.isEmpty()) null else RoamHero(name = n) }
-    }
-    return emptyList()
 }
 
-private fun parseStep(obj: JSONObject): RoamStep {
-    val merged = obj.optString("instruction").ifBlank { obj.optString("description") }.ifBlank {
-        val o = obj.optString("objective")
-        val d = obj.optString("description")
-        if (o.isNotBlank() && d.isNotBlank()) "$o. $d" else o + d
-    }
+private fun parseStep(json: JSONObject): RoamStep {
+    val description = json.optString("instruction").takeIf(String::isNotBlank)
+        ?: json.optString("description")
     return RoamStep(
-        startSeconds = obj.optInt("startSeconds"),
-        endSeconds = obj.optInt("endSeconds"),
-        description = merged,
-        timeLabel = obj.optString("timeLabel"),
-        phase = obj.optString("phase"),
-        callout = obj.optString("callout").ifBlank { obj.optString("objective") },
-        checklist = obj.optStringList("checklist"),
-        vision = obj.optString("vision"),
-        decision = obj.optString("decision"),
-        dont = obj.optString("dont")
+        startSeconds = json.optInt("startSeconds").coerceAtLeast(0),
+        endSeconds = json.optInt("endSeconds").coerceAtLeast(0),
+        description = description,
+        timeLabel = json.optString("timeLabel"),
+        phase = json.optString("phase"),
+        callout = json.optString("callout").ifBlank { json.optString("objective") },
+        checklist = json.stringList("checklist"),
+        vision = json.optString("vision"),
+        decision = json.optString("decision"),
+        dont = json.optString("dont")
     )
 }
 
-private fun parsePlan(obj: JSONObject): RoamPlan {
-    val stepsJson = obj.optJSONArray("steps") ?: JSONArray()
+private fun parsePlan(json: JSONObject): RoamPlan {
+    val stepArray = json.optJSONArray("steps") ?: JSONArray()
     val steps = buildList {
-        for (i in 0 until stepsJson.length()) {
-            val s = stepsJson.optJSONObject(i) ?: continue
-            add(parseStep(s))
+        for (index in 0 until stepArray.length()) {
+            val step = stepArray.optJSONObject(index) ?: continue
+            add(parseStep(step))
         }
-    }.sortedBy { it.startSeconds }
-    val tmpl = obj.optJSONObject("objective_templates")
+    }.sortedBy(RoamStep::startSeconds)
+    val templates = json.optJSONObject("objective_templates")
+    val heroesArray = json.optJSONArray("heroes")
+    val heroes = if (heroesArray != null) {
+        buildList {
+            for (index in 0 until heroesArray.length()) {
+                val entry = heroesArray.optJSONObject(index)
+                if (entry != null) entry.optString("name").takeIf(String::isNotBlank)?.let(::add)
+                else heroesArray.optString(index).takeIf(String::isNotBlank)?.let(::add)
+            }
+        }
+    } else {
+        json.optString("heroes").split(',').map(String::trim).filter(String::isNotEmpty)
+    }
+
     return RoamPlan(
-        id = obj.optString("id"),
-        label = obj.optString("label"),
-        blessing = obj.optString("blessing"),
-        blessingId = obj.optString("blessing_id"),
-        playstyle = obj.optString("playstyle"),
-        heroes = parseHeroes(obj),
-        battleSpells = obj.optStringList("battle_spells"),
-        emblem = obj.optString("emblem"),
-        winCondition = obj.optString("win_condition"),
+        id = json.optString("id"),
+        label = json.optString("label").ifBlank { json.optString("id") },
+        blessing = json.optString("blessing"),
+        blessingId = json.optString("blessing_id"),
+        heroes = heroes,
+        emblem = json.optString("emblem"),
         steps = steps,
-        turtleContest = tmpl?.optString("turtle_contest").orEmpty(),
-        turtleTrade = tmpl?.optString("turtle_trade").orEmpty(),
-        lordContest = tmpl?.optString("lord_contest").orEmpty(),
-        lordTrade = tmpl?.optString("lord_trade").orEmpty()
+        turtleContest = templates?.optString("turtle_contest").orEmpty(),
+        turtleTrade = templates?.optString("turtle_trade").orEmpty(),
+        lordContest = templates?.optString("lord_contest").orEmpty(),
+        lordTrade = templates?.optString("lord_trade").orEmpty()
     )
 }
 
 private fun loadRoamGuide(context: Context): RoamGuideData = runCatching {
-    val json = context.assets.open(ROAM_GUIDE_ASSET).bufferedReader().use { it.readText() }.trim()
-    if (json.startsWith("{")) {
-        val root = JSONObject(json)
-        val metaObj = root.optJSONObject("meta")
-        val meta = RoamMeta(patch = metaObj?.optString("patch").orEmpty(), season = metaObj?.optString("season").orEmpty())
-        val blessingsArr = root.optJSONArray("blessings") ?: JSONArray()
-        val blessings = buildList {
-            for (i in 0 until blessingsArr.length()) {
-                val b = blessingsArr.optJSONObject(i) ?: continue
-                add(RoamBlessing(id = b.optString("id"), name = b.optString("name"), type = b.optString("type"), effect = b.optString("effect"), cooldown = b.optString("cooldown")))
-            }
+    val source = context.assets.open(ROAM_GUIDE_ASSET).bufferedReader().use { it.readText() }
+    val root = JSONObject(source)
+    val blessingArray = root.optJSONArray("blessings") ?: JSONArray()
+    val blessings = buildList {
+        for (index in 0 until blessingArray.length()) {
+            val blessing = blessingArray.optJSONObject(index) ?: continue
+            add(
+                RoamBlessing(
+                    id = blessing.optString("id"),
+                    name = blessing.optString("name"),
+                    effect = blessing.optString("effect")
+                )
+            )
         }
-        val rolesArr = root.optJSONArray("roles") ?: JSONArray()
-        val plans = buildList {
-            for (i in 0 until rolesArr.length()) {
-                val p = rolesArr.optJSONObject(i) ?: continue
-                val plan = parsePlan(p)
-                if (plan.steps.isNotEmpty()) add(plan)
-            }
-        }
-        RoamGuideData(meta = meta, blessings = blessings, plans = plans)
-    } else {
-        val arr = JSONArray(json)
-        val plans = buildList {
-            for (i in 0 until arr.length()) {
-                val p = arr.optJSONObject(i) ?: continue
-                val plan = parsePlan(p)
-                if (plan.steps.isNotEmpty()) add(plan)
-            }
-        }
-        RoamGuideData(plans = plans)
     }
+    val roles = root.optJSONArray("roles") ?: JSONArray()
+    val plans = buildList {
+        for (index in 0 until roles.length()) {
+            val role = roles.optJSONObject(index) ?: continue
+            parsePlan(role).takeIf { it.steps.isNotEmpty() }?.let(::add)
+        }
+    }
+    RoamGuideData(
+        patch = root.optJSONObject("meta")?.optString("patch").orEmpty(),
+        blessings = blessings,
+        plans = plans
+    )
 }.getOrDefault(RoamGuideData())
 
-private fun formatTime(s: Int): String {
-    val v = s.coerceAtLeast(0)
-    return "%02d:%02d".format(v / 60, v % 60)
+private fun formatGameTime(seconds: Int): String {
+    val safeSeconds = seconds.coerceAtLeast(0)
+    return "%02d:%02d".format(safeSeconds / 60, safeSeconds % 60)
 }
 
-// CORE - dynamic objective state machine. Pure function, easy to test.
-// BUG FIX 2026-11-18: Lord slain early (e.g. 08:11 with only 1 Turtle) showed Lord in 01:39 instead of 02:39.
-// Cause: the elapsed>=480 branch treated ANY lastSlainAt as a Turtle slain and used +120s (Turtle->Lord delay).
-// A Lord slain must use Lord respawn: 180s before 18:00, 120s after 18:00. Fix: check lordSlain>0 FIRST, before any Turtle logic.
-private fun computeObjective(elapsed: Int, turtleSlain: Int, lordSlain: Int, lastSlainAt: Int?): ObjectiveStatus {
-    // LORD ALREADY SLAIN - must come first, regardless of how many Turtles were slain.
-    // Example: Turtle 1 + Lord 1, Lord slain at 08:11 (491s), now 08:32 (512s) -> next Lord 11:11 (671s), in 02:39. NOT 10:11 / 01:39.
+/**
+ * Computes the next objective using game time and manually recorded slain events.
+ * Before the first Turtle kill, the known schedule is used; subsequent objective
+ * respawns are based on the time the player marked the last objective slain.
+ */
+private fun computeObjective(
+    elapsedSeconds: Int,
+    turtleSlain: Int,
+    lordSlain: Int,
+    lastSlainAt: Int?
+): ObjectiveStatus {
     if (lordSlain > 0) {
-        val respawn = if ((lastSlainAt ?: 0) < 1080) 180 else 120
-        val next = (lastSlainAt ?: elapsed) + respawn
-        if (elapsed < next) return ObjectiveStatus(ObjectiveType.LORD, lordSlain + 1, false, next - elapsed, "Lord", next)
-        return ObjectiveStatus(ObjectiveType.LORD, lordSlain + 1, true, 0, "Lord", next)
+        val slainAt = lastSlainAt ?: elapsedSeconds
+        val nextSpawn = slainAt + if (slainAt < 18 * 60) 180 else 120
+        return ObjectiveStatus(
+            type = ObjectiveType.LORD,
+            count = lordSlain + 1,
+            isAlive = elapsedSeconds >= nextSpawn,
+            secondsUntil = (nextSpawn - elapsedSeconds).coerceAtLeast(0)
+        )
     }
-    // NO LORD SLAIN YET - remaining logic is Turtle -> Lord.
-    // LORD PHASE - already slain 3 Turtles, no Lord yet
-    if (turtleSlain >= 3) {
-        val lordSpawn = (lastSlainAt ?: 480) + 120
-        if (elapsed < lordSpawn) return ObjectiveStatus(ObjectiveType.LORD, 1, false, lordSpawn - elapsed, "Lord", lordSpawn)
-        return ObjectiveStatus(ObjectiveType.LORD, 1, true, 0, "Lord", lordSpawn)
+
+    if (elapsedSeconds < 2 * 60 && turtleSlain == 0) {
+        return ObjectiveStatus(ObjectiveType.TURTLE, 1, false, 2 * 60 - elapsedSeconds)
     }
-    // TURTLE PHASE, but past 8:00 - Turtle auto-converts to Lord, or last Turtle -> Lord in 120s
-    // Here lastSlainAt is guaranteed to be a Turtle slain (lordSlain==0 checked above), so +120 is correct.
-    if (elapsed >= 480) {
-        if (lastSlainAt != null) {
-            val lordSpawn = lastSlainAt + 120
-            if (elapsed < lordSpawn) return ObjectiveStatus(ObjectiveType.LORD, 1, false, lordSpawn - elapsed, "Lord", lordSpawn)
-            return ObjectiveStatus(ObjectiveType.LORD, 1, true, 0, "Lord", lordSpawn)
-        }
-        return ObjectiveStatus(ObjectiveType.LORD, 1, true, 0, "Lord", 480)
+
+    if (elapsedSeconds >= 8 * 60 || turtleSlain >= 3 || (lastSlainAt ?: 0) > 6 * 60) {
+        val lordSpawn = (lastSlainAt?.plus(120) ?: 8 * 60)
+        return ObjectiveStatus(
+            type = ObjectiveType.LORD,
+            count = 1,
+            isAlive = elapsedSeconds >= lordSpawn,
+            secondsUntil = (lordSpawn - elapsedSeconds).coerceAtLeast(0)
+        )
     }
-    // TURTLE PHASE, before 8:00
-    if (lastSlainAt == null) {
-        if (elapsed < 120) return ObjectiveStatus(ObjectiveType.TURTLE, 1, false, 120 - elapsed, "Turtle", 120)
-        return ObjectiveStatus(ObjectiveType.TURTLE, 1, true, 0, "Turtle", 120)
+
+    val nextTurtle = lastSlainAt?.plus(120) ?: 2 * 60
+    if (nextTurtle >= 8 * 60) {
+        return ObjectiveStatus(
+            type = ObjectiveType.LORD,
+            count = 1,
+            isAlive = elapsedSeconds >= 8 * 60,
+            secondsUntil = (8 * 60 - elapsedSeconds).coerceAtLeast(0)
+        )
     }
-    // A Turtle was slain before
-    if (lastSlainAt > 360) {
-        // No new Turtle after 6:00 - next is Lord
-        val lordSpawn = lastSlainAt + 120
-        if (elapsed < lordSpawn) return ObjectiveStatus(ObjectiveType.LORD, 1, false, lordSpawn - elapsed, "Lord", lordSpawn)
-        return ObjectiveStatus(ObjectiveType.LORD, 1, true, 0, "Lord", lordSpawn)
-    }
-    val nextTurtle = lastSlainAt + 120
-    if (elapsed < nextTurtle) return ObjectiveStatus(ObjectiveType.TURTLE, turtleSlain + 1, false, nextTurtle - elapsed, "Turtle", nextTurtle)
-    if (nextTurtle >= 480) return ObjectiveStatus(ObjectiveType.LORD, 1, true, 0, "Lord", 480)
-    return ObjectiveStatus(ObjectiveType.TURTLE, turtleSlain + 1, true, 0, "Turtle", nextTurtle)
+    return ObjectiveStatus(
+        type = ObjectiveType.TURTLE,
+        count = turtleSlain + 1,
+        isAlive = elapsedSeconds >= nextTurtle,
+        secondsUntil = (nextTurtle - elapsedSeconds).coerceAtLeast(0)
+    )
 }
 
-@Composable
-private fun OutlinedText(text: String, color: Color, modifier: Modifier = Modifier, fontSize: TextUnit = 9.sp, fontWeight: FontWeight? = null, maxLines: Int = Int.MAX_VALUE, lineHeight: TextUnit = 11.sp, overflow: TextOverflow = TextOverflow.Visible) {
-    Box(modifier = modifier) {
-        Text(text = text, color = Color.Black, maxLines = maxLines, overflow = overflow, style = TextStyle(fontSize = fontSize, fontWeight = fontWeight, lineHeight = lineHeight, drawStyle = Stroke(width = 3f), shadow = Shadow(color = Color.Black, offset = Offset.Zero, blurRadius = 1f)))
-        Text(text = text, color = color, maxLines = maxLines, overflow = overflow, style = TextStyle(fontSize = fontSize, fontWeight = fontWeight, lineHeight = lineHeight, shadow = Shadow(color = Color.Black, offset = Offset.Zero, blurRadius = 1f)))
-    }
-}
-
-@Composable
-private fun MergedInstructionText(phase: String, callout: String, description: String, maxLines: Int = Int.MAX_VALUE) {
-    val colored: AnnotatedString = buildAnnotatedString {
-        if (phase.isNotBlank()) {
-            withStyle(style = SpanStyle(color = GithubMuted, fontWeight = FontWeight.Bold, fontSize = 8.sp)) {
-                append(phase)
-                append(" - ")
-            }
-        }
-        withStyle(style = SpanStyle(color = GithubGold, fontWeight = FontWeight.Bold, fontSize = 9.sp)) {
-            append(callout)
-        }
-        if (description.isNotBlank()) {
-            withStyle(style = SpanStyle(color = GithubMuted, fontSize = 9.sp)) {
-                append(" - ")
-            }
-            withStyle(style = SpanStyle(color = GithubText, fontSize = 9.sp)) {
-                append(description)
-            }
-        }
-    }
-    val blackOutline: AnnotatedString = buildAnnotatedString {
-        if (phase.isNotBlank()) {
-            withStyle(style = SpanStyle(color = Color.Black, fontWeight = FontWeight.Bold, fontSize = 8.sp)) {
-                append(phase)
-                append(" - ")
-            }
-        }
-        withStyle(style = SpanStyle(color = Color.Black, fontWeight = FontWeight.Bold, fontSize = 9.sp)) {
-            append(callout)
-        }
-        if (description.isNotBlank()) {
-            withStyle(style = SpanStyle(color = Color.Black, fontSize = 9.sp)) {
-                append(" - ")
-            }
-            withStyle(style = SpanStyle(color = Color.Black, fontSize = 9.sp)) {
-                append(description)
-            }
-        }
-    }
-    Box(modifier = Modifier.fillMaxWidth().wrapContentHeight()) {
-        Text(text = blackOutline, maxLines = maxLines, overflow = TextOverflow.Visible, style = TextStyle(lineHeight = 11.sp, drawStyle = Stroke(width = 3f), shadow = Shadow(color = Color.Black, offset = Offset.Zero, blurRadius = 1f)))
-        Text(text = colored, maxLines = maxLines, overflow = TextOverflow.Visible, style = TextStyle(lineHeight = 11.sp, shadow = Shadow(color = Color.Black, offset = Offset.Zero, blurRadius = 1f)))
-    }
-}
-
-@Composable
-fun RoamGuideBubble(onTap: () -> Unit) {
-    Box(modifier = Modifier.width(56.dp).height(56.dp).clip(CircleShape).background(GithubSurface).border(2.dp, GithubAccent, CircleShape).clickable(onClick = onTap), contentAlignment = Alignment.Center) {
-        OutlinedText("R", GithubAccent, fontSize = 20.sp, fontWeight = FontWeight.Black)
-    }
-}
-
-@OptIn(ExperimentalFoundationApi::class)
+/**
+ * Compact roam macro guide for use over the game screen. The content width is
+ * explicitly bounded because the host overlay window is WRAP_CONTENT; relying on
+ * fillMaxWidth alone made long instruction lines size/clamp unpredictably.
+ */
 @Composable
 fun RoamGuideWidget(onBack: () -> Unit) {
     val context = LocalContext.current
-    val config = LocalConfiguration.current
-    // 1. WIDTH FIX - was width(0.62 * screen) then claimed 0.96, but still looked same in your screenshot.
-    // Why: inner Column used fixed width(widgetWidth) inside a WRAP_CONTENT overlay window, so it was clipped.
-    // Now: NO fixed widgetWidth. Outer Column uses fillMaxWidth() + 4dp side padding = edge-to-edge.
-    // That is +1/3 longer than the 62% you saw (62% * 4/3 = 82.7%) and actually reaches the edges.
-    // In your Activity / WindowManager, set LayoutParams width = MATCH_PARENT so fillMaxWidth can stretch.
-    val isLandscape = config.screenWidthDp > config.screenHeightDp
+    val configuration = LocalConfiguration.current
     val guide = remember(context) { loadRoamGuide(context) }
     val plans = guide.plans
-    var selectedPlanId by remember { mutableStateOf(plans.firstOrNull()?.id.orEmpty()) }
-    var elapsedSeconds by remember { mutableIntStateOf(0) }
-    var isRunning by remember { mutableStateOf(false) }
+    var selectedPlanId by rememberSaveable { mutableStateOf(plans.firstOrNull()?.id.orEmpty()) }
+    var elapsedSeconds by rememberSaveable { mutableIntStateOf(0) }
+    var isRunning by rememberSaveable { mutableStateOf(false) }
     var planMenuExpanded by remember { mutableStateOf(false) }
-    var isExpanded by remember { mutableStateOf(false) }
-    // 2. HIDE = SELECTION BOX with On / Off - NOT a Hide button.
-    // Off = show description + callout (default). On = hide description + callout only, top row stays.
-    var hideSelection by remember { mutableStateOf("Off") }
+    var detailsExpanded by rememberSaveable { mutableStateOf(false) }
+    var descriptionHidden by rememberSaveable { mutableStateOf(false) }
     var hideMenuExpanded by remember { mutableStateOf(false) }
-    val isMainHidden = hideSelection == "On"
-    // 4. DRAG - whole widget moves. There was NO drag code before, so every touch was a click.
-    // dragOffset moves the widget, isDragging dims it slightly while dragging so you know it grabbed.
-    var dragOffset by remember { mutableStateOf(Offset.Zero) }
-    var isDragging by remember { mutableStateOf(false) }
-    // DYNAMIC OBJECTIVE STATE - survives plan switch, resets with game Reset
-    var turtleSlain by remember { mutableIntStateOf(0) }
-    var lordSlain by remember { mutableIntStateOf(0) }
-    var lastSlainAt by remember { mutableStateOf<Int?>(null) }
-    // For undo: keep last action
-    var lastAction by remember { mutableStateOf<String?>(null) }
-    // ENEMY SPELL TRACKER - 5 lanes, survives plan switch, resets with game Reset
-    var enemySpells by remember { mutableStateOf(defaultEnemySpells()) }
-    var spellPickerLane by remember { mutableStateOf<String?>(null) }
+    var turtleSlain by rememberSaveable { mutableIntStateOf(0) }
+    var lordSlain by rememberSaveable { mutableIntStateOf(0) }
+    var lastSlainAt by rememberSaveable { mutableStateOf<Int?>(null) }
+    var lastSlainWasLord by rememberSaveable { mutableStateOf(false) }
+    var previousObjective by remember { mutableStateOf<ObjectiveSnapshot?>(null) }
 
     val selectedPlan = plans.firstOrNull { it.id == selectedPlanId } ?: plans.firstOrNull()
-
     LaunchedEffect(isRunning) {
         while (isRunning) {
             delay(1_000L)
@@ -409,318 +292,271 @@ fun RoamGuideWidget(onBack: () -> Unit) {
         }
     }
 
-    val currentStep = selectedPlan?.steps?.firstOrNull { elapsedSeconds >= it.startSeconds && elapsedSeconds < it.endSeconds } ?: selectedPlan?.steps?.lastOrNull()
-    val blessingDetail = guide.blessings.firstOrNull { it.id == selectedPlan?.blessingId || it.name.equals(selectedPlan?.blessing?.split("/")?.firstOrNull()?.trim(), ignoreCase = true) }
-
-    // Compute objective every second from elapsed + taps
+    val currentStep = selectedPlan?.steps?.firstOrNull {
+        elapsedSeconds >= it.startSeconds && elapsedSeconds < it.endSeconds
+    } ?: selectedPlan?.steps?.lastOrNull()
     val objective = computeObjective(elapsedSeconds, turtleSlain, lordSlain, lastSlainAt)
-
-    // DYNAMIC DESCRIPTION - if Turtle/Lord is ALIVE, override static description with CONTEST vs TRADE
-    val isObjectiveAlive = objective.isAlive
-    val contestText = if (objective.type == ObjectiveType.TURTLE) selectedPlan?.turtleContest.orEmpty() else selectedPlan?.lordContest.orEmpty()
-    val tradeText = if (objective.type == ObjectiveType.TURTLE) selectedPlan?.turtleTrade.orEmpty() else selectedPlan?.lordTrade.orEmpty()
-    // BUG FIX: when objective is on countdown (slain), collapsed must NOT show the step's pre-objective text
-    // e.g. after Lord slain at 08:11, it showed "Get vision at Lord, need more players - Lord appears at 8:00" even though Lord is dead.
-    // Now it shows "Lord slain - Next in 02:39" + "Lord slain. Next in 02:39. Push / farm / vision."
-    val dynamicCallout = if (isObjectiveAlive) {
-        "${objective.label} ${if (objective.type == ObjectiveType.TURTLE) objective.count else ""} UP".trim()
-    } else if (lastSlainAt != null) {
-        "${objective.label} slain - Next in ${formatTime(objective.secondsUntil)}"
+    val isTurtle = objective.type == ObjectiveType.TURTLE
+    val objectiveText = if (objective.isAlive) {
+        if (isTurtle) "Turtle ${objective.count} UP" else "Lord UP"
     } else {
-        currentStep?.callout.orEmpty()
+        "${objective.label} in ${formatGameTime(objective.secondsUntil)}"
     }
-    // BRIEF - Epic/Grandmaster: short commands, no baby-talk. JSON templates now ~40-70 chars (was ~90-115).
-    // Alive: "CONTEST: ... / TRADE: ..." ( / instead of OR saves space, fits 96% width on 1-2 lines)
-    // Slain: "Turtle slain. Next in 02:00. Push / farm / vision." (was "...slain at 08:11. Next Turtle in 02:00 at 10:11. Use this time to...")
-    val dynamicDescription = if (isObjectiveAlive) {
-        "CONTEST: $contestText / TRADE: $tradeText"
-    } else if (lastSlainAt != null) {
-        "${objective.label} slain. Next in ${formatTime(objective.secondsUntil)}. Push / farm / vision."
-    } else {
-        currentStep?.description.orEmpty()
+    val objectiveColor = when {
+        objective.isAlive && isTurtle -> GuideGold
+        objective.isAlive -> GuideRed
+        isTurtle -> GuideGold
+        else -> GuideRed
     }
-    // Pill text per spec: countdown = "Turtle 2 in 01:23", alive = "Turtle 2" / "Lord"
-    val pillText = if (objective.isAlive) {
-        if (objective.type == ObjectiveType.TURTLE) "Turtle ${objective.count}" else "Lord"
-    } else {
-        if (objective.type == ObjectiveType.TURTLE) "Turtle ${objective.count} in ${formatTime(objective.secondsUntil)}" else "Lord in ${formatTime(objective.secondsUntil)}"
+    val objectiveDescription = when {
+        objective.isAlive && isTurtle -> selectedPlan?.turtleContest.orEmpty()
+        objective.isAlive -> selectedPlan?.lordContest.orEmpty()
+        lastSlainAt != null -> "${objective.label} slain. Next in ${formatGameTime(objective.secondsUntil)}. Push, farm, or reset."
+        else -> currentStep?.description.orEmpty()
     }
-    val pillBg = when {
-        objective.isAlive && objective.type == ObjectiveType.TURTLE -> GithubGold
-        objective.isAlive && objective.type == ObjectiveType.LORD -> GithubRed
-        else -> GithubSurface
-    }
-    val pillTextColor = when {
-        objective.isAlive && objective.type == ObjectiveType.TURTLE -> Color.Black
-        objective.isAlive && objective.type == ObjectiveType.LORD -> Color.White
-        objective.type == ObjectiveType.TURTLE -> GithubGold
-        else -> GithubRed
+    val screenWidthDp = configuration.screenWidthDp
+    val isLandscape = configuration.screenWidthDp > configuration.screenHeightDp
+    val widthFraction = if (isLandscape) 0.62f else 0.98f
+    val widgetWidth = (screenWidthDp * widthFraction).coerceAtLeast(280f).coerceAtMost(screenWidthDp.toFloat())
+    val blessing = guide.blessings.firstOrNull {
+        it.id == selectedPlan?.blessingId ||
+            it.name.equals(selectedPlan?.blessing?.substringBefore('/')?.trim(), ignoreCase = true)
     }
 
-    // SPLIT INTO 2 AREAS (fix: spell tracker was INSIDE 65% box, so 45% + 15% stacked = ~70% opaque, looked dark in screenshot)
-    // Outer = TRANSPARENT wrapper, no background, no border - just holds the 2 areas with 4dp gap.
-    // AREA 1 = Main widget (objective, timer, Turtle/Lord, description) = 45% opaque, own background + border.
-    // AREA 2 = Spell tracker = SEPARATE, NO background, NO border - only the 5 buttons themselves are 15% opaque.
-    // So tracker no longer inherits the 65% - it stays truly faint over the game.
-    // DRAG ROOT: drag anywhere on widget background to move it. Tap vs drag is split by touch slop:
-    // tap (no move) = button click, drag (move past slop) = move widget. Buttons still work.
-    Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp).offset { IntOffset(dragOffset.x.roundToInt(), dragOffset.y.roundToInt()) }.pointerInput(Unit) {
-        detectDragGestures(
-            onDragStart = { isDragging = true; hideMenuExpanded = false; planMenuExpanded = false },
-            onDragEnd = { isDragging = false },
-            onDragCancel = { isDragging = false },
-            onDrag = { change, dragAmount ->
-                change.consume()
-                val maxX = config.screenWidthDp * 0.6f
-                val maxY = config.screenHeightDp * 0.8f
-                dragOffset = Offset(
-                    (dragOffset.x + dragAmount.x).coerceIn(-maxX, maxX),
-                    (dragOffset.y + dragAmount.y).coerceIn(0f, maxY)
-                )
-            }
-        )
-    }.wrapContentHeight(), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        if (plans.isEmpty() || selectedPlan == null || currentStep == null) {
-            Column(modifier = Modifier.fillMaxWidth().wrapContentHeight().background(GithubCanvas.copy(alpha = MAIN_ALPHA), RoundedCornerShape(6.dp)).border(1.dp, GithubBorder.copy(alpha = 0.8f), RoundedCornerShape(6.dp)).clip(RoundedCornerShape(6.dp)).padding(horizontal = 5.dp, vertical = 2.dp)) {
-                OutlinedText("Roam guide unavailable", GithubText, fontSize = 9.sp)
-            }
+    Column(
+        modifier = Modifier
+            .width(widgetWidth.dp)
+            .padding(horizontal = 4.dp),
+        verticalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+        if (selectedPlan == null || currentStep == null) {
+            GuideMessage("Roam guide unavailable — check roam_guide.json")
             return@Column
         }
-        // ===== AREA 1 - MAIN WIDGET - 45% opaque - TOP ROW ALWAYS STAYS =====
-        // Hide (On) hides ONLY description + callout + expanded detail, NOT top row.
-        // Top row (timer, roam, Turtle/Lord pill, expand, Hide box, X) ALWAYS stays.
-        // When Hide=On: Area 1 = top row only, then Area 2 (spell tracker) directly below.
-        Column(modifier = Modifier.fillMaxWidth().wrapContentHeight().background(GithubCanvas.copy(alpha = MAIN_ALPHA), RoundedCornerShape(6.dp)).border(1.dp, GithubBorder.copy(alpha = 0.8f), RoundedCornerShape(6.dp)).clip(RoundedCornerShape(6.dp)).padding(horizontal = 5.dp, vertical = 2.dp)) {
 
-        // ROW 1 - TOP: drag grip + timer + plan + DYNAMIC TURTLE/LORD PILL + expand + Hide box + X
-        // DRAG GRIP: the ⠿ handle is the clearest drag target - grab it and move. Whole widget background also drags (see outer Column).
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp), verticalAlignment = Alignment.CenterVertically) {
-            Box(modifier = Modifier.size(22.dp).clip(RoundedCornerShape(5.dp)).background(GithubSurface.copy(alpha = MAIN_ALPHA)).border(1.dp, GithubBorder.copy(alpha = 0.8f), RoundedCornerShape(5.dp)), contentAlignment = Alignment.Center) {
-                Text(text = "⠿", color = if (isDragging) GithubGold else GithubMuted, fontSize = 12.sp, fontWeight = FontWeight.Bold)
-            }
-            Row(modifier = Modifier.clip(RoundedCornerShape(5.dp)).background(GithubSurface.copy(alpha = WIDGET_ALPHA)).border(1.dp, GithubBorder.copy(alpha = 0.8f), RoundedCornerShape(5.dp)).clickable { isRunning = !isRunning }.padding(horizontal = 6.dp, vertical = 3.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(3.dp)) {
-                OutlinedText(formatTime(elapsedSeconds), GithubText, fontSize = 14.sp, fontWeight = FontWeight.Black)
-                OutlinedText(if (isRunning) "II" else "▶", GithubAccent, fontSize = 9.sp, fontWeight = FontWeight.Bold)
-            }
-            Box(modifier = Modifier.weight(1f)) {
-                // TOP BAR shows SHORT label only: "Crowd Control" not "Crowd Control - Setter" - saves ~40% width, no "Crowd Cont" truncation
-                Row(modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(5.dp)).background(GithubSurface.copy(alpha = MAIN_ALPHA)).border(1.dp, GithubBorder.copy(alpha = 0.8f), RoundedCornerShape(5.dp)).clickable { planMenuExpanded = true }.padding(horizontal = 6.dp, vertical = 4.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
-                    OutlinedText(selectedPlan.label.substringBefore(" - ").trim(), GithubAccent, fontSize = 10.sp, fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                    OutlinedText("▾", GithubMuted, fontSize = 10.sp)
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(GuideBackground, RoundedCornerShape(8.dp))
+                .border(1.dp, GuideBorder, RoundedCornerShape(8.dp))
+                .padding(6.dp),
+            verticalArrangement = Arrangement.spacedBy(5.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(5.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                GuideControl(formatGameTime(elapsedSeconds), GuideText, Modifier.width(58.dp))
+                GuideControl(if (isRunning) "Ⅱ" else "▶", GuideAccent) {
+                    isRunning = !isRunning && elapsedSeconds < 18 * 60
                 }
-                // ROAM TYPE PICKER - COMPACT 2-COLUMN GRID (was 1-col 6-row tall list)
-                // 6 types -> 3 rows x 2 cols, 30dp per cell, total ~98dp tall (was ~216dp). Short + suffix on 2 lines.
-                DropdownMenu(expanded = planMenuExpanded, onDismissRequest = { planMenuExpanded = false }, modifier = Modifier.width(240.dp).background(GithubSurface.copy(alpha = PICKER_ALPHA)).heightIn(max = 130.dp)) {
-                    Column(modifier = Modifier.padding(4.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                        plans.chunked(2).forEach { rowPlans ->
-                            Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                                rowPlans.forEach { plan ->
-                                    val isSel = plan.id == selectedPlan.id
-                                    val short = plan.label.substringBefore(" - ").trim()
-                                    val suffix = plan.label.substringAfter(" - ", "").trim()
-                                    Box(modifier = Modifier.weight(1f).height(30.dp).clip(RoundedCornerShape(5.dp)).background(if (isSel) GithubGold.copy(alpha = 0.25f) else GithubSurface).border(1.dp, if (isSel) GithubGold else GithubBorder, RoundedCornerShape(5.dp)).clickable { selectedPlanId = plan.id; planMenuExpanded = false }.padding(horizontal = 4.dp, vertical = 2.dp), contentAlignment = Alignment.Center) {
-                                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                            Text(text = short, color = if (isSel) GithubGold else GithubText, fontSize = 9.sp, fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                                            if (suffix.isNotEmpty()) Text(text = suffix, color = GithubMuted, fontSize = 7.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                                        }
-                                    }
+                Box(modifier = Modifier.weight(1f)) {
+                    GuideControl(
+                        selectedPlan.label.substringBefore(" - ").trim(),
+                        GuideAccent,
+                        Modifier.fillMaxWidth(),
+                        maxLines = 1,
+                        onClick = { planMenuExpanded = true }
+                    )
+                    DropdownMenu(
+                        expanded = planMenuExpanded,
+                        onDismissRequest = { planMenuExpanded = false }
+                    ) {
+                        plans.forEach { plan ->
+                            DropdownMenuItem(
+                                text = {
+                                    Text(
+                                        plan.label,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                },
+                                onClick = {
+                                    selectedPlanId = plan.id
+                                    planMenuExpanded = false
                                 }
-                                if (rowPlans.size == 1) Spacer(modifier = Modifier.weight(1f))
+                            )
+                        }
+                    }
+                }
+                GuideControl(
+                    objectiveText,
+                    objectiveColor,
+                    onClick = {
+                        if (objective.isAlive) {
+                            previousObjective = ObjectiveSnapshot(
+                                turtleSlain,
+                                lordSlain,
+                                lastSlainAt,
+                                lastSlainWasLord
+                            )
+                            lastSlainWasLord = !isTurtle
+                            if (isTurtle) turtleSlain += 1 else lordSlain += 1
+                            lastSlainAt = elapsedSeconds
+                        }
+                    },
+                    contentDescription = if (objective.isAlive) "Mark ${objective.label} as slain" else objectiveText
+                )
+                GuideControl(if (detailsExpanded) "−" else "+", GuideMuted) {
+                    detailsExpanded = !detailsExpanded
+                }
+                GuideControl("×", GuideMuted, onClick = onBack, contentDescription = "Close roam guide")
+            }
+
+            if (!descriptionHidden) {
+                Text(
+                    text = buildString {
+                        if (currentStep.phase.isNotBlank()) append("${currentStep.phase} · ")
+                        append(currentStep.callout.ifBlank { objectiveText })
+                        if (objectiveDescription.isNotBlank()) append(" — $objectiveDescription")
+                    },
+                    color = GuideText,
+                    fontSize = 10.sp,
+                    lineHeight = 13.sp,
+                    maxLines = if (detailsExpanded) 8 else 3,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                if (detailsExpanded) {
+                    Text(
+                        "${currentStep.timeLabel.ifBlank { "${formatGameTime(currentStep.startSeconds)}–${formatGameTime(currentStep.endSeconds)}" }}${guide.patch.takeIf(String::isNotBlank)?.let { " · Patch $it" }.orEmpty()}",
+                        color = GuideMuted,
+                        fontSize = 9.sp
+                    )
+                    currentStep.checklist.forEach { item ->
+                        Text("• $item", color = GuideText, fontSize = 9.sp)
+                    }
+                    if (currentStep.vision.isNotBlank()) GuideDetail("Vision", currentStep.vision)
+                    if (currentStep.decision.isNotBlank()) GuideDetail("Decision", currentStep.decision)
+                    if (currentStep.dont.isNotBlank()) GuideDetail("Avoid", currentStep.dont)
+                    if (blessing != null && blessing.effect.isNotBlank()) {
+                        GuideDetail(selectedPlan.blessing, blessing.effect)
+                    }
+                    if (elapsedSeconds == 0 && selectedPlan.heroes.isNotEmpty()) {
+                        GuideDetail("Suggested heroes", selectedPlan.heroes.take(6).joinToString())
+                    }
+                    Row(horizontalArrangement = Arrangement.spacedBy(5.dp)) {
+                        GuideControl("−10s", GuideMuted) { elapsedSeconds = (elapsedSeconds - 10).coerceAtLeast(0) }
+                        GuideControl("+10s", GuideMuted) { elapsedSeconds = (elapsedSeconds + 10).coerceAtMost(18 * 60) }
+                        GuideControl("Reset", GuideMuted) {
+                            elapsedSeconds = 0
+                            isRunning = false
+                            turtleSlain = 0
+                            lordSlain = 0
+                            lastSlainAt = null
+                            lastSlainWasLord = false
+                            previousObjective = null
+                        }
+                        if (previousObjective != null) {
+                            GuideControl("Undo slain", GuideGold) {
+                                previousObjective?.let { snapshot ->
+                                    turtleSlain = snapshot.turtleSlain
+                                    lordSlain = snapshot.lordSlain
+                                    lastSlainAt = snapshot.lastSlainAt
+                                    lastSlainWasLord = snapshot.lastSlainWasLord
+                                }
+                                previousObjective = null
+                            }
+                        }
+                        Box {
+                            GuideControl(if (descriptionHidden) "Show text" else "Hide text", GuideMuted) {
+                                hideMenuExpanded = true
+                            }
+                            DropdownMenu(
+                                expanded = hideMenuExpanded,
+                                onDismissRequest = { hideMenuExpanded = false }
+                            ) {
+                                DropdownMenuItem(
+                                    text = { Text("Show instructions") },
+                                    onClick = { descriptionHidden = false; hideMenuExpanded = false }
+                                )
+                                DropdownMenuItem(
+                                    text = { Text("Hide instructions") },
+                                    onClick = { descriptionHidden = true; hideMenuExpanded = false }
+                                )
                             }
                         }
                     }
-                }
-            }
-            // TURTLE / LORD PILL - TAP ONLY WHEN ALIVE = mark slain
-            // Alive: gold (Turtle) / red (Lord), tap to mark slain. Countdown: surface, not clickable, shows "in MM:SS"
-            val pillModifier = if (objective.isAlive) {
-                Modifier.clip(RoundedCornerShape(5.dp)).background(pillBg).border(1.dp, pillTextColor.copy(alpha = 0.8f), RoundedCornerShape(5.dp)).clickable {
-                    // Mark slain at current game time
-                    lastAction = if (objective.type == ObjectiveType.TURTLE) "Turtle ${objective.count}" else "Lord"
-                    if (objective.type == ObjectiveType.TURTLE) turtleSlain += 1 else lordSlain += 1
-                    lastSlainAt = elapsedSeconds
-                }.padding(horizontal = 6.dp, vertical = 4.dp)
-            } else {
-                Modifier.clip(RoundedCornerShape(5.dp)).background(pillBg.copy(alpha = WIDGET_ALPHA)).border(1.dp, GithubBorder.copy(alpha = 0.8f), RoundedCornerShape(5.dp)).padding(horizontal = 6.dp, vertical = 4.dp)
-            }
-            Box(modifier = pillModifier, contentAlignment = Alignment.Center) {
-                // For alive pill, use plain Text (no black outline) so gold/red bg stays readable. For countdown, use OutlinedText.
-                if (objective.isAlive) {
-                    Text(text = pillText, color = pillTextColor, fontSize = 9.sp, fontWeight = FontWeight.Bold, maxLines = 1)
                 } else {
-                    OutlinedText(pillText, pillTextColor, fontSize = 9.sp, fontWeight = FontWeight.Bold, maxLines = 1)
-                }
-            }
-            // 3. EXPAND / COLLAPSE - ONLY this ▼/▲ button expands/collapses description. Tapping description does NOT expand anymore.
-            OutlinedText(if (isExpanded) "▲" else "▼", GithubMuted, modifier = Modifier.clickable { isExpanded = !isExpanded }.padding(horizontal = 6.dp, vertical = 6.dp), fontSize = 12.sp, fontWeight = FontWeight.Bold)
-            // 2. HIDE = SELECTION BOX with On / Off. Tap box to open dropdown, pick On (hide description) or Off (show description).
-            // Top row (timer, roam, Turtle/Lord pill, X) stays in both cases.
-            Box {
-                Row(modifier = Modifier.clip(RoundedCornerShape(5.dp)).background(GithubSurface.copy(alpha = MAIN_ALPHA)).border(1.dp, GithubBorder.copy(alpha = 0.8f), RoundedCornerShape(5.dp)).clickable { hideMenuExpanded = true }.padding(horizontal = 6.dp, vertical = 4.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(2.dp)) {
-                    OutlinedText("Hide:", GithubMuted, fontSize = 9.sp, fontWeight = FontWeight.Bold)
-                    OutlinedText(hideSelection, if (hideSelection == "On") GithubGold else GithubText, fontSize = 9.sp, fontWeight = FontWeight.Bold)
-                    OutlinedText("▾", GithubMuted, fontSize = 9.sp, fontWeight = FontWeight.Bold)
-                }
-                DropdownMenu(expanded = hideMenuExpanded, onDismissRequest = { hideMenuExpanded = false }, modifier = Modifier.background(GithubSurface)) {
-                    DropdownMenuItem(text = { Text("On - hide description", color = GithubText, fontSize = 11.sp) }, onClick = { hideSelection = "On"; hideMenuExpanded = false })
-                    DropdownMenuItem(text = { Text("Off - show description", color = GithubText, fontSize = 11.sp) }, onClick = { hideSelection = "Off"; hideMenuExpanded = false })
-                }
-            }
-            OutlinedText("X", GithubMuted, modifier = Modifier.clickable(onClick = onBack).padding(horizontal = 4.dp, vertical = 4.dp), fontSize = 11.sp, fontWeight = FontWeight.Bold)
-        }
-
-        // DESCRIPTION + CALLOUT - hidden when Hide=On, top row above stays. Only ▼/▲ expands/collapses.
-        if (!isMainHidden) {
-        if (!isExpanded) {
-            // COLLAPSED: dynamic callout + description, adaptive height
-            // If Turtle/Lord alive: "Turtle 2 UP - CONTEST: ... / TRADE: ..."
-            // If countdown: normal step description
-            // NO clickable here - tapping description does NOT expand (fix #3). Only ▼/▲ above does.
-            Box(modifier = Modifier.fillMaxWidth().wrapContentHeight().padding(horizontal = 2.dp, vertical = 2.dp)) {
-                MergedInstructionText(phase = currentStep.phase, callout = dynamicCallout, description = dynamicDescription, maxLines = Int.MAX_VALUE)
-            }
-        } else {
-            Column(modifier = Modifier.fillMaxWidth().wrapContentHeight().padding(horizontal = 2.dp, vertical = 2.dp)) {
-                Row(horizontalArrangement = Arrangement.spacedBy(4.dp), verticalAlignment = Alignment.CenterVertically) {
-                    if (currentStep.phase.isNotBlank()) OutlinedText(currentStep.phase, GithubAccent, fontSize = 8.sp, fontWeight = FontWeight.Bold)
-                    OutlinedText(currentStep.timeLabel.ifBlank { formatTime(currentStep.startSeconds) + "-" + formatTime(currentStep.endSeconds) }, GithubMuted, fontSize = 8.sp)
-                    OutlinedText("Ends ${formatTime((currentStep.endSeconds - elapsedSeconds).coerceAtLeast(0))}", GithubMuted, fontSize = 8.sp)
-                    if (guide.meta.patch.isNotBlank()) OutlinedText("S42 ${guide.meta.patch}", GithubMuted, fontSize = 8.sp)
-                }
-                MergedInstructionText(phase = "", callout = dynamicCallout, description = dynamicDescription, maxLines = Int.MAX_VALUE)
-                // OBJECTIVE DETAIL - only in expanded, shows Contest vs Trade clearly + how pill works
-                Spacer(Modifier.height(3.dp))
-                val objTitle = if (objective.isAlive) {
-                    "${objective.label} ${if (objective.type == ObjectiveType.TURTLE) objective.count else ""} ALIVE - Tap pill when slain".trim()
-                } else {
-                    "${objective.label} ${if (objective.type == ObjectiveType.TURTLE) objective.count else ""} in ${formatTime(objective.secondsUntil)} - Slain: $turtleSlain Turtle, $lordSlain Lord".trim()
-                }
-                OutlinedText("Objective: $objTitle", if (objective.type == ObjectiveType.TURTLE) GithubGold else GithubRed, fontSize = 9.sp, fontWeight = FontWeight.Bold, lineHeight = 11.sp)
-                if (objective.isAlive) {
-                    OutlinedText("Contest: $contestText", GithubGreen, fontSize = 9.sp, lineHeight = 11.sp)
-                    OutlinedText("Trade (if no contest): $tradeText", GithubText, fontSize = 9.sp, lineHeight = 11.sp)
-                } else {
-                    OutlinedText("Next: ${objective.label} in ${formatTime(objective.secondsUntil)}. Use this time to push, farm, vision, reset.", GithubMuted, fontSize = 9.sp, lineHeight = 11.sp)
-                    if (lastSlainAt != null) OutlinedText("Last slain: $lastAction at ${formatTime(lastSlainAt ?: 0)} - Tap Undo if wrong.", GithubMuted, fontSize = 8.sp, lineHeight = 10.sp)
-                }
-                if (currentStep.checklist.isNotEmpty()) {
-                    Spacer(Modifier.height(3.dp))
-                    OutlinedText("To do:", GithubGold, fontSize = 9.sp, fontWeight = FontWeight.Bold, lineHeight = 11.sp)
-                    currentStep.checklist.forEach { item ->
-                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                            OutlinedText("•", GithubGreen, fontSize = 9.sp, fontWeight = FontWeight.Bold, lineHeight = 11.sp)
-                            OutlinedText(item, GithubText, fontSize = 9.sp, lineHeight = 11.sp)
-                        }
-                    }
-                }
-                if (currentStep.vision.isNotBlank()) OutlinedText("Vision: ${currentStep.vision}", GithubMuted, fontSize = 9.sp, lineHeight = 11.sp)
-                if (currentStep.decision.isNotBlank()) OutlinedText("Do: ${currentStep.decision}", GithubGreen, fontSize = 9.sp, lineHeight = 11.sp)
-                if (currentStep.dont.isNotBlank()) OutlinedText("Don't: ${currentStep.dont}", GithubRed, fontSize = 9.sp, lineHeight = 11.sp)
-                if (blessingDetail != null) {
-                    Spacer(Modifier.height(2.dp))
-                    OutlinedText("${selectedPlan.blessing} - ${blessingDetail.effect}", GithubGold, fontSize = 9.sp, lineHeight = 11.sp, maxLines = Int.MAX_VALUE)
-                }
-                Spacer(Modifier.height(3.dp))
-                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    OutlinedText("-10s", GithubMuted, modifier = Modifier.clip(RoundedCornerShape(5.dp)).background(GithubSurface.copy(alpha = WIDGET_ALPHA)).clickable { elapsedSeconds = (elapsedSeconds - 10).coerceIn(0, 18 * 60) }.padding(horizontal = 8.dp, vertical = 4.dp), fontSize = 10.sp, fontWeight = FontWeight.Bold)
-                    OutlinedText("+10s", GithubMuted, modifier = Modifier.clip(RoundedCornerShape(5.dp)).background(GithubSurface.copy(alpha = WIDGET_ALPHA)).clickable { elapsedSeconds = (elapsedSeconds + 10).coerceIn(0, 18 * 60) }.padding(horizontal = 8.dp, vertical = 4.dp), fontSize = 10.sp, fontWeight = FontWeight.Bold)
-                    OutlinedText("Reset", GithubMuted, modifier = Modifier.clip(RoundedCornerShape(5.dp)).background(GithubSurface.copy(alpha = WIDGET_ALPHA)).clickable { elapsedSeconds = 0; isRunning = false; turtleSlain = 0; lordSlain = 0; lastSlainAt = null; lastAction = null; enemySpells = defaultEnemySpells(); spellPickerLane = null }.padding(horizontal = 8.dp, vertical = 4.dp), fontSize = 10.sp, fontWeight = FontWeight.Bold)
-                    OutlinedText("Back", GithubMuted, modifier = Modifier.clip(RoundedCornerShape(5.dp)).background(GithubSurface.copy(alpha = WIDGET_ALPHA)).clickable(onClick = onBack).padding(horizontal = 8.dp, vertical = 4.dp), fontSize = 10.sp, fontWeight = FontWeight.Bold)
-                    if (lastSlainAt != null) {
-                        OutlinedText("Undo Slain", GithubGold, modifier = Modifier.clip(RoundedCornerShape(5.dp)).background(GithubSurface.copy(alpha = WIDGET_ALPHA)).clickable {
-                            if (lastAction?.startsWith("Lord") == true) lordSlain = (lordSlain - 1).coerceAtLeast(0) else turtleSlain = (turtleSlain - 1).coerceAtLeast(0)
-                            lastSlainAt = null; lastAction = null
-                        }.padding(horizontal = 8.dp, vertical = 4.dp), fontSize = 10.sp, fontWeight = FontWeight.Bold)
-                    }
-                }
-                if (elapsedSeconds == 0 && selectedPlan.heroes.isNotEmpty()) {
-                    Spacer(Modifier.height(3.dp))
-                    OutlinedText("Pick: ${selectedPlan.heroes.take(6).joinToString(", ") { it.name }}", GithubMuted, fontSize = 9.sp, lineHeight = 11.sp, maxLines = Int.MAX_VALUE)
-                    if (selectedPlan.emblem.isNotBlank()) OutlinedText("Emblem: ${selectedPlan.emblem}", GithubGold, fontSize = 9.sp, lineHeight = 11.sp, maxLines = Int.MAX_VALUE)
-                }
-            }
-        } // end else expanded
-        } // end if (!isMainHidden) - description/callout hidden when Hide=On, top row stays
-        // Progress - only when description visible
-        if (!isMainHidden) {
-        val span = (currentStep.endSeconds - currentStep.startSeconds).coerceAtLeast(1)
-        val progress = ((elapsedSeconds - currentStep.startSeconds).toFloat() / span).coerceIn(0f, 1f)
-        Box(modifier = Modifier.fillMaxWidth().height(3.dp).background(GithubBorder.copy(alpha = 0.5f))) {
-            Box(modifier = Modifier.fillMaxWidth(progress).height(3.dp).background(GithubAccent))
-        }
-        }
-        } // ===== END AREA 1 - 45% - top row always stays =====
-
-        // ===== AREA 2 - SPELL TRACKER - SEPARATE, 15% ONLY, NO 45% BACKGROUND =====
-        // This Column has NO background / NO border - so buttons are truly 15% opaque over the game,
-        // not 15% on top of 45% (which made them look dark in your screenshot).
-        // Always visible, collapsed + expanded. Same simplified design:
-        // Not clicked: [EXP] [JG] [MID] [GOLD] [ROAM] - lane only. Clicked: [01:45 gold fill] - timer only.
-        Column(modifier = Modifier.fillMaxWidth().wrapContentHeight()) {
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-            enemySpells.forEach { tracker ->
-                val spell = tracker.spell
-                val elapsedSinceUse = tracker.usedAt?.let { elapsedSeconds - it } ?: Int.MAX_VALUE
-                val remaining = if (tracker.usedAt == null) 0 else (spell.cooldown - elapsedSinceUse).coerceAtLeast(0)
-                val isOnCooldown = tracker.usedAt != null && remaining > 0
-                // Gold fill = button background itself. 0 = empty (transparent), 1 = full gold.
-                val cdProgress = if (isOnCooldown) (elapsedSinceUse.toFloat() / spell.cooldown.toFloat()).coerceIn(0f, 1f) else 0f
-                Box(modifier = Modifier.weight(1f)) {
                     Box(
-                        modifier = Modifier.fillMaxWidth()
-                            .height(28.dp)
-                            .clip(RoundedCornerShape(6.dp))
-                            .background(GithubSurface.copy(alpha = ENEMY_SPELL_ALPHA))
-                            .border(1.dp, if (isOnCooldown) GithubGold.copy(alpha = 0.8f) else GithubBorder.copy(alpha = 0.8f), RoundedCornerShape(6.dp))
-                            .combinedClickable(
-                                onClick = {
-                                    enemySpells = enemySpells.map {
-                                        if (it.lane == tracker.lane) it.copy(usedAt = if (isOnCooldown) null else elapsedSeconds) else it
-                                    }
-                                },
-                                onLongClick = { spellPickerLane = tracker.lane }
-                            ),
-                        contentAlignment = Alignment.Center
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(2.dp)
+                            .background(GuideBorder, RoundedCornerShape(1.dp))
                     ) {
-                        // GOLD BAR FILLING BACKGROUND - only when on CD, fills left -> right
-                        if (isOnCooldown) {
-                            Box(modifier = Modifier.fillMaxWidth(cdProgress).height(28.dp).background(GithubGold).align(Alignment.CenterStart))
-                        }
-                        // Text: lane when idle, timer when on CD. No spell name, no READY, no small bar.
-                        // Use OutlinedText (black outline + light text) so timer stays readable when gold fill is only 25% -
-                        // plain black text would be invisible on the dark 75% side.
-                        OutlinedText(
-                            text = if (isOnCooldown) formatTime(remaining) else tracker.lane,
-                            color = if (isOnCooldown) Color.White else GithubText,
-                            fontSize = 10.sp,
-                            fontWeight = FontWeight.Black,
-                            maxLines = 1
+                        val span = (currentStep.endSeconds - currentStep.startSeconds).coerceAtLeast(1)
+                        val progress = ((elapsedSeconds - currentStep.startSeconds).toFloat() / span).coerceIn(0f, 1f)
+                        Box(
+                            Modifier
+                                .fillMaxWidth(progress)
+                                .height(2.dp)
+                                .background(GuideAccent, RoundedCornerShape(1.dp))
                         )
                     }
-                    // SPELL PICKER - COMPACT 2-COLUMN GRID (was 1-col 12-row tall list that covered screen)
-                    // 12 spells -> 6 rows x 2 cols, 26dp per cell, total ~175dp tall (was ~384dp). Fits in landscape, no full-screen cover.
-                    DropdownMenu(expanded = spellPickerLane == tracker.lane, onDismissRequest = { spellPickerLane = null }, modifier = Modifier.width(230.dp).background(GithubSurface.copy(alpha = PICKER_ALPHA)).heightIn(max = 185.dp)) {
-                        Column(modifier = Modifier.padding(4.dp), verticalArrangement = Arrangement.spacedBy(3.dp)) {
-                            BATTLE_SPELLS.chunked(2).forEach { rowSpells ->
-                                Row(horizontalArrangement = Arrangement.spacedBy(3.dp)) {
-                                    rowSpells.forEach { s ->
-                                        val isSel = s.name == spell.name
-                                        Box(modifier = Modifier.weight(1f).height(26.dp).clip(RoundedCornerShape(5.dp)).background(if (isSel) GithubGold.copy(alpha = 0.25f) else GithubSurface).border(1.dp, if (isSel) GithubGold else GithubBorder, RoundedCornerShape(5.dp)).clickable {
-                                            enemySpells = enemySpells.map { if (it.lane == tracker.lane) it.copy(spell = s, usedAt = null) else it }
-                                            spellPickerLane = null
-                                        }.padding(horizontal = 4.dp, vertical = 2.dp), contentAlignment = Alignment.Center) {
-                                            Text(text = if (isSel) "✓ ${s.name.uppercase()} ${s.cooldown}s" else "${s.name.uppercase()} ${s.cooldown}s", color = if (isSel) GithubGold else GithubText, fontSize = 8.sp, fontWeight = if (isSel) FontWeight.Bold else FontWeight.Normal, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                                        }
-                                    }
-                                    if (rowSpells.size == 1) Spacer(modifier = Modifier.weight(1f))
-                                }
-                            }
-                        }
-                    }
                 }
             }
         }
-        OutlinedText("Tap = enemy used spell  •  Tap again = cancel  •  Long-press = switch spell", GithubMuted, fontSize = 7.sp)
-        } // ===== END AREA 2 - 15% only =====
-    } // ===== END OUTER WRAPPER (transparent) =====
+
+        // The spell cooldown panel is its own composable/file so it can be changed
+        // independently from the much larger guide UI.
+        EnemySpellTrackerWidget(
+            elapsedSeconds = elapsedSeconds,
+            modifier = Modifier.fillMaxWidth()
+        )
+    }
+}
+
+@Composable
+private fun GuideMessage(message: String) {
+    Text(
+        text = message,
+        color = GuideText,
+        fontSize = 10.sp,
+        modifier = Modifier
+            .background(GuideBackground, RoundedCornerShape(6.dp))
+            .padding(8.dp)
+    )
+}
+
+@Composable
+private fun GuideControl(
+    label: String,
+    color: Color,
+    modifier: Modifier = Modifier,
+    maxLines: Int = 1,
+    onClick: () -> Unit,
+    contentDescription: String = label
+) {
+    Box(
+        modifier = modifier
+            .clip(RoundedCornerShape(5.dp))
+            .background(GuideSurface)
+            .border(1.dp, GuideBorder, RoundedCornerShape(5.dp))
+            .clickable(onClick = onClick)
+            .padding(horizontal = 6.dp, vertical = 5.dp)
+            .semantics { this.contentDescription = contentDescription },
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = label,
+            color = color,
+            fontSize = 9.sp,
+            fontWeight = FontWeight.SemiBold,
+            maxLines = maxLines,
+            overflow = TextOverflow.Ellipsis
+        )
+    }
+}
+
+@Composable
+private fun GuideDetail(label: String, text: String) {
+    Text(
+        text = "$label: $text",
+        color = GuideText,
+        fontSize = 9.sp,
+        lineHeight = 12.sp,
+        maxLines = 3,
+        overflow = TextOverflow.Ellipsis
+    )
 }
