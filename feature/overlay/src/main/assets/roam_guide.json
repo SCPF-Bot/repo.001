@@ -2,7 +2,7 @@
   "meta": {
     "game": "Mobile Legends: Bang Bang",
     "title": "Roam Timeframe Table — Enhanced",
-    "version": "2.5 - Grandmaster to Epic",
+    "version": "2.6 - Grandmaster-Epic, adaptive height, shortened descriptions",
     "patch": "2.2.16a",
     "season": "Season 42 — Starward Decade",
     "updated": "2026-11-18",
@@ -63,7 +63,8 @@
       "heroes_note": "Heroes are pre-game only. Hide heroes in live view, show only when timer is 0 and expanded.",
       "width_rule": "Portrait 98% width, landscape 62% width so it does not cover the fight."
     },
-    "beginner_friendly": "Merged objective + description into one instruction per step. Tuned for Grandmaster to Epic: keep Ultimate, Retribution, Turtle, Lord. Explain peel, zone, engage, disengage, fog, CC, AoE in simple words."
+    "beginner_friendly": "Merged objective + description into one instruction per step. Tuned for Grandmaster to Epic: keep Ultimate, Retribution, Turtle, Lord. Explain peel, zone, engage, disengage, fog, CC, AoE in simple words.",
+    "adaptive_height": "Collapsed has no maxLines limit, height wraps to fit full description. No truncation."
   },
   "blessings": [
     {
@@ -275,7 +276,7 @@
           "endSeconds": 150,
           "timeLabel": "2:00-2:30",
           "phase": "First Turtle",
-          "description": "Stand in front of Turtle pit early to block enemies (this is called zoning). Save your Ultimate to start the fight (engage) or to protect your jungler's Retribution.",
+          "description": "Stand in front of Turtle pit to block enemies (zoning). Save Ultimate to start fight or protect jungler's Retribution.",
           "checklist": [
             "Block enemy jungler/mid from pit",
             "Save Ultimate for enemy start fight or Retribution denial",
@@ -286,14 +287,14 @@
           "dont": "Don't chase a low-HP enemy while Turtle is up.",
           "callout": "Block Turtle pit, save Ultimate",
           "compact": "First Turtle - Block Turtle pit, save Ultimate",
-          "instruction": "Stand in front of Turtle pit early to block enemies (this is called zoning). Save your Ultimate to start the fight (engage) or to protect your jungler's Retribution."
+          "instruction": "Stand in front of Turtle pit to block enemies (zoning). Save Ultimate to start fight or protect jungler's Retribution."
         },
         {
           "startSeconds": 150,
           "endSeconds": 240,
           "timeLabel": "2:30-4:00",
           "phase": "Post-Turtle",
-          "description": "After Turtle, stay near your carry and mid. You have a Turtle shield, so you can play a bit forward, but don't chase into a dark bush.",
+          "description": "After Turtle, stay near carry and mid. You have Turtle shield, can play forward, but don't chase into dark bush.",
           "checklist": [
             "Escort marksman or mid back to lane",
             "Check Gold-lane bush before marksman walks in",
@@ -304,14 +305,14 @@
           "dont": "Don't stay in river alone after Turtle.",
           "callout": "Stay with carry, reset",
           "compact": "Post-Turtle - Stay with carry, reset",
-          "instruction": "After Turtle, stay near your carry and mid. You have a Turtle shield, so you can play a bit forward, but don't chase into a dark bush."
+          "instruction": "After Turtle, stay near carry and mid. You have Turtle shield, can play forward, but don't chase into dark bush."
         },
         {
           "startSeconds": 240,
           "endSeconds": 300,
           "timeLabel": "4:00-5:00",
           "phase": "Second Turtle",
-          "description": "Next Turtle is near 4:00. Go early again and save your Ultimate. After 5:00 towers lose their shield, so pushing towers is more important.",
+          "description": "Next Turtle near 4:00. Go early, save Ultimate. After 5:00 towers lose shield, pushing matters more.",
           "checklist": [
             "Check actual Turtle timer (in-game)",
             "Setup 20s early again",
@@ -322,14 +323,14 @@
           "dont": "Don't force second Turtle if your team is behind and split.",
           "callout": "2nd Turtle, push after 5:00",
           "compact": "Second Turtle - 2nd Turtle, push after 5:00",
-          "instruction": "Next Turtle is near 4:00. Go early again and save your Ultimate. After 5:00 towers lose their shield, so pushing towers is more important."
+          "instruction": "Next Turtle near 4:00. Go early, save Ultimate. After 5:00 towers lose shield, pushing matters more."
         },
         {
           "startSeconds": 300,
           "endSeconds": 480,
           "timeLabel": "5:00-8:00",
           "phase": "Mid Game / Third Turtle",
-          "description": "Walk with your team through the river and stay in front of your damage dealers. Your Conceal is ready. Only use it when your team is together and ready to fight.",
+          "description": "Walk with team through river, stay in front of damage dealers. Conceal ready, use only when team is together.",
           "checklist": [
             "Unlock Conceal/Encourage",
             "Rotate mid <-> Gold <-> Turtle side",
@@ -340,7 +341,7 @@
           "dont": "Don't use Conceal to roam alone.",
           "callout": "Control river, get ready for Lord",
           "compact": "Mid Game / Third Turtle - Control river, get ready for Lord",
-          "instruction": "Walk with your team through the river and stay in front of your damage dealers. Your Conceal is ready. Only use it when your team is together and ready to fight."
+          "instruction": "Walk with team through river, stay in front of damage dealers. Conceal ready, use only when team is together."
         },
         {
           "startSeconds": 480,
@@ -401,7 +402,7 @@
           "endSeconds": 1080,
           "timeLabel": "15:00-18:00",
           "phase": "Late / Evolved Lord",
-          "description": "Stay close to your main damage dealer and protect them (peel). Use Conceal to start a good fight together or to run away together (disengage).",
+          "description": "Stay close to carry and protect them (peel). Use Conceal to start fight together or run away together (disengage).",
           "checklist": [
             "Group before Evolved Lord",
             "Conceal + Ultimate combo ready",
@@ -412,7 +413,7 @@
           "dont": "Don't die alone scouting with no info gained.",
           "callout": "Protect carry, use Conceal together",
           "compact": "Late / Evolved Lord - Protect carry, use Conceal together",
-          "instruction": "Stay close to your main damage dealer and protect them (peel). Use Conceal to start a good fight together or to run away together (disengage)."
+          "instruction": "Stay close to carry and protect them (peel). Use Conceal to start fight together or run away together (disengage)."
         }
       ]
     },
@@ -562,7 +563,7 @@
           "endSeconds": 300,
           "timeLabel": "4:00-5:00",
           "phase": "Second Turtle",
-          "description": "Next Turtle is near 4:00. Try to catch one enemy before Turtle starts. If you catch one, Turtle is 5 vs 4 and easy. Don't chase for a second kill.",
+          "description": "Next Turtle near 4:00. Catch one enemy first. 5 vs 4 = easy Turtle. Don't chase second kill.",
           "checklist": [
             "Setup 20s early",
             "Catch before Turtle starts",
@@ -573,7 +574,7 @@
           "dont": "Don't chase second kill after pick.",
           "callout": "Catch one before Turtle",
           "compact": "Second Turtle - Catch one before Turtle",
-          "instruction": "Next Turtle is near 4:00. Try to catch one enemy before Turtle starts. If you catch one, Turtle is 5 vs 4 and easy. Don't chase for a second kill."
+          "instruction": "Next Turtle near 4:00. Catch one enemy first. 5 vs 4 = easy Turtle. Don't chase second kill."
         },
         {
           "startSeconds": 300,
@@ -634,7 +635,7 @@
           "endSeconds": 900,
           "timeLabel": "12:00-15:00",
           "phase": "Mid-Late",
-          "description": "Hide near Lord and threaten a catch. If there is no safe catch, stay near your carry and protect them instead of forcing a bad hook.",
+          "description": "Hide near Lord, threaten catch. No safe catch = stay near carry and protect them.",
           "checklist": [
             "Threaten Lord pit angles",
             "Fall back to protect if no pick",
@@ -645,7 +646,7 @@
           "dont": "Don't force a pick when behind.",
           "callout": "Threaten catch, else protect carry",
           "compact": "Mid-Late - Threaten catch, else protect carry",
-          "instruction": "Hide near Lord and threaten a catch. If there is no safe catch, stay near your carry and protect them instead of forcing a bad hook."
+          "instruction": "Hide near Lord, threaten catch. No safe catch = stay near carry and protect them."
         },
         {
           "startSeconds": 900,
@@ -776,7 +777,7 @@
           "endSeconds": 150,
           "timeLabel": "2:00-2:30",
           "phase": "First Turtle",
-          "description": "Get to Turtle before it appears. Heal your jungler and don't stand all together where one enemy skill can hit everyone (AoE = hits many enemies).",
+          "description": "Get to Turtle early. Heal jungler, don't stand together where one skill hits everyone (AoE).",
           "checklist": [
             "Heal jungler when focused",
             "Use stun/slow to protect",
@@ -787,14 +788,14 @@
           "dont": "Don't Ultimate at full HP.",
           "callout": "Heal jungler, don't group too close",
           "compact": "First Turtle - Heal jungler, don't group too close",
-          "instruction": "Get to Turtle before it appears. Heal your jungler and don't stand all together where one enemy skill can hit everyone (AoE = hits many enemies)."
+          "instruction": "Get to Turtle early. Heal jungler, don't stand together where one skill hits everyone (AoE)."
         },
         {
           "startSeconds": 150,
           "endSeconds": 240,
           "timeLabel": "2:30-4:00",
           "phase": "Post-Turtle",
-          "description": "Follow your strongest teammate. Heal them after fights and go back to base safely if you are low. Don't walk into a dark river alone.",
+          "description": "Follow strongest teammate. Heal after fights, go base if low. Don't walk dark river alone.",
           "checklist": [
             "Heal lowest-HP ally",
             "Reset if low",
@@ -805,14 +806,14 @@
           "dont": "Don't walk alone into dark bush river alone.",
           "callout": "Follow carry, go back if low",
           "compact": "Post-Turtle - Follow carry, go back if low",
-          "instruction": "Follow your strongest teammate. Heal them after fights and go back to base safely if you are low. Don't walk into a dark river alone."
+          "instruction": "Follow strongest teammate. Heal after fights, go base if low. Don't walk dark river alone."
         },
         {
           "startSeconds": 240,
           "endSeconds": 300,
           "timeLabel": "4:00-5:00",
           "phase": "Second Turtle",
-          "description": "Next Turtle is near 4:00. Heal your team to full health before Turtle starts. Don't start Turtle while your heal is still cooling down.",
+          "description": "Next Turtle near 4:00. Heal team to full first. Don't start Turtle while heal is cooling down.",
           "checklist": [
             "Heal team to full before Turtle",
             "Setup 20s early",
@@ -823,14 +824,14 @@
           "dont": "Don't start Turtle while healing on cooldown.",
           "callout": "Heal full before Turtle",
           "compact": "Second Turtle - Heal full before Turtle",
-          "instruction": "Next Turtle is near 4:00. Heal your team to full health before Turtle starts. Don't start Turtle while your heal is still cooling down."
+          "instruction": "Next Turtle near 4:00. Heal team to full first. Don't start Turtle while heal is cooling down."
         },
         {
           "startSeconds": 300,
           "endSeconds": 480,
           "timeLabel": "5:00-8:00",
           "phase": "Mid Game",
-          "description": "Stay close to your frontline and your marksman. Save your Ultimate for when the enemy starts a fight, not for small damage from far (poke).",
+          "description": "Stay near frontline + marksman. Save Ultimate for team fight, not for small poke damage.",
           "checklist": [
             "Stay behind tank, near marksman",
             "Save Ultimate for enemy Ultimate",
@@ -841,7 +842,7 @@
           "dont": "Don't use Ultimate to heal one poke.",
           "callout": "Save Ultimate for team fight",
           "compact": "Mid Game - Save Ultimate for team fight",
-          "instruction": "Stay close to your frontline and your marksman. Save your Ultimate for when the enemy starts a fight, not for small damage from far (poke)."
+          "instruction": "Stay near frontline + marksman. Save Ultimate for team fight, not for small poke damage."
         },
         {
           "startSeconds": 480,
@@ -902,7 +903,7 @@
           "endSeconds": 1080,
           "timeLabel": "15:00-18:00",
           "phase": "Late / Evolved Lord",
-          "description": "Keep your main carry alive through the first enemy burst (quick big damage). If your Ultimate is not ready, run away and regroup. Don't fight without it.",
+          "description": "Keep carry alive through first burst (quick big damage). No Ultimate = run away and regroup.",
           "checklist": [
             "Save Ultimate for Evolved Lord fight",
             "Stay near carry",
@@ -913,7 +914,7 @@
           "dont": "Don't fight without Ultimate.",
           "callout": "Keep carry alive",
           "compact": "Late / Evolved Lord - Keep carry alive",
-          "instruction": "Keep your main carry alive through the first enemy burst (quick big damage). If your Ultimate is not ready, run away and regroup. Don't fight without it."
+          "instruction": "Keep carry alive through first burst (quick big damage). No Ultimate = run away and regroup."
         }
       ]
     },
@@ -1046,7 +1047,7 @@
           "endSeconds": 150,
           "timeLabel": "2:00-2:30",
           "phase": "First Turtle",
-          "description": "At Turtle, use shields, cleanse, or speed to help your team. Use them when the enemy starts a fight, not for small damage from far.",
+          "description": "At Turtle, use shields, cleanse, or speed. Use when fight starts, not for small damage.",
           "checklist": [
             "Shield/cleanse when enemy engages",
             "Disrupt enemy jungler",
@@ -1057,7 +1058,7 @@
           "dont": "Don't dive alone.",
           "callout": "Shield / cleanse when fight starts",
           "compact": "First Turtle - Shield / cleanse when fight starts",
-          "instruction": "At Turtle, use shields, cleanse, or speed to help your team. Use them when the enemy starts a fight, not for small damage from far."
+          "instruction": "At Turtle, use shields, cleanse, or speed. Use when fight starts, not for small damage."
         },
         {
           "startSeconds": 150,
@@ -1100,7 +1101,7 @@
           "endSeconds": 480,
           "timeLabel": "5:00-8:00",
           "phase": "Mid Game",
-          "description": "Make safe paths for your team and block enemy side attacks. Use your area skills to split the enemy team. Encourage makes your team hit harder when you are grouped.",
+          "description": "Make safe paths, block side attacks. Use area skills to split enemy. Encourage helps when grouped.",
           "checklist": [
             "Create safe path",
             "Deny flank bush",
@@ -1111,7 +1112,7 @@
           "dont": "Don't group in one area skill.",
           "callout": "Make safe paths, block side attack",
           "compact": "Mid Game - Make safe paths, block side attack",
-          "instruction": "Make safe paths for your team and block enemy side attacks. Use your area skills to split the enemy team. Encourage makes your team hit harder when you are grouped."
+          "instruction": "Make safe paths, block side attacks. Use area skills to split enemy. Encourage helps when grouped."
         },
         {
           "startSeconds": 480,
@@ -1154,7 +1155,7 @@
           "endSeconds": 900,
           "timeLabel": "12:00-15:00",
           "phase": "Mid-Late",
-          "description": "Use your Ultimate when 2 or more teammates can benefit. Don't waste it on one low-value enemy.",
+          "description": "Stay near teammate who may get caught. Show enemy path, save skill to stop their fight.",
           "checklist": [
             "Wait for mUltimatei-ally value",
             "Cleanse mUltimatei-stun/slow",
@@ -1165,14 +1166,14 @@
           "dont": "Don't Ultimate for one target.",
           "callout": "Ultimate for 2+ teammates",
           "compact": "Mid-Late - Ultimate for 2+ teammates",
-          "instruction": "Use your Ultimate when 2 or more teammates can benefit. Don't waste it on one low-value enemy."
+          "instruction": "Stay near teammate who may get caught. Show enemy path, save skill to stop their fight."
         },
         {
           "startSeconds": 900,
           "endSeconds": 1080,
           "timeLabel": "15:00-18:00",
           "phase": "Late / Evolved Lord",
-          "description": "Stay grouped. Stop enemies who dive your carry, help your carry move to a safe spot, and use Encourage when your team fights together.",
+          "description": "Stay grouped. Stop enemies diving carry, help carry to safe spot, use Encourage together.",
           "checklist": [
             "Stay grouped",
             "Stop dive with stun/slow/cleanse",
@@ -1183,7 +1184,7 @@
           "dont": "Don't split late.",
           "callout": "Stay grouped, protect carry",
           "compact": "Late / Evolved Lord - Stay grouped, protect carry",
-          "instruction": "Stay grouped. Stop enemies who dive your carry, help your carry move to a safe spot, and use Encourage when your team fights together."
+          "instruction": "Stay grouped. Stop enemies diving carry, help carry to safe spot, use Encourage together."
         }
       ]
     },
@@ -1237,7 +1238,7 @@
           "endSeconds": 40,
           "timeLabel": "0:00-0:40",
           "phase": "Setup",
-          "description": "Buy Roam boots. Scout for info, don't force a level 1 fight. Leave if many enemies come. If you are Selena, put traps at enemy buff and river.",
+          "description": "Buy Roam boots. Scout, don't force level 1 fight. Leave if outnumbered. Selena: traps at buff/river.",
           "checklist": [
             "Buy Roam",
             "Place trap/scout",
@@ -1248,7 +1249,7 @@
           "dont": "Don't force Lv1 fight.",
           "callout": "Scout, don't force fight",
           "compact": "Setup - Scout, don't force fight",
-          "instruction": "Buy Roam boots. Scout for info, don't force a level 1 fight. Leave if many enemies come. If you are Selena, put traps at enemy buff and river."
+          "instruction": "Buy Roam boots. Scout, don't force level 1 fight. Leave if outnumbered. Selena: traps at buff/river."
         },
         {
           "startSeconds": 40,
@@ -1291,7 +1292,7 @@
           "endSeconds": 150,
           "timeLabel": "2:00-2:30",
           "phase": "First Turtle",
-          "description": "At Turtle, use traps or burst to show where enemies are. Protect your jungler's Retribution. Keeping Turtle safe is more important than a solo kill.",
+          "description": "At Turtle, use traps/burst to show enemies. Protect jungler's Retribution. Turtle > solo kill.",
           "checklist": [
             "Reveal enemy jungler",
             "Pressure approaches",
@@ -1302,14 +1303,14 @@
           "dont": "Don't dive pit alone.",
           "callout": "Show enemies, protect Retribution",
           "compact": "First Turtle - Show enemies, protect Retribution",
-          "instruction": "At Turtle, use traps or burst to show where enemies are. Protect your jungler's Retribution. Keeping Turtle safe is more important than a solo kill."
+          "instruction": "At Turtle, use traps/burst to show enemies. Protect jungler's Retribution. Turtle > solo kill."
         },
         {
           "startSeconds": 150,
           "endSeconds": 240,
           "timeLabel": "2:30-4:00",
           "phase": "Post-Turtle",
-          "description": "Move through dark bushes with a teammate and punish an enemy who is alone. If it fails, leave after 10 seconds. Don't stay and get surrounded.",
+          "description": "Move through dark bushes with teammate, punish lone enemy. If fail, leave in 10s. Don't get surrounded.",
           "checklist": [
             "Rotate with ally",
             "Pick squishy",
@@ -1320,7 +1321,7 @@
           "dont": "Don't solo dive 1v2.",
           "callout": "Catch alone enemy, leave fast",
           "compact": "Post-Turtle - Catch alone enemy, leave fast",
-          "instruction": "Move through dark bushes with a teammate and punish an enemy who is alone. If it fails, leave after 10 seconds. Don't stay and get surrounded."
+          "instruction": "Move through dark bushes with teammate, punish lone enemy. If fail, leave in 10s. Don't get surrounded."
         },
         {
           "startSeconds": 240,
@@ -1381,7 +1382,7 @@
           "endSeconds": 720,
           "timeLabel": "10:00-12:00",
           "phase": "Lord Push",
-          "description": "Use burst to remove enemy vision and threaten their backline, but always keep a way to escape after you jump in. Dire Hit helps finish low-health enemies.",
+          "description": "Use burst on backline, keep escape. Dire Hit finishes low-health enemies.",
           "checklist": [
             "Burst backline",
             "Keep exit",
@@ -1392,7 +1393,7 @@
           "dont": "Don't dive without exit.",
           "callout": "Burst backline, keep escape",
           "compact": "Lord Push - Burst backline, keep escape",
-          "instruction": "Use burst to remove enemy vision and threaten their backline, but always keep a way to escape after you jump in. Dire Hit helps finish low-health enemies."
+          "instruction": "Use burst on backline, keep escape. Dire Hit finishes low-health enemies."
         },
         {
           "startSeconds": 720,
@@ -1417,7 +1418,7 @@
           "endSeconds": 1080,
           "timeLabel": "15:00-18:00",
           "phase": "Late / Evolved Lord",
-          "description": "Wait until the enemy team splits apart before you jump in. Dire Hit is for finishing a good target, not for starting a fight alone.",
+          "description": "Wait until enemy team splits before you jump in. Dire Hit finishes, not starts fight.",
           "checklist": [
             "Wait for break",
             "Finish low-HP carry",
@@ -1428,7 +1429,7 @@
           "dont": "Don't dive first into 5.",
           "callout": "Wait for split, finish target",
           "compact": "Late / Evolved Lord - Wait for split, finish target",
-          "instruction": "Wait until the enemy team splits apart before you jump in. Dire Hit is for finishing a good target, not for starting a fight alone."
+          "instruction": "Wait until enemy team splits before you jump in. Dire Hit finishes, not starts fight."
         }
       ]
     }
