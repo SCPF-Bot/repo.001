@@ -256,7 +256,8 @@ private fun computeObjective(
     elapsedSeconds: Int,
     turtleSlain: Int,
     lordSlain: Int,
-    lastSlainAt: Int?
+    lastSlainAt: Int?,
+    lastSlainWasLord: Boolean = false
 ): ObjectiveStatus {
     if (lordSlain > 0) {
         val slainAt = lastSlainAt ?: elapsedSeconds
@@ -273,7 +274,11 @@ private fun computeObjective(
         return ObjectiveStatus(ObjectiveType.TURTLE, 1, false, 2 * 60 - elapsedSeconds)
     }
 
-    if (elapsedSeconds >= 8 * 60 || turtleSlain >= 3 || (lastSlainAt ?: 0) > 6 * 60) {
+    // FIX V6 (1): Next is Lord only if Turtle is actually done:
+    // 3 Turtles slain, OR last slain was Turtle after 6:00 (next Turtle would be
+    // after 8:00, so it converts to Lord), OR we are past 8:00 with no Turtle alive.
+    // lastSlainWasLord is passed in so we don't guess from elapsed time alone.
+    if (turtleSlain >= 3 || (lastSlainAt != null && !lastSlainWasLord && lastSlainAt > 6 * 60) || elapsedSeconds >= 8 * 60) {
         val lordSpawn = (lastSlainAt?.plus(120) ?: 8 * 60)
         return ObjectiveStatus(
             type = ObjectiveType.LORD,
@@ -402,7 +407,7 @@ fun RoamGuideWidget(onBack: () -> Unit) {
     val currentStep = selectedPlan?.steps?.firstOrNull {
         elapsedSeconds >= it.startSeconds && elapsedSeconds < it.endSeconds
     } ?: selectedPlan?.steps?.lastOrNull()
-    val objective = computeObjective(elapsedSeconds, turtleSlain, lordSlain, lastSlainAt)
+    val objective = computeObjective(elapsedSeconds, turtleSlain, lordSlain, lastSlainAt, lastSlainWasLord)
     val isTurtle = objective.type == ObjectiveType.TURTLE
     val objectiveText = if (objective.isAlive) {
         if (isTurtle) "Turtle ${objective.count} UP" else "Lord UP"
@@ -418,7 +423,9 @@ fun RoamGuideWidget(onBack: () -> Unit) {
     val objectiveDescription = when {
         objective.isAlive && isTurtle -> selectedPlan?.turtleContest.orEmpty()
         objective.isAlive -> selectedPlan?.lordContest.orEmpty()
-        lastSlainAt != null -> "${objective.label} slain. Next in ${formatGameTime(objective.secondsUntil)}. Push, farm, or reset."
+        // FIX V6 (1): slain label must be LAST slain, not NEXT objective.
+        // At 7:26 you killed Turtle, next is Lord — old code said "Lord slain".
+        lastSlainAt != null -> "${if (lastSlainWasLord) "Lord" else "Turtle"} slain. Next ${objective.label} in ${formatGameTime(objective.secondsUntil)}. Push, farm, or reset."
         else -> currentStep?.description.orEmpty()
     }
     // FIX V3 (touch): window is now WRAP_CONTENT, so fillMaxWidth(0.52f)
@@ -431,8 +438,28 @@ fun RoamGuideWidget(onBack: () -> Unit) {
     // 52% = 416dp, already > 300dp, so no min is needed.
     val displayMetrics = LocalContext.current.resources.displayMetrics
     val screenWidthDp = (displayMetrics.widthPixels / displayMetrics.density).toInt()
-    val widgetWidth = (screenWidthDp * WIDGET_WIDTH_FRACTION_LANDSCAPE)
+    // FIX V6 (3+4): Full description (not first sentence) + adaptive width.
+    // Collapsed = full objectiveDescription (e.g. "Go Lord pit early, zone front.
+    // Save AoE Ultimate for Lord fight. Don't start Lord if enemy jungler + Retribution alive.")
+    // If that needs >2 lines at 52%, the RIGHT side expands so it still fits in 2 lines.
+    // If description is short, it shrinks back to 52%. Base 52% -> up to 78% max.
+    // Expanded = always wider (0.68) to fit checklist / vision / decision.
+    val adaptiveFraction = when {
+        detailsExpanded -> 0.68f
+        objectiveDescription.length > 140 -> 0.78f
+        objectiveDescription.length > 110 -> 0.72f
+        objectiveDescription.length > 85 -> 0.64f
+        objectiveDescription.length > 65 -> 0.58f
+        else -> WIDGET_WIDTH_FRACTION_LANDSCAPE
+    }
+    val widgetWidth = (screenWidthDp * adaptiveFraction)
         .coerceAtMost((screenWidthDp - 8).toFloat())
+    // FIX V6 (2): Step progress for timer background.
+    // (elapsed - start) / (end - start) for current step, 0..1.
+    val stepProgress = if (currentStep != null) {
+        val span = (currentStep.endSeconds - currentStep.startSeconds).coerceAtLeast(1)
+        ((elapsedSeconds - currentStep.startSeconds).toFloat() / span).coerceIn(0f, 1f)
+    } else 0f
     val blessing = guide.blessings.firstOrNull {
         it.id == selectedPlan?.blessingId ||
             it.name.equals(selectedPlan?.blessing?.substringBefore('/')?.trim(), ignoreCase = true)
@@ -470,17 +497,37 @@ fun RoamGuideWidget(onBack: () -> Unit) {
                 horizontalArrangement = Arrangement.spacedBy(3.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                GuideControl(
-                    // V5: play / pause icons removed. Timer text only.
-                    // Tap still starts / pauses. Running = green, paused = white.
-                    label = formatGameTime(elapsedSeconds),
-                    color = if (isRunning) GuideGreen else GuideText,
-                    modifier = Modifier.width(56.dp),
-                    fontWeight = FontWeight.Bold,
-                    onClick = { isRunning = !isRunning && elapsedSeconds < 18 * 60 },
-                    contentDescription = "Start or pause timer"
-                    // Timer IS the start/pause button — tap the timer. No separate button, no icons.
-                )
+                // FIX V6 (2): Blue progress indicator MOVED here — as timer background.
+                // Old separate 4dp bar below description is deleted (see below).
+                // Blue fill = step progress (0..1). Text stays on top, centered.
+                // Tap still starts / pauses. Running = green text, paused = white.
+                Box(
+                    modifier = Modifier
+                        .width(56.dp)
+                        .heightIn(min = 24.dp)
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(GuideSurface)
+                        .border(1.dp, GuideBorder, RoundedCornerShape(8.dp))
+                        .clickable { isRunning = !isRunning && elapsedSeconds < 18 * 60 }
+                        .semantics { contentDescription = "Start or pause timer" },
+                    contentAlignment = Alignment.Center
+                ) {
+                    // Progress fill — blue, 35% alpha so timer text stays readable
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth(stepProgress)
+                            .fillMaxHeight()
+                            .background(GuideAccent.copy(alpha = 0.35f))
+                            .align(Alignment.CenterStart)
+                    )
+                    OutlinedText(
+                        text = formatGameTime(elapsedSeconds),
+                        color = if (isRunning) GuideGreen else GuideText,
+                        fontSize = 8.sp,
+                        fontWeight = FontWeight.Bold,
+                        maxLines = 1
+                    )
+                }
                 Box(modifier = Modifier.weight(1f)) {
                     GuideControl(
                         selectedPlan.label.substringBefore(" - ").trim(),
@@ -576,31 +623,25 @@ fun RoamGuideWidget(onBack: () -> Unit) {
             }
 
             if (!descriptionHidden) {
-                // FIX V5 (1): text still didn't fit — e.g. "Go Turtle pit early,
-                // stand in front (zoning). Save Ultimate to start fight or
-                // protect jungler's Retribution." clipped at 52% width.
-                // Two fixes together:
-                // (a) Simplify: collapsed = first sentence only.
-                //     "Go Turtle pit early, stand in front (zoning)."
-                //     Expanded = full description (6 lines).
-                // (b) Dynamic sizing: if first sentence still long, shrink font
-                //     9sp -> 8sp (>65 chars) -> 7.5sp (>90 chars) so it fits
-                //     in 2 lines without clipping. No widget width change.
+                // FIX V6 (3+4): Full description + adaptive width.
+                // V5 cut to first sentence only — lost "Save AoE Ultimate...".
+                // Now full text, widget expands right so it still fits in 2 lines.
                 if (objectiveDescription.isNotBlank()) {
-                    val collapsedDescription = objectiveDescription
-                        .substringBefore(". ")
-                        .trim()
-                        .let { if (it.endsWith(".")) it else "$it." }
-                        .ifBlank { objectiveDescription }
-                    val displayDescription = if (detailsExpanded) objectiveDescription else collapsedDescription
+                    // FIX V6 (3): Show FULL description, not first sentence only.
+                    // Old V5 showed only "Go Lord pit early, zone front." — cut off
+                    // "Save AoE Ultimate for Lord fight..." which is the key info.
+                    // Now full text + adaptive width (above) makes it fit in 2 lines.
+                    val displayDescription = objectiveDescription
                     val descFontSize = when {
-                        !detailsExpanded && displayDescription.length > 90 -> 7.5.sp
-                        !detailsExpanded && displayDescription.length > 65 -> 8.sp
+                        !detailsExpanded && displayDescription.length > 140 -> 7.5.sp
+                        !detailsExpanded && displayDescription.length > 110 -> 8.sp
+                        !detailsExpanded && displayDescription.length > 85 -> 8.5.sp
                         else -> 9.sp
                     }
                     val descLineHeight = when {
-                        !detailsExpanded && displayDescription.length > 90 -> 10.sp
-                        !detailsExpanded && displayDescription.length > 65 -> 11.sp
+                        !detailsExpanded && displayDescription.length > 140 -> 10.sp
+                        !detailsExpanded && displayDescription.length > 110 -> 11.sp
+                        !detailsExpanded && displayDescription.length > 85 -> 11.sp
                         else -> 12.sp
                     }
                     OutlinedText(
@@ -678,23 +719,9 @@ fun RoamGuideWidget(onBack: () -> Unit) {
                             }
                         }
                     }
-                } else {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(4.dp)
-                            .background(GuideBorder, RoundedCornerShape(2.dp))
-                    ) {
-                        val span = (currentStep.endSeconds - currentStep.startSeconds).coerceAtLeast(1)
-                        val progress = ((elapsedSeconds - currentStep.startSeconds).toFloat() / span).coerceIn(0f, 1f)
-                        Box(
-                            Modifier
-                                .fillMaxWidth(progress)
-                                .height(4.dp)
-                                .background(GuideAccent, RoundedCornerShape(2.dp))
-                        )
-                    }
                 }
+                // FIX V6 (2): Separate blue progress bar DELETED — now timer background.
+                // No extra 4dp bar below description.
             }
         }
 
