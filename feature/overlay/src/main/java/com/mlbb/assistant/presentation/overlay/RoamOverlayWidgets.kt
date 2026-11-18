@@ -98,12 +98,13 @@ private data class RoamStep(
     val description: String,
     val timeLabel: String,
     val phase: String,
-    val callout: String,
     val checklist: List<String>,
     val vision: String,
     val decision: String,
     val dont: String
 )
+// V4: callout field totally removed — no more phase · callout line.
+// Description is shown directly (see OutlinedText below).
 
 private data class RoamBlessing(
     val id: String,
@@ -167,7 +168,6 @@ private fun parseStep(json: JSONObject): RoamStep {
         description = description,
         timeLabel = json.optString("timeLabel"),
         phase = json.optString("phase"),
-        callout = json.optString("callout").ifBlank { json.optString("objective") },
         checklist = json.stringList("checklist"),
         vision = json.optString("vision"),
         decision = json.optString("decision"),
@@ -539,22 +539,23 @@ fun RoamGuideWidget(onBack: () -> Unit) {
             }
 
             if (!descriptionHidden) {
-                // FIX: was phase + callout + full objectiveDescription in one 11sp/3-line
-                // block (45dp tall, 3rd line clipped by progress bar in screenshot).
-                // Collapsed = callout only, 9sp, 2 lines. Full text only when expanded.
-                OutlinedText(
-                    text = buildString {
-                        if (currentStep.phase.isNotBlank()) append("${currentStep.phase} · ")
-                        append(currentStep.callout.ifBlank { objectiveText })
-                        if (detailsExpanded && objectiveDescription.isNotBlank()) append(" — $objectiveDescription")
-                    },
-                    color = GuideText,
-                    fontSize = 9.sp,
-                    lineHeight = 12.sp,
-                    maxLines = if (detailsExpanded) 6 else 2,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.fillMaxWidth()
-                )
+                // FIX V4: call-out totally removed. Was:
+                //   phase · callout (+ " — description" when expanded)
+                //   e.g. "Setup · Guard buff, don't feed"
+                // Now: description directly, no prefix / suffix.
+                // objectiveDescription already = currentStep.description
+                // (or turtle/lord template when that objective is relevant).
+                if (objectiveDescription.isNotBlank()) {
+                    OutlinedText(
+                        text = objectiveDescription,
+                        color = GuideText,
+                        fontSize = 9.sp,
+                        lineHeight = 12.sp,
+                        maxLines = if (detailsExpanded) 6 else 2,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
                 if (detailsExpanded) {
                     OutlinedText(
                         "${currentStep.timeLabel.ifBlank { "${formatGameTime(currentStep.startSeconds)}–${formatGameTime(currentStep.endSeconds)}" }}${guide.patch.takeIf(String::isNotBlank)?.let { " · $it" }.orEmpty()}",
