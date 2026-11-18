@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -99,9 +100,8 @@ private fun formatCooldown(seconds: Int): String = "%02d:%02d".format(seconds / 
  * width (~52% of screen in landscape), so each of the 5 cells stays ~1/5 of that.
  */
 @OptIn(ExperimentalFoundationApi::class)
-
 @Composable
-private fun OutlinedText(
+private fun OutlinedTrackerText(
     text: String,
     color: Color,
     fontSize: TextUnit = TextUnit.Unspecified,
@@ -142,7 +142,6 @@ private fun OutlinedText(
     }
 }
 
-
 @Composable
 fun EnemySpellTrackerWidget(elapsedSeconds: Int, modifier: Modifier = Modifier) {
     var trackedSpells by rememberSaveable { mutableStateOf(initialTrackedSpells()) }
@@ -159,7 +158,7 @@ fun EnemySpellTrackerWidget(elapsedSeconds: Int, modifier: Modifier = Modifier) 
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            OutlinedText(
+            OutlinedTrackerText(
                 text = "ENEMY SPELLS",
                 color = TrackerMuted,
                 fontSize = 6.5.sp,
@@ -167,7 +166,7 @@ fun EnemySpellTrackerWidget(elapsedSeconds: Int, modifier: Modifier = Modifier) 
                 letterSpacing = 0.8.sp,
                 maxLines = 1
             )
-            OutlinedText(
+            OutlinedTrackerText(
                 text = "Tap = used  ·  Hold = change",
                 color = TrackerMuted,
                 fontSize = 6.5.sp,
@@ -231,7 +230,7 @@ fun EnemySpellTrackerWidget(elapsedSeconds: Int, modifier: Modifier = Modifier) 
                         ) {
                             // Lane always visible. When cooling, also show the spell
                             // abbreviation so you don't lose which spell is on CD.
-                            OutlinedText(
+                            OutlinedTrackerText(
                                 text = if (isCoolingDown) {
                                     "${laneSpell.lane} · ${abbreviationFor(laneSpell.spell.name)}"
                                 } else {
@@ -244,7 +243,7 @@ fun EnemySpellTrackerWidget(elapsedSeconds: Int, modifier: Modifier = Modifier) 
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis
                             )
-                            OutlinedText(
+                            OutlinedTrackerText(
                                 text = if (isCoolingDown) formatCooldown(remaining) else laneSpell.spell.name,
                                 color = if (isCoolingDown) TrackerGold else TrackerText,
                                 fontSize = if (isCoolingDown) 11.sp else 8.sp,
@@ -283,7 +282,7 @@ fun EnemySpellTrackerWidget(elapsedSeconds: Int, modifier: Modifier = Modifier) 
                                     Box(modifier = Modifier.weight(1f)) {
                                         DropdownMenuItem(
                                             text = {
-                                                OutlinedText(
+                                                OutlinedTrackerText(
                                                     text = if (isSelected) "✓ ${spell.name} ${spell.cooldownSeconds}s"
                                                     else "${spell.name} ${spell.cooldownSeconds}s",
                                                     maxLines = 1,
