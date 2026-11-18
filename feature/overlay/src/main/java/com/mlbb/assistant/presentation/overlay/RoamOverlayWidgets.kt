@@ -420,12 +420,18 @@ fun RoamGuideWidget(onBack: () -> Unit) {
         lastSlainAt != null -> "${objective.label} slain. Next in ${formatGameTime(objective.secondsUntil)}. Push, farm, or reset."
         else -> currentStep?.description.orEmpty()
     }
-    // FIX V2: No more manual dp math (displayMetrics / density / LocalConfiguration).
-    // All three gave a different width depending on window type, and the 300dp
-    // min pushed 52% -> 83% on small windows. Now the width is declarative:
-    // fillMaxWidth(0.52f) on the outer Column = exactly 52% of the MATCH_PARENT
-    // JetOverlay window, no matter the density / portrait / landscape.
-    // See the Column modifier below — widgetWidth variable is gone.
+    // FIX V3 (touch): window is now WRAP_CONTENT, so fillMaxWidth(0.52f)
+    // has nothing to be 52% OF — it would wrap / stretch wrong.
+    // Width must be absolute: 52% of the REAL display width.
+    // displayMetrics (not LocalConfiguration) because LocalConfiguration
+    // in an overlay window reports portrait size even in-game (landscape).
+    // No 300dp min — that was the old overshoot (52% of 360dp = 187dp
+    // coerced to 300dp = 83%). With real landscape width (e.g. 800dp),
+    // 52% = 416dp, already > 300dp, so no min is needed.
+    val displayMetrics = LocalContext.current.resources.displayMetrics
+    val screenWidthDp = (displayMetrics.widthPixels / displayMetrics.density).toInt()
+    val widgetWidth = (screenWidthDp * WIDGET_WIDTH_FRACTION_LANDSCAPE)
+        .coerceAtMost((screenWidthDp - 8).toFloat())
     val blessing = guide.blessings.firstOrNull {
         it.id == selectedPlan?.blessingId ||
             it.name.equals(selectedPlan?.blessing?.substringBefore('/')?.trim(), ignoreCase = true)
@@ -434,13 +440,13 @@ fun RoamGuideWidget(onBack: () -> Unit) {
     // Gap between the two widgets = exactly 1 physical pixel.
     // 1.dp is NOT 1px (at 3x density 1.dp = 3px), so convert 1px -> dp.
     val onePx = with(LocalDensity.current) { 1.toDp() }
-    // FIX V2: was Modifier.width(widgetWidth.dp) where widgetWidth was
-    // coerced to >=300dp -> 83-95% wide in your screenshot (a bit too long).
-    // Now: exactly 52% of the window, centered by the parent Box in JetOverlay.
-    // No min-width, no manual math — cannot overshoot.
+    // FIX V3: was fillMaxWidth(0.52f) — only works in a MATCH_PARENT window.
+    // Window is now WRAP_CONTENT (for touch passthrough), so the Column
+    // must define the window width: absolute 52% of display.
+    // This Column IS the window width — sides stay outside the window.
     Column(
         modifier = Modifier
-            .fillMaxWidth(0.52f),
+            .width(widgetWidth.dp),
         // No outer horizontal padding: the card itself is 52%,
         // so its visible edges line up exactly with the green line.
         verticalArrangement = Arrangement.spacedBy(onePx)

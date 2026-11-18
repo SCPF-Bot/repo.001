@@ -1,9 +1,10 @@
 package com.mlbb.assistant.presentation.overlay
 
 // ── Merged: JetOverlay.kt + pointerInput shim ─────────────────────────────────────
-// V2: window stays MATCH_PARENT + CENTER_HORIZONTAL, but content is now
-// wrapped in a TopCenter Box. Roam is fillMaxWidth(0.52f) inside that Box,
-// so it is exactly 52% and centered on the green line, not stretched.
+// V3: window is WRAP_CONTENT + CENTER_HORIZONTAL + FLAG_NOT_TOUCH_MODAL.
+// Window hugs the 52% widget, so green areas beside it are outside the
+// window and fall through to MLBB. Roam defines width as absolute
+// displayMetrics * 0.52f (not fillMaxWidth(0.52f)).
 // DELETED: pointerInput shim file (11 lines). Merged here — it was only used by the
 // overlay package and only JetOverlay needs low-level pointer handling.
 
@@ -18,7 +19,6 @@ import android.view.VelocityTracker
 import android.view.WindowManager
 import android.view.WindowMetrics
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -86,17 +86,21 @@ object JetOverlay {
         val wm = app.getSystemService(Context.WINDOW_SERVICE) as WindowManager
         windowManager = wm
 
-        // FIX: WRAP_CONTENT + TOP|START pinned widget to left edge (x=0) and made
-        // width measurement wrong. MATCH_PARENT width + CENTER_HORIZONTAL lets the
-        // 52% widget actually center on the green line.
+        // FIX V3 (touch passthrough): MATCH_PARENT made the window cover the
+        // whole top bar. Even transparent sides ate taps — MLBB never got them.
+        // Window is now WRAP_CONTENT wide, so it hugs the 52% widget. The green
+        // areas beside the widget are OUTSIDE the window, so with
+        // FLAG_NOT_TOUCH_MODAL they fall through to MLBB.
+        // Gravity CENTER_HORIZONTAL still centers the WRAP_CONTENT window.
         val params = WindowManager.LayoutParams(
-            WindowManager.LayoutParams.MATCH_PARENT,
+            WindowManager.LayoutParams.WRAP_CONTENT,
             WindowManager.LayoutParams.WRAP_CONTENT,
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
                 WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
             else
                 @Suppress("DEPRECATION") WindowManager.LayoutParams.TYPE_SYSTEM_ALERT,
             WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
+                    WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL or
                     WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,
             PixelFormat.TRANSLUCENT
         ).apply {
@@ -118,8 +122,11 @@ object JetOverlay {
             // Without this Box, a 52% widget would stick to the left edge and
             // look like it spans the full width (empty space on the right).
             setContent {
+                // FIX V3: NO fillMaxWidth() here. Inside a WRAP_CONTENT window,
+                // fillMaxWidth() would stretch the window back to full width
+                // and block the green areas again. Plain Box hugs the widget.
                 Box(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier,
                     contentAlignment = Alignment.TopCenter
                 ) { content() }
             }
