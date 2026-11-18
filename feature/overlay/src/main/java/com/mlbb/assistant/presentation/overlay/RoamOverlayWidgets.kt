@@ -59,9 +59,9 @@ import kotlinx.coroutines.delay
 import org.json.JSONArray
 import org.json.JSONObject
 
-private val GuideBackground = Color(0x4D0D1117) // V11: GitHub Dark #0d1117 at 30% (was 45% 0x73)
-private val GuideSurface = Color(0x4D161B22) // V11: GitHub Dark #161b22 at 30% (was 45%)
-private val GuideBorder = Color(0x4D30363D) // V11: GitHub Dark #30363d at 30% (was 45%)
+private val GuideBackground = Color(0x400D1117) // V12: GitHub Dark #0d1117 at 25% (was 30% 0x4D)
+private val GuideSurface = Color(0x40161B22) // V12: GitHub Dark #161b22 at 25% (was 30% 0x4D)
+private val GuideBorder = Color(0x4030363D) // V12: GitHub Dark #30363d at 25% (was 30% 0x4D)
 private val GuideAccent = Color(0xFF58A6FF) // GitHub Dark blue
 private val GuideText = Color(0xFFE6EDF3) // GitHub Dark primary
 private val GuideMuted = Color(0xFF8B949E) // GitHub Dark secondary
@@ -444,7 +444,7 @@ fun RoamGuideWidget(onBack: () -> Unit) {
                         modifier = Modifier
                             .fillMaxWidth(stepProgress)
                             .height(28.dp)
-                            .background(GuideAccent.copy(alpha = 0.30f)) // V11: timer progress 30% to match
+                            .background(GuideAccent.copy(alpha = 0.25f)) // V12: timer progress 25% to match
                             .align(Alignment.CenterStart)
                     )
                     OutlinedText(
@@ -676,9 +676,9 @@ fun RoamGuideWidget(onBack: () -> Unit) {
 // DELETE: RoamGuideWidget.kt, EnemySpellTrackerWidget.kt, RoamOverlayWidgets.kt
 //         (and any RoamOverlayWidgets_V*.kt). Keep ONLY this file + JetOverlay.kt.
 
-private val TrackerSurface = Color(0x4D161B22) // V11: 30% like Guide (was 45% 0x73)
-private val TrackerSurfaceCooling = Color(0x4D2A2413) // V11: 30% like Guide (was 45%)
-private val TrackerBorder = Color(0x4D30363D) // V11: 30% like Guide (was 45%)
+private val TrackerSurface = Color(0x40161B22) // V12: 25% like Guide (was 30% 0x4D)
+private val TrackerSurfaceCooling = Color(0x402A2413) // V12: 25% like Guide (was 30%)
+private val TrackerBorder = Color(0x4030363D) // V12: 25% like Guide (was 30%)
 private val TrackerGold = Color(0xFFFFC94D)
 private val TrackerText = Color(0xFFE6EDF3)
 private val TrackerMuted = Color(0xFF9AA7B4)
