@@ -17,7 +17,10 @@ import android.view.MotionEvent
 import android.view.VelocityTracker
 import android.view.WindowManager
 import android.view.WindowMetrics
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.PointerInputScope
 import androidx.compose.ui.input.pointer.pointerInput as composePointerInput
@@ -115,9 +118,9 @@ object JetOverlay {
             // Without this Box, a 52% widget would stick to the left edge and
             // look like it spans the full width (empty space on the right).
             setContent {
-                androidx.compose.foundation.layout.Box(
-                    modifier = androidx.compose.ui.Modifier.fillMaxWidth(),
-                    contentAlignment = androidx.compose.ui.Alignment.TopCenter
+                Box(
+                    modifier = Modifier.fillMaxWidth(),
+                    contentAlignment = Alignment.TopCenter
                 ) { content() }
             }
         }
