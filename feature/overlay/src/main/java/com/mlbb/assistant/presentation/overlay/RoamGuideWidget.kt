@@ -40,15 +40,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.mlbb.assistant.presentation.common.theme.MLBBGold
-import com.mlbb.assistant.presentation.common.theme.OverlayBackground
-import com.mlbb.assistant.presentation.common.theme.SurfaceDark
-import com.mlbb.assistant.presentation.common.theme.SurfaceElevated
-import com.mlbb.assistant.presentation.common.theme.TextPrimary
 import kotlinx.coroutines.delay
 import org.json.JSONArray
 
-private val GuideGreen = Color(0xFF72D6A0)
+private val GithubCanvas = Color(0xFF0D1117)
+private val GithubSurface = Color(0xFF161B22)
+private val GithubBorder = Color(0xFF30363D)
+private val GithubAccent = Color(0xFF58A6FF)
+private val GithubText = Color(0xFFC9D1D9)
+private val GithubMuted = Color(0xFF8B949E)
+private val GithubGold = Color(0xFFE3B341)
 private const val ROAM_GUIDE_ASSET = "roam_guide.json"
 private const val WIDGET_ALPHA = 0.25f // 75% transparent
 
@@ -139,12 +140,12 @@ fun RoamGuideBubble(onTap: () -> Unit) {
             .width(56.dp)
             .height(56.dp)
             .clip(CircleShape)
-            .background(SurfaceElevated)
-            .border(2.dp, GuideGreen, CircleShape)
+            .background(GithubSurface)
+            .border(2.dp, GithubAccent, CircleShape)
             .clickable(onClick = onTap),
         contentAlignment = Alignment.Center
     ) {
-        OutlinedText("R", GuideGreen, fontSize = 20.sp, fontWeight = FontWeight.Black)
+        OutlinedText("R", GithubAccent, fontSize = 20.sp, fontWeight = FontWeight.Black)
     }
 }
 
@@ -174,35 +175,48 @@ fun RoamGuideWidget(onBack: () -> Unit) {
     Column(
         modifier = Modifier
             .width(widgetWidth)
-            .background(OverlayBackground.copy(alpha = WIDGET_ALPHA), RoundedCornerShape(6.dp))
-            .border(1.dp, GuideGreen.copy(alpha = 0.55f), RoundedCornerShape(6.dp))
+            .background(GithubCanvas.copy(alpha = WIDGET_ALPHA), RoundedCornerShape(6.dp))
+            .border(1.dp, GithubBorder.copy(alpha = 0.8f), RoundedCornerShape(6.dp))
             .clip(RoundedCornerShape(6.dp))
-            .padding(horizontal = 4.dp, vertical = 2.dp)
+            .padding(horizontal = 3.dp, vertical = 1.dp)
     ) {
         if (plans.isEmpty() || selectedPlan == null) {
-            OutlinedText("Roam guide unavailable", TextPrimary, fontSize = 9.sp)
+            OutlinedText("Roam guide unavailable", GithubText, fontSize = 9.sp)
             return@Column
         }
 
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(4.dp),
+            horizontalArrangement = Arrangement.spacedBy(3.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            OutlinedText(
-                "%02d:%02d".format(elapsedSeconds / 60, elapsedSeconds % 60),
-                TextPrimary,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Black
-            )
+            // The timer itself is the start/pause control.
+            Row(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(4.dp))
+                    .background(GithubSurface.copy(alpha = WIDGET_ALPHA))
+                    .border(1.dp, GithubBorder.copy(alpha = 0.8f), RoundedCornerShape(4.dp))
+                    .clickable { isRunning = !isRunning }
+                    .padding(horizontal = 4.dp, vertical = 1.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(3.dp)
+            ) {
+                OutlinedText(
+                    "%02d:%02d".format(elapsedSeconds / 60, elapsedSeconds % 60),
+                    GithubText,
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Black
+                )
+                OutlinedText(if (isRunning) "Ⅱ" else "▶", GithubAccent, fontSize = 8.sp, fontWeight = FontWeight.Bold)
+            }
 
             Box(modifier = Modifier.weight(1f)) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(4.dp))
-                        .background(SurfaceDark.copy(alpha = WIDGET_ALPHA))
-                        .border(1.dp, GuideGreen.copy(alpha = 0.6f), RoundedCornerShape(4.dp))
+                        .background(GithubSurface.copy(alpha = WIDGET_ALPHA))
+                        .border(1.dp, GithubBorder.copy(alpha = 0.8f), RoundedCornerShape(4.dp))
                         .clickable { planMenuExpanded = true }
                         .padding(horizontal = 5.dp, vertical = 2.dp),
                     verticalAlignment = Alignment.CenterVertically,
@@ -210,24 +224,24 @@ fun RoamGuideWidget(onBack: () -> Unit) {
                 ) {
                     OutlinedText(
                         selectedPlan.label,
-                        GuideGreen,
+                        GithubAccent,
                         fontSize = 8.sp,
                         fontWeight = FontWeight.Bold,
                         maxLines = 1
                     )
-                    OutlinedText("▾", TextPrimary, fontSize = 9.sp)
+                    OutlinedText("▾", GithubMuted, fontSize = 9.sp)
                 }
                 DropdownMenu(
                     expanded = planMenuExpanded,
                     onDismissRequest = { planMenuExpanded = false },
-                    modifier = Modifier.background(SurfaceElevated)
+                    modifier = Modifier.background(GithubSurface)
                 ) {
                     plans.forEach { plan ->
                         DropdownMenuItem(
                             text = {
                                 OutlinedText(
                                     plan.label,
-                                    if (plan.id == selectedPlan.id) GuideGreen else TextPrimary,
+                                    if (plan.id == selectedPlan.id) GithubAccent else GithubText,
                                     fontSize = 9.sp
                                 )
                             },
@@ -243,31 +257,15 @@ fun RoamGuideWidget(onBack: () -> Unit) {
 
             OutlinedText(
                 selectedPlan.blessing,
-                MLBBGold,
+                GithubGold,
                 fontSize = 8.sp,
                 fontWeight = FontWeight.Bold,
                 maxLines = 1
             )
 
-            Box(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(4.dp))
-                    .background(Color.Black.copy(alpha = WIDGET_ALPHA))
-                    .border(1.dp, TextPrimary.copy(alpha = WIDGET_ALPHA), RoundedCornerShape(4.dp))
-                    .clickable { isRunning = !isRunning }
-                    .padding(horizontal = 6.dp, vertical = 2.dp)
-            ) {
-                OutlinedText(
-                    if (isRunning) "Pause" else "Start",
-                    TextPrimary,
-                    fontSize = 8.sp,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-
             OutlinedText(
                 "Back",
-                MLBBGold,
+                GithubMuted,
                 modifier = Modifier.clickable(onClick = onBack).padding(horizontal = 2.dp, vertical = 2.dp),
                 fontSize = 8.sp,
                 fontWeight = FontWeight.Bold
@@ -280,13 +278,13 @@ fun RoamGuideWidget(onBack: () -> Unit) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(GuideGreen.copy(alpha = WIDGET_ALPHA), RoundedCornerShape(4.dp))
-                    .border(1.dp, GuideGreen.copy(alpha = 0.3f), RoundedCornerShape(4.dp))
+                    .background(GithubSurface.copy(alpha = WIDGET_ALPHA), RoundedCornerShape(4.dp))
+                    .border(1.dp, GithubBorder.copy(alpha = 0.65f), RoundedCornerShape(4.dp))
                     .padding(horizontal = 5.dp, vertical = 2.dp)
             ) {
                 OutlinedText(
                     currentStep.description,
-                    TextPrimary,
+                    GithubText,
                     fontSize = 8.sp,
                     lineHeight = 10.sp
                 )
