@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.DropdownMenu
@@ -39,9 +40,9 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -61,15 +62,16 @@ private val GithubRed = Color(0xFFF85149)
 private const val ROAM_GUIDE_ASSET = "roam_guide.json"
 private const val WIDGET_ALPHA = 0.25f
 
-// COMPACT + SLIGHTLY WIDER
-// Goal: guide roam users in landscape without blocking the fight.
-// Collapsed = 2 rows only. Width is slightly longer than before so more words fit per line:
-//   Portrait: 98% (already max, kept)
-//   Landscape: 72% (was 62%, +10 points) - still leaves 28% of screen free for the fight.
-// Buttons are slightly bigger for UX: larger font + larger tap padding, so you can hit them mid-game.
-// Height is NOT increased. The extra width is what makes it feel roomier.
-// JSON v2.5: Grandmaster-Epic, objective + description merged. Collapsed shows merged line, expanded adds checklist/vision/do/dont/blessing.
-// No separate objective field anymore. Use instruction / description.
+// FINAL SPEC - from screenshots + requests
+// - Width: slightly longer. Landscape 72% (was 62%), Portrait 98%. Height is NOT fixed.
+// - Collapsed: yellow callout + white description in ONE flowing line.
+//   Example 02:52 collapsed: "Stay with carry, reset - After Turtle, stay near carry and mid. You have a Turtle shield..."
+//   No truncation. Bottom side has adaptive height: height wraps to fit full description.
+// - Expanded: same merged line on top, then additional info: To do checklist, Vision, Do, Don't, Blessing.
+// - Font: callout = same style as "To do:" heading (yellow / GithubGold, bold)
+//   description = same style as To do bullet text (white / GithubText, normal)
+// - Top row: Turtle / Lord indicator REMOVED. Top row is now timer + plan + expand + X only.
+// - JSON v2.6: Grandmaster-Epic, objective + description merged, descriptions shortened to fit adaptive height.
 
 private data class RoamHero(val name: String, val archetype: String = "", val note: String = "")
 private data class RoamBlessing(val id: String, val name: String, val type: String = "", val effect: String = "", val cooldown: String = "", val unlock: String = "")
@@ -101,7 +103,6 @@ private fun parseHeroes(obj: JSONObject): List<RoamHero> {
 }
 
 private fun parseStep(obj: JSONObject): RoamStep {
-    // Merged field: instruction == description in v2.1. Fall back to old objective + description if needed.
     val merged = obj.optString("instruction").ifBlank { obj.optString("description") }.ifBlank {
         val o = obj.optString("objective")
         val d = obj.optString("description")
@@ -178,42 +179,34 @@ private fun loadRoamGuide(context: Context): RoamGuideData = runCatching {
     }
 }.getOrDefault(RoamGuideData())
 
-private data class NextObjective(val label: String, val secondsUntil: Int, val isLive: Boolean)
-
-private fun nextObjective(elapsed: Int): NextObjective {
-    val spawns = listOf(120 to "Turtle", 240 to "Turtle 2", 360 to "Turtle 3", 480 to "Lord", 660 to "Lord 2", 840 to "Lord 3", 1080 to "Evolved Lord")
-    val next = spawns.firstOrNull { it.first > elapsed } ?: return NextObjective("Push", 0, true)
-    val until = next.first - elapsed
-    return NextObjective(next.second, until, until <= 30)
-}
-
 private fun formatTime(s: Int): String {
     val v = s.coerceAtLeast(0)
     return "%02d:%02d".format(v / 60, v % 60)
 }
 
 @Composable
-private fun OutlinedText(text: String, color: Color, modifier: Modifier = Modifier, fontSize: TextUnit = 9.sp, fontWeight: FontWeight? = null, maxLines: Int = Int.MAX_VALUE, lineHeight: TextUnit = TextUnit.Unspecified, overflow: TextOverflow = TextOverflow.Clip) {
+private fun OutlinedText(text: String, color: Color, modifier: Modifier = Modifier, fontSize: TextUnit = 9.sp, fontWeight: FontWeight? = null, maxLines: Int = Int.MAX_VALUE, lineHeight: TextUnit = TextUnit.Unspecified, overflow: TextOverflow = TextOverflow.Visible) {
     Box(modifier = modifier) {
         Text(text = text, color = Color.Black, maxLines = maxLines, overflow = overflow, style = TextStyle(fontSize = fontSize, fontWeight = fontWeight, lineHeight = lineHeight, drawStyle = Stroke(width = 3f), shadow = Shadow(color = Color.Black, offset = Offset.Zero, blurRadius = 1f)))
         Text(text = text, color = color, maxLines = maxLines, overflow = overflow, style = TextStyle(fontSize = fontSize, fontWeight = fontWeight, lineHeight = lineHeight, shadow = Shadow(color = Color.Black, offset = Offset.Zero, blurRadius = 1f)))
     }
 }
 
-// COLLAPSED + EXPANDED HEADER: blue objective merged with description in ONE flowing line.
-// Collapsed: callout (blue, bold) + " - " + description (white) in 2 lines max.
-// Expanded: same merged line on top, then additional info below (checklist, vision, do/dont, blessing).
-// This is what makes collapsed useful: you see "Guard buff, don't feed - Buy Roam boots. Stay near jungler's buff..." not just the short callout.
+// MERGED LINE: yellow callout + white description in ONE flowing paragraph.
+// Callout = same style as "To do:" heading: yellow, bold, 9sp.
+// Description = same style as To do bullet text: white, normal, 9sp.
+// ADAPTIVE HEIGHT: maxLines = Int.MAX_VALUE, overflow = Visible, parent uses wrapContentHeight.
+// No "..." truncation in collapsed. Bottom side grows to fit full description.
 @Composable
-private fun MergedInstructionText(phase: String, callout: String, description: String, maxLines: Int = 2) {
-    val annotated = buildAnnotatedString {
+private fun MergedInstructionText(phase: String, callout: String, description: String, maxLines: Int = Int.MAX_VALUE) {
+    val annotated: AnnotatedString = buildAnnotatedString {
         if (phase.isNotBlank()) {
             withStyle(style = SpanStyle(color = GithubMuted, fontWeight = FontWeight.Bold, fontSize = 8.sp)) {
                 append(phase)
                 append(" - ")
             }
         }
-        withStyle(style = SpanStyle(color = GithubAccent, fontWeight = FontWeight.Bold, fontSize = 10.sp)) {
+        withStyle(style = SpanStyle(color = GithubGold, fontWeight = FontWeight.Bold, fontSize = 9.sp)) {
             append(callout)
         }
         if (description.isNotBlank()) {
@@ -225,26 +218,9 @@ private fun MergedInstructionText(phase: String, callout: String, description: S
             }
         }
     }
-    Box {
-        Text(
-            text = annotated,
-            maxLines = maxLines,
-            overflow = TextOverflow.Ellipsis,
-            style = TextStyle(
-                lineHeight = 11.sp,
-                drawStyle = Stroke(width = 3f),
-                shadow = Shadow(color = Color.Black, offset = Offset.Zero, blurRadius = 1f)
-            )
-        )
-        Text(
-            text = annotated,
-            maxLines = maxLines,
-            overflow = TextOverflow.Ellipsis,
-            style = TextStyle(
-                lineHeight = 11.sp,
-                shadow = Shadow(color = Color.Black, offset = Offset.Zero, blurRadius = 1f)
-            )
-        )
+    Box(modifier = Modifier.fillMaxWidth().wrapContentHeight()) {
+        Text(text = annotated, maxLines = maxLines, overflow = TextOverflow.Visible, style = TextStyle(lineHeight = 11.sp, drawStyle = Stroke(width = 3f), shadow = Shadow(color = Color.Black, offset = Offset.Zero, blurRadius = 1f)))
+        Text(text = annotated, maxLines = maxLines, overflow = TextOverflow.Visible, style = TextStyle(lineHeight = 11.sp, shadow = Shadow(color = Color.Black, offset = Offset.Zero, blurRadius = 1f)))
     }
 }
 
@@ -260,8 +236,6 @@ fun RoamGuideWidget(onBack: () -> Unit) {
     val context = LocalContext.current
     val config = LocalConfiguration.current
     val isLandscape = config.screenWidthDp > config.screenHeightDp
-    // WIDTH - slightly longer than before. Height unchanged.
-    // Landscape 72% (was 62%), Portrait 98% (kept). Still leaves room for the fight.
     val widgetWidth = if (isLandscape) (config.screenWidthDp * 0.72f).dp else (config.screenWidthDp * 0.98f).dp
     val guide = remember(context) { loadRoamGuide(context) }
     val plans = guide.plans
@@ -280,23 +254,19 @@ fun RoamGuideWidget(onBack: () -> Unit) {
     }
 
     val currentStep = selectedPlan?.steps?.firstOrNull { elapsedSeconds >= it.startSeconds && elapsedSeconds < it.endSeconds } ?: selectedPlan?.steps?.lastOrNull()
-    val nextObj = nextObjective(elapsedSeconds)
     val blessingDetail = guide.blessings.firstOrNull { it.id == selectedPlan?.blessingId || it.name.equals(selectedPlan?.blessing?.split("/")?.firstOrNull()?.trim(), ignoreCase = true) }
 
-    Column(modifier = Modifier.width(widgetWidth).background(GithubCanvas.copy(alpha = WIDGET_ALPHA), RoundedCornerShape(6.dp)).border(1.dp, GithubBorder.copy(alpha = 0.8f), RoundedCornerShape(6.dp)).clip(RoundedCornerShape(6.dp)).padding(horizontal = 5.dp, vertical = 2.dp)) {
+    Column(modifier = Modifier.width(widgetWidth).wrapContentHeight().background(GithubCanvas.copy(alpha = WIDGET_ALPHA), RoundedCornerShape(6.dp)).border(1.dp, GithubBorder.copy(alpha = 0.8f), RoundedCornerShape(6.dp)).clip(RoundedCornerShape(6.dp)).padding(horizontal = 5.dp, vertical = 2.dp)) {
         if (plans.isEmpty() || selectedPlan == null || currentStep == null) {
             OutlinedText("Roam guide unavailable", GithubText, fontSize = 9.sp)
             return@Column
         }
 
-        // ROW 1 - controls. Buttons slightly bigger: larger font + larger tap padding.
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp), verticalAlignment = Alignment.CenterVertically) {
-            // Timer = play/pause. Bigger tap target: 14sp text, 6dp horizontal / 3dp vertical padding.
             Row(modifier = Modifier.clip(RoundedCornerShape(5.dp)).background(GithubSurface.copy(alpha = WIDGET_ALPHA)).border(1.dp, GithubBorder.copy(alpha = 0.8f), RoundedCornerShape(5.dp)).clickable { isRunning = !isRunning }.padding(horizontal = 6.dp, vertical = 3.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(3.dp)) {
                 OutlinedText(formatTime(elapsedSeconds), GithubText, fontSize = 14.sp, fontWeight = FontWeight.Black)
                 OutlinedText(if (isRunning) "II" else "▶", GithubAccent, fontSize = 9.sp, fontWeight = FontWeight.Bold)
             }
-            // Plan selector - weight 1 so it uses the extra width, truncates if needed.
             Box(modifier = Modifier.weight(1f)) {
                 Row(modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(5.dp)).background(GithubSurface.copy(alpha = WIDGET_ALPHA)).border(1.dp, GithubBorder.copy(alpha = 0.8f), RoundedCornerShape(5.dp)).clickable { planMenuExpanded = true }.padding(horizontal = 6.dp, vertical = 4.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
                     OutlinedText(selectedPlan.label, GithubAccent, fontSize = 10.sp, fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis)
@@ -308,34 +278,23 @@ fun RoamGuideWidget(onBack: () -> Unit) {
                     }
                 }
             }
-            // Next objective - slightly bigger so it is readable in landscape.
-            val objColor = if (nextObj.isLive) GithubRed else GithubGold
-            val objText = if (nextObj.isLive) "${nextObj.label} NOW" else "${nextObj.label} ${formatTime(nextObj.secondsUntil)}"
-            OutlinedText(objText, objColor, fontSize = 9.sp, fontWeight = FontWeight.Bold, maxLines = 1)
-            // Expand toggle - bigger tap target.
             OutlinedText(if (isExpanded) "▲" else "▼", GithubMuted, modifier = Modifier.clickable { isExpanded = !isExpanded }.padding(horizontal = 4.dp, vertical = 4.dp), fontSize = 11.sp, fontWeight = FontWeight.Bold)
             OutlinedText("X", GithubMuted, modifier = Modifier.clickable(onClick = onBack).padding(horizontal = 4.dp, vertical = 4.dp), fontSize = 11.sp, fontWeight = FontWeight.Bold)
         }
 
-        // ROW 2 - COLLAPSED: blue objective MERGED with description in one flowing line.
-        // Example 00:00-00:40: "Guard buff, don't feed - Buy Roam boots. Stay near jungler's first buff and watch the bush..."
-        // Not just the callout alone. Tap to expand for checklist / vision / do / dont / blessing.
         if (!isExpanded) {
-            Box(modifier = Modifier.fillMaxWidth().clickable { isExpanded = true }.padding(horizontal = 2.dp, vertical = 2.dp)) {
-                MergedInstructionText(phase = currentStep.phase, callout = currentStep.callout, description = currentStep.description, maxLines = 2)
+            Box(modifier = Modifier.fillMaxWidth().wrapContentHeight().clickable { isExpanded = true }.padding(horizontal = 2.dp, vertical = 2.dp)) {
+                MergedInstructionText(phase = currentStep.phase, callout = currentStep.callout, description = currentStep.description, maxLines = Int.MAX_VALUE)
             }
         } else {
-            Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 2.dp, vertical = 2.dp)) {
+            Column(modifier = Modifier.fillMaxWidth().wrapContentHeight().padding(horizontal = 2.dp, vertical = 2.dp)) {
                 Row(horizontalArrangement = Arrangement.spacedBy(4.dp), verticalAlignment = Alignment.CenterVertically) {
                     if (currentStep.phase.isNotBlank()) OutlinedText(currentStep.phase, GithubAccent, fontSize = 8.sp, fontWeight = FontWeight.Bold)
                     OutlinedText(currentStep.timeLabel.ifBlank { formatTime(currentStep.startSeconds) + "-" + formatTime(currentStep.endSeconds) }, GithubMuted, fontSize = 8.sp)
                     OutlinedText("Ends ${formatTime((currentStep.endSeconds - elapsedSeconds).coerceAtLeast(0))}", GithubMuted, fontSize = 8.sp)
                     if (guide.meta.patch.isNotBlank()) OutlinedText("S42 ${guide.meta.patch}", GithubMuted, fontSize = 8.sp)
                 }
-                // Same merged line as collapsed, now with more lines so full description shows.
-                MergedInstructionText(phase = "", callout = currentStep.callout, description = currentStep.description, maxLines = 3)
-                // ADDITIONAL INFO only in expanded: checklist, vision, do/dont, blessing.
-                // Example 00:00-00:40 checklist = Buy Roam blessing, Stand in bush near jungler's buff, Ping enemy invade if seen.
+                MergedInstructionText(phase = "", callout = currentStep.callout, description = currentStep.description, maxLines = Int.MAX_VALUE)
                 if (currentStep.checklist.isNotEmpty()) {
                     Spacer(Modifier.height(3.dp))
                     OutlinedText("To do:", GithubGold, fontSize = 8.sp, fontWeight = FontWeight.Bold)
@@ -351,9 +310,8 @@ fun RoamGuideWidget(onBack: () -> Unit) {
                 if (currentStep.dont.isNotBlank()) OutlinedText("Don't: ${currentStep.dont}", GithubRed, fontSize = 9.sp, lineHeight = 11.sp)
                 if (blessingDetail != null) {
                     Spacer(Modifier.height(2.dp))
-                    OutlinedText("${selectedPlan.blessing} - ${blessingDetail.effect}", GithubGold, fontSize = 9.sp, lineHeight = 11.sp, maxLines = 2)
+                    OutlinedText("${selectedPlan.blessing} - ${blessingDetail.effect}", GithubGold, fontSize = 9.sp, lineHeight = 11.sp, maxLines = Int.MAX_VALUE)
                 }
-                // Timer sync controls - slightly bigger buttons for UX.
                 Spacer(Modifier.height(3.dp))
                 Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                     OutlinedText("-10s", GithubMuted, modifier = Modifier.clip(RoundedCornerShape(5.dp)).background(GithubSurface.copy(alpha = WIDGET_ALPHA)).clickable { elapsedSeconds = (elapsedSeconds - 10).coerceIn(0, 18 * 60) }.padding(horizontal = 8.dp, vertical = 4.dp), fontSize = 10.sp, fontWeight = FontWeight.Bold)
@@ -363,13 +321,12 @@ fun RoamGuideWidget(onBack: () -> Unit) {
                 }
                 if (elapsedSeconds == 0 && selectedPlan.heroes.isNotEmpty()) {
                     Spacer(Modifier.height(3.dp))
-                    OutlinedText("Pick: ${selectedPlan.heroes.take(6).joinToString(", ") { it.name }}", GithubMuted, fontSize = 9.sp, lineHeight = 11.sp, maxLines = 2)
-                    if (selectedPlan.emblem.isNotBlank()) OutlinedText("Emblem: ${selectedPlan.emblem}", GithubGold, fontSize = 9.sp, lineHeight = 11.sp, maxLines = 2)
+                    OutlinedText("Pick: ${selectedPlan.heroes.take(6).joinToString(", ") { it.name }}", GithubMuted, fontSize = 9.sp, lineHeight = 11.sp, maxLines = Int.MAX_VALUE)
+                    if (selectedPlan.emblem.isNotBlank()) OutlinedText("Emblem: ${selectedPlan.emblem}", GithubGold, fontSize = 9.sp, lineHeight = 11.sp, maxLines = Int.MAX_VALUE)
                 }
             }
         }
 
-        // Progress - 3dp line, no extra row.
         val span = (currentStep.endSeconds - currentStep.startSeconds).coerceAtLeast(1)
         val progress = ((elapsedSeconds - currentStep.startSeconds).toFloat() / span).coerceIn(0f, 1f)
         Box(modifier = Modifier.fillMaxWidth().height(3.dp).background(GithubBorder.copy(alpha = 0.5f))) {
