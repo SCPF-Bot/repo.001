@@ -64,11 +64,11 @@ private val GithubGreen = Color(0xFF3FB950)
 private val GithubRed = Color(0xFFF85149)
 private const val ROAM_GUIDE_ASSET = "roam_guide.json"
 // OPACITY - per request 2026-11-18 (see screenshot):
-// Main widget area (objective, game timer, Turtle/Lord pill, roam type, description) = 65% opaque (35% see-through)
+// Main widget area (objective, game timer, Turtle/Lord pill, roam type, description) = 45% opaque (55% see-through) - changed 65% -> 45% per request
 // Spell tracker buttons = 15% opaque (85% transparent) - stays faint so it never blocks fight view
 // Pickers (roam type / spell) are temporary popups = 95% opaque so text stays readable over game
-private const val WIDGET_ALPHA = 0.65f // 65% opaque - main widget
-private const val MAIN_ALPHA = 0.65f
+private const val WIDGET_ALPHA = 0.45f // 45% opaque - main widget (was 65%)
+private const val MAIN_ALPHA = 0.45f // 45% - Area 1 only, Area 2 stays 15%
 private const val PICKER_ALPHA = 0.95f
 private const val ENEMY_SPELL_ALPHA = 0.15f // 15% opaque - spell tracker only
 
@@ -363,7 +363,8 @@ fun RoamGuideWidget(onBack: () -> Unit) {
     val context = LocalContext.current
     val config = LocalConfiguration.current
     val isLandscape = config.screenWidthDp > config.screenHeightDp
-    val widgetWidth = if (isLandscape) (config.screenWidthDp * 0.72f).dp else (config.screenWidthDp * 0.98f).dp
+    // WIDTH +1/3: landscape 72% -> 96% (72% * 4/3 = 96%), portrait 98% stays (already max, capped at screen)
+    val widgetWidth = if (isLandscape) (config.screenWidthDp * 0.96f).dp else (config.screenWidthDp * 0.98f).dp
     val guide = remember(context) { loadRoamGuide(context) }
     val plans = guide.plans
     var selectedPlanId by remember { mutableStateOf(plans.firstOrNull()?.id.orEmpty()) }
@@ -371,6 +372,10 @@ fun RoamGuideWidget(onBack: () -> Unit) {
     var isRunning by remember { mutableStateOf(false) }
     var planMenuExpanded by remember { mutableStateOf(false) }
     var isExpanded by remember { mutableStateOf(false) }
+    // HIDE/SHOW DESCRIPTION - upper Hide button hides ONLY description + callout + expanded detail.
+    // Top row (game timer, roam type, Turtle/Lord pill, expand, Hide/Show, X) ALWAYS stays visible.
+    // When hidden: Top row + spell tracker only. Tap Show to bring description back.
+    var isMainHidden by remember { mutableStateOf(false) }
     // DYNAMIC OBJECTIVE STATE - survives plan switch, resets with game Reset
     var turtleSlain by remember { mutableIntStateOf(0) }
     var lordSlain by remember { mutableIntStateOf(0) }
@@ -402,7 +407,7 @@ fun RoamGuideWidget(onBack: () -> Unit) {
     val tradeText = if (objective.type == ObjectiveType.TURTLE) selectedPlan?.turtleTrade.orEmpty() else selectedPlan?.lordTrade.orEmpty()
     // BUG FIX: when objective is on countdown (slain), collapsed must NOT show the step's pre-objective text
     // e.g. after Lord slain at 08:11, it showed "Get vision at Lord, need more players - Lord appears at 8:00" even though Lord is dead.
-    // Now it shows "Lord slain - Next in 02:39" + "Next Lord in 02:39 at 11:11. Use this time to push, farm, vision, reset."
+    // Now it shows "Lord slain - Next in 02:39" + "Lord slain. Next in 02:39. Push / farm / vision."
     val dynamicCallout = if (isObjectiveAlive) {
         "${objective.label} ${if (objective.type == ObjectiveType.TURTLE) objective.count else ""} UP".trim()
     } else if (lastSlainAt != null) {
@@ -410,10 +415,13 @@ fun RoamGuideWidget(onBack: () -> Unit) {
     } else {
         currentStep?.callout.orEmpty()
     }
+    // BRIEF - Epic/Grandmaster: short commands, no baby-talk. JSON templates now ~40-70 chars (was ~90-115).
+    // Alive: "CONTEST: ... / TRADE: ..." ( / instead of OR saves space, fits 96% width on 1-2 lines)
+    // Slain: "Turtle slain. Next in 02:00. Push / farm / vision." (was "...slain at 08:11. Next Turtle in 02:00 at 10:11. Use this time to...")
     val dynamicDescription = if (isObjectiveAlive) {
-        "CONTEST: $contestText OR TRADE: $tradeText"
+        "CONTEST: $contestText / TRADE: $tradeText"
     } else if (lastSlainAt != null) {
-        "${objective.label} slain at ${formatTime(lastSlainAt ?: 0)}. Next ${objective.label} in ${formatTime(objective.secondsUntil)} at ${formatTime(objective.nextSpawnSeconds)}. Use this time to push, farm, vision, reset."
+        "${objective.label} slain. Next in ${formatTime(objective.secondsUntil)}. Push / farm / vision."
     } else {
         currentStep?.description.orEmpty()
     }
@@ -435,9 +443,9 @@ fun RoamGuideWidget(onBack: () -> Unit) {
         else -> GithubRed
     }
 
-    // SPLIT INTO 2 AREAS (fix: spell tracker was INSIDE 65% box, so 65% + 15% stacked = ~70% opaque, looked dark in screenshot)
+    // SPLIT INTO 2 AREAS (fix: spell tracker was INSIDE 65% box, so 45% + 15% stacked = ~70% opaque, looked dark in screenshot)
     // Outer = TRANSPARENT wrapper, no background, no border - just holds the 2 areas with 4dp gap.
-    // AREA 1 = Main widget (objective, timer, Turtle/Lord, description) = 65% opaque, own background + border.
+    // AREA 1 = Main widget (objective, timer, Turtle/Lord, description) = 45% opaque, own background + border.
     // AREA 2 = Spell tracker = SEPARATE, NO background, NO border - only the 5 buttons themselves are 15% opaque.
     // So tracker no longer inherits the 65% - it stays truly faint over the game.
     Column(modifier = Modifier.width(widgetWidth).wrapContentHeight(), verticalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -447,7 +455,10 @@ fun RoamGuideWidget(onBack: () -> Unit) {
             }
             return@Column
         }
-        // ===== AREA 1 - MAIN WIDGET - 65% opaque =====
+        // ===== AREA 1 - MAIN WIDGET - 45% opaque - TOP ROW ALWAYS STAYS =====
+        // FIX: Hide hides ONLY description + callout + expanded detail, NOT the top row.
+        // Top row (game timer, roam type, Turtle/Lord pill, expand, Hide/Show, X) ALWAYS stays.
+        // When hidden: Area 1 = top row only, then Area 2 (spell tracker) directly below.
         Column(modifier = Modifier.fillMaxWidth().wrapContentHeight().background(GithubCanvas.copy(alpha = MAIN_ALPHA), RoundedCornerShape(6.dp)).border(1.dp, GithubBorder.copy(alpha = 0.8f), RoundedCornerShape(6.dp)).clip(RoundedCornerShape(6.dp)).padding(horizontal = 5.dp, vertical = 2.dp)) {
 
         // ROW 1 - TOP: timer + plan + DYNAMIC TURTLE/LORD PILL (clickable when alive) + expand + X
@@ -506,9 +517,14 @@ fun RoamGuideWidget(onBack: () -> Unit) {
                 }
             }
             OutlinedText(if (isExpanded) "▲" else "▼", GithubMuted, modifier = Modifier.clickable { isExpanded = !isExpanded }.padding(horizontal = 4.dp, vertical = 4.dp), fontSize = 11.sp, fontWeight = FontWeight.Bold)
+            // HIDE/SHOW BUTTON - upper side: tap to hide ONLY description + callout + expanded detail.
+            // Top row (timer, roam, Turtle/Lord pill, X) stays. Label flips Hide <-> Show.
+            OutlinedText(if (isMainHidden) "Show" else "Hide", GithubMuted, modifier = Modifier.clip(RoundedCornerShape(5.dp)).background(GithubSurface.copy(alpha = MAIN_ALPHA)).clickable { isMainHidden = !isMainHidden }.padding(horizontal = 6.dp, vertical = 4.dp), fontSize = 9.sp, fontWeight = FontWeight.Bold)
             OutlinedText("X", GithubMuted, modifier = Modifier.clickable(onClick = onBack).padding(horizontal = 4.dp, vertical = 4.dp), fontSize = 11.sp, fontWeight = FontWeight.Bold)
-        }
+        } // end ROW 1 - TOP - always visible, even when description hidden
 
+        // DESCRIPTION + CALLOUT - HIDDEN when isMainHidden, top row above stays
+        if (!isMainHidden) {
         if (!isExpanded) {
             // COLLAPSED: dynamic callout + description, adaptive height
             // If Turtle/Lord alive: "Turtle 2 UP - CONTEST: ... OR TRADE: ..."
@@ -583,11 +599,12 @@ fun RoamGuideWidget(onBack: () -> Unit) {
         Box(modifier = Modifier.fillMaxWidth().height(3.dp).background(GithubBorder.copy(alpha = 0.5f))) {
             Box(modifier = Modifier.fillMaxWidth(progress).height(3.dp).background(GithubAccent))
         }
-        } // ===== END AREA 1 - 65% =====
+        } // end if (!isMainHidden) - description/callout hidden, top row stays
+        } // ===== END AREA 1 - 45% - top row always stays =====
 
-        // ===== AREA 2 - SPELL TRACKER - SEPARATE, 15% ONLY, NO 65% BACKGROUND =====
+        // ===== AREA 2 - SPELL TRACKER - SEPARATE, 15% ONLY, NO 45% BACKGROUND =====
         // This Column has NO background / NO border - so buttons are truly 15% opaque over the game,
-        // not 15% on top of 65% (which made them look ~70% dark in your screenshot).
+        // not 15% on top of 45% (which made them look dark in your screenshot).
         // Always visible, collapsed + expanded. Same simplified design:
         // Not clicked: [EXP] [JG] [MID] [GOLD] [ROAM] - lane only. Clicked: [01:45 gold fill] - timer only.
         Column(modifier = Modifier.fillMaxWidth().wrapContentHeight()) {
