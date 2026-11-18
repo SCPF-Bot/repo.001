@@ -565,8 +565,6 @@ private fun GuideMessage(message: String) {
 }
 
 @Composable
-
-@Composable
 private fun OutlinedText(
     text: String,
     color: Color,
@@ -608,6 +606,7 @@ private fun OutlinedText(
     }
 }
 
+@Composable
 private fun GuideControl(
     label: String,
     color: Color,
