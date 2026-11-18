@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
@@ -62,8 +63,14 @@ private val GithubGold = Color(0xFFE3B341)
 private val GithubGreen = Color(0xFF3FB950)
 private val GithubRed = Color(0xFFF85149)
 private const val ROAM_GUIDE_ASSET = "roam_guide.json"
-private const val WIDGET_ALPHA = 0.25f
-private const val ENEMY_SPELL_ALPHA = 0.15f // 85% transparent = 15% opaque
+// OPACITY - per request 2026-11-18 (see screenshot):
+// Main widget area (objective, game timer, Turtle/Lord pill, roam type, description) = 65% opaque (35% see-through)
+// Spell tracker buttons = 15% opaque (85% transparent) - stays faint so it never blocks fight view
+// Pickers (roam type / spell) are temporary popups = 95% opaque so text stays readable over game
+private const val WIDGET_ALPHA = 0.65f // 65% opaque - main widget
+private const val MAIN_ALPHA = 0.65f
+private const val PICKER_ALPHA = 0.95f
+private const val ENEMY_SPELL_ALPHA = 0.15f // 15% opaque - spell tracker only
 
 // ENEMY BATTLE SPELL TRACKER - v3.2 - Season 42, Patch 2.2.16, Liquipedia ledger
 // Tap = enemy used spell -> start CD bar (empty -> full). Tap again on CD = cancel (fix mis-tap).
@@ -428,7 +435,8 @@ fun RoamGuideWidget(onBack: () -> Unit) {
         else -> GithubRed
     }
 
-    Column(modifier = Modifier.width(widgetWidth).wrapContentHeight().background(GithubCanvas.copy(alpha = WIDGET_ALPHA), RoundedCornerShape(6.dp)).border(1.dp, GithubBorder.copy(alpha = 0.8f), RoundedCornerShape(6.dp)).clip(RoundedCornerShape(6.dp)).padding(horizontal = 5.dp, vertical = 2.dp)) {
+    // MAIN WIDGET AREA = 65% opaque (WIDGET_ALPHA=0.65). Spell tracker below stays 15% opaque.
+    Column(modifier = Modifier.width(widgetWidth).wrapContentHeight().background(GithubCanvas.copy(alpha = MAIN_ALPHA), RoundedCornerShape(6.dp)).border(1.dp, GithubBorder.copy(alpha = 0.8f), RoundedCornerShape(6.dp)).clip(RoundedCornerShape(6.dp)).padding(horizontal = 5.dp, vertical = 2.dp)) {
         if (plans.isEmpty() || selectedPlan == null || currentStep == null) {
             OutlinedText("Roam guide unavailable", GithubText, fontSize = 9.sp)
             return@Column
@@ -441,13 +449,31 @@ fun RoamGuideWidget(onBack: () -> Unit) {
                 OutlinedText(if (isRunning) "II" else "▶", GithubAccent, fontSize = 9.sp, fontWeight = FontWeight.Bold)
             }
             Box(modifier = Modifier.weight(1f)) {
-                Row(modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(5.dp)).background(GithubSurface.copy(alpha = WIDGET_ALPHA)).border(1.dp, GithubBorder.copy(alpha = 0.8f), RoundedCornerShape(5.dp)).clickable { planMenuExpanded = true }.padding(horizontal = 6.dp, vertical = 4.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
-                    OutlinedText(selectedPlan.label, GithubAccent, fontSize = 10.sp, fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                // TOP BAR shows SHORT label only: "Crowd Control" not "Crowd Control - Setter" - saves ~40% width, no "Crowd Cont" truncation
+                Row(modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(5.dp)).background(GithubSurface.copy(alpha = MAIN_ALPHA)).border(1.dp, GithubBorder.copy(alpha = 0.8f), RoundedCornerShape(5.dp)).clickable { planMenuExpanded = true }.padding(horizontal = 6.dp, vertical = 4.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
+                    OutlinedText(selectedPlan.label.substringBefore(" - ").trim(), GithubAccent, fontSize = 10.sp, fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis)
                     OutlinedText("▾", GithubMuted, fontSize = 10.sp)
                 }
-                DropdownMenu(expanded = planMenuExpanded, onDismissRequest = { planMenuExpanded = false }, modifier = Modifier.background(GithubSurface)) {
-                    plans.forEach { plan ->
-                        DropdownMenuItem(text = { OutlinedText(plan.label, if (plan.id == selectedPlan.id) GithubAccent else GithubText, fontSize = 10.sp) }, onClick = { selectedPlanId = plan.id; planMenuExpanded = false }, contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp))
+                // ROAM TYPE PICKER - COMPACT 2-COLUMN GRID (was 1-col 6-row tall list)
+                // 6 types -> 3 rows x 2 cols, 30dp per cell, total ~98dp tall (was ~216dp). Short + suffix on 2 lines.
+                DropdownMenu(expanded = planMenuExpanded, onDismissRequest = { planMenuExpanded = false }, modifier = Modifier.width(240.dp).background(GithubSurface.copy(alpha = PICKER_ALPHA)).heightIn(max = 130.dp)) {
+                    Column(modifier = Modifier.padding(4.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        plans.chunked(2).forEach { rowPlans ->
+                            Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                                rowPlans.forEach { plan ->
+                                    val isSel = plan.id == selectedPlan.id
+                                    val short = plan.label.substringBefore(" - ").trim()
+                                    val suffix = plan.label.substringAfter(" - ", "").trim()
+                                    Box(modifier = Modifier.weight(1f).height(30.dp).clip(RoundedCornerShape(5.dp)).background(if (isSel) GithubGold.copy(alpha = 0.25f) else GithubSurface).border(1.dp, if (isSel) GithubGold else GithubBorder, RoundedCornerShape(5.dp)).clickable { selectedPlanId = plan.id; planMenuExpanded = false }.padding(horizontal = 4.dp, vertical = 2.dp), contentAlignment = Alignment.Center) {
+                                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                            Text(text = short, color = if (isSel) GithubGold else GithubText, fontSize = 9.sp, fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                                            if (suffix.isNotEmpty()) Text(text = suffix, color = GithubMuted, fontSize = 7.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                                        }
+                                    }
+                                }
+                                if (rowPlans.size == 1) Spacer(modifier = Modifier.weight(1f))
+                            }
+                        }
                     }
                 }
             }
@@ -586,25 +612,34 @@ fun RoamGuideWidget(onBack: () -> Unit) {
                             Box(modifier = Modifier.fillMaxWidth(cdProgress).height(28.dp).background(GithubGold).align(Alignment.CenterStart))
                         }
                         // Text: lane when idle, timer when on CD. No spell name, no READY, no small bar.
-                        Text(
+                        // Use OutlinedText (black outline + light text) so timer stays readable when gold fill is only 25% -
+                        // plain black text would be invisible on the dark 75% side.
+                        OutlinedText(
                             text = if (isOnCooldown) formatTime(remaining) else tracker.lane,
-                            color = if (isOnCooldown) Color.Black else GithubText,
+                            color = if (isOnCooldown) Color.White else GithubText,
                             fontSize = 10.sp,
                             fontWeight = FontWeight.Black,
                             maxLines = 1
                         )
                     }
-                    // LONG-PRESS PICKER - switch spell for this lane
-                    DropdownMenu(expanded = spellPickerLane == tracker.lane, onDismissRequest = { spellPickerLane = null }, modifier = Modifier.background(GithubSurface)) {
-                        BATTLE_SPELLS.forEach { s ->
-                            DropdownMenuItem(
-                                text = { OutlinedText(if (s.name == spell.name) "✓ ${s.name.uppercase()} • ${s.cooldown}s" else "${s.name.uppercase()} • ${s.cooldown}s", if (s.name == spell.name) GithubGold else GithubText, fontSize = 9.sp) },
-                                onClick = {
-                                    enemySpells = enemySpells.map { if (it.lane == tracker.lane) it.copy(spell = s, usedAt = null) else it }
-                                    spellPickerLane = null
-                                },
-                                contentPadding = PaddingValues(horizontal = 10.dp, vertical = 2.dp)
-                            )
+                    // SPELL PICKER - COMPACT 2-COLUMN GRID (was 1-col 12-row tall list that covered screen)
+                    // 12 spells -> 6 rows x 2 cols, 26dp per cell, total ~175dp tall (was ~384dp). Fits in landscape, no full-screen cover.
+                    DropdownMenu(expanded = spellPickerLane == tracker.lane, onDismissRequest = { spellPickerLane = null }, modifier = Modifier.width(230.dp).background(GithubSurface.copy(alpha = PICKER_ALPHA)).heightIn(max = 185.dp)) {
+                        Column(modifier = Modifier.padding(4.dp), verticalArrangement = Arrangement.spacedBy(3.dp)) {
+                            BATTLE_SPELLS.chunked(2).forEach { rowSpells ->
+                                Row(horizontalArrangement = Arrangement.spacedBy(3.dp)) {
+                                    rowSpells.forEach { s ->
+                                        val isSel = s.name == spell.name
+                                        Box(modifier = Modifier.weight(1f).height(26.dp).clip(RoundedCornerShape(5.dp)).background(if (isSel) GithubGold.copy(alpha = 0.25f) else GithubSurface).border(1.dp, if (isSel) GithubGold else GithubBorder, RoundedCornerShape(5.dp)).clickable {
+                                            enemySpells = enemySpells.map { if (it.lane == tracker.lane) it.copy(spell = s, usedAt = null) else it }
+                                            spellPickerLane = null
+                                        }.padding(horizontal = 4.dp, vertical = 2.dp), contentAlignment = Alignment.Center) {
+                                            Text(text = if (isSel) "✓ ${s.name.uppercase()} ${s.cooldown}s" else "${s.name.uppercase()} ${s.cooldown}s", color = if (isSel) GithubGold else GithubText, fontSize = 8.sp, fontWeight = if (isSel) FontWeight.Bold else FontWeight.Normal, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                                        }
+                                    }
+                                    if (rowSpells.size == 1) Spacer(modifier = Modifier.weight(1f))
+                                }
+                            }
                         }
                     }
                 }
