@@ -435,12 +435,20 @@ fun RoamGuideWidget(onBack: () -> Unit) {
         else -> GithubRed
     }
 
-    // MAIN WIDGET AREA = 65% opaque (WIDGET_ALPHA=0.65). Spell tracker below stays 15% opaque.
-    Column(modifier = Modifier.width(widgetWidth).wrapContentHeight().background(GithubCanvas.copy(alpha = MAIN_ALPHA), RoundedCornerShape(6.dp)).border(1.dp, GithubBorder.copy(alpha = 0.8f), RoundedCornerShape(6.dp)).clip(RoundedCornerShape(6.dp)).padding(horizontal = 5.dp, vertical = 2.dp)) {
+    // SPLIT INTO 2 AREAS (fix: spell tracker was INSIDE 65% box, so 65% + 15% stacked = ~70% opaque, looked dark in screenshot)
+    // Outer = TRANSPARENT wrapper, no background, no border - just holds the 2 areas with 4dp gap.
+    // AREA 1 = Main widget (objective, timer, Turtle/Lord, description) = 65% opaque, own background + border.
+    // AREA 2 = Spell tracker = SEPARATE, NO background, NO border - only the 5 buttons themselves are 15% opaque.
+    // So tracker no longer inherits the 65% - it stays truly faint over the game.
+    Column(modifier = Modifier.width(widgetWidth).wrapContentHeight(), verticalArrangement = Arrangement.spacedBy(4.dp)) {
         if (plans.isEmpty() || selectedPlan == null || currentStep == null) {
-            OutlinedText("Roam guide unavailable", GithubText, fontSize = 9.sp)
+            Column(modifier = Modifier.fillMaxWidth().wrapContentHeight().background(GithubCanvas.copy(alpha = MAIN_ALPHA), RoundedCornerShape(6.dp)).border(1.dp, GithubBorder.copy(alpha = 0.8f), RoundedCornerShape(6.dp)).clip(RoundedCornerShape(6.dp)).padding(horizontal = 5.dp, vertical = 2.dp)) {
+                OutlinedText("Roam guide unavailable", GithubText, fontSize = 9.sp)
+            }
             return@Column
         }
+        // ===== AREA 1 - MAIN WIDGET - 65% opaque =====
+        Column(modifier = Modifier.fillMaxWidth().wrapContentHeight().background(GithubCanvas.copy(alpha = MAIN_ALPHA), RoundedCornerShape(6.dp)).border(1.dp, GithubBorder.copy(alpha = 0.8f), RoundedCornerShape(6.dp)).clip(RoundedCornerShape(6.dp)).padding(horizontal = 5.dp, vertical = 2.dp)) {
 
         // ROW 1 - TOP: timer + plan + DYNAMIC TURTLE/LORD PILL (clickable when alive) + expand + X
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -575,13 +583,14 @@ fun RoamGuideWidget(onBack: () -> Unit) {
         Box(modifier = Modifier.fillMaxWidth().height(3.dp).background(GithubBorder.copy(alpha = 0.5f))) {
             Box(modifier = Modifier.fillMaxWidth(progress).height(3.dp).background(GithubAccent))
         }
+        } // ===== END AREA 1 - 65% =====
 
-        // BOTTOM - ENEMY SPELL TRACKER - always visible, collapsed + expanded
-        // SIMPLIFIED per request:
-        // Not clicked: [EXP] [JG] [MID] [GOLD] [ROAM] - lane only, no spell name, no READY, no small bar.
-        // Clicked: [01:45 with GOLD BAR FILLING BACKGROUND] - timer only, gold fill is the button background itself (empty -> full).
-        // TAP = enemy used spell -> start CD. TAP again on CD = cancel. LONG-PRESS = switch spell (picker shows current spell + CD).
-        Spacer(Modifier.height(3.dp))
+        // ===== AREA 2 - SPELL TRACKER - SEPARATE, 15% ONLY, NO 65% BACKGROUND =====
+        // This Column has NO background / NO border - so buttons are truly 15% opaque over the game,
+        // not 15% on top of 65% (which made them look ~70% dark in your screenshot).
+        // Always visible, collapsed + expanded. Same simplified design:
+        // Not clicked: [EXP] [JG] [MID] [GOLD] [ROAM] - lane only. Clicked: [01:45 gold fill] - timer only.
+        Column(modifier = Modifier.fillMaxWidth().wrapContentHeight()) {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
             enemySpells.forEach { tracker ->
                 val spell = tracker.spell
@@ -646,5 +655,6 @@ fun RoamGuideWidget(onBack: () -> Unit) {
             }
         }
         OutlinedText("Tap = enemy used spell  •  Tap again = cancel  •  Long-press = switch spell", GithubMuted, fontSize = 7.sp)
-    }
+        } // ===== END AREA 2 - 15% only =====
+    } // ===== END OUTER WRAPPER (transparent) =====
 }
