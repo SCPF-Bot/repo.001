@@ -8,10 +8,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.weight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.DropdownMenu
@@ -47,18 +45,18 @@ private data class TrackedLaneSpell(
 )
 
 private val availableSpells = listOf(
-    TrackedSpell("Flicker", 120),
-    TrackedSpell("Retribution", 35),
-    TrackedSpell("Purify", 90),
-    TrackedSpell("Sprint", 100),
-    TrackedSpell("Execute", 90),
-    TrackedSpell("Petrify", 75),
-    TrackedSpell("Inspire", 75),
     TrackedSpell("Aegis", 75),
-    TrackedSpell("Vengeance", 75),
-    TrackedSpell("Flameshot", 50),
     TrackedSpell("Arrival", 75),
-    TrackedSpell("Revitalize", 75)
+    TrackedSpell("Execute", 90),
+    TrackedSpell("Flicker", 120),
+    TrackedSpell("Flameshot", 50),
+    TrackedSpell("Inspire", 75),
+    TrackedSpell("Petrify", 75),
+    TrackedSpell("Purify", 90),
+    TrackedSpell("Retribution", 35),
+    TrackedSpell("Revitalize", 75),
+    TrackedSpell("Sprint", 100),
+    TrackedSpell("Vengeance", 75)
 )
 
 private fun initialTrackedSpells() = listOf("EXP", "JG", "MID", "GOLD", "ROAM").map { lane ->
