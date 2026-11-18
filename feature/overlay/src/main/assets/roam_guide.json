@@ -2,7 +2,7 @@
   "meta": {
     "game": "Mobile Legends: Bang Bang",
     "title": "Roam Timeframe Table — Enhanced",
-    "version": "3.0 - Tank/Support + Current Roam only, narrowed",
+    "version": "3.2 - Enemy spell tracker (EXP/JG/MID/GOLD/ROAM) + battle spells CD",
     "patch": "2.2.16a",
     "season": "Season 42 — Starward Decade",
     "updated": "2026-11-18",
@@ -1895,6 +1895,79 @@
       "respawn_before_18min": 180,
       "respawn_after_18min": 120,
       "evolves_at": 1080
+    }
+  },
+  "battle_spells": {
+    "source": "Liquipedia Battle Spells ledger, Season 42 Patch 2.2.16 - 12 spells",
+    "note": "Defaults for enemy tracker: JG = Retribution, EXP/MID/GOLD/ROAM = Flicker. Tap = enemy used spell, bar fills empty->full over CD. Long-press = switch spell.",
+    "spells": [
+      {
+        "name": "Flicker",
+        "cooldown_seconds": 120,
+        "note": "Blink, longest CD"
+      },
+      {
+        "name": "Retribution",
+        "cooldown_seconds": 35,
+        "note": "Jungle, shortest CD, secures Turtle/Lord"
+      },
+      {
+        "name": "Purify",
+        "cooldown_seconds": 90,
+        "note": "Cleanse, raised from 75 to 90"
+      },
+      {
+        "name": "Sprint",
+        "cooldown_seconds": 100,
+        "note": "+50% MS 6s, slow immune"
+      },
+      {
+        "name": "Execute",
+        "cooldown_seconds": 90,
+        "note": "Finisher true damage"
+      },
+      {
+        "name": "Petrify",
+        "cooldown_seconds": 75,
+        "note": "AoE stun 0.8s"
+      },
+      {
+        "name": "Inspire",
+        "cooldown_seconds": 75,
+        "note": "Attack speed burst"
+      },
+      {
+        "name": "Aegis",
+        "cooldown_seconds": 75,
+        "note": "Shield"
+      },
+      {
+        "name": "Vengeance",
+        "cooldown_seconds": 75,
+        "note": "Reflect + damage reduction"
+      },
+      {
+        "name": "Flameshot",
+        "cooldown_seconds": 50,
+        "note": "Shortest non-Retri CD, knockback"
+      },
+      {
+        "name": "Arrival",
+        "cooldown_seconds": 75,
+        "note": "Teleport to turret/minion"
+      },
+      {
+        "name": "Revitalize",
+        "cooldown_seconds": 75,
+        "note": "AoE heal zone"
+      }
+    ],
+    "defaults": {
+      "EXP": "Flicker",
+      "JG": "Retribution",
+      "MID": "Flicker",
+      "GOLD": "Flicker",
+      "ROAM": "Flicker"
     }
   }
 }
