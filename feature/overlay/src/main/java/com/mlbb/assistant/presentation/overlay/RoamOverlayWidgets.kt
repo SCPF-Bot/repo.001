@@ -462,6 +462,7 @@ fun RoamGuideWidget(onBack: () -> Unit) {
                                 text = {
                                     OutlinedText(
                                         plan.label,
+                                        color = GuideText,
                                         maxLines = 1,
                                         overflow = TextOverflow.Ellipsis
                                     )
@@ -619,11 +620,11 @@ fun RoamGuideWidget(onBack: () -> Unit) {
                                 onDismissRequest = { hideMenuExpanded = false }
                             ) {
                                 DropdownMenuItem(
-                                    text = { OutlinedText("Show instructions") },
+                                    text = { OutlinedText("Show instructions", color = GuideText) },
                                     onClick = { descriptionHidden = false; hideMenuExpanded = false }
                                 )
                                 DropdownMenuItem(
-                                    text = { OutlinedText("Hide instructions") },
+                                    text = { OutlinedText("Hide instructions", color = GuideText) },
                                     onClick = { descriptionHidden = true; hideMenuExpanded = false }
                                 )
                             }
@@ -871,8 +872,6 @@ private fun GuideMessage(message: String) {
 }
 
 @Composable
-
-@Composable
 private fun OutlinedText(
     text: String,
     color: Color,
@@ -914,6 +913,7 @@ private fun OutlinedText(
     }
 }
 
+@Composable
 private fun GuideControl(
     label: String,
     color: Color,
