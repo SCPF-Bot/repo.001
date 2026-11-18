@@ -62,16 +62,17 @@ private val GithubRed = Color(0xFFF85149)
 private const val ROAM_GUIDE_ASSET = "roam_guide.json"
 private const val WIDGET_ALPHA = 0.25f
 
-// FINAL SPEC - from screenshots + requests
-// - Width: slightly longer. Landscape 72% (was 62%), Portrait 98%. Height is NOT fixed.
-// - Collapsed: yellow callout + white description in ONE flowing line.
-//   Example 02:52 collapsed: "Stay with carry, reset - After Turtle, stay near carry and mid. You have a Turtle shield..."
-//   No truncation. Bottom side has adaptive height: height wraps to fit full description.
-// - Expanded: same merged line on top, then additional info: To do checklist, Vision, Do, Don't, Blessing.
-// - Font: callout = same style as "To do:" heading (yellow / GithubGold, bold)
-//   description = same style as To do bullet text (white / GithubText, normal)
-// - Top row: Turtle / Lord indicator REMOVED. Top row is now timer + plan + expand + X only.
-// - JSON v2.6: Grandmaster-Epic, objective + description merged, descriptions shortened to fit adaptive height.
+// FIX - 12:12 screenshot: description vs To do bullet was still different.
+// ROOT CAUSE: MergedInstructionText drew its outline in the text's OWN color (yellow/white stroke),
+// while To do bullets use OutlinedText which draws outline in BLACK.
+// Result: merged description looked yellow, thick, bigger, with white halo. Bullets looked white, thin, small.
+// FIX: MergedInstructionText now uses EXACT same rendering as OutlinedText:
+//   Layer 1 = all-black AnnotatedString with Stroke(3f) = black outline
+//   Layer 2 = colored AnnotatedString (yellow callout + white description) = fill
+// And EXACT same sizes: callout = To do heading, description = To do bullet.
+//   Callout / To do heading: GithubGold, 9sp, Bold, 11sp lineHeight
+//   Description / Bullet: GithubText, 9sp, Normal, 11sp lineHeight
+// No other difference. If you still see a difference, you are on an old .kt - replace whole file.
 
 private data class RoamHero(val name: String, val archetype: String = "", val note: String = "")
 private data class RoamBlessing(val id: String, val name: String, val type: String = "", val effect: String = "", val cooldown: String = "", val unlock: String = "")
@@ -185,21 +186,20 @@ private fun formatTime(s: Int): String {
 }
 
 @Composable
-private fun OutlinedText(text: String, color: Color, modifier: Modifier = Modifier, fontSize: TextUnit = 9.sp, fontWeight: FontWeight? = null, maxLines: Int = Int.MAX_VALUE, lineHeight: TextUnit = TextUnit.Unspecified, overflow: TextOverflow = TextOverflow.Visible) {
+private fun OutlinedText(text: String, color: Color, modifier: Modifier = Modifier, fontSize: TextUnit = 9.sp, fontWeight: FontWeight? = null, maxLines: Int = Int.MAX_VALUE, lineHeight: TextUnit = 11.sp, overflow: TextOverflow = TextOverflow.Visible) {
     Box(modifier = modifier) {
         Text(text = text, color = Color.Black, maxLines = maxLines, overflow = overflow, style = TextStyle(fontSize = fontSize, fontWeight = fontWeight, lineHeight = lineHeight, drawStyle = Stroke(width = 3f), shadow = Shadow(color = Color.Black, offset = Offset.Zero, blurRadius = 1f)))
         Text(text = text, color = color, maxLines = maxLines, overflow = overflow, style = TextStyle(fontSize = fontSize, fontWeight = fontWeight, lineHeight = lineHeight, shadow = Shadow(color = Color.Black, offset = Offset.Zero, blurRadius = 1f)))
     }
 }
 
-// MERGED LINE: yellow callout + white description in ONE flowing paragraph.
-// Callout = same style as "To do:" heading: yellow, bold, 9sp.
-// Description = same style as To do bullet text: white, normal, 9sp.
-// ADAPTIVE HEIGHT: maxLines = Int.MAX_VALUE, overflow = Visible, parent uses wrapContentHeight.
-// No "..." truncation in collapsed. Bottom side grows to fit full description.
+// SHARED STYLE - single source of truth so description and bullet can never drift again.
+// Callout / To do heading: GithubGold, 9sp, Bold, 11sp
+// Description / Bullet: GithubText, 9sp, Normal, 11sp
 @Composable
 private fun MergedInstructionText(phase: String, callout: String, description: String, maxLines: Int = Int.MAX_VALUE) {
-    val annotated: AnnotatedString = buildAnnotatedString {
+    // Colored layer - what you actually see
+    val colored: AnnotatedString = buildAnnotatedString {
         if (phase.isNotBlank()) {
             withStyle(style = SpanStyle(color = GithubMuted, fontWeight = FontWeight.Bold, fontSize = 8.sp)) {
                 append(phase)
@@ -213,14 +213,36 @@ private fun MergedInstructionText(phase: String, callout: String, description: S
             withStyle(style = SpanStyle(color = GithubMuted, fontSize = 9.sp)) {
                 append(" - ")
             }
+            // MUST match To do bullet exactly: GithubText, 9sp, Normal
             withStyle(style = SpanStyle(color = GithubText, fontSize = 9.sp)) {
                 append(description)
             }
         }
     }
+    // Black outline layer - SAME text, ALL black, SAME sizes/weights. This is what OutlinedText does.
+    // Previous bug: outline was drawn in yellow/white, so description looked yellow and thick.
+    val blackOutline: AnnotatedString = buildAnnotatedString {
+        if (phase.isNotBlank()) {
+            withStyle(style = SpanStyle(color = Color.Black, fontWeight = FontWeight.Bold, fontSize = 8.sp)) {
+                append(phase)
+                append(" - ")
+            }
+        }
+        withStyle(style = SpanStyle(color = Color.Black, fontWeight = FontWeight.Bold, fontSize = 9.sp)) {
+            append(callout)
+        }
+        if (description.isNotBlank()) {
+            withStyle(style = SpanStyle(color = Color.Black, fontSize = 9.sp)) {
+                append(" - ")
+            }
+            withStyle(style = SpanStyle(color = Color.Black, fontSize = 9.sp)) {
+                append(description)
+            }
+        }
+    }
     Box(modifier = Modifier.fillMaxWidth().wrapContentHeight()) {
-        Text(text = annotated, maxLines = maxLines, overflow = TextOverflow.Visible, style = TextStyle(lineHeight = 11.sp, drawStyle = Stroke(width = 3f), shadow = Shadow(color = Color.Black, offset = Offset.Zero, blurRadius = 1f)))
-        Text(text = annotated, maxLines = maxLines, overflow = TextOverflow.Visible, style = TextStyle(lineHeight = 11.sp, shadow = Shadow(color = Color.Black, offset = Offset.Zero, blurRadius = 1f)))
+        Text(text = blackOutline, maxLines = maxLines, overflow = TextOverflow.Visible, style = TextStyle(lineHeight = 11.sp, drawStyle = Stroke(width = 3f), shadow = Shadow(color = Color.Black, offset = Offset.Zero, blurRadius = 1f)))
+        Text(text = colored, maxLines = maxLines, overflow = TextOverflow.Visible, style = TextStyle(lineHeight = 11.sp, shadow = Shadow(color = Color.Black, offset = Offset.Zero, blurRadius = 1f)))
     }
 }
 
@@ -297,10 +319,10 @@ fun RoamGuideWidget(onBack: () -> Unit) {
                 MergedInstructionText(phase = "", callout = currentStep.callout, description = currentStep.description, maxLines = Int.MAX_VALUE)
                 if (currentStep.checklist.isNotEmpty()) {
                     Spacer(Modifier.height(3.dp))
-                    OutlinedText("To do:", GithubGold, fontSize = 8.sp, fontWeight = FontWeight.Bold)
+                    OutlinedText("To do:", GithubGold, fontSize = 9.sp, fontWeight = FontWeight.Bold, lineHeight = 11.sp)
                     currentStep.checklist.forEach { item ->
                         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                            OutlinedText("•", GithubGreen, fontSize = 9.sp, fontWeight = FontWeight.Bold)
+                            OutlinedText("•", GithubGreen, fontSize = 9.sp, fontWeight = FontWeight.Bold, lineHeight = 11.sp)
                             OutlinedText(item, GithubText, fontSize = 9.sp, lineHeight = 11.sp)
                         }
                     }
