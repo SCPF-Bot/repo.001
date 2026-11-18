@@ -1,6 +1,9 @@
 package com.mlbb.assistant.presentation.overlay
 
 // ── Merged: JetOverlay.kt + pointerInput shim ─────────────────────────────────────
+// V2: window stays MATCH_PARENT + CENTER_HORIZONTAL, but content is now
+// wrapped in a TopCenter Box. Roam is fillMaxWidth(0.52f) inside that Box,
+// so it is exactly 52% and centered on the green line, not stretched.
 // DELETED: pointerInput shim file (11 lines). Merged here — it was only used by the
 // overlay package and only JetOverlay needs low-level pointer handling.
 
@@ -108,7 +111,15 @@ object JetOverlay {
         val view = ComposeView(app).apply {
             setViewTreeLifecycleOwner(owner)
             setViewTreeSavedStateRegistryOwner(owner)
-            setContent { content() }
+            // FIX V2: window is MATCH_PARENT, so content() must be centered.
+            // Without this Box, a 52% widget would stick to the left edge and
+            // look like it spans the full width (empty space on the right).
+            setContent {
+                androidx.compose.foundation.layout.Box(
+                    modifier = androidx.compose.ui.Modifier.fillMaxWidth(),
+                    contentAlignment = androidx.compose.ui.Alignment.TopCenter
+                ) { content() }
+            }
         }
 
         var initialX = 0

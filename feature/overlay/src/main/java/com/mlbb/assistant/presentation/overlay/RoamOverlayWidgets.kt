@@ -87,7 +87,9 @@ private val TrackerMuted = Color(0xFF8B949E) // GitHub Dark secondary
 // for readability, but landscape — the real case — is now exactly 0.52f.
 private const val WIDGET_WIDTH_FRACTION_LANDSCAPE = 0.52f
 private const val WIDGET_WIDTH_FRACTION_PORTRAIT = 0.92f
-private const val WIDGET_MIN_WIDTH_DP = 300f
+// FIX V2: WIDGET_MIN_WIDTH_DP (300dp) DELETED. It was the reason the widget looked
+// "a bit too long" — on a 360dp-wide window 52% = 187dp, coerced up to 300dp = 83%
+// of screen. With FLK/RET abbreviations the 5 cells fit in 52% without a min.
 private const val ROAM_GUIDE_ASSET = "roam_guide.json"
 
 private data class RoamStep(
@@ -418,20 +420,12 @@ fun RoamGuideWidget(onBack: () -> Unit) {
         lastSlainAt != null -> "${objective.label} slain. Next in ${formatGameTime(objective.secondsUntil)}. Push, farm, or reset."
         else -> currentStep?.description.orEmpty()
     }
-    // FIX: LocalConfiguration in an overlay window reports PORTRAIT size even in-game
-    // (landscape). That made 0.52f = 52% of portrait = too narrow, so the callout
-    // wrapped to 3 lines. Use real display width instead.
-    val displayMetrics = context.resources.displayMetrics
-    val screenWidthDp = (displayMetrics.widthPixels / displayMetrics.density).toInt()
-    val screenHeightDp = (displayMetrics.heightPixels / displayMetrics.density).toInt()
-    val isLandscape = screenWidthDp > screenHeightDp
-    // Same width as the green line in the photo: 52% of screen in landscape.
-    // Min keeps the 5 spell cells + controls tappable on small phones;
-    // it only kicks in below ~577dp wide, where 52% would be < 300dp.
-    val widthFraction = if (isLandscape) WIDGET_WIDTH_FRACTION_LANDSCAPE else WIDGET_WIDTH_FRACTION_PORTRAIT
-    val widgetWidth = (screenWidthDp * widthFraction)
-        .coerceAtLeast(WIDGET_MIN_WIDTH_DP)
-        .coerceAtMost((screenWidthDp - 8).toFloat())
+    // FIX V2: No more manual dp math (displayMetrics / density / LocalConfiguration).
+    // All three gave a different width depending on window type, and the 300dp
+    // min pushed 52% -> 83% on small windows. Now the width is declarative:
+    // fillMaxWidth(0.52f) on the outer Column = exactly 52% of the MATCH_PARENT
+    // JetOverlay window, no matter the density / portrait / landscape.
+    // See the Column modifier below — widgetWidth variable is gone.
     val blessing = guide.blessings.firstOrNull {
         it.id == selectedPlan?.blessingId ||
             it.name.equals(selectedPlan?.blessing?.substringBefore('/')?.trim(), ignoreCase = true)
@@ -440,10 +434,14 @@ fun RoamGuideWidget(onBack: () -> Unit) {
     // Gap between the two widgets = exactly 1 physical pixel.
     // 1.dp is NOT 1px (at 3x density 1.dp = 3px), so convert 1px -> dp.
     val onePx = with(LocalDensity.current) { 1.toDp() }
+    // FIX V2: was Modifier.width(widgetWidth.dp) where widgetWidth was
+    // coerced to >=300dp -> 83-95% wide in your screenshot (a bit too long).
+    // Now: exactly 52% of the window, centered by the parent Box in JetOverlay.
+    // No min-width, no manual math — cannot overshoot.
     Column(
         modifier = Modifier
-            .width(widgetWidth.dp),
-        // No outer horizontal padding: the card itself is widgetWidth,
+            .fillMaxWidth(0.52f),
+        // No outer horizontal padding: the card itself is 52%,
         // so its visible edges line up exactly with the green line.
         verticalArrangement = Arrangement.spacedBy(onePx)
     ) {
