@@ -1,97 +1,1448 @@
-[
-  {
-    "id": "engage",
-    "label": "Engage Tank",
-    "blessing": "Conceal / Encourage",
-    "heroes": "Tigreal, Khufra, Atlas, Minotaur, Lolita, Johnson, Hylos, Grock, Baxia, Gloo, Edith, Akai, Belerick, Gatotkaca, Kalea",
-    "steps": [
-      {"startSeconds": 0, "endSeconds": 40, "description": "Buy Roam blessing. Check the enemy jungle entrance from a safe angle; do not donate first blood."},
-      {"startSeconds": 40, "endSeconds": 80, "description": "Help mid clear, then move with your jungler. Hold key crowd control; threaten a counter-invade only with lane priority."},
-      {"startSeconds": 80, "endSeconds": 110, "description": "Move toward the first Turtle side. Sweep river bushes and keep an escape route."},
-      {"startSeconds": 110, "endSeconds": 150, "description": "Be at Turtle before it spawns. Zone enemy approaches; engage only when your damage dealers can follow."},
-      {"startSeconds": 150, "endSeconds": 240, "description": "After the objective, protect the nearest carry and help mid regain priority. Do not chase into fog."},
-      {"startSeconds": 240, "endSeconds": 360, "description": "Track the next Turtle from its actual respawn. Start vision control early and save your ultimate for the contest."},
-      {"startSeconds": 360, "endSeconds": 480, "description": "Escort your team through river and keep a frontline between enemies and your damage dealers. Objective timing is match-state dependent."},
-      {"startSeconds": 480, "endSeconds": 600, "description": "Prepare Lord-side vision when Lord becomes available. Look for a numbers advantage before starting a fight."},
-      {"startSeconds": 600, "endSeconds": 720, "description": "Lead safe rotations, check bushes before carries cross them, and convert won fights into towers or neutral objectives."},
-      {"startSeconds": 720, "endSeconds": 900, "description": "Do not face-check alone. Hold one reliable control skill to interrupt divers or punish a committed enemy."},
-      {"startSeconds": 900, "endSeconds": 1080, "description": "Stay close enough to peel your main damage dealer. Use Conceal to start a coordinated fight or disengage a losing one."}
-    ]
+{
+  "meta": {
+    "game": "Mobile Legends: Bang Bang",
+    "title": "Roam Timeframe Table — Enhanced",
+    "version": "2.0",
+    "patch": "2.2.16a",
+    "season": "Season 42 — Starward Decade",
+    "updated": "2026-11-18",
+    "based_on": "Original timeframe JSON (5 roam archetypes, 0:00-18:00) + online verification for Season 42",
+    "how_to_use": "Each role has steps aligned to real objective spawns. Use startSeconds/endSeconds for your in-game timer UI. Check 'objective' and 'checklist' for what to do, 'decision' for engage vs disengage, and 'dont' for the most common throw in that window. In solo queue, prioritize the checklist over forcing a fight — if your team is not in position, take vision + trade instead.",
+    "objective_timers": {
+      "lithowanderer": {
+        "first_spawn_seconds": 45,
+        "respawn_seconds": 120,
+        "note": "River crab. Small team reward + short river benefit. Take it only if it does not delay Turtle setup."
+      },
+      "turtle": {
+        "first_spawn_seconds": 120,
+        "respawn_seconds": 120,
+        "stops_at_seconds": 480,
+        "reward": "Team-wide gold + EXP + shield / buff for 120s (varies by Battlefield variant, e.g. Healing Turtle in Season 42 annual map change)",
+        "note": "First Turtle is the highest-value early objective. Setup 20-30s early."
+      },
+      "lord": {
+        "first_spawn_seconds": 480,
+        "respawn_seconds": 180,
+        "note": "Respawn ~3 min, shorter late. Evolves into Evolved Lord around 18:00 (1080s). Late Lords end games."
+      },
+      "evolved_lord": {
+        "approx_spawn_seconds": 1080,
+        "note": "Stronger Lord with charge. Never start it 50/50 — take it after a won fight or a pick."
+      },
+      "outer_turret_shield": {
+        "ends_seconds": 300,
+        "note": "Outer turret energy shields drop at 5:00. After that, tower damage converts to real gold/pressure."
+      },
+      "jungler_level_4": {
+        "target_seconds": 95,
+        "window": "1:35-1:45",
+        "note": "Standard full clear should hit Lv4 before Turtle. Roamer should NOT steal camps — your EXP comes from Roam passive + assists."
+      }
+    },
+    "roam_mechanics": {
+      "buy_first": "Buy Roam boots (600 gold, +40 MS, +18 Magic Defense) at 0:00. Do NOT delay it for another item — you lose Thriving gold/EXP.",
+      "devotion": "For the first 8 minutes, you get only 30% gold from a minion/creep you take with no ally nearby. Leave waves and camps to laners/jungler.",
+      "thriving": "If you are the lowest-gold ally, you gain passive gold + EXP every 5s: ~6 gold + 12 EXP before 8:00, ~8 gold + 16 EXP after 8:00 (capped). This is your farm. Stay lowest-gold on purpose.",
+      "blessing_unlock": "Blessing unlocks after accumulating 1000 Gold from Thriving (usually around 4-5 min). Conceal is the only active blessing; others are passive.",
+      "vision_rule": "MLBB has no wards. You are the ward. Face-check with HP, never alone at low HP, and always check the bush your carry is about to walk into first.",
+      "five_second_rule": "Revealing an enemy grants gold/EXP. After an enemy disappears, wait ~5s and re-reveal for another proc — don't spam face-checks with no value.",
+      "solo_queue_note": "Solo queue teams often expect you to babysit the Marksman. Don't. Protect MM early, then follow the next fight. If your team won't group for Turtle/Lord, trade: take opposite buff, tower, or a safe pick instead of dying 1v4."
+    },
+    "global_rules": [
+      "Arrive 20-30s BEFORE Turtle/Lord spawns, not at spawn time.",
+      "Never start Lord with enemy jungler + Retribution alive and nearby.",
+      "Trade your life only for an objective or your carry's life.",
+      "Don't take last hits from carries — your income is assists + Thriving + reveals.",
+      "After a won fight, convert to tower or objective immediately. Don't chase into fog.",
+      "If you lose lanes, give up Turtle and take the opposite side (buff/tower) instead of forcing a losing fight."
+    ],
+    "compact_mode": {
+      "goal": "Widget must stay 2 rows tall in landscape. Collapsed shows callout only. Expanded shows full description, checklist, vision, decision, dont.",
+      "collapsed_height_target_dp": 48,
+      "heroes_note": "Heroes are pre-game only. Hide heroes in live view, show only when timer is 0 and expanded.",
+      "width_rule": "Portrait 98% width, landscape 62% width so it does not cover the fight."
+    }
   },
-  {
-    "id": "pickoff",
-    "label": "Pick-off Tank",
-    "blessing": "Conceal / Dire Hit",
-    "heroes": "Franco, Kaja, Jawhead",
-    "steps": [
-      {"startSeconds": 0, "endSeconds": 40, "description": "Buy Roam blessing and identify the enemy jungler's likely start. Avoid an unsupported invade."},
-      {"startSeconds": 40, "endSeconds": 80, "description": "Rotate through mid and threaten a hook or suppression only when an ally is in range."},
-      {"startSeconds": 80, "endSeconds": 110, "description": "Check the Turtle-side river and mark the enemy jungler or mid laner. Keep your key catch skill ready."},
-      {"startSeconds": 110, "endSeconds": 150, "description": "At first Turtle, punish isolated targets and interrupt the enemy Retribution user; don't abandon your jungler."},
-      {"startSeconds": 150, "endSeconds": 240, "description": "Move between mid and Gold lane. Create short ambushes from controlled bushes, then leave before being collapsed on."},
-      {"startSeconds": 240, "endSeconds": 360, "description": "Use the actual next Turtle spawn to time a pick. A caught enemy is an objective window, not a reason to chase farther."},
-      {"startSeconds": 360, "endSeconds": 480, "description": "Track enemy carry positions and flank routes. Keep your ultimate for a high-value target or objective steal denial."},
-      {"startSeconds": 480, "endSeconds": 600, "description": "Set up Lord vision from the sides. Catch an enemy rotating alone before your team commits to Lord."},
-      {"startSeconds": 600, "endSeconds": 720, "description": "Shadow the teammate with burst damage. Avoid starting fights while your follow-up is clearing a wave."},
-      {"startSeconds": 720, "endSeconds": 900, "description": "Threaten fog angles around objectives. If no clean pick exists, protect your carry instead of forcing one."},
-      {"startSeconds": 900, "endSeconds": 1080, "description": "Save suppression or displacement for the enemy's most dangerous diver or carry. One late-game pick can decide the match."}
-    ]
-  },
-  {
-    "id": "healer",
-    "label": "Healer Support",
-    "blessing": "Favor",
-    "heroes": "Estes, Rafaela, Angela, Floryn",
-    "steps": [
-      {"startSeconds": 0, "endSeconds": 40, "description": "Buy Roam blessing. Stay near the team without taking jungle experience or exposing yourself to an invade."},
-      {"startSeconds": 40, "endSeconds": 80, "description": "Help mid sustain the first clear, then rotate toward the lane most likely to be pressured."},
-      {"startSeconds": 80, "endSeconds": 110, "description": "Move with an ally to Turtle-side river. Keep healing resources available for the first skirmish."},
-      {"startSeconds": 110, "endSeconds": 150, "description": "Arrive before Turtle. Heal and protect the jungler; avoid standing where enemy area control hits your whole team."},
-      {"startSeconds": 150, "endSeconds": 240, "description": "Follow the strongest nearby teammate. Heal after trades and reset safely rather than face-checking."},
-      {"startSeconds": 240, "endSeconds": 360, "description": "Prepare for the next Turtle based on its real respawn. Keep your carry healthy before the objective starts."},
-      {"startSeconds": 360, "endSeconds": 480, "description": "Stay within ability range of your frontline and marksman. Save major healing or protection for the enemy engage."},
-      {"startSeconds": 480, "endSeconds": 600, "description": "Group before Lord. Heal between pokes and keep a safe position behind your frontline."},
-      {"startSeconds": 600, "endSeconds": 720, "description": "Escort the team through contested areas; let a tank check bushes and do not enter dark river first."},
-      {"startSeconds": 720, "endSeconds": 900, "description": "Prioritize the teammate who can deal sustained damage. Use Favor's heal trigger on the ally who needs it most."},
-      {"startSeconds": 900, "endSeconds": 1080, "description": "Keep your core carry alive through the first burst. Disengage and regroup if key healing or ultimate tools are unavailable."}
-    ]
-  },
-  {
-    "id": "utility",
-    "label": "Utility / Disengage",
-    "blessing": "Encourage",
-    "heroes": "Diggie, Mathilda, Chip, Carmilla, Faramis, Alice, Nana, Hirara",
-    "steps": [
-      {"startSeconds": 0, "endSeconds": 40, "description": "Buy Roam blessing. Scout safely and identify whether your team needs anti-engage, mobility, or teamfight setup."},
-      {"startSeconds": 40, "endSeconds": 80, "description": "Help mid clear and use utility to secure river access. Avoid spending your escape or cleanse too early."},
-      {"startSeconds": 80, "endSeconds": 110, "description": "Rotate toward Turtle and establish vision with a teammate. Keep a route to retreat."},
-      {"startSeconds": 110, "endSeconds": 150, "description": "Support the Turtle contest with shields, cleanse, mobility, or area control. Disrupt enemy setup rather than diving alone."},
-      {"startSeconds": 150, "endSeconds": 240, "description": "Connect lanes and help teammates rotate faster. Use defensive tools when the enemy commits, not on harmless poke."},
-      {"startSeconds": 240, "endSeconds": 360, "description": "Track the next objective timer and escort your jungler through river. Save anti-CC or escape tools for the contest."},
-      {"startSeconds": 360, "endSeconds": 480, "description": "Create safe paths for your team and deny enemy flanks. Use area control to split the fight."},
-      {"startSeconds": 480, "endSeconds": 600, "description": "Prepare Lord-side routes. Use mobility or disengage to reset a bad setup instead of forcing a 50/50."},
-      {"startSeconds": 600, "endSeconds": 720, "description": "Stay near the teammate most likely to be caught. Reveal approaches and keep your utility available for counter-engage."},
-      {"startSeconds": 720, "endSeconds": 900, "description": "Use teamfight tools when multiple allies can benefit. Avoid spending major cooldowns on a single low-value target."},
-      {"startSeconds": 900, "endSeconds": 1080, "description": "Protect the team's formation. Stop dives, help carries reposition, and use Encourage value during grouped fights."}
-    ]
-  },
-  {
-    "id": "damage",
-    "label": "Damage / Assassin",
-    "blessing": "Dire Hit",
-    "heroes": "Flex examples: Selena, Natalia (not tagged as ROAM in this bundled roster)",
-    "steps": [
-      {"startSeconds": 0, "endSeconds": 40, "description": "Buy Roam blessing. Scout for information, not a forced level-one fight; leave if the enemy collapses."},
-      {"startSeconds": 40, "endSeconds": 80, "description": "Help mid secure priority, then threaten a side-lane angle. Do not steal your jungler's camps."},
-      {"startSeconds": 80, "endSeconds": 110, "description": "Look for a low-risk pick near Turtle side. Keep enough resources to contest the objective."},
-      {"startSeconds": 110, "endSeconds": 150, "description": "Use traps, marks, or burst to reveal and pressure approaches. Prioritize vision and objective safety over a solo kill."},
-      {"startSeconds": 150, "endSeconds": 240, "description": "Rotate through fog with an ally and punish isolated squishy targets. Leave after a failed attempt."},
-      {"startSeconds": 240, "endSeconds": 360, "description": "Time picks around the actual Turtle respawn. Pressure the enemy damage dealer before your team starts the objective."},
-      {"startSeconds": 360, "endSeconds": 480, "description": "Control side bushes and deny enemy rotations. Avoid trading your life for a low-value support."},
-      {"startSeconds": 480, "endSeconds": 600, "description": "Set up Lord vision and look for a pick on an enemy who checks alone. Do not start Lord while your team is split."},
-      {"startSeconds": 600, "endSeconds": 720, "description": "Use burst to remove vision and threaten backline access, but keep an exit route after committing."},
-      {"startSeconds": 720, "endSeconds": 900, "description": "Play around enemy defensive cooldowns. If the carry is protected, switch to scouting and objective pressure."},
-      {"startSeconds": 900, "endSeconds": 1080, "description": "Wait for the enemy formation to break before diving. Dire Hit is for finishing a valid target, not replacing team coordination."}
+  "blessings": [
+    {
+      "id": "conceal",
+      "name": "Conceal",
+      "type": "Active",
+      "effect": "Conceals you + nearby allies and grants ~40% extra Movement Speed for 5s, or until you deal/take damage. Breaks on damage.",
+      "cooldown": "Active cooldown ~60s (in-game). Use to start a coordinated fight or to disengage a losing one — not to walk into empty jungle.",
+      "best_for": [
+        "engage",
+        "pickoff"
+      ],
+      "unlock": "1000 Gold from Thriving"
+    },
+    {
+      "id": "encourage",
+      "name": "Encourage",
+      "type": "Passive",
+      "effect": "Nearby allies (incl. self) gain +12 to +30 Physical Attack & Magic Power (scales with Thriving gold) and +15% Attack Speed. Recent rework also adds hybrid defense in team fights.",
+      "cooldown": "Always on while near allies",
+      "best_for": [
+        "engage",
+        "utility"
+      ],
+      "unlock": "1000 Gold from Thriving"
+    },
+    {
+      "id": "favor",
+      "name": "Favor",
+      "type": "Passive",
+      "effect": "Every 10s, your next heal/shield restores an extra 300-750 HP to the lowest-HP ally (incl. self) within range.",
+      "cooldown": "10s proc",
+      "best_for": [
+        "healer"
+      ],
+      "unlock": "1000 Gold from Thriving"
+    },
+    {
+      "id": "dire_hit",
+      "name": "Dire Hit",
+      "type": "Passive",
+      "effect": "Every 30s, your damage to an enemy below 35% HP deals an extra ~12% of target's Max HP as hybrid damage. Finisher, not a poke tool.",
+      "cooldown": "30s per target",
+      "best_for": [
+        "pickoff",
+        "damage"
+      ],
+      "unlock": "1000 Gold from Thriving"
+    }
+  ],
+  "roles": [
+    {
+      "id": "engage",
+      "label": "Engage Tank",
+      "blessing": "Conceal / Encourage",
+      "blessing_id": "conceal",
+      "blessing_alt": "encourage",
+      "playstyle": "Frontline initiator. You start fights, zone Turtle/Lord, and peel. Your ultimate is the team's engage button — don't waste it on a single low-value target.",
+      "heroes": [
+        {
+          "name": "Tigreal",
+          "archetype": "AoE CC initiator",
+          "note": "Best with Conceal + Flicker. Classic Turtle/Lord engage."
+        },
+        {
+          "name": "Khufra",
+          "archetype": "Anti-dash / zone",
+          "note": "Top roam in S42 (54%+ WR). Ball form blocks dashes, great vs assassins."
+        },
+        {
+          "name": "Atlas",
+          "archetype": "AoE pull initiator",
+          "note": "Conceal + Flicker + Ult can win Lord fights alone if follow-up is close."
+        },
+        {
+          "name": "Minotaur",
+          "archetype": "Sustain + AoE CC",
+          "note": "S-tier sustain tank in S42. Rage management = engage timing."
+        },
+        {
+          "name": "Lolita",
+          "archetype": "Shield / anti-projectile",
+          "note": "Strong vs marksman/mage comps. Shield blocks poke before objective."
+        },
+        {
+          "name": "Johnson",
+          "archetype": "Global engage",
+          "note": "Drive to create numbers advantage. Don't drive alone into 5."
+        },
+        {
+          "name": "Hylos",
+          "archetype": "Frontline / zone",
+          "note": "Tanky zone + slow. Good when team needs a wall, not a flash engage."
+        },
+        {
+          "name": "Grock",
+          "archetype": "Early invade / wall",
+          "note": "Level 1 wall can steal buff / block Turtle pit. Falls off if you force bad fights."
+        },
+        {
+          "name": "Baxia",
+          "archetype": "Anti-heal / dive",
+          "note": "Anti-heal passive counters sustain comps (Estes/Rafaela/Floryn)."
+        },
+        {
+          "name": "Gloo",
+          "archetype": "Sticky / split",
+          "note": "Ult-split to stick to carry. Good for zoning backline at Lord."
+        },
+        {
+          "name": "Edith",
+          "archetype": "Tank / burst hybrid",
+          "note": "Can flex EXP. As roam, use Ult to frontline after engage."
+        },
+        {
+          "name": "Akai",
+          "archetype": "Pin / zone",
+          "note": "Ult pin into wall at Turtle/Lord = free Retribution window."
+        },
+        {
+          "name": "Belerick",
+          "archetype": "Sustain / reflect",
+          "note": "S-tier in S42. Punishes AoE / multi-hit comps, strong vs MM."
+        },
+        {
+          "name": "Gatotkaca",
+          "archetype": "Taunt / AoE",
+          "note": "Taunt + Ult for multi-man engage. Save taunt for diver peel."
+        },
+        {
+          "name": "Kalea",
+          "archetype": "Fighter / support hybrid",
+          "note": "Buffed in 2.2.16a. Heal + CC. Can roam or EXP — check draft."
+        }
+      ],
+      "battle_spells": [
+        "Flicker (default for initiators)",
+        "Vengeance (vs burst / when you will be focused)",
+        "Petrify (second AoE stun if team lacks CC)"
+      ],
+      "emblem": "Tank Emblem — Concussive Blast or Focusing Mark. Prioritize HP + Hybrid Defense + Tenacity.",
+      "strengths": [
+        "Wins Turtle/Lord fights with one good engage",
+        "Best vision + face-check tank"
+      ],
+      "weaknesses": [
+        "Useless if you engage without damage follow-up",
+        "Long cooldowns — if you miss Ult, disengage"
+      ],
+      "win_condition": "Land a multi-man CC when your damage dealers are in range, then convert to Turtle/Lord/tower.",
+      "lose_condition": "Engaging alone, or using Conceal to walk into fog with no team behind you.",
+      "steps": [
+        {
+          "startSeconds": 0,
+          "endSeconds": 40,
+          "timeLabel": "0:00-0:40",
+          "phase": "Setup",
+          "objective": "Guard jungler's first buff",
+          "description": "Buy Roam boots immediately. Guard your jungler's starting buff from a safe angle. Do NOT donate first blood — spot the invade, don't fight it 1v3.",
+          "checklist": [
+            "Buy Roam blessing",
+            "Stand in bush near jungler's buff",
+            "Ping enemy invade if seen"
+          ],
+          "vision": "Bush at jungler's buff + river entrance",
+          "decision": "If enemy invades with 3+, give buff and trade opposite side.",
+          "dont": "Don't face-check enemy jungle alone at Lv1.",
+          "callout": "Guard buff, no feed",
+          "compact": "Setup - Guard buff, no feed"
+        },
+        {
+          "startSeconds": 40,
+          "endSeconds": 80,
+          "timeLabel": "0:40-1:20",
+          "phase": "Early Rotate",
+          "objective": "Help mid clear, link to jungler",
+          "description": "Help mid clear first wave, then move with jungler. Hold key CC — threaten counter-invade only with lane priority. Reveal enemies for Thriving gold.",
+          "checklist": [
+            "Help mid (don't take last hits)",
+            "Move to jungler's second buff",
+            "Reveal enemy jungler/mid if safe"
+          ],
+          "vision": "Mid river bush + Gold-lane river bush",
+          "decision": "Engage only if mid + jungler can follow in 2s.",
+          "dont": "Don't stay in mid to farm.",
+          "callout": "Help mid, link jungler",
+          "compact": "Early Rotate - Help mid, link jungler"
+        },
+        {
+          "startSeconds": 80,
+          "endSeconds": 120,
+          "timeLabel": "1:20-2:00",
+          "phase": "Turtle Setup",
+          "objective": "Pre-position for Turtle (spawns 2:00)",
+          "description": "Move to Turtle side 20-30s early. Sweep river bushes, keep an escape route. Your jungler should be Lv4 by ~1:40. Stand where enemy must walk through you to reach pit.",
+          "checklist": [
+            "Be at Turtle-side river by 1:30",
+            "Check 2 bushes: river + pit entrance",
+            "Ping Turtle spawn timer"
+          ],
+          "vision": "Turtle pit entrance + enemy jungle exit",
+          "decision": "If enemy has numbers, poke + delay — don't start Turtle 2v4.",
+          "dont": "Don't start Turtle without your jungler.",
+          "callout": "Setup Turtle early",
+          "compact": "Turtle Setup - Setup Turtle early"
+        },
+        {
+          "startSeconds": 120,
+          "endSeconds": 150,
+          "timeLabel": "2:00-2:30",
+          "phase": "First Turtle",
+          "objective": "Contest / secure first Turtle",
+          "description": "Be at Turtle BEFORE it spawns. Zone enemy approaches; engage only when damage dealers can follow. Your job is to let jungler Retribution safely — body-block the enemy jungler, don't hit Turtle.",
+          "checklist": [
+            "Zone enemy jungler/mid from pit",
+            "Save Ult for enemy engage or Retribution denial",
+            "Peel if enemy dives your jungler"
+          ],
+          "vision": "Pit + flanking bush",
+          "decision": "Engage if enemy jungler is isolated or uses Retribution early.",
+          "dont": "Don't chase a low-HP enemy while Turtle is up.",
+          "callout": "Zone pit, save Ult",
+          "compact": "First Turtle - Zone pit, save Ult"
+        },
+        {
+          "startSeconds": 150,
+          "endSeconds": 240,
+          "timeLabel": "2:30-4:00",
+          "phase": "Post-Turtle",
+          "objective": "Protect carry + reset mid priority",
+          "description": "After objective, protect nearest carry and help mid regain priority. Use Turtle shield (120s) to trade aggressively but don't chase into fog. Rotate to Gold lane if MM is pressured.",
+          "checklist": [
+            "Escort MM or mid back to lane",
+            "Check Gold-lane bush before MM walks in",
+            "Reset + buy first defense item"
+          ],
+          "vision": "Gold-lane river + mid bush",
+          "decision": "If Turtle won: push tower. If lost: trade opposite buff/tower.",
+          "dont": "Don't stay in river alone after Turtle.",
+          "callout": "Protect carry, reset",
+          "compact": "Post-Turtle - Protect carry, reset"
+        },
+        {
+          "startSeconds": 240,
+          "endSeconds": 300,
+          "timeLabel": "4:00-5:00",
+          "phase": "Second Turtle",
+          "objective": "Track Turtle respawn (~4:00) + turret shields end 5:00",
+          "description": "Second Turtle spawns ~2 min after first kill (~4:00). Start vision early and save Ult for contest. Outer turret shields drop at 5:00 — after that, tower damage matters more.",
+          "checklist": [
+            "Check actual Turtle timer (in-game)",
+            "Setup 20s early again",
+            "After 5:00, help push weakest tower"
+          ],
+          "vision": "Turtle pit + enemy rotation path",
+          "decision": "If enemy is ahead, give Turtle and take tower/buff trade.",
+          "dont": "Don't force second Turtle if your team is behind and split.",
+          "callout": "2nd Turtle, push after 5:00",
+          "compact": "Second Turtle - 2nd Turtle, push after 5:00"
+        },
+        {
+          "startSeconds": 300,
+          "endSeconds": 480,
+          "timeLabel": "5:00-8:00",
+          "phase": "Mid Game / Third Turtle",
+          "objective": "Control river, prep for Lord at 8:00",
+          "description": "Third Turtle can spawn ~6:00 if previous was taken on time — check timer, don't guess. Escort team through river, keep frontline between enemies and carries. Blessing should be unlocked now (1000g Thriving) — Conceal is live.",
+          "checklist": [
+            "Unlock Conceal/Encourage",
+            "Rotate mid <-> Gold <-> Turtle side",
+            "Buy anti-heal if enemy sustains (Dominance Ice)"
+          ],
+          "vision": "Lord pit entrance by 7:30",
+          "decision": "Use Conceal only when team is grouped and ready to fight.",
+          "dont": "Don't use Conceal to roam alone.",
+          "callout": "Control river, prep Lord",
+          "compact": "Mid Game / Third Turtle - Control river, prep Lord"
+        },
+        {
+          "startSeconds": 480,
+          "endSeconds": 600,
+          "timeLabel": "8:00-10:00",
+          "phase": "First Lord",
+          "objective": "Vision + numbers advantage before Lord",
+          "description": "Lord spawns at 8:00. Prepare Lord-side vision early. Look for numbers advantage (pick or enemy dead) before starting. Stand at pit entrance while team hits Lord.",
+          "checklist": [
+            "Vision Lord pit by 7:40",
+            "Force a pick before Lord if possible",
+            "Don't start Lord 50/50 vs alive enemy jungler"
+          ],
+          "vision": "Lord pit + both jungle exits",
+          "decision": "Start Lord only after won fight or enemy jungler dead/missing far.",
+          "dont": "Don't start Lord while your MM is clearing bot alone.",
+          "callout": "Vision Lord, need numbers",
+          "compact": "First Lord - Vision Lord, need numbers"
+        },
+        {
+          "startSeconds": 600,
+          "endSeconds": 720,
+          "timeLabel": "10:00-12:00",
+          "phase": "Lord Push",
+          "objective": "Convert Lord to towers",
+          "description": "Lead safe rotations, check bushes before carries cross. Convert won fights into towers or next Lord. Group with Lord wave — don't split push alone as tank.",
+          "checklist": [
+            "Push with Lord wave",
+            "Check bush before team crosses river",
+            "Protect MM from assassin dive"
+          ],
+          "vision": "Push lane bushes + Lord pit",
+          "decision": "Push if Lord alive + team grouped. Reset if Lord dead and enemy respawns.",
+          "dont": "Don't dive inhibitor without minions.",
+          "callout": "Push with Lord",
+          "compact": "Lord Push - Push with Lord"
+        },
+        {
+          "startSeconds": 720,
+          "endSeconds": 900,
+          "timeLabel": "12:00-15:00",
+          "phase": "Mid-Late",
+          "objective": "Hold vision, punish overextension",
+          "description": "Do not face-check alone. Hold one reliable CC to interrupt divers or punish committed enemy. Death timers are long — one pick can be Lord.",
+          "checklist": [
+            "Stay within 2s of carry",
+            "Save CC for diver",
+            "Ward Lord pit via presence"
+          ],
+          "vision": "Lord pit + enemy jungle exit",
+          "decision": "Engage if enemy diver commits and your carry is safe.",
+          "dont": "Don't chase a kill across map with Lord up.",
+          "callout": "Hold CC, don't face-check",
+          "compact": "Mid-Late - Hold CC, don't face-check"
+        },
+        {
+          "startSeconds": 900,
+          "endSeconds": 1080,
+          "timeLabel": "15:00-18:00",
+          "phase": "Late / Evolved Lord",
+          "objective": "Peel + Conceal engage for Evolved Lord",
+          "description": "Stay close to peel main damage dealer. Use Conceal to start a coordinated fight or disengage a losing one. Evolved Lord (~18:00) ends games — never give it for free.",
+          "checklist": [
+            "Group before Evolved Lord",
+            "Conceal + Ult combo ready",
+            "Buy Immortality / Winter Crown if ahead/behind"
+          ],
+          "vision": "Evolved Lord pit — walk first, team close behind",
+          "decision": "Fight only with full team + Ult + Conceal ready.",
+          "dont": "Don't die alone scouting with no info gained.",
+          "callout": "Peel carry, Conceal fight",
+          "compact": "Late / Evolved Lord - Peel carry, Conceal fight"
+        }
+      ]
+    },
+    {
+      "id": "pickoff",
+      "label": "Pick-off Tank",
+      "blessing": "Conceal / Dire Hit",
+      "blessing_id": "conceal",
+      "blessing_alt": "dire_hit",
+      "playstyle": "Single-target catch. You live in bushes and fog. One hook/suppression = Turtle, Lord, or tower. If you miss, you reset — you don't force.",
+      "heroes": [
+        {
+          "name": "Franco",
+          "archetype": "Hook / suppress",
+          "note": "Hook is the win condition. Hide, don't show in lane. Flicker + Hook + Ult."
+        },
+        {
+          "name": "Kaja",
+          "archetype": "Suppress / pull",
+          "note": "Buffed in 2.2.16. Ult suppress pulls carry into team. Strong vs mobile heroes."
+        },
+        {
+          "name": "Jawhead",
+          "archetype": "Throw / displacement",
+          "note": "Throw enemy into team or throw ally to engage. Great for isolating jungler at Turtle."
+        },
+        {
+          "name": "Grock",
+          "archetype": "Wall + burst pick",
+          "note": "Flex from Engage — wall + Ult can isolate one target at objective."
+        },
+        {
+          "name": "Saber",
+          "archetype": "Assassin roam (situational)",
+          "note": "Solo-queue pick: Ult deletes one carry. Needs team to follow — don't pick if you have no frontline."
+        }
+      ],
+      "battle_spells": [
+        "Flicker (extend hook/suppress range)",
+        "Petrify (extra lock after pull)",
+        "Sprint (reposition for flank)"
+      ],
+      "emblem": "Tank or Support — Focusing Mark to amplify team burst after catch. Move Speed + HP.",
+      "strengths": [
+        "One pick = objective",
+        "Best at denying enemy Retribution user"
+      ],
+      "weaknesses": [
+        "No teamfight if you miss catch",
+        "Squishier than engage tanks if you get collapsed"
+      ],
+      "win_condition": "Catch the enemy jungler, mid, or MM before objective, then take objective 5v4.",
+      "lose_condition": "Forcing hooks when your burst ally is clearing wave or dead.",
+      "steps": [
+        {
+          "startSeconds": 0,
+          "endSeconds": 40,
+          "timeLabel": "0:00-0:40",
+          "phase": "Setup",
+          "objective": "Identify enemy jungler start, avoid unsupported invade",
+          "description": "Buy Roam blessing. Identify enemy jungler's likely start (buff near their Gold lane). Avoid unsupported invade — spot, ping, retreat.",
+          "checklist": [
+            "Buy Roam",
+            "Check enemy buff bush from safe angle",
+            "Ping jungler start"
+          ],
+          "vision": "Enemy buff entrance",
+          "decision": "Only invade if you have 3+ and enemy is spotted opposite side.",
+          "dont": "Don't hook Lv1 with no follow-up.",
+          "callout": "Spot jungler start",
+          "compact": "Setup - Spot jungler start"
+        },
+        {
+          "startSeconds": 40,
+          "endSeconds": 80,
+          "timeLabel": "0:40-1:20",
+          "phase": "Early Rotate",
+          "objective": "Threaten hook only with ally in range",
+          "description": "Rotate through mid and threaten hook/suppression only when ally is in range. Stay in fog — if enemy sees you, they won't walk up.",
+          "checklist": [
+            "Stay in mid bush, not in lane",
+            "Wait for mid to be in burst range",
+            "Reveal enemy for Thriving"
+          ],
+          "vision": "Mid river bush",
+          "decision": "Hook if ally can burst in 1s and you have escape.",
+          "dont": "Don't show yourself for poke.",
+          "callout": "Hide, hook with ally",
+          "compact": "Early Rotate - Hide, hook with ally"
+        },
+        {
+          "startSeconds": 80,
+          "endSeconds": 120,
+          "timeLabel": "1:20-2:00",
+          "phase": "Turtle Setup",
+          "objective": "Mark enemy jungler/mid, keep catch ready",
+          "description": "Check Turtle-side river and mark enemy jungler or mid. Keep key catch skill ready — don't waste it on tank.",
+          "checklist": [
+            "Be in Turtle-side bush by 1:30",
+            "Ping enemy jungler position",
+            "Save hook/suppress for Turtle fight"
+          ],
+          "vision": "Turtle pit bush + river",
+          "decision": "Catch if enemy jungler steps up alone.",
+          "dont": "Don't hook the tank to start Turtle.",
+          "callout": "Mark jungler, save hook",
+          "compact": "Turtle Setup - Mark jungler, save hook"
+        },
+        {
+          "startSeconds": 120,
+          "endSeconds": 150,
+          "timeLabel": "2:00-2:30",
+          "phase": "First Turtle",
+          "objective": "Punish isolated target, deny Retribution",
+          "description": "At first Turtle, punish isolated targets and interrupt enemy Retribution user. Don't abandon jungler — your catch protects his Retribution.",
+          "checklist": [
+            "Hook/suppress enemy jungler when Turtle low",
+            "Body-block pit entrance",
+            "Peel if enemy dives your jungler"
+          ],
+          "vision": "Pit entrance",
+          "decision": "Use Ult on jungler if Turtle < Retribution range.",
+          "dont": "Don't chase kill while Turtle is being stolen.",
+          "callout": "Hook jungler, deny Retri",
+          "compact": "First Turtle - Hook jungler, deny Retri"
+        },
+        {
+          "startSeconds": 150,
+          "endSeconds": 240,
+          "timeLabel": "2:30-4:00",
+          "phase": "Roam Pick",
+          "objective": "Short ambushes mid <-> Gold",
+          "description": "Move between mid and Gold. Create short ambushes from controlled bushes, then leave before collapsed on. One pick = tower or Turtle.",
+          "checklist": [
+            "Bush in Gold river",
+            "Hook MM/mid if isolated",
+            "Leave after 10s if no pick"
+          ],
+          "vision": "Gold-lane bush + mid bush",
+          "decision": "If no pick in 10s, rotate — don't camp empty bush.",
+          "dont": "Don't stay in one bush for 30s while team fights elsewhere.",
+          "callout": "Short ambush, leave fast",
+          "compact": "Roam Pick - Short ambush, leave fast"
+        },
+        {
+          "startSeconds": 240,
+          "endSeconds": 300,
+          "timeLabel": "4:00-5:00",
+          "phase": "Second Turtle",
+          "objective": "Time pick around Turtle respawn",
+          "description": "Use actual next Turtle spawn (~4:00) to time a pick. Caught enemy = objective window, not reason to chase farther.",
+          "checklist": [
+            "Setup 20s early",
+            "Catch before Turtle starts",
+            "Take Turtle 5v4"
+          ],
+          "vision": "Turtle pit",
+          "decision": "If pick lands, take Turtle immediately.",
+          "dont": "Don't chase second kill after pick.",
+          "callout": "Pick before Turtle",
+          "compact": "Second Turtle - Pick before Turtle"
+        },
+        {
+          "startSeconds": 300,
+          "endSeconds": 480,
+          "timeLabel": "5:00-8:00",
+          "phase": "Mid Game",
+          "objective": "Track carries + flank routes",
+          "description": "Track enemy carry positions and flank routes. Keep Ult for high-value target or objective steal denial. Outer shields down at 5:00 — picks now = towers.",
+          "checklist": [
+            "Flank from side bush",
+            "Save Ult for carry/jungler",
+            "Help push after pick"
+          ],
+          "vision": "Side bushes + Lord pit by 7:30",
+          "decision": "Catch carry if they check bush alone.",
+          "dont": "Don't Ult the roamer/tank.",
+          "callout": "Flank carry, save Ult",
+          "compact": "Mid Game - Flank carry, save Ult"
+        },
+        {
+          "startSeconds": 480,
+          "endSeconds": 600,
+          "timeLabel": "8:00-10:00",
+          "phase": "First Lord",
+          "objective": "Catch rotator before Lord",
+          "description": "Set up Lord vision from sides. Catch enemy rotating alone before team commits to Lord. One pick = free Lord.",
+          "checklist": [
+            "Side bush at Lord pit",
+            "Catch rotator",
+            "Start Lord only 5v4"
+          ],
+          "vision": "Lord pit sides",
+          "decision": "If no pick, don't start Lord 50/50.",
+          "dont": "Don't start Lord while enemy jungler alive.",
+          "callout": "Catch rotator, then Lord",
+          "compact": "First Lord - Catch rotator, then Lord"
+        },
+        {
+          "startSeconds": 600,
+          "endSeconds": 720,
+          "timeLabel": "10:00-12:00",
+          "phase": "Lord Push",
+          "objective": "Shadow burst ally",
+          "description": "Shadow teammate with burst damage. Avoid starting fights while follow-up is clearing wave. Your catch is only as good as your follow-up.",
+          "checklist": [
+            "Stay near burst ally",
+            "Communicate hook CD",
+            "Push with Lord wave"
+          ],
+          "vision": "Push lane bush",
+          "decision": "Engage only if burst ally is within 2s.",
+          "dont": "Don't hook without burst ally.",
+          "callout": "Shadow burst ally",
+          "compact": "Lord Push - Shadow burst ally"
+        },
+        {
+          "startSeconds": 720,
+          "endSeconds": 900,
+          "timeLabel": "12:00-15:00",
+          "phase": "Mid-Late",
+          "objective": "Threaten fog angles, protect if no pick",
+          "description": "Threaten fog angles around objectives. If no clean pick exists, protect carry instead of forcing one. A forced hook that misses = lost Lord.",
+          "checklist": [
+            "Threaten Lord pit angles",
+            "Fall back to peel if no pick",
+            "Save Ult for diver"
+          ],
+          "vision": "Lord pit + carry flank",
+          "decision": "Force only if enemy carry is isolated and your team is grouped.",
+          "dont": "Don't force a pick when behind.",
+          "callout": "Threaten fog, else peel",
+          "compact": "Mid-Late - Threaten fog, else peel"
+        },
+        {
+          "startSeconds": 900,
+          "endSeconds": 1080,
+          "timeLabel": "15:00-18:00",
+          "phase": "Late / Evolved Lord",
+          "objective": "Save catch for game-deciding target",
+          "description": "Save suppression/displacement for enemy's most dangerous diver or carry. One late-game pick can decide match. Dire Hit helps finish low-HP target.",
+          "checklist": [
+            "Save Ult for carry/jungler",
+            "Group before Evolved Lord",
+            "Conceal to flank"
+          ],
+          "vision": "Evolved Lord pit",
+          "decision": "Catch = start Lord. Miss = disengage.",
+          "dont": "Don't Ult early on tank in late game.",
+          "callout": "Save catch for carry",
+          "compact": "Late / Evolved Lord - Save catch for carry"
+        }
+      ]
+    },
+    {
+      "id": "healer",
+      "label": "Healer Support",
+      "blessing": "Favor",
+      "blessing_id": "favor",
+      "playstyle": "Sustain + protect. You keep the team alive through poke and burst. Position is everything — you die first if you face-check.",
+      "heroes": [
+        {
+          "name": "Estes",
+          "archetype": "AoE heal / sustain",
+          "note": "Ult wins long fights. Stay behind frontline, heal after enemy burst."
+        },
+        {
+          "name": "Rafaela",
+          "archetype": "Heal + speed + CC",
+          "note": "Top roam S42 despite 2.2.16a nerf (55% WR). Speed boost helps engage/disengage. Ban/pick priority."
+        },
+        {
+          "name": "Angela",
+          "archetype": "Shield + possess",
+          "note": "Ult to save carry or to join dive. Don't possess tank if carry is being dived."
+        },
+        {
+          "name": "Floryn",
+          "archetype": "Global heal + sustain",
+          "note": "Top sustain in S42 (54% WR). Global Ult can save fight from across map. Don't waste on full-HP team."
+        },
+        {
+          "name": "Marcel",
+          "archetype": "Support / CC + sustain flex",
+          "note": "S-tier S42: 57% WR, 40%+ ban. Soul Tether mitigates damage, wide freeze starts fights. If open, first-pick."
+        }
+      ],
+      "battle_spells": [
+        "Revitalize (sustain in long fights)",
+        "Aegis (burst protection)",
+        "Flicker (escape / reposition)"
+      ],
+      "emblem": "Support Emblem — Focusing Mark. Prioritize Heal Effect + Movement Speed + Hybrid Defense.",
+      "strengths": [
+        "Wins poke wars and long fights",
+        "Best at keeping MM alive vs dive"
+      ],
+      "weaknesses": [
+        "No engage — needs tank/fighter to start",
+        "Dies if caught alone"
+      ],
+      "win_condition": "Survive first burst, heal team through it, then win the extended fight.",
+      "lose_condition": "Face-checking, or using Ult/heal before enemy engages.",
+      "steps": [
+        {
+          "startSeconds": 0,
+          "endSeconds": 40,
+          "timeLabel": "0:00-0:40",
+          "phase": "Setup",
+          "objective": "Stay safe, don't take jungle EXP",
+          "description": "Buy Roam blessing. Stay near team without taking jungle EXP or exposing yourself to invade. You are the squishiest early.",
+          "checklist": [
+            "Buy Roam",
+            "Stay near mid/jungler",
+            "Don't face-check enemy buff"
+          ],
+          "vision": "Mid bush + jungler buff",
+          "decision": "If invade, retreat and ping — don't trade HP.",
+          "dont": "Don't take jungler's camps.",
+          "callout": "Stay safe, no farm",
+          "compact": "Setup - Stay safe, no farm"
+        },
+        {
+          "startSeconds": 40,
+          "endSeconds": 80,
+          "timeLabel": "0:40-1:20",
+          "phase": "Early Rotate",
+          "objective": "Sustain mid clear, rotate to pressured lane",
+          "description": "Help mid sustain first clear, then rotate toward lane most likely to be pressured. Heal after trades, not before.",
+          "checklist": [
+            "Help mid (don't take last hits)",
+            "Heal mid after poke",
+            "Rotate to Gold if MM pressured"
+          ],
+          "vision": "Mid + Gold river",
+          "decision": "Follow strongest nearby teammate.",
+          "dont": "Don't heal full-HP ally — waste of Favor proc.",
+          "callout": "Sustain mid, rotate",
+          "compact": "Early Rotate - Sustain mid, rotate"
+        },
+        {
+          "startSeconds": 80,
+          "endSeconds": 120,
+          "timeLabel": "1:20-2:00",
+          "phase": "Turtle Setup",
+          "objective": "Move with ally to Turtle river, keep heal ready",
+          "description": "Move with ally to Turtle-side river. Keep healing resources for first skirmish. Stay behind tank.",
+          "checklist": [
+            "Be at Turtle river by 1:30 with ally",
+            "Favor proc ready",
+            "Position behind frontline"
+          ],
+          "vision": "Turtle river bush",
+          "decision": "If team is split, don't go alone.",
+          "dont": "Don't stand in AoE at pit entrance.",
+          "callout": "Move with ally, save heal",
+          "compact": "Turtle Setup - Move with ally, save heal"
+        },
+        {
+          "startSeconds": 120,
+          "endSeconds": 150,
+          "timeLabel": "2:00-2:30",
+          "phase": "First Turtle",
+          "objective": "Heal + protect jungler",
+          "description": "Arrive before Turtle. Heal and protect jungler; avoid standing where enemy AoE hits whole team. Spread — don't stack.",
+          "checklist": [
+            "Heal jungler when focused",
+            "Use CC/slow to peel",
+            "Don't stack with team in pit"
+          ],
+          "vision": "Pit entrance",
+          "decision": "Save Ult for enemy engage.",
+          "dont": "Don't Ult at full HP.",
+          "callout": "Heal jungler, spread out",
+          "compact": "First Turtle - Heal jungler, spread out"
+        },
+        {
+          "startSeconds": 150,
+          "endSeconds": 240,
+          "timeLabel": "2:30-4:00",
+          "phase": "Post-Turtle",
+          "objective": "Follow strongest teammate, reset safely",
+          "description": "Follow strongest nearby teammate. Heal after trades and reset safely rather than face-checking. Favor triggers on lowest-HP ally.",
+          "checklist": [
+            "Heal lowest-HP ally",
+            "Reset if low",
+            "Escort MM/mid"
+          ],
+          "vision": "Lane bushes",
+          "decision": "If low on heal/Ult, disengage.",
+          "dont": "Don't face-check river alone.",
+          "callout": "Follow carry, reset safe",
+          "compact": "Post-Turtle - Follow carry, reset safe"
+        },
+        {
+          "startSeconds": 240,
+          "endSeconds": 300,
+          "timeLabel": "4:00-5:00",
+          "phase": "Second Turtle",
+          "objective": "Prep based on real Turtle timer",
+          "description": "Prepare for next Turtle based on real respawn (~4:00). Keep carry healthy before objective starts. Don't let team start Turtle at half HP.",
+          "checklist": [
+            "Heal team to full before Turtle",
+            "Setup 20s early",
+            "Favor proc ready"
+          ],
+          "vision": "Turtle pit",
+          "decision": "If team low, delay Turtle and heal first.",
+          "dont": "Don't start Turtle while healing on CD.",
+          "callout": "Heal full before Turtle",
+          "compact": "Second Turtle - Heal full before Turtle"
+        },
+        {
+          "startSeconds": 300,
+          "endSeconds": 480,
+          "timeLabel": "5:00-8:00",
+          "phase": "Mid Game",
+          "objective": "Stay in ability range, save Ult for engage",
+          "description": "Stay within ability range of frontline and MM. Save major heal/protection for enemy engage. Outer shields down at 5:00 — sustain lets you push towers.",
+          "checklist": [
+            "Stay behind tank, near MM",
+            "Save Ult for enemy Ult",
+            "Buy anti-heal if needed"
+          ],
+          "vision": "Mid + Lord pit by 7:30",
+          "decision": "Use Ult when enemy commits, not on poke.",
+          "dont": "Don't use Ult to heal one poke.",
+          "callout": "Save Ult for engage",
+          "compact": "Mid Game - Save Ult for engage"
+        },
+        {
+          "startSeconds": 480,
+          "endSeconds": 600,
+          "timeLabel": "8:00-10:00",
+          "phase": "First Lord",
+          "objective": "Group before Lord, heal between pokes",
+          "description": "Group before Lord. Heal between pokes and keep safe position behind frontline. Let tank check bushes.",
+          "checklist": [
+            "Group before Lord",
+            "Heal between pokes",
+            "Stay behind tank"
+          ],
+          "vision": "Lord pit entrance",
+          "decision": "If team low, reset before Lord.",
+          "dont": "Don't enter dark river first.",
+          "callout": "Group, heal between pokes",
+          "compact": "First Lord - Group, heal between pokes"
+        },
+        {
+          "startSeconds": 600,
+          "endSeconds": 720,
+          "timeLabel": "10:00-12:00",
+          "phase": "Lord Push",
+          "objective": "Escort team, let tank check bushes",
+          "description": "Escort team through contested areas; let tank check bushes and do not enter dark river first. Heal Lord-push wave.",
+          "checklist": [
+            "Escort MM",
+            "Let tank face-check",
+            "Heal after tower poke"
+          ],
+          "vision": "Push lane",
+          "decision": "Push with Lord wave if team healthy.",
+          "dont": "Don't walk ahead of tank.",
+          "callout": "Let tank check, escort",
+          "compact": "Lord Push - Let tank check, escort"
+        },
+        {
+          "startSeconds": 720,
+          "endSeconds": 900,
+          "timeLabel": "12:00-15:00",
+          "phase": "Mid-Late",
+          "objective": "Prioritize sustained damage dealer",
+          "description": "Prioritize teammate who can deal sustained damage. Use Favor's heal trigger on ally who needs it most — usually MM or jungler, not tank.",
+          "checklist": [
+            "Heal MM/jungler first",
+            "Save Ult for dive",
+            "Position behind frontline"
+          ],
+          "vision": "Lord pit",
+          "decision": "Peel diver, don't chase.",
+          "dont": "Don't heal tank while MM dies.",
+          "callout": "Heal MM first",
+          "compact": "Mid-Late - Heal MM first"
+        },
+        {
+          "startSeconds": 900,
+          "endSeconds": 1080,
+          "timeLabel": "15:00-18:00",
+          "phase": "Late / Evolved Lord",
+          "objective": "Keep core carry alive through first burst",
+          "description": "Keep core carry alive through first burst. Disengage and regroup if key healing/Ult unavailable. One death = lost Evolved Lord.",
+          "checklist": [
+            "Save Ult for Evolved Lord fight",
+            "Stay near carry",
+            "Buy Immortality / Winter Crown"
+          ],
+          "vision": "Evolved Lord pit",
+          "decision": "Fight only if heal/Ult ready.",
+          "dont": "Don't fight without Ult.",
+          "callout": "Keep carry alive",
+          "compact": "Late / Evolved Lord - Keep carry alive"
+        }
+      ]
+    },
+    {
+      "id": "utility",
+      "label": "Utility / Disengage",
+      "blessing": "Encourage",
+      "blessing_id": "encourage",
+      "playstyle": "Control + mobility + cleanse. You decide when fights start and when they stop. Save utility for the moment enemy commits.",
+      "heroes": [
+        {
+          "name": "Diggie",
+          "archetype": "Anti-CC / vision",
+          "note": "Ult cleanses all CC. Best vs Atlas/Tigreal/Franco comps. Eggs give vision."
+        },
+        {
+          "name": "Mathilda",
+          "archetype": "Mobility / shield",
+          "note": "Ult + Skill 2 lets ally escape or dive. Strong for Lord picks."
+        },
+        {
+          "name": "Chip",
+          "archetype": "Portal / global rotation",
+          "note": "Portal creates numbers advantage at Turtle/Lord. Don't portal into 1v5."
+        },
+        {
+          "name": "Carmilla",
+          "archetype": "Link / AoE CC",
+          "note": "S-tier S42. Ult links enemies — AoE damage spreads. Great vs grouped comps."
+        },
+        {
+          "name": "Faramis",
+          "archetype": "Revive / AoE",
+          "note": "Ult revives team in zone. Forces enemy to disengage or fight into revive."
+        },
+        {
+          "name": "Alice",
+          "archetype": "Sustain / AoE (situational)",
+          "note": "Flex pick. Needs farm — only if team lacks magic damage."
+        },
+        {
+          "name": "Nana",
+          "archetype": "Poke / transform (situational)",
+          "note": "Molina stops dives. Situational roam if team needs CC + poke."
+        },
+        {
+          "name": "Hirara",
+          "archetype": "Flex / scouting (situational)",
+          "note": "Primarily jungle/mid in S42. As roam, use for vision/burst — not default blind pick."
+        },
+        {
+          "name": "Marcel",
+          "archetype": "Support / CC + sustain",
+          "note": "S-tier S42: 57% WR, 40%+ ban. Wide freeze + Soul Tether. Top utility pick — ban or first-pick."
+        }
+      ],
+      "battle_spells": [
+        "Flicker (reposition for Ult)",
+        "Revitalize (sustain)",
+        "Purify (if you will be focused)"
+      ],
+      "emblem": "Support Emblem — Focusing Mark or Pull Yourself Together (reduces Ult CD). Move Speed + Heal Effect.",
+      "strengths": [
+        "Best at stopping enemy engage",
+        "Wins fights by resetting bad fights"
+      ],
+      "weaknesses": [
+        "No hard engage alone",
+        "Utility wasted if used on poke"
+      ],
+      "win_condition": "Use utility when multiple allies benefit — cleanse the engage, shield the carry, portal for numbers.",
+      "lose_condition": "Spending Ult/cleanse on one low-value target or on harmless poke.",
+      "steps": [
+        {
+          "startSeconds": 0,
+          "endSeconds": 40,
+          "timeLabel": "0:00-0:40",
+          "phase": "Setup",
+          "objective": "Scout safely, identify team need",
+          "description": "Buy Roam blessing. Scout safely and identify whether team needs anti-engage, mobility, or teamfight setup. Don't trade HP early.",
+          "checklist": [
+            "Buy Roam",
+            "Scout enemy jungle entrance",
+            "Ping team need"
+          ],
+          "vision": "River + jungler buff",
+          "decision": "If enemy invades, use utility to disengage.",
+          "dont": "Don't spend escape/cleanse Lv1.",
+          "callout": "Scout, pick utility need",
+          "compact": "Setup - Scout, pick utility need"
+        },
+        {
+          "startSeconds": 40,
+          "endSeconds": 80,
+          "timeLabel": "0:40-1:20",
+          "phase": "Early Rotate",
+          "objective": "Help mid, secure river, save escape",
+          "description": "Help mid clear and use utility to secure river access. Avoid spending escape/cleanse too early.",
+          "checklist": [
+            "Help mid",
+            "Secure river bush",
+            "Save cleanse/escape"
+          ],
+          "vision": "Mid river",
+          "decision": "Use utility only if ally will die.",
+          "dont": "Don't use Ult on poke.",
+          "callout": "Help mid, save cleanse",
+          "compact": "Early Rotate - Help mid, save cleanse"
+        },
+        {
+          "startSeconds": 80,
+          "endSeconds": 120,
+          "timeLabel": "1:20-2:00",
+          "phase": "Turtle Setup",
+          "objective": "Vision with teammate, keep retreat route",
+          "description": "Rotate toward Turtle and establish vision with teammate. Keep route to retreat — you are not the tank.",
+          "checklist": [
+            "Be at Turtle river by 1:30 with teammate",
+            "Vision pit entrance",
+            "Plan retreat"
+          ],
+          "vision": "Turtle pit",
+          "decision": "If enemy collapses, disengage with utility.",
+          "dont": "Don't face-check alone.",
+          "callout": "Vision with teammate",
+          "compact": "Turtle Setup - Vision with teammate"
+        },
+        {
+          "startSeconds": 120,
+          "endSeconds": 150,
+          "timeLabel": "2:00-2:30",
+          "phase": "First Turtle",
+          "objective": "Disrupt setup, don't dive alone",
+          "description": "Support Turtle contest with shields, cleanse, mobility, or AoE. Disrupt enemy setup rather than diving alone.",
+          "checklist": [
+            "Shield/cleanse when enemy engages",
+            "Disrupt enemy jungler",
+            "Peel for jungler"
+          ],
+          "vision": "Pit",
+          "decision": "Use Ult when enemy commits.",
+          "dont": "Don't dive alone.",
+          "callout": "Shield / cleanse on engage",
+          "compact": "First Turtle - Shield / cleanse on engage"
+        },
+        {
+          "startSeconds": 150,
+          "endSeconds": 240,
+          "timeLabel": "2:30-4:00",
+          "phase": "Post-Turtle",
+          "objective": "Connect lanes, help rotations",
+          "description": "Connect lanes and help teammates rotate faster. Use defensive tools when enemy commits, not on harmless poke.",
+          "checklist": [
+            "Rotate mid <-> Gold",
+            "Use mobility to help ally escape",
+            "Save utility for fight"
+          ],
+          "vision": "Lane bushes",
+          "decision": "Rotate to lane with kill chance.",
+          "dont": "Don't waste utility on one poke.",
+          "callout": "Connect lanes, save utility",
+          "compact": "Post-Turtle - Connect lanes, save utility"
+        },
+        {
+          "startSeconds": 240,
+          "endSeconds": 300,
+          "timeLabel": "4:00-5:00",
+          "phase": "Second Turtle",
+          "objective": "Track timer, escort jungler",
+          "description": "Track next objective timer and escort jungler through river. Save anti-CC/escape for contest.",
+          "checklist": [
+            "Escort jungler",
+            "Setup 20s early",
+            "Save Ult for Turtle fight"
+          ],
+          "vision": "Turtle pit",
+          "decision": "If enemy engages, cleanse + disengage.",
+          "dont": "Don't start Turtle without team.",
+          "callout": "Escort jungler, save Ult",
+          "compact": "Second Turtle - Escort jungler, save Ult"
+        },
+        {
+          "startSeconds": 300,
+          "endSeconds": 480,
+          "timeLabel": "5:00-8:00",
+          "phase": "Mid Game",
+          "objective": "Safe paths, deny flanks, split fight",
+          "description": "Create safe paths for team and deny enemy flanks. Use AoE to split fight. Encourage boosts team damage in grouped fights.",
+          "checklist": [
+            "Create safe path",
+            "Deny flank bush",
+            "Use AoE to split"
+          ],
+          "vision": "Lord pit by 7:30",
+          "decision": "Split fight if enemy groups.",
+          "dont": "Don't group in one AoE.",
+          "callout": "Safe paths, deny flank",
+          "compact": "Mid Game - Safe paths, deny flank"
+        },
+        {
+          "startSeconds": 480,
+          "endSeconds": 600,
+          "timeLabel": "8:00-10:00",
+          "phase": "First Lord",
+          "objective": "Prepare routes, reset bad setup",
+          "description": "Prepare Lord-side routes. Use mobility/disengage to reset bad setup instead of forcing 50/50. Portal (Chip) for numbers.",
+          "checklist": [
+            "Vision Lord pit",
+            "Prepare reset route",
+            "Portal if numbers advantage"
+          ],
+          "vision": "Lord pit",
+          "decision": "Reset if setup is bad.",
+          "dont": "Don't force Lord 50/50.",
+          "callout": "Prep routes, reset bad fight",
+          "compact": "First Lord - Prep routes, reset bad fight"
+        },
+        {
+          "startSeconds": 600,
+          "endSeconds": 720,
+          "timeLabel": "10:00-12:00",
+          "phase": "Lord Push",
+          "objective": "Stay near likely caught ally",
+          "description": "Stay near teammate most likely to be caught. Reveal approaches and keep utility for counter-engage.",
+          "checklist": [
+            "Stay near MM",
+            "Reveal flank",
+            "Save utility for counter"
+          ],
+          "vision": "Push lane",
+          "decision": "Counter-engage when enemy dives.",
+          "dont": "Don't use utility to engage alone.",
+          "callout": "Stay near caught ally",
+          "compact": "Lord Push - Stay near caught ally"
+        },
+        {
+          "startSeconds": 720,
+          "endSeconds": 900,
+          "timeLabel": "12:00-15:00",
+          "phase": "Mid-Late",
+          "objective": "Use utility when multiple allies benefit",
+          "description": "Use teamfight tools when multiple allies can benefit. Avoid spending major CDs on single low-value target.",
+          "checklist": [
+            "Wait for multi-ally value",
+            "Cleanse multi-CC",
+            "Peel diver"
+          ],
+          "vision": "Lord pit",
+          "decision": "Use Ult if 2+ allies benefit.",
+          "dont": "Don't Ult for one target.",
+          "callout": "Ult for 2+ allies",
+          "compact": "Mid-Late - Ult for 2+ allies"
+        },
+        {
+          "startSeconds": 900,
+          "endSeconds": 1080,
+          "timeLabel": "15:00-18:00",
+          "phase": "Late / Evolved Lord",
+          "objective": "Protect formation, stop dives",
+          "description": "Protect team's formation. Stop dives, help carries reposition, and use Encourage value during grouped fights.",
+          "checklist": [
+            "Stay grouped",
+            "Stop dive with CC/cleanse",
+            "Save Ult for Evolved Lord fight"
+          ],
+          "vision": "Evolved Lord pit",
+          "decision": "Fight only grouped.",
+          "dont": "Don't split late.",
+          "callout": "Protect formation, stop dive",
+          "compact": "Late / Evolved Lord - Protect formation, stop dive"
+        }
+      ]
+    },
+    {
+      "id": "damage",
+      "label": "Damage / Assassin Roam",
+      "blessing": "Dire Hit",
+      "blessing_id": "dire_hit",
+      "playstyle": "Burst + vision + picks. You are not a tank — you scout, burst a squishy, and leave. If you die for a support, you lost the trade.",
+      "heroes": [
+        {
+          "name": "Selena",
+          "archetype": "Trap / stun / burst",
+          "note": "Traps = vision at Turtle/Lord. Stun + burst deletes MM/mage. Strong early, needs accuracy."
+        },
+        {
+          "name": "Natalia",
+          "archetype": "Stealth / silence / burst",
+          "note": "Not tagged ROAM in bundled roster — flex pick. Silence + burst vs mage/MM. Don't pick if team has no frontline."
+        },
+        {
+          "name": "Saber",
+          "archetype": "Ult delete",
+          "note": "Flex from Pick-off. Ult one carry, then disengage."
+        },
+        {
+          "name": "Helcurt",
+          "archetype": "Silence / burst (situational)",
+          "note": "Specialist pick. Ult blinds map for picks. Not default blind pick if team needs frontline."
+        }
+      ],
+      "battle_spells": [
+        "Execute (finish)",
+        "Flicker (reposition for burst)",
+        "Petrify (extra lock)"
+      ],
+      "emblem": "Assassin Emblem — Killing Spree or Focusing Mark. Prioritize Adaptive Attack + Move Speed + Penetration.",
+      "strengths": [
+        "Best early picks + vision (Selena traps)",
+        "Dire Hit finishes low-HP targets"
+      ],
+      "weaknesses": [
+        "No frontline — team will be squishy",
+        "Falls off if you don't snowball"
+      ],
+      "win_condition": "Get early picks, snowball jungler/MM, and end before enemy tank scales.",
+      "lose_condition": "Trading your life for a support, or diving without exit.",
+      "steps": [
+        {
+          "startSeconds": 0,
+          "endSeconds": 40,
+          "timeLabel": "0:00-0:40",
+          "phase": "Setup",
+          "objective": "Scout for info, not forced Lv1 fight",
+          "description": "Buy Roam blessing. Scout for info, not forced Lv1 fight; leave if enemy collapses. Selena: place traps at enemy buff/river.",
+          "checklist": [
+            "Buy Roam",
+            "Place trap/scout",
+            "Ping enemy positions"
+          ],
+          "vision": "Enemy buff + river",
+          "decision": "Leave if enemy collapses 3+.",
+          "dont": "Don't force Lv1 fight.",
+          "callout": "Scout, no forced fight",
+          "compact": "Setup - Scout, no forced fight"
+        },
+        {
+          "startSeconds": 40,
+          "endSeconds": 80,
+          "timeLabel": "0:40-1:20",
+          "phase": "Early Rotate",
+          "objective": "Help mid priority, threaten side angle",
+          "description": "Help mid secure priority, then threaten side-lane angle. Do NOT steal jungler's camps — your gold is Thriving + picks.",
+          "checklist": [
+            "Help mid",
+            "Threaten Gold/EXP angle",
+            "Don't take camps"
+          ],
+          "vision": "Mid + side bush",
+          "decision": "Pick if enemy overextends with no escape.",
+          "dont": "Don't steal camps.",
+          "callout": "Help mid, threaten side",
+          "compact": "Early Rotate - Help mid, threaten side"
+        },
+        {
+          "startSeconds": 80,
+          "endSeconds": 120,
+          "timeLabel": "1:20-2:00",
+          "phase": "Turtle Setup",
+          "objective": "Low-risk pick near Turtle, keep resources for objective",
+          "description": "Look for low-risk pick near Turtle side. Keep enough resources to contest objective. Traps/vision > kill attempt.",
+          "checklist": [
+            "Trap/scout Turtle river",
+            "Keep burst ready",
+            "Be at Turtle river by 1:30"
+          ],
+          "vision": "Turtle river",
+          "decision": "Pick only if you can still contest Turtle.",
+          "dont": "Don't burn all CDs before Turtle.",
+          "callout": "Low-risk pick, save burst",
+          "compact": "Turtle Setup - Low-risk pick, save burst"
+        },
+        {
+          "startSeconds": 120,
+          "endSeconds": 150,
+          "timeLabel": "2:00-2:30",
+          "phase": "First Turtle",
+          "objective": "Reveal + pressure, prioritize objective safety",
+          "description": "Use traps, marks, or burst to reveal and pressure approaches. Prioritize vision and objective safety over solo kill.",
+          "checklist": [
+            "Reveal enemy jungler",
+            "Pressure approaches",
+            "Protect jungler's Retribution"
+          ],
+          "vision": "Pit + approaches",
+          "decision": "Burst enemy jungler if they step for steal.",
+          "dont": "Don't dive pit alone.",
+          "callout": "Reveal, protect Retri",
+          "compact": "First Turtle - Reveal, protect Retri"
+        },
+        {
+          "startSeconds": 150,
+          "endSeconds": 240,
+          "timeLabel": "2:30-4:00",
+          "phase": "Post-Turtle",
+          "objective": "Fog picks with ally, leave after fail",
+          "description": "Rotate through fog with ally and punish isolated squishy. Leave after failed attempt — don't stay to be collapsed on.",
+          "checklist": [
+            "Rotate with ally",
+            "Pick squishy",
+            "Leave after 10s if fail"
+          ],
+          "vision": "Fog bushes",
+          "decision": "Pick if ally can follow.",
+          "dont": "Don't solo dive 1v2.",
+          "callout": "Fog pick with ally, leave",
+          "compact": "Post-Turtle - Fog pick with ally, leave"
+        },
+        {
+          "startSeconds": 240,
+          "endSeconds": 300,
+          "timeLabel": "4:00-5:00",
+          "phase": "Second Turtle",
+          "objective": "Time picks around Turtle respawn",
+          "description": "Time picks around actual Turtle respawn (~4:00). Pressure enemy damage dealer before team starts objective.",
+          "checklist": [
+            "Setup 20s early",
+            "Pressure enemy MM/mid",
+            "Take Turtle after pick"
+          ],
+          "vision": "Turtle pit",
+          "decision": "Pick = Turtle.",
+          "dont": "Don't chase after pick.",
+          "callout": "Pick before Turtle",
+          "compact": "Second Turtle - Pick before Turtle"
+        },
+        {
+          "startSeconds": 300,
+          "endSeconds": 480,
+          "timeLabel": "5:00-8:00",
+          "phase": "Mid Game",
+          "objective": "Control side bushes, deny rotations",
+          "description": "Control side bushes and deny enemy rotations. Avoid trading your life for low-value support — you are the burst.",
+          "checklist": [
+            "Control side bush",
+            "Deny rotation",
+            "Save burst for carry"
+          ],
+          "vision": "Side bushes + Lord pit by 7:30",
+          "decision": "Burst carry if isolated.",
+          "dont": "Don't trade 1-for-1 with support.",
+          "callout": "Control bush, save burst",
+          "compact": "Mid Game - Control bush, save burst"
+        },
+        {
+          "startSeconds": 480,
+          "endSeconds": 600,
+          "timeLabel": "8:00-10:00",
+          "phase": "First Lord",
+          "objective": "Pick lone checker, don't start Lord split",
+          "description": "Set up Lord vision and look for pick on enemy who checks alone. Do not start Lord while team is split.",
+          "checklist": [
+            "Vision Lord pit",
+            "Pick lone checker",
+            "Group before Lord"
+          ],
+          "vision": "Lord pit",
+          "decision": "Pick = Lord. No pick = don't start.",
+          "dont": "Don't start Lord split.",
+          "callout": "Pick lone checker, group",
+          "compact": "First Lord - Pick lone checker, group"
+        },
+        {
+          "startSeconds": 600,
+          "endSeconds": 720,
+          "timeLabel": "10:00-12:00",
+          "phase": "Lord Push",
+          "objective": "Burst to remove vision, keep exit",
+          "description": "Use burst to remove vision and threaten backline access, but keep exit route after committing. Dire Hit finishes low-HP target.",
+          "checklist": [
+            "Burst backline",
+            "Keep exit",
+            "Push with Lord wave"
+          ],
+          "vision": "Push lane",
+          "decision": "Dive only with exit.",
+          "dont": "Don't dive without exit.",
+          "callout": "Burst backline, keep exit",
+          "compact": "Lord Push - Burst backline, keep exit"
+        },
+        {
+          "startSeconds": 720,
+          "endSeconds": 900,
+          "timeLabel": "12:00-15:00",
+          "phase": "Mid-Late",
+          "objective": "Play around enemy defensive CDs",
+          "description": "Play around enemy defensive CDs. If carry is protected, switch to scouting and objective pressure.",
+          "checklist": [
+            "Track enemy Purify/Immortality",
+            "Scout if carry protected",
+            "Pressure Lord"
+          ],
+          "vision": "Lord pit",
+          "decision": "Burst only if defensive CDs down.",
+          "dont": "Don't dive protected carry.",
+          "callout": "Wait for CDs down",
+          "compact": "Mid-Late - Wait for CDs down"
+        },
+        {
+          "startSeconds": 900,
+          "endSeconds": 1080,
+          "timeLabel": "15:00-18:00",
+          "phase": "Late / Evolved Lord",
+          "objective": "Wait for formation break, finish valid target",
+          "description": "Wait for enemy formation to break before diving. Dire Hit is for finishing valid target, not replacing team coordination.",
+          "checklist": [
+            "Wait for break",
+            "Finish low-HP carry",
+            "Group for Evolved Lord"
+          ],
+          "vision": "Evolved Lord pit",
+          "decision": "Dive only when formation breaks.",
+          "dont": "Don't dive first into 5.",
+          "callout": "Wait break, finish target",
+          "compact": "Late / Evolved Lord - Wait break, finish target"
+        }
+      ]
+    }
+  ],
+  "changelog": {
+    "from_v1_to_v2": [
+      "Fixed Turtle timing: first Turtle 2:00, respawn ~2 min, stops at 8:00 — original 110-150s window overlapped spawn and missed respawn logic",
+      "Fixed Lord timing: first Lord 8:00, Evolved Lord ~18:00 — original said 'Lord becomes available' vaguely at 480-600s without evolve note",
+      "Added outer turret shield end at 5:00, Lithowanderer at 0:45, jungler Lv4 window 1:35-1:45",
+      "Changed heroes from single string to structured array with archetype + S42 notes; added Marcel (S-tier), Carmilla, Kaja buff, Kalea buff, and clarified flex picks (Natalia, Hirara, Alice, Nana)",
+      "Added blessings as structured objects with exact effects, cooldowns, and unlock (1000g Thriving)",
+      "Added roam economy: Devotion 30% rule, Thriving 6g+12exp -> 8g+16exp per 5s, stay lowest gold",
+      "Added per-step phase, objective, checklist, vision, decision, dont — so table is usable as in-game timer UI",
+      "Added solo-queue adaptations: 5-second reveal rule, fake rotation note, don't babysit MM, trade objectives when behind",
+      "Added battle spells + emblem per role"
     ]
   }
-]
+}
