@@ -12,8 +12,12 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -47,8 +51,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.TextUnit
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlin.math.roundToInt
 import kotlinx.coroutines.delay
 import org.json.JSONArray
 import org.json.JSONObject
@@ -362,9 +368,12 @@ fun RoamGuideBubble(onTap: () -> Unit) {
 fun RoamGuideWidget(onBack: () -> Unit) {
     val context = LocalContext.current
     val config = LocalConfiguration.current
+    // 1. WIDTH FIX - was width(0.62 * screen) then claimed 0.96, but still looked same in your screenshot.
+    // Why: inner Column used fixed width(widgetWidth) inside a WRAP_CONTENT overlay window, so it was clipped.
+    // Now: NO fixed widgetWidth. Outer Column uses fillMaxWidth() + 4dp side padding = edge-to-edge.
+    // That is +1/3 longer than the 62% you saw (62% * 4/3 = 82.7%) and actually reaches the edges.
+    // In your Activity / WindowManager, set LayoutParams width = MATCH_PARENT so fillMaxWidth can stretch.
     val isLandscape = config.screenWidthDp > config.screenHeightDp
-    // WIDTH +1/3: landscape 72% -> 96% (72% * 4/3 = 96%), portrait 98% stays (already max, capped at screen)
-    val widgetWidth = if (isLandscape) (config.screenWidthDp * 0.96f).dp else (config.screenWidthDp * 0.98f).dp
     val guide = remember(context) { loadRoamGuide(context) }
     val plans = guide.plans
     var selectedPlanId by remember { mutableStateOf(plans.firstOrNull()?.id.orEmpty()) }
@@ -372,10 +381,15 @@ fun RoamGuideWidget(onBack: () -> Unit) {
     var isRunning by remember { mutableStateOf(false) }
     var planMenuExpanded by remember { mutableStateOf(false) }
     var isExpanded by remember { mutableStateOf(false) }
-    // HIDE/SHOW DESCRIPTION - upper Hide button hides ONLY description + callout + expanded detail.
-    // Top row (game timer, roam type, Turtle/Lord pill, expand, Hide/Show, X) ALWAYS stays visible.
-    // When hidden: Top row + spell tracker only. Tap Show to bring description back.
-    var isMainHidden by remember { mutableStateOf(false) }
+    // 2. HIDE = SELECTION BOX with On / Off - NOT a Hide button.
+    // Off = show description + callout (default). On = hide description + callout only, top row stays.
+    var hideSelection by remember { mutableStateOf("Off") }
+    var hideMenuExpanded by remember { mutableStateOf(false) }
+    val isMainHidden = hideSelection == "On"
+    // 4. DRAG - whole widget moves. There was NO drag code before, so every touch was a click.
+    // dragOffset moves the widget, isDragging dims it slightly while dragging so you know it grabbed.
+    var dragOffset by remember { mutableStateOf(Offset.Zero) }
+    var isDragging by remember { mutableStateOf(false) }
     // DYNAMIC OBJECTIVE STATE - survives plan switch, resets with game Reset
     var turtleSlain by remember { mutableIntStateOf(0) }
     var lordSlain by remember { mutableIntStateOf(0) }
@@ -448,7 +462,24 @@ fun RoamGuideWidget(onBack: () -> Unit) {
     // AREA 1 = Main widget (objective, timer, Turtle/Lord, description) = 45% opaque, own background + border.
     // AREA 2 = Spell tracker = SEPARATE, NO background, NO border - only the 5 buttons themselves are 15% opaque.
     // So tracker no longer inherits the 65% - it stays truly faint over the game.
-    Column(modifier = Modifier.width(widgetWidth).wrapContentHeight(), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+    // DRAG ROOT: drag anywhere on widget background to move it. Tap vs drag is split by touch slop:
+    // tap (no move) = button click, drag (move past slop) = move widget. Buttons still work.
+    Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp).offset { IntOffset(dragOffset.x.roundToInt(), dragOffset.y.roundToInt()) }.pointerInput(Unit) {
+        detectDragGestures(
+            onDragStart = { isDragging = true; hideMenuExpanded = false; planMenuExpanded = false },
+            onDragEnd = { isDragging = false },
+            onDragCancel = { isDragging = false },
+            onDrag = { change, dragAmount ->
+                change.consume()
+                val maxX = config.screenWidthDp * 0.6f
+                val maxY = config.screenHeightDp * 0.8f
+                dragOffset = Offset(
+                    (dragOffset.x + dragAmount.x).coerceIn(-maxX, maxX),
+                    (dragOffset.y + dragAmount.y).coerceIn(0f, maxY)
+                )
+            }
+        )
+    }.wrapContentHeight(), verticalArrangement = Arrangement.spacedBy(4.dp)) {
         if (plans.isEmpty() || selectedPlan == null || currentStep == null) {
             Column(modifier = Modifier.fillMaxWidth().wrapContentHeight().background(GithubCanvas.copy(alpha = MAIN_ALPHA), RoundedCornerShape(6.dp)).border(1.dp, GithubBorder.copy(alpha = 0.8f), RoundedCornerShape(6.dp)).clip(RoundedCornerShape(6.dp)).padding(horizontal = 5.dp, vertical = 2.dp)) {
                 OutlinedText("Roam guide unavailable", GithubText, fontSize = 9.sp)
@@ -456,13 +487,17 @@ fun RoamGuideWidget(onBack: () -> Unit) {
             return@Column
         }
         // ===== AREA 1 - MAIN WIDGET - 45% opaque - TOP ROW ALWAYS STAYS =====
-        // FIX: Hide hides ONLY description + callout + expanded detail, NOT the top row.
-        // Top row (game timer, roam type, Turtle/Lord pill, expand, Hide/Show, X) ALWAYS stays.
-        // When hidden: Area 1 = top row only, then Area 2 (spell tracker) directly below.
+        // Hide (On) hides ONLY description + callout + expanded detail, NOT top row.
+        // Top row (timer, roam, Turtle/Lord pill, expand, Hide box, X) ALWAYS stays.
+        // When Hide=On: Area 1 = top row only, then Area 2 (spell tracker) directly below.
         Column(modifier = Modifier.fillMaxWidth().wrapContentHeight().background(GithubCanvas.copy(alpha = MAIN_ALPHA), RoundedCornerShape(6.dp)).border(1.dp, GithubBorder.copy(alpha = 0.8f), RoundedCornerShape(6.dp)).clip(RoundedCornerShape(6.dp)).padding(horizontal = 5.dp, vertical = 2.dp)) {
 
-        // ROW 1 - TOP: timer + plan + DYNAMIC TURTLE/LORD PILL (clickable when alive) + expand + X
+        // ROW 1 - TOP: drag grip + timer + plan + DYNAMIC TURTLE/LORD PILL + expand + Hide box + X
+        // DRAG GRIP: the ⠿ handle is the clearest drag target - grab it and move. Whole widget background also drags (see outer Column).
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp), verticalAlignment = Alignment.CenterVertically) {
+            Box(modifier = Modifier.size(22.dp).clip(RoundedCornerShape(5.dp)).background(GithubSurface.copy(alpha = MAIN_ALPHA)).border(1.dp, GithubBorder.copy(alpha = 0.8f), RoundedCornerShape(5.dp)), contentAlignment = Alignment.Center) {
+                Text(text = "⠿", color = if (isDragging) GithubGold else GithubMuted, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+            }
             Row(modifier = Modifier.clip(RoundedCornerShape(5.dp)).background(GithubSurface.copy(alpha = WIDGET_ALPHA)).border(1.dp, GithubBorder.copy(alpha = 0.8f), RoundedCornerShape(5.dp)).clickable { isRunning = !isRunning }.padding(horizontal = 6.dp, vertical = 3.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(3.dp)) {
                 OutlinedText(formatTime(elapsedSeconds), GithubText, fontSize = 14.sp, fontWeight = FontWeight.Black)
                 OutlinedText(if (isRunning) "II" else "▶", GithubAccent, fontSize = 9.sp, fontWeight = FontWeight.Bold)
@@ -516,20 +551,32 @@ fun RoamGuideWidget(onBack: () -> Unit) {
                     OutlinedText(pillText, pillTextColor, fontSize = 9.sp, fontWeight = FontWeight.Bold, maxLines = 1)
                 }
             }
-            OutlinedText(if (isExpanded) "▲" else "▼", GithubMuted, modifier = Modifier.clickable { isExpanded = !isExpanded }.padding(horizontal = 4.dp, vertical = 4.dp), fontSize = 11.sp, fontWeight = FontWeight.Bold)
-            // HIDE/SHOW BUTTON - upper side: tap to hide ONLY description + callout + expanded detail.
-            // Top row (timer, roam, Turtle/Lord pill, X) stays. Label flips Hide <-> Show.
-            OutlinedText(if (isMainHidden) "Show" else "Hide", GithubMuted, modifier = Modifier.clip(RoundedCornerShape(5.dp)).background(GithubSurface.copy(alpha = MAIN_ALPHA)).clickable { isMainHidden = !isMainHidden }.padding(horizontal = 6.dp, vertical = 4.dp), fontSize = 9.sp, fontWeight = FontWeight.Bold)
+            // 3. EXPAND / COLLAPSE - ONLY this ▼/▲ button expands/collapses description. Tapping description does NOT expand anymore.
+            OutlinedText(if (isExpanded) "▲" else "▼", GithubMuted, modifier = Modifier.clickable { isExpanded = !isExpanded }.padding(horizontal = 6.dp, vertical = 6.dp), fontSize = 12.sp, fontWeight = FontWeight.Bold)
+            // 2. HIDE = SELECTION BOX with On / Off. Tap box to open dropdown, pick On (hide description) or Off (show description).
+            // Top row (timer, roam, Turtle/Lord pill, X) stays in both cases.
+            Box {
+                Row(modifier = Modifier.clip(RoundedCornerShape(5.dp)).background(GithubSurface.copy(alpha = MAIN_ALPHA)).border(1.dp, GithubBorder.copy(alpha = 0.8f), RoundedCornerShape(5.dp)).clickable { hideMenuExpanded = true }.padding(horizontal = 6.dp, vertical = 4.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(2.dp)) {
+                    OutlinedText("Hide:", GithubMuted, fontSize = 9.sp, fontWeight = FontWeight.Bold)
+                    OutlinedText(hideSelection, if (hideSelection == "On") GithubGold else GithubText, fontSize = 9.sp, fontWeight = FontWeight.Bold)
+                    OutlinedText("▾", GithubMuted, fontSize = 9.sp, fontWeight = FontWeight.Bold)
+                }
+                DropdownMenu(expanded = hideMenuExpanded, onDismissRequest = { hideMenuExpanded = false }, modifier = Modifier.background(GithubSurface)) {
+                    DropdownMenuItem(text = { Text("On - hide description", color = GithubText, fontSize = 11.sp) }, onClick = { hideSelection = "On"; hideMenuExpanded = false })
+                    DropdownMenuItem(text = { Text("Off - show description", color = GithubText, fontSize = 11.sp) }, onClick = { hideSelection = "Off"; hideMenuExpanded = false })
+                }
+            }
             OutlinedText("X", GithubMuted, modifier = Modifier.clickable(onClick = onBack).padding(horizontal = 4.dp, vertical = 4.dp), fontSize = 11.sp, fontWeight = FontWeight.Bold)
-        } // end ROW 1 - TOP - always visible, even when description hidden
+        }
 
-        // DESCRIPTION + CALLOUT - HIDDEN when isMainHidden, top row above stays
+        // DESCRIPTION + CALLOUT - hidden when Hide=On, top row above stays. Only ▼/▲ expands/collapses.
         if (!isMainHidden) {
         if (!isExpanded) {
             // COLLAPSED: dynamic callout + description, adaptive height
-            // If Turtle/Lord alive: "Turtle 2 UP - CONTEST: ... OR TRADE: ..."
+            // If Turtle/Lord alive: "Turtle 2 UP - CONTEST: ... / TRADE: ..."
             // If countdown: normal step description
-            Box(modifier = Modifier.fillMaxWidth().wrapContentHeight().clickable { isExpanded = true }.padding(horizontal = 2.dp, vertical = 2.dp)) {
+            // NO clickable here - tapping description does NOT expand (fix #3). Only ▼/▲ above does.
+            Box(modifier = Modifier.fillMaxWidth().wrapContentHeight().padding(horizontal = 2.dp, vertical = 2.dp)) {
                 MergedInstructionText(phase = currentStep.phase, callout = dynamicCallout, description = dynamicDescription, maxLines = Int.MAX_VALUE)
             }
         } else {
@@ -592,14 +639,16 @@ fun RoamGuideWidget(onBack: () -> Unit) {
                     if (selectedPlan.emblem.isNotBlank()) OutlinedText("Emblem: ${selectedPlan.emblem}", GithubGold, fontSize = 9.sp, lineHeight = 11.sp, maxLines = Int.MAX_VALUE)
                 }
             }
-        }
-
+        } // end else expanded
+        } // end if (!isMainHidden) - description/callout hidden when Hide=On, top row stays
+        // Progress - only when description visible
+        if (!isMainHidden) {
         val span = (currentStep.endSeconds - currentStep.startSeconds).coerceAtLeast(1)
         val progress = ((elapsedSeconds - currentStep.startSeconds).toFloat() / span).coerceIn(0f, 1f)
         Box(modifier = Modifier.fillMaxWidth().height(3.dp).background(GithubBorder.copy(alpha = 0.5f))) {
             Box(modifier = Modifier.fillMaxWidth(progress).height(3.dp).background(GithubAccent))
         }
-        } // end if (!isMainHidden) - description/callout hidden, top row stays
+        }
         } // ===== END AREA 1 - 45% - top row always stays =====
 
         // ===== AREA 2 - SPELL TRACKER - SEPARATE, 15% ONLY, NO 45% BACKGROUND =====
