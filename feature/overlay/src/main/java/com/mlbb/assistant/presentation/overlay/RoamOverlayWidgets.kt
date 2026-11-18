@@ -382,6 +382,7 @@ fun RoamGuideWidget(onBack: () -> Unit) {
     var isRunning by rememberSaveable { mutableStateOf(false) }
     var planMenuExpanded by remember { mutableStateOf(false) }
     var detailsExpanded by rememberSaveable { mutableStateOf(false) }
+    var helpExpanded by rememberSaveable { mutableStateOf(false) }
     var descriptionHidden by rememberSaveable { mutableStateOf(false) }
     var hideMenuExpanded by remember { mutableStateOf(false) }
     var turtleSlain by rememberSaveable { mutableIntStateOf(0) }
@@ -470,13 +471,15 @@ fun RoamGuideWidget(onBack: () -> Unit) {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 GuideControl(
-                    label = "${if (isRunning) "⏸ " else "▶ "}${formatGameTime(elapsedSeconds)}",
+                    // V5: play / pause icons removed. Timer text only.
+                    // Tap still starts / pauses. Running = green, paused = white.
+                    label = formatGameTime(elapsedSeconds),
                     color = if (isRunning) GuideGreen else GuideText,
                     modifier = Modifier.width(56.dp),
                     fontWeight = FontWeight.Bold,
                     onClick = { isRunning = !isRunning && elapsedSeconds < 18 * 60 },
-                    contentDescription = if (isRunning) "Pause timer" else "Start timer"
-                    // Timer IS the play/pause button — tap the timer to start/pause. No separate button.
+                    contentDescription = "Start or pause timer"
+                    // Timer IS the start/pause button — tap the timer. No separate button, no icons.
                 )
                 Box(modifier = Modifier.weight(1f)) {
                     GuideControl(
@@ -535,22 +538,76 @@ fun RoamGuideWidget(onBack: () -> Unit) {
                 GuideControl(if (detailsExpanded) "−" else "+", GuideMuted, modifier = Modifier.width(24.dp)) {
                     detailsExpanded = !detailsExpanded
                 }
+                // V5: ? help button between + / − and ×. Holds what was removed
+                // from the spell header (Tap = used · Hold = change) + other tips.
+                Box {
+                    GuideControl("?", GuideMuted, modifier = Modifier.width(24.dp), onClick = { helpExpanded = true }, contentDescription = "Help and tips")
+                    DropdownMenu(
+                        expanded = helpExpanded,
+                        onDismissRequest = { helpExpanded = false }
+                    ) {
+                        DropdownMenuItem(
+                            text = { OutlinedText("Timer: Tap timer to start / pause", fontSize = 8.sp) },
+                            onClick = { helpExpanded = false }
+                        )
+                        DropdownMenuItem(
+                            text = { OutlinedText("Spell: Tap = used · Hold = change", fontSize = 8.sp) },
+                            onClick = { helpExpanded = false }
+                        )
+                        DropdownMenuItem(
+                            text = { OutlinedText("Spell: Tap again to cancel cooldown", fontSize = 8.sp) },
+                            onClick = { helpExpanded = false }
+                        )
+                        DropdownMenuItem(
+                            text = { OutlinedText("Objective: Tap Turtle / Lord when slain", fontSize = 8.sp) },
+                            onClick = { helpExpanded = false }
+                        )
+                        DropdownMenuItem(
+                            text = { OutlinedText("Plan: Tap plan name to switch plan", fontSize = 8.sp) },
+                            onClick = { helpExpanded = false }
+                        )
+                        DropdownMenuItem(
+                            text = { OutlinedText("Expand: Tap + for checklist / vision", fontSize = 8.sp) },
+                            onClick = { helpExpanded = false }
+                        )
+                    }
+                }
                 GuideControl("×", GuideMuted, modifier = Modifier.width(24.dp), onClick = onBack, contentDescription = "Close roam guide")
             }
 
             if (!descriptionHidden) {
-                // FIX V4: call-out totally removed. Was:
-                //   phase · callout (+ " — description" when expanded)
-                //   e.g. "Setup · Guard buff, don't feed"
-                // Now: description directly, no prefix / suffix.
-                // objectiveDescription already = currentStep.description
-                // (or turtle/lord template when that objective is relevant).
+                // FIX V5 (1): text still didn't fit — e.g. "Go Turtle pit early,
+                // stand in front (zoning). Save Ultimate to start fight or
+                // protect jungler's Retribution." clipped at 52% width.
+                // Two fixes together:
+                // (a) Simplify: collapsed = first sentence only.
+                //     "Go Turtle pit early, stand in front (zoning)."
+                //     Expanded = full description (6 lines).
+                // (b) Dynamic sizing: if first sentence still long, shrink font
+                //     9sp -> 8sp (>65 chars) -> 7.5sp (>90 chars) so it fits
+                //     in 2 lines without clipping. No widget width change.
                 if (objectiveDescription.isNotBlank()) {
+                    val collapsedDescription = objectiveDescription
+                        .substringBefore(". ")
+                        .trim()
+                        .let { if (it.endsWith(".")) it else "$it." }
+                        .ifBlank { objectiveDescription }
+                    val displayDescription = if (detailsExpanded) objectiveDescription else collapsedDescription
+                    val descFontSize = when {
+                        !detailsExpanded && displayDescription.length > 90 -> 7.5.sp
+                        !detailsExpanded && displayDescription.length > 65 -> 8.sp
+                        else -> 9.sp
+                    }
+                    val descLineHeight = when {
+                        !detailsExpanded && displayDescription.length > 90 -> 10.sp
+                        !detailsExpanded && displayDescription.length > 65 -> 11.sp
+                        else -> 12.sp
+                    }
                     OutlinedText(
-                        text = objectiveDescription,
+                        text = displayDescription,
                         color = GuideText,
-                        fontSize = 9.sp,
-                        lineHeight = 12.sp,
+                        fontSize = descFontSize,
+                        lineHeight = descLineHeight,
                         maxLines = if (detailsExpanded) 6 else 2,
                         overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.fillMaxWidth()
@@ -659,33 +716,9 @@ fun EnemySpellTrackerWidget(elapsedSeconds: Int, modifier: Modifier = Modifier) 
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(2.dp)
     ) {
-        // Header replaces the old bottom hint, which truncated at 52% width.
-        // It tells the gesture once, up top, where it never gets cut off.
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            // FIX: header was 2 long strings (170dp) in a 224dp widget, clipped in screenshot.
-            // Shorten to fit + save height.
-            OutlinedText(
-                text = "ENEMY",
-                color = TrackerMuted,
-                fontSize = 6.5.sp,
-                fontWeight = FontWeight.Bold,
-                letterSpacing = 0.8.sp,
-                maxLines = 1
-            )
-            OutlinedText(
-                text = "Tap = used · Hold = change",
-                color = TrackerMuted,
-                fontSize = 6.5.sp,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                textAlign = TextAlign.End
-            )
-        }
-
+        // V5: ENEMY / "Tap = used · Hold = change" header removed.
+        // Moved to ? help menu in Roam header (see helpExpanded above).
+        // Saves one row of height + removes the text that clipped.
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(2.dp)
