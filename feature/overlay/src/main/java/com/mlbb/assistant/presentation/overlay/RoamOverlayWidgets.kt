@@ -749,7 +749,7 @@ fun EnemySpellTrackerWidget(elapsedSeconds: Int, modifier: Modifier = Modifier) 
                             .background(if (isCoolingDown) TrackerSurfaceCooling else TrackerSurface)
                             .border(
                                 1.dp,
-                                if (isCoolingDown) TrackerGold.copy(alpha = 0.70f) else TrackerBorder // V8: cooling border 70% gold,
+                                if (isCoolingDown) TrackerGold.copy(alpha = 0.70f) else TrackerBorder, // V8: cooling border 70% gold
                                 RoundedCornerShape(8.dp)
                             )
                             .combinedClickable(
