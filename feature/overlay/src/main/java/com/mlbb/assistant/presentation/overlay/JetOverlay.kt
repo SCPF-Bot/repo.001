@@ -1,5 +1,7 @@
 package com.mlbb.assistant.presentation.overlay
 
+// V8 — (1) Drag restored with 8px tap threshold, no fling. (2) WRAP_CONTENT + NOT_TOUCH_MODAL kept.
+
 // ── Merged: JetOverlay.kt + pointerInput shim ─────────────────────────────────────
 // V2: window stays MATCH_PARENT + CENTER_HORIZONTAL, but content is now
 // wrapped in a TopCenter Box. Roam is fillMaxWidth(0.52f) inside that Box,
@@ -13,8 +15,8 @@ import android.graphics.PixelFormat
 import android.os.Build
 import android.os.Bundle
 import android.view.Gravity
+import android.view.MotionEvent
 import android.view.WindowManager
-import android.view.WindowMetrics
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.PointerInputScope
@@ -118,12 +120,53 @@ object JetOverlay {
             setContent { content() }
         }
 
-        // V7: Drag-to-move REMOVED for the guide. It moved the whole guide
-        // window on ACTION_MOVE (your screenshot 1: widget in the middle of
-        // the screen) and on a WRAP_CONTENT window it fights the centering.
-        // Guide stays pinned at TOP|CENTER_HORIZONTAL, y=100. If you want
-        // dragging later, add a dedicated drag handle inside RoamGuideWidget,
-        // not a window-level touch listener.
+        // V8 FIX (1): Drag RESTORED — but with a tap threshold, no fling.
+        // V7 removed it entirely, so guide was pinned and couldn't be moved.
+        // How it works: DOWN records start. MOVE < 8px = tap (returns false,
+        // so Compose buttons still get the tap). MOVE > 8px = drag: window
+        // follows finger via params.x/y, returns true to consume the move.
+        // UP after drag = consumed (so it doesn't fire a click). UP after tap
+        // = not consumed (so buttons work). No fling-to-edge — guide stays
+        // where you drop it. Works with WRAP_CONTENT + TOP|CENTER (x = offset
+        // from center, y = offset from top).
+        var initialX = 0
+        var initialY = 0
+        var initialTouchX = 0f
+        var initialTouchY = 0f
+        var isDragging = false
+        view.setOnTouchListener { _, event ->
+            when (event.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    initialX = params.x
+                    initialY = params.y
+                    initialTouchX = event.rawX
+                    initialTouchY = event.rawY
+                    isDragging = false
+                    false
+                }
+                MotionEvent.ACTION_MOVE -> {
+                    val dx = event.rawX - initialTouchX
+                    val dy = event.rawY - initialTouchY
+                    if (!isDragging && (kotlin.math.abs(dx) > 8f || kotlin.math.abs(dy) > 8f)) {
+                        isDragging = true
+                    }
+                    if (isDragging) {
+                        params.x = initialX + dx.toInt()
+                        params.y = initialY + dy.toInt()
+                        runCatching { wm.updateViewLayout(view, params) }
+                        true
+                    } else {
+                        false
+                    }
+                }
+                MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                    val wasDragging = isDragging
+                    isDragging = false
+                    wasDragging
+                }
+                else -> false
+            }
+        }
         composeView = view
         runCatching {
             wm.addView(view, params)
@@ -135,18 +178,6 @@ object JetOverlay {
             composeView = null
             windowManager = null
             lifecycleOwner = null
-        }
-    }
-
-    /** Screen width in px, using the modern WindowMetrics API on R+ and falling back to the deprecated Display API below it. */
-    private fun screenWidthPx(app: Application, wm: WindowManager): Int {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            val metrics: WindowMetrics = wm.currentWindowMetrics
-            metrics.bounds.width()
-        } else {
-            val displayMetrics = android.util.DisplayMetrics()
-            @Suppress("DEPRECATION") wm.defaultDisplay.getMetrics(displayMetrics)
-            displayMetrics.widthPixels
         }
     }
 

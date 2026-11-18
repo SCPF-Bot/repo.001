@@ -1,5 +1,8 @@
 package com.mlbb.assistant.presentation.overlay
 
+// V8 — Fixes: (1) Drag restored, (2) 45% opacity both widgets, (3) Lord at 8:00 always,
+// (4) Hide instructions deleted, (5) Timer/plan/buttons 28dp UX, + final sweep.
+
 // ── SINGLE SOURCE OF TRUTH ────────────────────────────────────────────────────
 // This is the ONLY file that may declare Roam* / Tracker* / Guide* types.
 // Do NOT keep RoamGuideWidget.kt, EnemySpellTrackerWidget.kt, or an older
@@ -21,7 +24,6 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
@@ -43,7 +45,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.contentDescription
@@ -246,7 +247,14 @@ private fun computeObjective(
     lastSlainAt: Int?,
     lastSlainWasLord: Boolean = false
 ): ObjectiveStatus {
+    // V8 FIX: Lord/Turtle timer was wrong at 8:20.
+    // Bug: first Lord spawn was lastSlainAt + 120. If Turtle died at 7:30,
+    // Lord was scheduled for 9:30, so at 8:20 it still showed "Lord in 01:10".
+    // Truth: Turtle stops at 8:00, first Lord ALWAYS spawns at 8:00, no matter
+    // when the last Turtle died. The +120 only applies to Turtle respawns
+    // before 8:00 and to Lord respawns AFTER the first Lord was slain.
     if (lordSlain > 0) {
+        // Lord already slain once: respawn 180s (120s late game).
         val slainAt = lastSlainAt ?: elapsedSeconds
         val nextSpawn = slainAt + if (slainAt < 18 * 60) 180 else 120
         return ObjectiveStatus(
@@ -256,31 +264,22 @@ private fun computeObjective(
             secondsUntil = (nextSpawn - elapsedSeconds).coerceAtLeast(0)
         )
     }
-
+    // First Lord not yet slain: at/after 8:00 it is ALWAYS UP.
+    if (elapsedSeconds >= 8 * 60) {
+        return ObjectiveStatus(ObjectiveType.LORD, 1, true, 0)
+    }
     if (elapsedSeconds < 2 * 60 && turtleSlain == 0) {
         return ObjectiveStatus(ObjectiveType.TURTLE, 1, false, 2 * 60 - elapsedSeconds)
     }
-
-    // FIX V7: Next is Lord only if Turtle is actually done: 3 Turtles, or last
-    // slain was Turtle after 6:00 (next Turtle would be after 8:00), or past 8:00.
-    if (turtleSlain >= 3 || (lastSlainAt != null && !lastSlainWasLord && lastSlainAt > 6 * 60) || elapsedSeconds >= 8 * 60) {
-        val lordSpawn = (lastSlainAt?.plus(120) ?: 8 * 60)
-        return ObjectiveStatus(
-            type = ObjectiveType.LORD,
-            count = 1,
-            isAlive = elapsedSeconds >= lordSpawn,
-            secondsUntil = (lordSpawn - elapsedSeconds).coerceAtLeast(0)
-        )
+    // 3 Turtles done -> next is Lord at 8:00.
+    if (turtleSlain >= 3) {
+        return ObjectiveStatus(ObjectiveType.LORD, 1, false, 8 * 60 - elapsedSeconds)
     }
-
+    // Next Turtle = last slain + 120, or 2:00 if none. If that would be at/after
+    // 8:00, show Lord at 8:00 instead (e.g. Turtle died 7:26 -> Lord in 00:34).
     val nextTurtle = lastSlainAt?.plus(120) ?: 2 * 60
     if (nextTurtle >= 8 * 60) {
-        return ObjectiveStatus(
-            type = ObjectiveType.LORD,
-            count = 1,
-            isAlive = elapsedSeconds >= 8 * 60,
-            secondsUntil = (8 * 60 - elapsedSeconds).coerceAtLeast(0)
-        )
+        return ObjectiveStatus(ObjectiveType.LORD, 1, false, 8 * 60 - elapsedSeconds)
     }
     return ObjectiveStatus(
         type = ObjectiveType.TURTLE,
@@ -304,7 +303,10 @@ private fun computeObjective(
 @Composable
 fun RoamGuideWidget(onBack: () -> Unit) {
     val context = LocalContext.current
-    val configuration = LocalConfiguration.current
+    // V8 FIX: Width from displayMetrics (true screen), NOT LocalConfiguration.
+    // In a WRAP_CONTENT overlay window, LocalConfiguration returns the WINDOW size,
+    // so widgetWidth fed back on itself and shrank to ~35% (your screenshot).
+    // displayMetrics is the real screen, so 52% is really 52%.
     val guide = remember(context) { loadRoamGuide(context) }
     val plans = guide.plans
     var selectedPlanId by rememberSaveable { mutableStateOf(plans.firstOrNull()?.id.orEmpty()) }
@@ -313,8 +315,9 @@ fun RoamGuideWidget(onBack: () -> Unit) {
     var planMenuExpanded by remember { mutableStateOf(false) }
     var detailsExpanded by rememberSaveable { mutableStateOf(false) }
     var helpExpanded by rememberSaveable { mutableStateOf(false) }
-    var descriptionHidden by rememberSaveable { mutableStateOf(false) }
-    var hideMenuExpanded by remember { mutableStateOf(false) }
+    // V8 FIX (4): Hide instructions DELETED. It hid the description with no way
+    // back (button lived inside expanded section, so once hidden you couldn't
+    // unhide without re-expanding). Description is now always visible.
     var turtleSlain by rememberSaveable { mutableIntStateOf(0) }
     var lordSlain by rememberSaveable { mutableIntStateOf(0) }
     var lastSlainAt by rememberSaveable { mutableStateOf<Int?>(null) }
@@ -353,12 +356,13 @@ fun RoamGuideWidget(onBack: () -> Unit) {
         lastSlainAt != null -> "${if (lastSlainWasLord) "Lord" else "Turtle"} slain. Next ${objective.label} in ${formatGameTime(objective.secondsUntil)}. Push, farm, or reset."
         else -> currentStep?.description.orEmpty()
     }
-    val screenWidthDp = configuration.screenWidthDp
-    val isLandscape = configuration.screenWidthDp > configuration.screenHeightDp
-    // V7 FIX: Adaptive width — SAFE version. V6 used displayMetrics (wrong dp in
-    // portrait) + fillMaxHeight() (made window full-screen tall). That was the
-    // tall skinny strip in your screenshot. This uses LocalConfiguration (window
-    // size, not display size) and NO fillMaxHeight anywhere.
+    val displayMetrics = context.resources.displayMetrics
+    val screenWidthDp = displayMetrics.widthPixels / displayMetrics.density
+    val screenHeightDp = displayMetrics.heightPixels / displayMetrics.density
+    val isLandscape = screenWidthDp > screenHeightDp
+    // V8 FIX: Adaptive width — displayMetrics (true screen) + NO fillMaxHeight.
+    // V6 used fillMaxHeight() in WRAP_CONTENT window -> full-screen tall strip.
+    // V7 used LocalConfiguration (window size) -> shrank to ~35% (screenshot).
     // Base: 52% landscape (green line), 92% portrait. If description is long,
     // expand a bit to the RIGHT so it still fits in 2-3 lines, then shrink back.
     // Max: 78% landscape / 95% portrait, so it never runs off-screen.
@@ -406,23 +410,21 @@ fun RoamGuideWidget(onBack: () -> Unit) {
                 .fillMaxWidth()
                 .background(GuideBackground, RoundedCornerShape(8.dp))
                 .border(1.dp, GuideBorder, RoundedCornerShape(8.dp))
-                .padding(horizontal = 4.dp, vertical = 4.dp),
-            verticalArrangement = Arrangement.spacedBy(3.dp)
+                .padding(horizontal = 6.dp, vertical = 6.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(3.dp),
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // V7 FIX (2): Play/pause icons REMOVED, progress as timer background.
-                // V6 bug: progress Box used fillMaxHeight() in a WRAP_CONTENT window —
-                // that made the whole window go full-screen tall (your tall strip).
-                // This uses FIXED 24.dp height everywhere, no fillMaxHeight / fillMaxSize.
+                // V8 FIX (5): Timer bigger — was 56x24dp / 8sp, too small to read/tap.
+                // Now 68x28dp / 11sp. Fixed height, no fillMaxHeight (V6 tall-strip bug).
                 // Blue fill = step progress, 35% alpha, text on top. Tap = start/pause.
                 Box(
                     modifier = Modifier
-                        .width(56.dp)
-                        .height(24.dp)
+                        .width(68.dp)
+                        .height(28.dp)
                         .clip(RoundedCornerShape(8.dp))
                         .background(GuideSurface)
                         .border(1.dp, GuideBorder, RoundedCornerShape(8.dp))
@@ -433,24 +435,27 @@ fun RoamGuideWidget(onBack: () -> Unit) {
                     Box(
                         modifier = Modifier
                             .fillMaxWidth(stepProgress)
-                            .height(24.dp)
+                            .height(28.dp)
                             .background(GuideAccent.copy(alpha = 0.35f))
                             .align(Alignment.CenterStart)
                     )
                     OutlinedText(
                         text = formatGameTime(elapsedSeconds),
                         color = if (isRunning) GuideGreen else GuideText,
-                        fontSize = 8.sp,
+                        fontSize = 11.sp,
                         fontWeight = FontWeight.Bold,
                         maxLines = 1
                     )
                 }
+                // V8 FIX (5): Plan box shows "Crowd Control ▾" so it's clear it's a dropdown.
                 Box(modifier = Modifier.weight(1f)) {
                     GuideControl(
-                        selectedPlan.label.substringBefore(" - ").trim(),
+                        selectedPlan.label.substringBefore(" - ").trim() + " ▾",
                         GuideAccent,
                         Modifier.fillMaxWidth(),
                         maxLines = 1,
+                        fontSize = 10.sp,
+                        contentDescription = "Change roam plan: ${selectedPlan.label}",
                         onClick = { planMenuExpanded = true }
                     )
                     DropdownMenu(
@@ -481,6 +486,7 @@ fun RoamGuideWidget(onBack: () -> Unit) {
                     background = objectiveColor.copy(alpha = if (objective.isAlive) 0.22f else 0.12f),
                     borderColor = objectiveColor.copy(alpha = 0.65f),
                     fontWeight = FontWeight.Bold,
+                    fontSize = 10.sp,
                     onClick = {
                         if (objective.isAlive) {
                             previousObjective = ObjectiveSnapshot(
@@ -496,12 +502,13 @@ fun RoamGuideWidget(onBack: () -> Unit) {
                     },
                     contentDescription = if (objective.isAlive) "Mark ${objective.label} as slain" else objectiveText
                 )
-                GuideControl(if (detailsExpanded) "−" else "+", GuideMuted) {
+                // V8 FIX (5): Icon buttons are 28x28 squares, 14sp — was ~18dp / 8sp, too small.
+                GuideControl(if (detailsExpanded) "−" else "+", GuideMuted, modifier = Modifier.width(28.dp), fontSize = 14.sp, contentDescription = if (detailsExpanded) "Collapse details" else "Expand details") {
                     detailsExpanded = !detailsExpanded
                 }
                 // V7: ? help button between + / − and ×. Holds "Tap = used · Hold = change" + other tips.
                 Box {
-                    GuideControl("?", GuideMuted, onClick = { helpExpanded = true }, contentDescription = "Help and tips")
+                    GuideControl("?", GuideMuted, modifier = Modifier.width(28.dp), fontSize = 14.sp, onClick = { helpExpanded = true }, contentDescription = "Help and tips")
                     DropdownMenu(
                         expanded = helpExpanded,
                         onDismissRequest = { helpExpanded = false }
@@ -532,10 +539,11 @@ fun RoamGuideWidget(onBack: () -> Unit) {
                         )
                     }
                 }
-                GuideControl("×", GuideMuted, onClick = onBack, contentDescription = "Close roam guide")
+                GuideControl("×", GuideMuted, modifier = Modifier.width(28.dp), fontSize = 14.sp, onClick = onBack, contentDescription = "Close roam guide")
             }
 
-            if (!descriptionHidden) {
+            // V8 FIX (4): Description ALWAYS visible — no hide toggle to trap you.
+            {
                 // V7 FIX (3): Call-out REMOVED. Show FULL description directly.
                 // Old: "Setup · Guard buff, don't feed — Buy Roam boots..."
                 // Now: full turtle/lordContest or step description, e.g.
@@ -609,26 +617,7 @@ fun RoamGuideWidget(onBack: () -> Unit) {
                                 previousObjective = null
                             })
                         }
-                        Box {
-                            GuideControl(
-                                if (descriptionHidden) "Show text" else "Hide text",
-                                GuideMuted,
-                                onClick = { hideMenuExpanded = true }
-                            )
-                            DropdownMenu(
-                                expanded = hideMenuExpanded,
-                                onDismissRequest = { hideMenuExpanded = false }
-                            ) {
-                                DropdownMenuItem(
-                                    text = { OutlinedText("Show instructions", color = GuideText) },
-                                    onClick = { descriptionHidden = false; hideMenuExpanded = false }
-                                )
-                                DropdownMenuItem(
-                                    text = { OutlinedText("Hide instructions", color = GuideText) },
-                                    onClick = { descriptionHidden = true; hideMenuExpanded = false }
-                                )
-                            }
-                        }
+                        // V8: Hide instructions removed — no trap. Description always visible.
                     }
                 }
                 // V7 FIX (2): Separate 4dp progress bar DELETED — now timer background.
@@ -658,9 +647,9 @@ fun RoamGuideWidget(onBack: () -> Unit) {
 // DELETE: RoamGuideWidget.kt, EnemySpellTrackerWidget.kt, RoamOverlayWidgets.kt
 //         (and any RoamOverlayWidgets_V*.kt). Keep ONLY this file + JetOverlay.kt.
 
-private val TrackerSurface = Color(0xF2161B22)
-private val TrackerSurfaceCooling = Color(0xFF2A2413)
-private val TrackerBorder = Color(0xFF30363D)
+private val TrackerSurface = Color(0x73161B22) // V8: 45% like Guide — was 0xF2 (95%), made tracker opaque
+private val TrackerSurfaceCooling = Color(0x732A2413) // V8: 45% like Guide — was 0xFF (100%)
+private val TrackerBorder = Color(0x7330363D) // V8: 45% like Guide — was 0xFF (100%)
 private val TrackerGold = Color(0xFFFFC94D)
 private val TrackerText = Color(0xFFE6EDF3)
 private val TrackerMuted = Color(0xFF9AA7B4)
@@ -759,7 +748,7 @@ fun EnemySpellTrackerWidget(elapsedSeconds: Int, modifier: Modifier = Modifier) 
                             .background(if (isCoolingDown) TrackerSurfaceCooling else TrackerSurface)
                             .border(
                                 1.dp,
-                                if (isCoolingDown) TrackerGold.copy(alpha = 0.85f) else TrackerBorder,
+                                if (isCoolingDown) TrackerGold.copy(alpha = 0.70f) else TrackerBorder // V8: cooling border 70% gold,
                                 RoundedCornerShape(8.dp)
                             )
                             .combinedClickable(
@@ -923,23 +912,27 @@ private fun GuideControl(
     background: Color = GuideSurface,
     borderColor: Color = GuideBorder,
     fontWeight: FontWeight = FontWeight.SemiBold,
+    fontSize: TextUnit = 10.sp,
     onClick: () -> Unit
 ) {
+    // V8 FIX (5): Taller + bigger text. Was 24dp / 8sp / 4dp padding — too cramped
+    // to tap in-game (your screenshot). Now 28dp min, 10sp, 6dp/4dp padding.
+    // Icon buttons pass fontSize = 14.sp + width(28.dp) for a 28x28 square.
     Box(
         modifier = modifier
-            .heightIn(min = 24.dp)
+            .heightIn(min = 28.dp)
             .clip(RoundedCornerShape(8.dp))
             .background(background)
             .border(1.dp, borderColor, RoundedCornerShape(8.dp))
             .clickable(onClick = onClick)
-            .padding(horizontal = 4.dp, vertical = 2.dp)
+            .padding(horizontal = 6.dp, vertical = 4.dp)
             .semantics { this.contentDescription = contentDescription },
         contentAlignment = Alignment.Center
     ) {
         OutlinedText(
             text = label,
             color = color,
-            fontSize = 8.sp,
+            fontSize = fontSize,
             fontWeight = fontWeight,
             maxLines = maxLines,
             overflow = TextOverflow.Ellipsis
