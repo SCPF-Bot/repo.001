@@ -1,10 +1,9 @@
 package com.mlbb.assistant.presentation.overlay
 
 // ── Merged: JetOverlay.kt + pointerInput shim ─────────────────────────────────────
-// V3: window is WRAP_CONTENT + CENTER_HORIZONTAL + FLAG_NOT_TOUCH_MODAL.
-// Window hugs the 52% widget, so green areas beside it are outside the
-// window and fall through to MLBB. Roam defines width as absolute
-// displayMetrics * 0.52f (not fillMaxWidth(0.52f)).
+// V2: window stays MATCH_PARENT + CENTER_HORIZONTAL, but content is now
+// wrapped in a TopCenter Box. Roam is fillMaxWidth(0.52f) inside that Box,
+// so it is exactly 52% and centered on the green line, not stretched.
 // DELETED: pointerInput shim file (11 lines). Merged here — it was only used by the
 // overlay package and only JetOverlay needs low-level pointer handling.
 
@@ -14,13 +13,9 @@ import android.graphics.PixelFormat
 import android.os.Build
 import android.os.Bundle
 import android.view.Gravity
-import android.view.MotionEvent
-import android.view.VelocityTracker
 import android.view.WindowManager
 import android.view.WindowMetrics
-import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.PointerInputScope
 import androidx.compose.ui.input.pointer.pointerInput as composePointerInput
@@ -61,8 +56,6 @@ object JetOverlay {
     @Volatile private var composeView: ComposeView? = null
     @Volatile private var lifecycleOwner: OverlayLifecycleOwner? = null
 
-    private const val FLING_MIN_VELOCITY_PX_PER_SEC = 800f
-
     fun initialize(app: Application, block: JetOverlayScope.() -> Unit) {
         application = app
         JetOverlayScope().also(block)
@@ -86,12 +79,13 @@ object JetOverlay {
         val wm = app.getSystemService(Context.WINDOW_SERVICE) as WindowManager
         windowManager = wm
 
-        // FIX V3 (touch passthrough): MATCH_PARENT made the window cover the
-        // whole top bar. Even transparent sides ate taps — MLBB never got them.
-        // Window is now WRAP_CONTENT wide, so it hugs the 52% widget. The green
-        // areas beside the widget are OUTSIDE the window, so with
-        // FLAG_NOT_TOUCH_MODAL they fall through to MLBB.
-        // Gravity CENTER_HORIZONTAL still centers the WRAP_CONTENT window.
+        // V7 FIX: Window is WRAP_CONTENT (hugs widget) + NOT_TOUCH_MODAL.
+        // V6 bug combo: MATCH_PARENT window + fillMaxHeight() in timer made the
+        // window go full-screen tall (your tall vertical strip) and touches
+        // outside the widget were swallowed. WRAP_CONTENT + NOT_TOUCH_MODAL
+        // means: window = exactly widget size, taps outside pass to game.
+        // Widget width itself is set in RoamGuideWidget (52% landscape / 92%
+        // portrait, + adaptive extra). Window just centers it.
         val params = WindowManager.LayoutParams(
             WindowManager.LayoutParams.WRAP_CONTENT,
             WindowManager.LayoutParams.WRAP_CONTENT,
@@ -118,67 +112,18 @@ object JetOverlay {
         val view = ComposeView(app).apply {
             setViewTreeLifecycleOwner(owner)
             setViewTreeSavedStateRegistryOwner(owner)
-            // FIX V2: window is MATCH_PARENT, so content() must be centered.
-            // Without this Box, a 52% widget would stick to the left edge and
-            // look like it spans the full width (empty space on the right).
-            setContent {
-                // FIX V3: NO fillMaxWidth() here. Inside a WRAP_CONTENT window,
-                // fillMaxWidth() would stretch the window back to full width
-                // and block the green areas again. Plain Box hugs the widget.
-                Box(
-                    modifier = Modifier,
-                    contentAlignment = Alignment.TopCenter
-                ) { content() }
-            }
+            // V7: Window is WRAP_CONTENT, so content must NOT be fillMaxWidth —
+            // that would stretch the window back to full screen width.
+            // Just call content() — RoamGuideWidget sets its own width.
+            setContent { content() }
         }
 
-        var initialX = 0
-        var initialY = 0
-        var initialTouchX = 0f
-        var initialTouchY = 0f
-
-        // UX-07: fling-to-edge. A VelocityTracker accumulates ACTION_MOVE
-        // samples between ACTION_DOWN and ACTION_UP; on release, a fast
-        // horizontal fling snaps the bubble to the nearest screen edge in the
-        // direction of the fling instead of leaving it wherever the finger
-        // happened to lift, matching the "docked bubble" behavior users expect
-        // from floating overlays (e.g. Messenger chat heads).
-        var velocityTracker: VelocityTracker? = null
-
-        view.setOnTouchListener { _, event ->
-            when (event.action) {
-                MotionEvent.ACTION_DOWN -> {
-                    initialX = params.x
-                    initialY = params.y
-                    initialTouchX = event.rawX
-                    initialTouchY = event.rawY
-                    velocityTracker?.recycle()
-                    velocityTracker = VelocityTracker.obtain().also { it.addMovement(event) }
-                    false
-                }
-                MotionEvent.ACTION_MOVE -> {
-                    velocityTracker?.addMovement(event)
-                    params.x = initialX + (event.rawX - initialTouchX).toInt()
-                    params.y = initialY + (event.rawY - initialTouchY).toInt()
-                    runCatching { wm.updateViewLayout(view, params) }
-                    true
-                }
-                MotionEvent.ACTION_UP -> {
-                    // FIX: fling-to-edge snapped the whole GUIDE to the screen edge.
-                    // That's for the bubble only, not the guide. Guide stays where dragged.
-                    velocityTracker?.recycle()
-                    velocityTracker = null
-                    false
-                }
-                MotionEvent.ACTION_CANCEL -> {
-                    velocityTracker?.recycle()
-                    velocityTracker = null
-                    false
-                }
-                else -> false
-            }
-        }
-
+        // V7: Drag-to-move REMOVED for the guide. It moved the whole guide
+        // window on ACTION_MOVE (your screenshot 1: widget in the middle of
+        // the screen) and on a WRAP_CONTENT window it fights the centering.
+        // Guide stays pinned at TOP|CENTER_HORIZONTAL, y=100. If you want
+        // dragging later, add a dedicated drag handle inside RoamGuideWidget,
+        // not a window-level touch listener.
         composeView = view
         runCatching {
             wm.addView(view, params)
