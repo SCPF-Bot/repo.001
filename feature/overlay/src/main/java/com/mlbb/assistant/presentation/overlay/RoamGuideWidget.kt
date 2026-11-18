@@ -5,6 +5,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -41,15 +44,25 @@ import kotlinx.coroutines.delay
 import org.json.JSONArray
 import org.json.JSONObject
 
-private val GuideBackground = Color(0xE60D1117)
-private val GuideSurface = Color(0xCC161B22)
-private val GuideBorder = Color(0xFF30363D)
+private val GuideBackground = Color(0xF20D1117)
+private val GuideSurface = Color(0xFF1B222D)
+private val GuideBorder = Color(0xFF2F3A46)
 private val GuideAccent = Color(0xFF58A6FF)
-private val GuideText = Color(0xFFC9D1D9)
-private val GuideMuted = Color(0xFF8B949E)
-private val GuideGold = Color(0xFFE3B341)
+private val GuideText = Color(0xFFE8EEF4)
+private val GuideMuted = Color(0xFF9AA7B4)
+private val GuideGold = Color(0xFFFFC94D)
 private val GuideGreen = Color(0xFF3FB950)
-private val GuideRed = Color(0xFFF85149)
+private val GuideRed = Color(0xFFFF6B6B)
+
+// --- Widget width: matched to the green line in the reference photo ---
+// Measured from the photo (720px wide): green line runs x = 150 → 526,
+// i.e. left = 20.8%, right = 72.9%, width = 52.1% of screen width.
+// Previous value was 0.62f in landscape (too wide, blocked extra vision).
+// Portrait is not the in-game case (MLBB is landscape) so it stays wide
+// for readability, but landscape — the real case — is now exactly 0.52f.
+private const val WIDGET_WIDTH_FRACTION_LANDSCAPE = 0.52f
+private const val WIDGET_WIDTH_FRACTION_PORTRAIT = 0.92f
+private const val WIDGET_MIN_WIDTH_DP = 300f
 private const val ROAM_GUIDE_ASSET = "roam_guide.json"
 
 private data class RoamStep(
@@ -264,7 +277,13 @@ private fun computeObjective(
  * Compact roam macro guide for use over the game screen. The content width is
  * explicitly bounded because the host overlay window is WRAP_CONTENT; relying on
  * fillMaxWidth alone made long instruction lines size/clamp unpredictably.
+ *
+ * Width is matched to the green line in the reference photo: 52% of screen
+ * width in landscape (150–526px on a 720px-wide screenshot). See
+ * WIDGET_WIDTH_FRACTION_LANDSCAPE. The host overlay window should centre
+ * this widget horizontally — the widget itself only controls its own width.
  */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun RoamGuideWidget(onBack: () -> Unit) {
     val context = LocalContext.current
@@ -316,8 +335,13 @@ fun RoamGuideWidget(onBack: () -> Unit) {
     }
     val screenWidthDp = configuration.screenWidthDp
     val isLandscape = configuration.screenWidthDp > configuration.screenHeightDp
-    val widthFraction = if (isLandscape) 0.62f else 0.98f
-    val widgetWidth = (screenWidthDp * widthFraction).coerceAtLeast(280f).coerceAtMost(screenWidthDp.toFloat())
+    // Same width as the green line in the photo: 52% of screen in landscape.
+    // Min keeps the 5 spell cells + controls tappable on small phones;
+    // it only kicks in below ~577dp wide, where 52% would be < 300dp.
+    val widthFraction = if (isLandscape) WIDGET_WIDTH_FRACTION_LANDSCAPE else WIDGET_WIDTH_FRACTION_PORTRAIT
+    val widgetWidth = (screenWidthDp * widthFraction)
+        .coerceAtLeast(WIDGET_MIN_WIDTH_DP)
+        .coerceAtMost((screenWidthDp - 8).toFloat())
     val blessing = guide.blessings.firstOrNull {
         it.id == selectedPlan?.blessingId ||
             it.name.equals(selectedPlan?.blessing?.substringBefore('/')?.trim(), ignoreCase = true)
@@ -325,9 +349,10 @@ fun RoamGuideWidget(onBack: () -> Unit) {
 
     Column(
         modifier = Modifier
-            .width(widgetWidth.dp)
-            .padding(horizontal = 4.dp),
-        verticalArrangement = Arrangement.spacedBy(4.dp)
+            .width(widgetWidth.dp),
+        // No outer horizontal padding: the card itself is widgetWidth,
+        // so its visible edges line up exactly with the green line.
+        verticalArrangement = Arrangement.spacedBy(6.dp)
     ) {
         if (selectedPlan == null || currentStep == null) {
             GuideMessage("Roam guide unavailable — check roam_guide.json")
@@ -337,25 +362,29 @@ fun RoamGuideWidget(onBack: () -> Unit) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(GuideBackground, RoundedCornerShape(8.dp))
-                .border(1.dp, GuideBorder, RoundedCornerShape(8.dp))
-                .padding(6.dp),
-            verticalArrangement = Arrangement.spacedBy(5.dp)
+                .background(GuideBackground, RoundedCornerShape(12.dp))
+                .border(1.dp, GuideBorder, RoundedCornerShape(12.dp))
+                .padding(horizontal = 8.dp, vertical = 8.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(5.dp),
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 GuideControl(
                     label = formatGameTime(elapsedSeconds),
                     color = GuideText,
-                    modifier = Modifier.width(58.dp),
+                    modifier = Modifier.width(56.dp),
+                    fontWeight = FontWeight.Bold,
                     onClick = {}
                 )
-                GuideControl(if (isRunning) "Ⅱ" else "▶", GuideAccent) {
-                    isRunning = !isRunning && elapsedSeconds < 18 * 60
-                }
+                GuideControl(
+                    label = if (isRunning) "⏸" else "▶",
+                    color = GuideAccent,
+                    onClick = { isRunning = !isRunning && elapsedSeconds < 18 * 60 },
+                    contentDescription = if (isRunning) "Pause timer" else "Start timer"
+                )
                 Box(modifier = Modifier.weight(1f)) {
                     GuideControl(
                         selectedPlan.label.substringBefore(" - ").trim(),
@@ -388,6 +417,9 @@ fun RoamGuideWidget(onBack: () -> Unit) {
                 GuideControl(
                     objectiveText,
                     objectiveColor,
+                    background = objectiveColor.copy(alpha = if (objective.isAlive) 0.22f else 0.12f),
+                    borderColor = objectiveColor.copy(alpha = 0.65f),
+                    fontWeight = FontWeight.Bold,
                     onClick = {
                         if (objective.isAlive) {
                             previousObjective = ObjectiveSnapshot(
@@ -417,8 +449,8 @@ fun RoamGuideWidget(onBack: () -> Unit) {
                         if (objectiveDescription.isNotBlank()) append(" — $objectiveDescription")
                     },
                     color = GuideText,
-                    fontSize = 10.sp,
-                    lineHeight = 13.sp,
+                    fontSize = 11.sp,
+                    lineHeight = 15.sp,
                     maxLines = if (detailsExpanded) 8 else 3,
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.fillMaxWidth()
@@ -441,7 +473,10 @@ fun RoamGuideWidget(onBack: () -> Unit) {
                     if (elapsedSeconds == 0 && selectedPlan.heroes.isNotEmpty()) {
                         GuideDetail("Suggested heroes", selectedPlan.heroes.take(6).joinToString())
                     }
-                    Row(horizontalArrangement = Arrangement.spacedBy(5.dp)) {
+                    FlowRow(
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        verticalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
                         GuideControl("−10s", GuideMuted) { elapsedSeconds = (elapsedSeconds - 10).coerceAtLeast(0) }
                         GuideControl("+10s", GuideMuted) { elapsedSeconds = (elapsedSeconds + 10).coerceAtMost(18 * 60) }
                         GuideControl("Reset", GuideMuted) {
@@ -489,16 +524,16 @@ fun RoamGuideWidget(onBack: () -> Unit) {
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(2.dp)
-                            .background(GuideBorder, RoundedCornerShape(1.dp))
+                            .height(4.dp)
+                            .background(GuideBorder, RoundedCornerShape(2.dp))
                     ) {
                         val span = (currentStep.endSeconds - currentStep.startSeconds).coerceAtLeast(1)
                         val progress = ((elapsedSeconds - currentStep.startSeconds).toFloat() / span).coerceIn(0f, 1f)
                         Box(
                             Modifier
                                 .fillMaxWidth(progress)
-                                .height(2.dp)
-                                .background(GuideAccent, RoundedCornerShape(1.dp))
+                                .height(4.dp)
+                                .background(GuideAccent, RoundedCornerShape(2.dp))
                         )
                     }
                 }
@@ -521,7 +556,7 @@ private fun GuideMessage(message: String) {
         color = GuideText,
         fontSize = 10.sp,
         modifier = Modifier
-            .background(GuideBackground, RoundedCornerShape(6.dp))
+            .background(GuideBackground, RoundedCornerShape(12.dp))
             .padding(8.dp)
     )
 }
@@ -532,16 +567,20 @@ private fun GuideControl(
     color: Color,
     modifier: Modifier = Modifier,
     maxLines: Int = 1,
-    onClick: () -> Unit,
-    contentDescription: String = label
+    contentDescription: String = label,
+    background: Color = GuideSurface,
+    borderColor: Color = GuideBorder,
+    fontWeight: FontWeight = FontWeight.SemiBold,
+    onClick: () -> Unit
 ) {
     Box(
         modifier = modifier
-            .clip(RoundedCornerShape(5.dp))
-            .background(GuideSurface)
-            .border(1.dp, GuideBorder, RoundedCornerShape(5.dp))
+            .heightIn(min = 32.dp)
+            .clip(RoundedCornerShape(8.dp))
+            .background(background)
+            .border(1.dp, borderColor, RoundedCornerShape(8.dp))
             .clickable(onClick = onClick)
-            .padding(horizontal = 6.dp, vertical = 5.dp)
+            .padding(horizontal = 8.dp, vertical = 6.dp)
             .semantics { this.contentDescription = contentDescription },
         contentAlignment = Alignment.Center
     ) {
@@ -549,7 +588,7 @@ private fun GuideControl(
             text = label,
             color = color,
             fontSize = 9.sp,
-            fontWeight = FontWeight.SemiBold,
+            fontWeight = fontWeight,
             maxLines = maxLines,
             overflow = TextOverflow.Ellipsis
         )
@@ -558,12 +597,23 @@ private fun GuideControl(
 
 @Composable
 private fun GuideDetail(label: String, text: String) {
-    Text(
-        text = "$label: $text",
-        color = GuideText,
-        fontSize = 9.sp,
-        lineHeight = 12.sp,
-        maxLines = 3,
-        overflow = TextOverflow.Ellipsis
-    )
+    Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+        Text(
+            text = "$label:",
+            color = GuideMuted,
+            fontSize = 9.sp,
+            lineHeight = 12.sp,
+            fontWeight = FontWeight.Bold,
+            maxLines = 1
+        )
+        Text(
+            text = text,
+            color = GuideText,
+            fontSize = 9.sp,
+            lineHeight = 12.sp,
+            maxLines = 3,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.weight(1f, fill = false)
+        )
+    }
 }
