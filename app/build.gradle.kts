@@ -18,10 +18,11 @@ android {
     buildTypes {
         release {
             isMinifyEnabled = true
-            isShrinkResources = true
+            isShrinkResources = false
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
         debug {
-            isMinifyEnabled = true
+            isMinifyEnabled = false
         }
     }
 
@@ -53,10 +54,7 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel)
     implementation(libs.androidx.activity.compose)
     implementation(libs.kotlinx.coroutines.android)
-
-    // Needed by JetOverlay: LifecycleOwner + SavedStateRegistry
     implementation("androidx.savedstate:savedstate:1.2.1")
-
     implementation(platform(libs.compose.bom))
     implementation(libs.compose.ui)
     implementation(libs.compose.ui.graphics)
