@@ -2,15 +2,36 @@ name: Build Release
 
 on:
   workflow_dispatch:
+  # Direct source pushes.
+  push:
+    branches: [main]
+    paths:
+      - "app/**"
+      - "gradle/**"
+      - "build.gradle.kts"
+      - "settings.gradle.kts"
+      - "gradle.properties"
+      - ".github/workflows/release.yml"
+  # "Extract Archives" pushes its commit with GITHUB_TOKEN (and [skip ci]), which never
+  # fires `push` workflows, so chain off its completion instead. The old trigger pointed
+  # at a "Build Debug" workflow that does not exist in this repo.
   workflow_run:
-    workflows: ["Build Debug"]
-    types:
-      - completed
+    workflows: ["Extract Archives"]
+    types: [completed]
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build:
-    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
+    timeout-minutes: 30
 
     steps:
       - name: Checkout code
@@ -28,48 +49,30 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      - name: Accept Android SDK licenses and install Platform 37
+      - name: Install Android SDK components
         run: |
-          yes | "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" --licenses
-          "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" \
-            "platforms;android-37" \
-            "build-tools;36.0.0" \
-            "platform-tools"
+          set -uo pipefail
+          SDKMANAGER="$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager"
 
-      - name: Print build and dependency versions
+          yes | "$SDKMANAGER" --licenses > /dev/null || true
+          "$SDKMANAGER" "build-tools;36.0.0" "platform-tools"
+
+          # compileSdk 37: the SDK id is android-37 or android-37.0 depending on the
+          # repository, so look it up instead of hard-coding it.
+          PLATFORM=$("$SDKMANAGER" --list 2>/dev/null \
+            | grep -oE 'platforms;android-37(\.[0-9]+)?' | sort -u | head -n1)
+          if [[ -n "$PLATFORM" ]]; then
+            echo "Installing $PLATFORM"
+            "$SDKMANAGER" "$PLATFORM"
+          else
+            echo "No android-37 platform listed; AGP will download it (licenses are accepted)."
+          fi
+
+      - name: Print toolchain versions
         run: |
-          echo "=== Gradle / AGP / SDK ==="
-          ./gradlew --version --no-daemon
-
-          echo "=== gradle-wrapper.properties ==="
-          cat gradle/wrapper/gradle-wrapper.properties
-
-          echo "=== libs.versions.toml ==="
-          cat gradle/libs.versions.toml
-
-          echo "=== app/build.gradle.kts ==="
-          grep -n -E \
-            "compileSdk|minSdk|targetSdk|namespace|applicationId" \
-            app/build.gradle.kts
-
-          echo "=== releaseRuntimeClasspath ==="
-          ./gradlew :app:dependencies \
-            --configuration releaseRuntimeClasspath \
-            --no-daemon
-
-      - name: Diagnose AAR metadata
-        run: |
-          set -o pipefail
-          ./gradlew :app:checkReleaseAarMetadata \
-            --info \
-            --stacktrace \
-            --no-daemon \
-            2>&1 | tee aar-metadata.log
-
-          echo "--- grep for the exact incompatibility ---"
-          grep -i -A 10 -B 2 -E \
-            "AAR metadata|minCompileSdk|minAgpVersion|minSdkVersion|CheckAarMetadata" \
-            aar-metadata.log || true
+          ./gradlew --version
+          grep -E '^(agp|kotlin|composeBom) ' gradle/libs.versions.toml
+          grep -nE 'compileSdk|minSdk|targetSdk|namespace|applicationId' app/build.gradle.kts
 
       - name: Generate ephemeral signing keystore
         run: |
@@ -81,35 +84,25 @@ jobs:
             -validity 1 \
             -storepass android \
             -keypass android \
-            -dname "CN=CI Build, OU=Dev, O=MLBB Assistant, L=Unknown, S=Unknown, C=US"
+            -dname "CN=CI Build, OU=Dev, O=MLBB Plus, L=Unknown, ST=Unknown, C=US"
 
       - name: Build release APK
         run: |
           set -o pipefail
-          ./gradlew assembleRelease \
-            --info \
-            --stacktrace \
-            --no-daemon \
-            2>&1 | tee assemble-release.log
+          ./gradlew :app:assembleRelease --stacktrace 2>&1 | tee assemble-release.log
 
       - name: Align APK
         run: |
           set -euo pipefail
 
-          APK=$(find app/build/outputs/apk/release \
-            -name "*.apk" \
-            -print \
-            -quit)
-
+          APK=$(find app/build/outputs/apk/release -name "*.apk" -print -quit)
           if [[ -z "$APK" ]]; then
             echo "No release APK was produced" >&2
             exit 1
           fi
 
           echo "Aligning $APK"
-
-          "$ANDROID_SDK_ROOT/build-tools/36.0.0/zipalign" \
-            -v 4 "$APK" app-release-aligned.apk
+          "$ANDROID_SDK_ROOT/build-tools/36.0.0/zipalign" -f -v 4 "$APK" app-release-aligned.apk
 
       - name: Sign APK
         run: |
@@ -123,23 +116,21 @@ jobs:
 
       - name: Verify signed APK
         run: |
-          "$ANDROID_SDK_ROOT/build-tools/36.0.0/apksigner" verify \
-            --verbose app-release-signed.apk
+          "$ANDROID_SDK_ROOT/build-tools/36.0.0/apksigner" verify --verbose app-release-signed.apk
 
       - name: Upload release APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: mlbb-assistant-release
+          name: mlbb-plus-release
           path: app-release-signed.apk
           retention-days: 30
+          if-no-files-found: error
 
-      - name: Upload build logs
+      - name: Upload build log
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: build-logs
-          path: |
-            aar-metadata.log
-            assemble-release.log
+          path: assemble-release.log
           retention-days: 7
-          if-no-files-found: warn
+          if-no-files-found: ignore
