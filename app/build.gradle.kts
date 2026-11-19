@@ -8,7 +8,7 @@ android {
     compileSdk = 37
 
     defaultConfig {
-        applicationId = "com.mlbb.roamguide"
+        applicationId = "com.mlbb.plus"
         minSdk = 29
         targetSdk = 36
         versionCode = 1
