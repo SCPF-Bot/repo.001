@@ -19,13 +19,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil3.compose.AsyncImage
 import com.mlbb.plus.ui.model.GameData
 import com.mlbb.plus.ui.model.Hero
 import com.mlbb.plus.ui.theme.MLBBPlusColors
@@ -95,7 +93,7 @@ fun HeroesScreen(onHeroClick: (Hero) -> Unit) {
                 items(filtered) { hero ->
                     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.clip(RoundedCornerShape(10.dp)).background(MLBBPlusColors.GithubCard).clickable { onHeroClick(hero) }.padding(4.dp)) {
                         Box {
-                            AsyncImage(model = "file:///android_asset/images/heroes/${hero.id}.webp", contentDescription = hero.name, contentScale = ContentScale.Crop, modifier = Modifier.aspectRatio(1f).clip(RoundedCornerShape(8.dp)).background(MLBBPlusColors.GithubSurface))
+                            HeroImage(hero = hero, modifier = Modifier.aspectRatio(1f).clip(RoundedCornerShape(8.dp)).background(MLBBPlusColors.GithubSurface))
                             if (!hero.isLive) Box(Modifier.align(Alignment.TopEnd).clip(RoundedCornerShape(6.dp)).background(MLBBPlusColors.Orange).padding(horizontal = 4.dp, vertical = 2.dp)) { Text("ADV", color = Color.Black, fontSize = 7.sp, fontWeight = FontWeight.Bold) }
                             if (hero.isOP) Box(Modifier.align(Alignment.TopStart).clip(RoundedCornerShape(6.dp)).background(MLBBPlusColors.Gold).padding(horizontal = 4.dp, vertical = 2.dp)) { Text("OP", color = Color.Black, fontSize = 7.sp, fontWeight = FontWeight.Bold) }
                         }
@@ -115,7 +113,7 @@ fun HeroDetailScreen(hero: Hero, onBack: () -> Unit, onHeroClick: (Hero) -> Unit
     val itemsById = GameData.itemsById
     Column(Modifier.fillMaxSize().background(MLBBPlusColors.GithubBg)) {
         Box(Modifier.fillMaxWidth().height(180.dp)) {
-            AsyncImage(model = "file:///android_asset/images/heroes/${hero.id}.webp", contentDescription = "${hero.name} portrait", contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
+            HeroImage(hero = hero, modifier = Modifier.fillMaxSize())
             Box(Modifier.fillMaxSize().background(Brush.verticalGradient(listOf(Color.Transparent, MLBBPlusColors.GithubBg.copy(alpha = 0.3f), MLBBPlusColors.GithubBg))))
             Box(Modifier.align(Alignment.TopStart).padding(12.dp).clickable { onBack() }.clip(RoundedCornerShape(100.dp)).background(MLBBPlusColors.GithubCard.copy(alpha = 0.9f)).padding(horizontal = 12.dp, vertical = 6.dp)) { Text("← Back", color = MLBBPlusColors.GithubText, fontSize = 12.sp, fontWeight = FontWeight.Bold) }
             Column(Modifier.align(Alignment.BottomStart).padding(16.dp)) {
@@ -206,7 +204,7 @@ private fun HeroRelationTab(sectionA: String, idsA: List<Int>, sectionB: String,
 @Composable
 fun HeroPortraitSmall(hero: Hero, onClick: (Hero) -> Unit) {
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.clickable { onClick(hero) }) {
-        AsyncImage(model = "file:///android_asset/images/heroes/${hero.id}.webp", contentDescription = hero.name, contentScale = ContentScale.Crop, modifier = Modifier.size(52.dp).clip(RoundedCornerShape(8.dp)).background(MLBBPlusColors.GithubSurface).border(1.dp, MLBBPlusColors.GithubBorder, RoundedCornerShape(8.dp)))
+        HeroImage(hero = hero, modifier = Modifier.size(52.dp).clip(RoundedCornerShape(8.dp)).background(MLBBPlusColors.GithubSurface).border(1.dp, MLBBPlusColors.GithubBorder, RoundedCornerShape(8.dp)))
         Text(hero.name, color = MLBBPlusColors.GithubSecondary, fontSize = 10.sp, modifier = Modifier.padding(top = 4.dp))
     }
 }
