@@ -1,64 +1,112 @@
 package com.mlbb.plus.ui.theme
 
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.darkColorScheme
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 
 // ============================================================
-// plus/ui/theme/MLBBPlusTheme.kt
+// plus/ui/theme/MLBBPlusTheme.kt  ->  FIXED
 // GitHub path: app/src/main/java/com/mlbb/plus/ui/theme/MLBBPlusTheme.kt
 // ------------------------------------------------------------
-// GitHub Dark + Gold — LOCKED STYLE, flat, no glow, no neon
-// Does NOT read heroes.json / items.json / images —
-// so NO breaking change needed for the new assets.
-// ------------------------------------------------------------
-// 2 SMALL FIXES for new JSON features (added below):
-//   1. Tier colors were all Gold — S and A looked identical.
-//      Now: S = Gold, A = light gray, B = dark gray.
-//   2. Patch Notes now shows BUFF / NERF / REVAMP / ADJUST badges
-//      from patch_notes.json — added Patch* colors for them.
-//   3. Heroes now shows ADV badge for Dori (134) — added Advanced color.
-// Old code still works — these are additions, not renames.
+// FIXES:
+//  [1] Tier colors were not distinct. Old: TierS = Gold,
+//      TierA = GithubText (E6EDF3, same as primary text),
+//      TierB = GithubSecondary (7D8590). TierA blended into
+//      normal text, and A vs B was low contrast. Fix:
+//      S = Gold, A = blue 58A6FF, B = gray 8B949E.
+//      Blue was previously marked "DO NOT USE" as BlueOld -
+//      that left no blue for tiers. BlueOld is kept for
+//      back-compat but new code uses TierA.
+//  [2] GoldBg / AdvancedBg were opaque solid colors.
+//      Old: GoldBg = 0xFFE3B341 (opaque Gold), AdvancedBg =
+//      0xFFD29922 (opaque Orange). If used as a background
+//      with Gold / Orange text on top, contrast fails.
+//      Fix: GoldBg = Gold at 15% alpha, AdvancedBg = Orange
+//      at 15% alpha. Use these for badge backgrounds.
+//  [3] Back-compat aliases lied about color. Old:
+//      InfoBlue = Gold, MLBBTeal = Gold, MLBBBlue = Gold,
+//      TierSPlus = Gold, TierAPlus = GithubText. Any old file
+//      using InfoBlue / Teal / Blue expecting blue/teal got
+//      yellow. Fix: InfoBlue / MLBBBlue = real blue,
+//      MLBBTeal = real teal, TierSPlus = brighter gold,
+//      TierAPlus = lighter blue.
+//  [4] File was named MLBBPlusTheme.kt but had no
+//      MLBBPlusTheme() composable. MainActivity built its own
+//      MaterialTheme(darkColorScheme(...)) inline, duplicating
+//      the theme in two places. Fix: added MLBBPlusTheme()
+//      wrapper below. MainActivity now uses it. New screens
+//      should use MLBBPlusTheme { ... }, not rebuild
+//      darkColorScheme() themselves.
+//  [5] GithubDisabled duplicated GithubSecondary. Kept for
+//      back-compat, but new code should use GithubSecondary.
 // ============================================================
 
 object MLBBPlusColors {
-    val GithubBg = Color(0xFF0D1117)        // screen background
-    val GithubCard = Color(0xFF161B22)      // cards, dropdowns, search
-    val GithubSurface = Color(0xFF21262D)   // unselected chips
-    val GithubBorder = Color(0xFF30363D)    // borders
-    val GithubText = Color(0xFFE6EDF3)      // primary text
-    val GithubSecondary = Color(0xFF7D8590) // subtitles, hints
+    val GithubBg = Color(0xFF0D1117)
+    val GithubCard = Color(0xFF161B22)
+    val GithubSurface = Color(0xFF21262D)
+    val GithubBorder = Color(0xFF30363D)
+    val GithubText = Color(0xFFE6EDF3)
+    val GithubSecondary = Color(0xFF7D8590)
     val GithubDisabled = Color(0xFF7D8590)
 
-    val Gold = Color(0xFFE3B341)            // accent
+    val Gold = Color(0xFFE3B341)
     val GoldDark = Color(0xFFD29922)
-    val GoldBg = Color(0xFFE3B341)
+    // FIX [2]: translucent background, not opaque Gold.
+    val GoldBg = Color(0xFFE3B341).copy(alpha = 0.15f)
 
-    val Green = Color(0xFF3FB950)           // READY, win rate, granted, BUFF
-    val Red = Color(0xFFF85149)             // ban rate, danger, NERF
-    val Orange = Color(0xFFD29922)          // needs permission, ADV badge, REVERSION
-    val BlueOld = Color(0xFF2F81F7)         // DO NOT USE — kept for reference only
+    val Green = Color(0xFF3FB950)
+    val Red = Color(0xFFF85149)
+    val Orange = Color(0xFFD29922)
+    val BlueOld = Color(0xFF2F81F7)
 
-    // --- NEW: Tier colors (from heroes.json tier field) ---
+    // --- Tier colors ---
+    // FIX [1]: A is now blue, distinct from text and from B.
     val TierS = Gold
-    val TierA = GithubText // was Gold — fixed so S vs A are different
-    val TierB = GithubSecondary
+    val TierA = Color(0xFF58A6FF)
+    val TierB = Color(0xFF8B949E)
 
-    // --- NEW: Patch type colors (from patch_notes.json heroChanges[].type) ---
+    // --- Patch type colors ---
     val PatchBuff = Green
     val PatchNerf = Red
     val PatchRevamp = Gold
     val PatchAdjust = GithubSecondary
     val PatchReversion = Orange
 
-    // --- NEW: Advanced Server (Dori 134, Advanced patch 2.2.32) ---
+    // --- Advanced Server (Dori 134, Advanced patch) ---
     val Advanced = Orange
-    val AdvancedBg = Color(0xFFD29922)
+    // FIX [2]: translucent background, not opaque Orange.
+    val AdvancedBg = Color(0xFFD29922).copy(alpha = 0.15f)
 
-    // --- NEW: Hero detail badges ---
+    // --- Hero detail badges ---
     val OP = Gold
     val Meta = Green
 }
 
-// Back-compat aliases — old files still compile if you copy-paste
+// FIX [4]: single theme wrapper. Use this in MainActivity and
+// any future Activity. Do NOT rebuild darkColorScheme() elsewhere.
+@Composable
+fun MLBBPlusTheme(content: @Composable () -> Unit) {
+    MaterialTheme(
+        colorScheme = darkColorScheme(
+            primary = MLBBPlusColors.Gold,
+            onPrimary = Color.Black,
+            background = MLBBPlusColors.GithubBg,
+            onBackground = MLBBPlusColors.GithubText,
+            surface = MLBBPlusColors.GithubCard,
+            onSurface = MLBBPlusColors.GithubText,
+            secondary = MLBBPlusColors.Gold,
+            onSecondary = Color.Black,
+            error = MLBBPlusColors.Red,
+            onError = Color.White
+        ),
+        content = content
+    )
+}
+
+// Back-compat aliases - old files still compile if you copy-paste.
+// New code should use MLBBPlusColors.* directly, not these.
 val SurfaceDark = MLBBPlusColors.GithubBg
 val SurfaceCard = MLBBPlusColors.GithubCard
 val SurfaceMid = MLBBPlusColors.GithubCard
@@ -69,9 +117,10 @@ val TextDisabled = MLBBPlusColors.GithubSecondary
 val MLBBGold = MLBBPlusColors.Gold
 val SuccessGreen = MLBBPlusColors.Green
 val ErrorRed = MLBBPlusColors.Red
-val InfoBlue = MLBBPlusColors.Gold
+// FIX [3]: these are now real blue / teal, not Gold.
+val InfoBlue = Color(0xFF58A6FF)
 val MLBBRed = MLBBPlusColors.Red
-val MLBBTeal = MLBBPlusColors.Gold
-val MLBBBlue = MLBBPlusColors.Gold
-val TierSPlus = MLBBPlusColors.Gold
-val TierAPlus = MLBBPlusColors.GithubText
+val MLBBTeal = Color(0xFF39C5CF)
+val MLBBBlue = Color(0xFF2F81F7)
+val TierSPlus = Color(0xFFFFD700)
+val TierAPlus = Color(0xFF79C0FF)
