@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <string name="calibration_title">Auto-calibration</string>
-    <string name="calibration_rationale_label">Why these weights?</string>
-    <string name="calibration_confidence_label">Confidence</string>
-    <string name="calibration_apply">Apply suggested weights</string>
-    <string name="calibration_need_more">Need at least 10 sessions with outcomes to calibrate.</string>
-</resources>
