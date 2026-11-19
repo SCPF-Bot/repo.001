@@ -46,7 +46,7 @@ import com.mlbb.plus.ui.widgets.RoamGuideWidget
 //      Before: notification had no way to stop the service and
 //      used a bare Builder without ongoing / actions.
 //  [4] companion setters: private set -> internal set + explicit
-//      updateRole() / setRunning() helpers. Old private-set in a
+//      updateRole() / markRunning() helpers. Old private-set in a
 //      companion is fragile / confusing - the instance methods
 //      assign companion state. Helpers make the mutation explicit
 //      and keep the public API read-only.
@@ -93,7 +93,7 @@ class WidgetOverlayService : Service() {
         val role = intent?.getStringExtra(EXTRA_ROLE) ?: currentRole
         val roleType = intent?.getStringExtra(EXTRA_ROLE_TYPE) ?: currentRoleType
         updateRole(role, roleType)
-        setRunning(true)
+        markRunning(true)
 
         // FIX [7]: null-safe notify.
         getSystemService(NotificationManager::class.java)
@@ -116,7 +116,7 @@ class WidgetOverlayService : Service() {
     }
 
     override fun onDestroy() {
-        setRunning(false)
+        markRunning(false)
         JetOverlay.hide()
         // FIX [6]: remove the foreground notification.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
@@ -179,7 +179,7 @@ class WidgetOverlayService : Service() {
             currentRole = role
             currentRoleType = roleType
         }
-        internal fun setRunning(value: Boolean) {
+        internal fun markRunning(value: Boolean) {
             isRunning = value
         }
 
