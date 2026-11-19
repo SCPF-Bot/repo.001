@@ -17,11 +17,11 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
-            isShrinkResources = false
+            isMinifyEnabled = true
+            isShrinkResources = true
         }
         debug {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
         }
     }
 
