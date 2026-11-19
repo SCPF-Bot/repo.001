@@ -23,6 +23,7 @@ import com.mlbb.plus.ui.model.Hero
 import com.mlbb.plus.ui.model.Item
 import com.mlbb.plus.ui.screens.*
 import com.mlbb.plus.ui.theme.MLBBPlusColors
+import com.mlbb.plus.ui.theme.MLBBPlusTheme
 
 // ============================================================
 // mlbb/ui/MainActivity.kt  ->  FIXED
@@ -51,6 +52,13 @@ import com.mlbb.plus.ui.theme.MLBBPlusColors
 //      dropping to the Heroes list and losing the Item detail.
 //  [7] validTypes moved to remember{} so the map is not rebuilt
 //      on every recomposition.
+//  [8] NEW batch: use MLBBPlusTheme() wrapper from
+//      MLBBPlusTheme.kt instead of inline MaterialTheme.
+//  [9] NEW batch: onOverlayGrantedChange no longer sets the
+//      Boolean directly. SettingsScreen only forwards ON as
+//      a request to open system settings. Setting the Boolean
+//      here would lie (Home would show READY before the user
+//      grants). ON_RESUME observer re-reads the real permission.
 // ============================================================
 
 private enum class Tab(val label: String, val emoji: String) {
@@ -134,7 +142,8 @@ private fun MLBBPlusApp(onLaunchWidget: (String, String) -> Unit) {
         if (selectedRoleType !in types) selectedRoleType = types.first()
     }
 
-    MaterialTheme(colorScheme = darkColorScheme(primary = MLBBPlusColors.Gold, background = MLBBPlusColors.GithubBg, surface = MLBBPlusColors.GithubCard)) {
+    // FIX [8]: single theme wrapper, not inline darkColorScheme.
+    MLBBPlusTheme {
         Scaffold(
             containerColor = MLBBPlusColors.GithubBg,
             bottomBar = {
@@ -225,7 +234,24 @@ private fun MLBBPlusApp(onLaunchWidget: (String, String) -> Unit) {
                     Tab.PATCH -> PatchNotesScreen()
                     Tab.SETTINGS -> SettingsScreen(
                         overlayGranted = overlayGranted,
-                        onOverlayGrantedChange = { overlayGranted = it },
+                        // FIX [9]: do NOT set overlayGranted = true here.
+                        // SettingsScreen only calls this with true as a
+                        // request to open system settings. The ON_RESUME
+                        // observer above re-reads the real permission
+                        // when the user returns. Setting it here would
+                        // show READY before the user grants.
+                        onOverlayGrantedChange = { wanted ->
+                            if (wanted) {
+                                ctx.startActivity(
+                                    Intent(
+                                        Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                                        Uri.parse("package:${ctx.packageName}")
+                                    )
+                                )
+                            }
+                            // OFF is never forwarded by SettingsScreen -
+                            // system permission cannot be revoked by a Switch.
+                        },
                         autoStartLastRole = autoStartLastRole,
                         onAutoStartChange = { value ->
                             autoStartLastRole = value
