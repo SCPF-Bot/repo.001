@@ -1,4 +1,4 @@
-package com.【entity-mlbb¦canonical_name=MLBB】.ui
+package com.mlbb.ui
 
 import android.app.Notification
 import android.app.NotificationChannel
