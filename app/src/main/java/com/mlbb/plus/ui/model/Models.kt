@@ -86,6 +86,5 @@ object SampleData {
         Item(109, "Wind of Nature", "Attack", tier="S", price=1910, stats=listOf("+30 Physical Attack", "+20% Attack Speed")),
         Item(110, "Malefic Roar", "Attack", tier="S", price=2060, stats=listOf("+60 Physical Attack")),
     )
-    val itemsById = items.associateBy { it.
-id }
+    val itemsById = items.associateBy { it.id }
 }
