@@ -1,21 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!-- ── Permissions ─────────────────────────────────────────────────────── -->
-    <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
-    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <application
-        android:name=".MLBBApplication"
         android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -23,9 +14,8 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.MLBBAssistant">
 
-        <!-- ── Main Activity ───────────────────────────────────────────────── -->
         <activity
-            android:name=".presentation.main.MainActivity"
+            android:name=".ui.MainActivity"
             android:exported="true"
             android:windowSoftInputMode="adjustResize">
             <intent-filter>
@@ -34,103 +24,14 @@
             </intent-filter>
         </activity>
 
-        <!-- ── Log Viewer Activity ─────────────────────────────────────────── -->
-        <!--
-            Not exported directly; the launcher icon is provided by DevLogAlias below.
-            This keeps the Activity off the back-stack of other apps and prevents
-            accidental deep-link access from third parties.
-        -->
-        <activity
-            android:name=".presentation.logviewer.LogViewerActivity"
-            android:exported="false"
-            android:label="@string/log_viewer_title"
-            android:theme="@style/Theme.MLBBAssistant" />
-
-        <!-- ── DevLogAlias — second launcher icon ──────────────────────────── -->
-        <!--
-            activity-alias creates a separate launcher icon pointing to LogViewerActivity.
-            android:enabled="true" is the manifest default; at runtime
-            DevModeManager.applyStoredState() calls PackageManager.setComponentEnabledSetting()
-            to show or hide the icon based on the saved developer-mode preference.
-
-            The alias must be declared AFTER its targetActivity in the manifest.
-        -->
-        <activity-alias
-            android:name=".DevLogAlias"
-            android:exported="true"
-            android:enabled="true"
-            android:icon="@drawable/ic_log_viewer"
-            android:label="@string/log_viewer_label"
-            android:targetActivity=".presentation.logviewer.LogViewerActivity">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity-alias>
-
-        <!-- ── Overlay Permission Activity ────────────────────────────────── -->
-        <activity
-            android:name=".presentation.overlay.OverlayPermissionActivity"
-            android:exported="false"
-            android:theme="@style/Theme.MLBBAssistant" />
-
-        <!-- ── Overlay Service ─────────────────────────────────────────────── -->
         <service
-            android:name=".presentation.overlay.OverlayService"
+            android:name=".ui.WidgetOverlayService"
             android:exported="false"
-            android:foregroundServiceType="specialUse|mediaProjection">
+            android:foregroundServiceType="specialUse">
             <property
                 android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
-                android:value="MLBB draft assistant overlay" />
+                android:value="Roam guide overlay" />
         </service>
-
-        <!-- ── Accessibility Service ───────────────────────────────────────── -->
-        <service
-            android:name=".service.MLBBAccessibilityService"
-            android:exported="true"
-            android:label="@string/accessibility_service_label"
-            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
-            <intent-filter>
-                <action android:name="android.accessibilityservice.AccessibilityService" />
-            </intent-filter>
-            <meta-data
-                android:name="android.accessibilityservice"
-                android:resource="@xml/accessibility_service_config" />
-        </service>
-
-        <!-- ── FileProvider ────────────────────────────────────────────────── -->
-        <provider
-            android:name="androidx.core.content.FileProvider"
-            android:authorities="${applicationId}.provider"
-            android:exported="false"
-            android:grantUriPermissions="true">
-            <meta-data
-                android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/file_paths" />
-        </provider>
-
-        <!--
-            Disable WorkManager's default auto-initialisation via AndroidX Startup.
-            MLBBApplication implements Configuration.Provider for Hilt WorkerFactory.
-        -->
-        <provider
-            android:name="androidx.startup.InitializationProvider"
-            android:authorities="${applicationId}.androidx-startup"
-            android:exported="false"
-            tools:node="merge">
-            <meta-data
-                android:name="androidx.work.WorkManagerInitializer"
-                android:value="androidx.startup"
-                tools:node="remove" />
-        </provider>
-
-        <!-- WorkManager's SystemForegroundService must declare an explicit type on
-             targetSdk 34+ — "type none" is banned. We override via manifest merger
-             to add dataSync so ForegroundInfo(DATA_SYNC) is accepted at runtime. -->
-        <service
-            android:name="androidx.work.impl.foreground.SystemForegroundService"
-            android:foregroundServiceType="dataSync"
-            tools:node="merge" />
 
     </application>
 
