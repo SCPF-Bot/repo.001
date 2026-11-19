@@ -1,4 +1,4 @@
-package com.mlbb.assistant.presentation.overlay
+package com.mlbb.ui.widgets
 
 // V8 — Fixes: (1) Drag restored, (2) 45% opacity both widgets, (3) Lord at 8:00 always,
 // (4) Hide instructions deleted, (5) Timer/plan/buttons 28dp UX, + final sweep.
