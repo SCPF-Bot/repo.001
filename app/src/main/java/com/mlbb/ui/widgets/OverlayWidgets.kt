@@ -320,7 +320,7 @@ fun RoamGuideWidget(onBack: () -> Unit) {
     // 1 = expand: full description (6 lines) + details
     // 2 = full collapsed: even short description hidden, only header left
     // Loop: 0 -> 1 -> 2 -> 0. Key avoids restoring old Boolean (would crash).
-    var displayMode by rememberSaveable(key = "displayModeV11") { mutableIntStateOf(0) }
+    var displayMode by rememberSaveable { mutableIntStateOf(0) }
     var helpExpanded by rememberSaveable { mutableStateOf(false) }
     // V8 FIX (4): Hide instructions DELETED. It hid the description with no way
     // back (button lived inside expanded section, so once hidden you couldn't
