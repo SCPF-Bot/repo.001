@@ -1,0 +1,1973 @@
+{
+  "meta": {
+    "game": "Mobile Legends: Bang Bang",
+    "title": "Roam Timeframe Table — Enhanced",
+    "version": "3.2 - Enemy spell tracker (EXP/JG/MID/GOLD/ROAM) + battle spells CD",
+    "patch": "2.2.16a",
+    "season": "Season 42 — Starward Decade",
+    "updated": "2026-11-18",
+    "based_on": "Original timeframe JSON (5 roam archetypes, 0:00-18:00) + online verification for Season 42",
+    "how_to_use": "Each role has steps aligned to real objective spawns. Use startSeconds/endSeconds for your in-game timer UI. Check 'objective' and 'checklist' for what to do, 'decision' for start fight vs run away, and 'dont' for the most common throw in that window. In solo queue, prioritize the checklist over forcing a fight — if your team is not in position, take vision + trade instead.",
+    "objective_timers": {
+      "turtle": {
+        "first_spawn_seconds": 120,
+        "respawn_seconds": 120,
+        "max_per_game": 3,
+        "no_new_turtle_if_last_slain_after_seconds": 360,
+        "auto_convert_to_lord_at_seconds": 480,
+        "auto_convert_delay_if_no_damage_seconds": 5,
+        "auto_convert_latest_seconds": 540,
+        "reward": "60/70/80 gold per hero for 1st/2nd/3rd Turtle + large EXP + 120s team shield. Last-hit: instant heal + self-repairing shield + adaptive damage.",
+        "note": "First Turtle always spawns next to EXP lane. Countdown for next Turtle shows in-game within 120s after death. In Season 42 Healing Turtle variant, killing it summons a Turtle that pushes strongest lane + heals instead of shield."
+      },
+      "lord": {
+        "first_spawn_rule": "Exactly 120s after last Turtle slain. Example: Turtle slain 7:45 -> Lord 9:45. If Turtle not slain by 8:00 and no damage for 5s, Lord replaces Turtle position after 5s, delayed up to 9:00.",
+        "first_spawn_fallback_seconds": 480,
+        "respawn_seconds_before_18min": 180,
+        "respawn_seconds_after_18min": 120,
+        "evolves_at_seconds": 1080,
+        "reward": "Lord pushes weakest lane, buffs minion waves, charges turret for 30% Max HP True damage (8-18min), nearby allies deal +250 (+50% ATK +50% Magic +2.5% HP) Magic Damage every 2s.",
+        "note": "Lord is NOT fixed at 8:00 if you tap slain. Widget counts 2 min after last Turtle if you tap. If you never tap, widget falls back to 8:00."
+      },
+      "lithowanderer": {
+        "first_spawn_seconds": 45,
+        "respawn_seconds": 120,
+        "note": "River crab. Small team reward + short river benefit."
+      },
+      "outer_turret_shield": {
+        "ends_seconds": 300,
+        "note": "Outer turret shields drop at 5:00."
+      }
+    },
+    "roam_mechanics": {
+      "buy_first": "Buy Roam boots (600 gold, +40 MS, +18 Magic Defense) at 0:00. Do NOT delay it for another item — you lose Thriving gold/EXP.",
+      "devotion": "For the first 8 minutes, you get only 30% gold from a minion/creep you take with no ally nearby. Leave waves and camps to laners/jungler.",
+      "thriving": "If you are the lowest-gold ally, you gain passive gold + EXP every 5s: ~6 gold + 12 EXP before 8:00, ~8 gold + 16 EXP after 8:00 (capped). This is your farm. Stay lowest-gold on purpose.",
+      "blessing_unlock": "Blessing unlocks after accumulating 1000 Gold from Thriving (usually around 4-5 min). Conceal is the only active blessing; others are passive.",
+      "vision_rule": "MLBB has no wards. You are the ward. Face-check with HP, never alone at low HP, and always check the bush your carry is about to walk into first.",
+      "five_second_rule": "Revealing an enemy grants gold/EXP. After an enemy disappears, wait ~5s and re-reveal for another proc — don't spam face-checks with no value.",
+      "solo_queue_note": "Solo queue teams often expect you to babysit the Marksman. Don't. Protect marksman early, then follow the next fight. If your team won't group for Turtle/Lord, trade: take opposite buff, tower, or a safe pick instead of dying 1v4."
+    },
+    "global_rules": [
+      "Arrive 20-30s BEFORE Turtle/Lord spawns, not at spawn time.",
+      "Never start Lord with enemy jungler + Retribution alive and nearby.",
+      "Trade your life only for an objective or your carry's life.",
+      "Don't take last hits from carries — your income is assists + Thriving + reveals.",
+      "After a won fight, convert to tower or objective immediately. Don't chase into dark bush.",
+      "If you lose lanes, give up Turtle and take the opposite side (buff/tower) instead of forcing a losing fight."
+    ],
+    "compact_mode": {
+      "goal": "Widget must stay 2 rows tall in landscape. Collapsed shows callout only. Expanded shows full description, checklist, vision, decision, dont.",
+      "collapsed_height_target_dp": 48,
+      "heroes_note": "Heroes are pre-game only. Hide heroes in live view, show only when timer is 0 and expanded.",
+      "width_rule": "Portrait 98% width, landscape 62% width so it does not cover the fight."
+    },
+    "beginner_friendly": "Merged objective + description into one instruction per step. Tuned for Grandmaster to Epic: keep Ultimate, Retribution, Turtle, Lord. Explain peel, zone, engage, disengage, fog, CC, AoE in simple words.",
+    "adaptive_height": "Collapsed has no maxLines limit, height wraps to fit full description. No truncation.",
+    "roam_types_verified": {
+      "note": "Old 5 archetypes (Engage/Pickoff/Healer/Utility/Damage) were guide archetypes, not in-game labels. New 6 types use verified in-game Hero Specialty tags shown on hero card / filter + Roamer categories from wiki. Verified 2026-11-18.",
+      "source": "Hero specialties page: Regen, Crowd Control, Charge, Initiator, Control, Support, Guard, etc. Roamer page: unofficially 4 categories Setter / Initiator / Utility-Healing / Damage.",
+      "mapping": {
+        "crowd_control": "Old Engage -> Crowd Control (Setter). AoE CC, controls many at once.",
+        "initiator": "NEW. Initiator specialty. Starts fight on 1-2, comeback starter.",
+        "charge": "Old Damage -> Charge. Dash fast into teamfight.",
+        "control": "Old Pickoff -> Control. Guaranteed single-target disable / lock.",
+        "support": "Old Utility -> Support + Guard. Save allies from certain death, shields/cleanse.",
+        "heal": "Old Healer -> Heal / Regen. Regenerate HP, sustain heal."
+      },
+      "not_a_roam_type": "Damage, Finisher, Burst, Poke, Push, Chase, Magic Damage are also specialties but not roam playstyles - they are covered by Charge/Control. Heal in game = Regen specialty."
+    },
+    "hero_pool_rule": {
+      "rule": "Tank or Support only AND in current Roam heroes list (Lane contains Roam, Nov 2026, patch 2.2.16). Removed if not Roam.",
+      "current_roam_source": "MLBB.io Nov 2026 hero list by Role & Lane + Fandom Roamer page: 34 heroes recommended as Roamer. Roamers are often associated with Supports or Tanks.",
+      "current_roam_34": [
+        "Akai",
+        "Angela",
+        "Atlas",
+        "Badang",
+        "Baxia",
+        "Belerick",
+        "Carmilla",
+        "Chip",
+        "Chou",
+        "Diggie",
+        "Estes",
+        "Faramis",
+        "Floryn",
+        "Franco",
+        "Gatotkaca",
+        "Gloo",
+        "Grock",
+        "Helcurt",
+        "Hilda",
+        "Hylos",
+        "Jawhead",
+        "Johnson",
+        "Kaja",
+        "Kalea",
+        "Khaleed",
+        "Khufra",
+        "Lolita",
+        "Marcel",
+        "Mathilda",
+        "Minotaur",
+        "Natalia",
+        "Rafaela",
+        "Saber",
+        "Tigreal"
+      ],
+      "removed_this_turn": {
+        "charge": [
+          "Barats"
+        ],
+        "control": [
+          "Edith"
+        ]
+      },
+      "removed_this_turn_reason": {
+        "Barats": "Tank/Fighter - Exp Lane only in Nov 2026 list, not Roam. Was in Charge.",
+        "Edith": "Tank/Marksman - Exp Lane only in Nov 2026 list, not Roam. Was in Control."
+      },
+      "kept_note": "Baxia (Jungle/Roam), Gatotkaca (Roam/Exp), Gloo (Roam/Exp) kept - they ARE in Roam list, Roam is one of their lanes. Kaja, Kalea, Mathilda kept - Support primary + Roam, even though secondary is Fighter/Assassin.",
+      "counts": "Crowd Control 6, Initiator 6, Charge 5, Control 4, Support 6, Heal 6 = 33 slots"
+    }
+  },
+  "blessings": [
+    {
+      "id": "conceal",
+      "name": "Conceal",
+      "type": "Active",
+      "effect": "Conceals you + nearby allies and grants ~40% extra Movement Speed for 5s, or until you deal/take damage. Breaks on damage.",
+      "cooldown": "Active cooldown ~60s (in-game). Use to start a coordinated fight or to run away a losing one — not to walk into empty jungle.",
+      "best_for": [
+        "start fight",
+        "pickoff"
+      ],
+      "unlock": "1000 Gold from Thriving"
+    },
+    {
+      "id": "encourage",
+      "name": "Encourage",
+      "type": "Passive",
+      "effect": "Nearby allies (incl. self) gain +12 to +30 Physical Attack & Magic Power (scales with Thriving gold) and +15% Attack Speed. Recent rework also adds hybrid defense in team fights.",
+      "cooldown": "Always on while near allies",
+      "best_for": [
+        "start fight",
+        "utility"
+      ],
+      "unlock": "1000 Gold from Thriving"
+    },
+    {
+      "id": "favor",
+      "name": "Favor",
+      "type": "Passive",
+      "effect": "Every 10s, your next heal/shield restores an extra 300-750 HP to the lowest-HP ally (incl. self) within range.",
+      "cooldown": "10s proc",
+      "best_for": [
+        "healer"
+      ],
+      "unlock": "1000 Gold from Thriving"
+    },
+    {
+      "id": "dire_hit",
+      "name": "Dire Hit",
+      "type": "Passive",
+      "effect": "Every 30s, your damage to an enemy below 35% HP deals an extra ~12% of target's Max HP as hybrid damage. Finisher, not a poke tool.",
+      "cooldown": "30s per target",
+      "best_for": [
+        "pickoff",
+        "damage"
+      ],
+      "unlock": "1000 Gold from Thriving"
+    }
+  ],
+  "roles": [
+    {
+      "id": "crowd_control",
+      "label": "Crowd Control - Setter",
+      "blessing": "Conceal / Encourage",
+      "blessing_id": "conceal",
+      "blessing_alt": "encourage",
+      "playstyle": "AoE Crowd Control setter. Tank only. In-game specialty: Crowd Control - Capable of controlling multiple enemies at once. Your Ultimate is the AoE set-up - save it for Turtle/Lord.",
+      "heroes": [
+        {
+          "name": "Atlas",
+          "archetype": "",
+          "note": ""
+        },
+        {
+          "name": "Tigreal",
+          "archetype": "",
+          "note": ""
+        },
+        {
+          "name": "Khufra",
+          "archetype": "",
+          "note": ""
+        },
+        {
+          "name": "Minotaur",
+          "archetype": "",
+          "note": ""
+        },
+        {
+          "name": "Gatotkaca",
+          "archetype": "",
+          "note": ""
+        },
+        {
+          "name": "Belerick",
+          "archetype": "",
+          "note": ""
+        }
+      ],
+      "battle_spells": [
+        "Flicker (default for fight starters)",
+        "Vengeance (vs burst / when you will be focused)",
+        "Petrify (second area skill stun if team lacks stun/slow)"
+      ],
+      "emblem": "Tank Emblem — Concussive Blast or Focusing Mark. Prioritize HP + Hybrid Defense + Tenacity.",
+      "strengths": [
+        "Wins Turtle/Lord fights with one good start fight",
+        "Best vision + walk alone into dark bush tank"
+      ],
+      "weaknesses": [
+        "Useless if you start fight without damage follow-up",
+        "Long cooldowns — if you miss Ultimate, run away"
+      ],
+      "win_condition": "Land a mUltimatei-man stun/slow when your damage dealers are in range, then convert to Turtle/Lord/tower.",
+      "lose_condition": "Starting a fight alone, or using Conceal to walk into dark bush with no team behind you.",
+      "steps": [
+        {
+          "startSeconds": 0,
+          "endSeconds": 40,
+          "timeLabel": "0:00-0:40",
+          "phase": "Setup",
+          "description": "Buy Roam boots. Stay near your jungler's first buff and watch the bush. Don't fight alone at level 1, you will die first.",
+          "checklist": [
+            "Buy Roam blessing",
+            "Stand in bush near jungler's buff",
+            "Ping enemy invade if seen"
+          ],
+          "vision": "Bush at jungler's buff + river entrance",
+          "decision": "If enemy invades with 3+, give buff and trade opposite side.",
+          "dont": "Don't walk alone into dark bush enemy jungle alone at Lv1.",
+          "callout": "Guard buff, don't feed",
+          "compact": "Setup - Guard buff, don't feed",
+          "instruction": "Buy Roam boots. Stay near your jungler's first buff and watch the bush. Don't fight alone at level 1, you will die first.",
+          "objective_contest": "Go Turtle pit early, stand in front (zoning). Save Ultimate to start fight or protect jungler's Retribution.",
+          "objective_trade": "Give Turtle. Push opposite lane + take tower / steal buff. Don't fight 4v5 without Ultimate."
+        },
+        {
+          "startSeconds": 40,
+          "endSeconds": 80,
+          "timeLabel": "0:40-1:20",
+          "phase": "Early Rotate",
+          "description": "Help mid clear the first wave, then stay with your jungler. Keep your stun ready. Only fight if your team is nearby.",
+          "checklist": [
+            "Help mid (don't take last hits)",
+            "Move to jungler's second buff",
+            "Reveal enemy jungler/mid if safe"
+          ],
+          "vision": "Mid river bush + Gold-lane river bush",
+          "decision": "Start fight only if mid + jungler can follow in 2s.",
+          "dont": "Don't stay in mid to farm.",
+          "callout": "Help mid, stay with jungler",
+          "compact": "Early Rotate - Help mid, stay with jungler",
+          "instruction": "Help mid clear the first wave, then stay with your jungler. Keep your stun ready. Only fight if your team is nearby.",
+          "objective_contest": "Go Turtle pit early, stand in front (zoning). Save Ultimate to start fight or protect jungler's Retribution.",
+          "objective_trade": "Give Turtle. Push opposite lane + take tower / steal buff. Don't fight 4v5 without Ultimate."
+        },
+        {
+          "startSeconds": 80,
+          "endSeconds": 120,
+          "timeLabel": "1:20-2:00",
+          "phase": "Turtle Setup",
+          "description": "Go to Turtle early, about 30 seconds before it appears at 2:00. Check bushes and keep a way to run away.",
+          "checklist": [
+            "Be at Turtle-side river by 1:30",
+            "Check 2 bushes: river + pit entrance",
+            "Ping Turtle spawn timer"
+          ],
+          "vision": "Turtle pit entrance + enemy jungle exit",
+          "decision": "If enemy has numbers, poke + delay — don't start Turtle 2v4.",
+          "dont": "Don't start Turtle without your jungler.",
+          "callout": "Go Turtle early",
+          "compact": "Turtle Setup - Go Turtle early",
+          "instruction": "Go to Turtle early, about 30 seconds before it appears at 2:00. Check bushes and keep a way to run away.",
+          "objective_contest": "Go Turtle pit early, stand in front (zoning). Save Ultimate to start fight or protect jungler's Retribution.",
+          "objective_trade": "Give Turtle. Push opposite lane + take tower / steal buff. Don't fight 4v5 without Ultimate."
+        },
+        {
+          "startSeconds": 120,
+          "endSeconds": 150,
+          "timeLabel": "2:00-2:30",
+          "phase": "First Turtle",
+          "description": "Stand in front of Turtle pit to block enemies (zoning). Save AoE Ultimate to control many enemies or protect jungler's Retribution.",
+          "checklist": [
+            "Block enemy jungler/mid from pit",
+            "Save Ultimate for enemy start fight or Retribution denial",
+            "Protect if enemy dives your jungler"
+          ],
+          "vision": "Pit + flanking bush",
+          "decision": "Start fight if enemy jungler is isolated or uses Retribution early.",
+          "dont": "Don't chase a low-HP enemy while Turtle is up.",
+          "callout": "Block Turtle, save AoE Ultimate",
+          "compact": "First Turtle - Block Turtle pit, save Ultimate",
+          "instruction": "Stand in front of Turtle pit to block enemies (zoning). Save Ultimate to start fight or protect jungler's Retribution.",
+          "objective_contest": "Go Turtle pit early, stand in front (zoning). Save Ultimate to start fight or protect jungler's Retribution.",
+          "objective_trade": "Give Turtle. Push opposite lane + take tower / steal buff. Don't fight 4v5 without Ultimate."
+        },
+        {
+          "startSeconds": 150,
+          "endSeconds": 240,
+          "timeLabel": "2:30-4:00",
+          "phase": "Post-Turtle",
+          "description": "After Turtle, stay near carry and mid. You have Turtle shield, can play forward, but don't chase into dark bush.",
+          "checklist": [
+            "Escort marksman or mid back to lane",
+            "Check Gold-lane bush before marksman walks in",
+            "Reset + buy first defense item"
+          ],
+          "vision": "Gold-lane river + mid bush",
+          "decision": "If Turtle won: push tower. If lost: trade opposite buff/tower.",
+          "dont": "Don't stay in river alone after Turtle.",
+          "callout": "Stay with carry, reset",
+          "compact": "Post-Turtle - Stay with carry, reset",
+          "instruction": "After Turtle, stay near carry and mid. You have Turtle shield, can play forward, but don't chase into dark bush.",
+          "objective_contest": "Go Turtle pit early, stand in front (zoning). Save Ultimate to start fight or protect jungler's Retribution.",
+          "objective_trade": "Give Turtle. Push opposite lane + take tower / steal buff. Don't fight 4v5 without Ultimate."
+        },
+        {
+          "startSeconds": 240,
+          "endSeconds": 300,
+          "timeLabel": "4:00-5:00",
+          "phase": "Second Turtle",
+          "description": "Next Turtle near 4:00. Go early, save Ultimate. After 5:00 towers lose shield, pushing matters more.",
+          "checklist": [
+            "Check actual Turtle timer (in-game)",
+            "Setup 20s early again",
+            "After 5:00, help push weakest tower"
+          ],
+          "vision": "Turtle pit + enemy rotation path",
+          "decision": "If enemy is ahead, give Turtle and take tower/buff trade.",
+          "dont": "Don't force second Turtle if your team is behind and split.",
+          "callout": "2nd Turtle, push after 5:00",
+          "compact": "Second Turtle - 2nd Turtle, push after 5:00",
+          "instruction": "Next Turtle near 4:00. Go early, save Ultimate. After 5:00 towers lose shield, pushing matters more.",
+          "objective_contest": "Go Turtle pit early, stand in front (zoning). Save Ultimate to start fight or protect jungler's Retribution.",
+          "objective_trade": "Give Turtle. Push opposite lane + take tower / steal buff. Don't fight 4v5 without Ultimate."
+        },
+        {
+          "startSeconds": 300,
+          "endSeconds": 480,
+          "timeLabel": "5:00-8:00",
+          "phase": "Mid Game / Third Turtle",
+          "description": "Walk with team through river, stay in front of damage dealers. Conceal ready, use only when team is together.",
+          "checklist": [
+            "Unlock Conceal/Encourage",
+            "Rotate mid <-> Gold <-> Turtle side",
+            "Buy anti-heal if enemy sustains (Dominance Ice)"
+          ],
+          "vision": "Lord pit entrance by 7:30",
+          "decision": "Use Conceal only when team is grouped and ready to fight.",
+          "dont": "Don't use Conceal to roam alone.",
+          "callout": "Control river, get ready for Lord",
+          "compact": "Mid Game / Third Turtle - Control river, get ready for Lord",
+          "instruction": "Walk with team through river, stay in front of damage dealers. Conceal ready, use only when team is together.",
+          "objective_contest": "Go Turtle pit early, stand in front (zoning). Save Ultimate to start fight or protect jungler's Retribution.",
+          "objective_trade": "Give Turtle. Push opposite lane + take tower / steal buff. Don't fight 4v5 without Ultimate."
+        },
+        {
+          "startSeconds": 480,
+          "endSeconds": 600,
+          "timeLabel": "8:00-10:00",
+          "phase": "First Lord",
+          "description": "Lord appears at 8:00. Get vision around Lord early. Only start Lord if more of your team is alive than theirs.",
+          "checklist": [
+            "Vision Lord pit by 7:40",
+            "Force a pick before Lord if possible",
+            "Don't start Lord 50/50 vs alive enemy jungler"
+          ],
+          "vision": "Lord pit + both jungle exits",
+          "decision": "Start Lord only after won fight or enemy jungler dead/missing far.",
+          "dont": "Don't start Lord while your marksman is clearing bot alone.",
+          "callout": "Get vision at Lord, need more players",
+          "compact": "First Lord - Get vision at Lord, need more players",
+          "instruction": "Lord appears at 8:00. Get vision around Lord early. Only start Lord if more of your team is alive than theirs.",
+          "objective_contest": "Go Lord pit early, zone front. Save Ultimate for Lord fight. Don't start Lord if enemy jungler + Retribution alive.",
+          "objective_trade": "Give Lord. Defend base together, clear waves, push opposite lane while Lord pushes."
+        },
+        {
+          "startSeconds": 600,
+          "endSeconds": 720,
+          "timeLabel": "10:00-12:00",
+          "phase": "Lord Push",
+          "description": "Push with the Lord wave. Check bushes before your carry walks in. After you win a fight, take a tower or another Lord.",
+          "checklist": [
+            "Push with Lord wave",
+            "Check bush before team crosses river",
+            "Protect marksman from assassin dive"
+          ],
+          "vision": "Push lane bushes + Lord pit",
+          "decision": "Push if Lord alive + team grouped. Reset if Lord dead and enemy respawns.",
+          "dont": "Don't dive inhibitor without minions.",
+          "callout": "Push with Lord",
+          "compact": "Lord Push - Push with Lord",
+          "instruction": "Push with the Lord wave. Check bushes before your carry walks in. After you win a fight, take a tower or another Lord.",
+          "objective_contest": "Go Lord pit early, zone front. Save Ultimate for Lord fight. Don't start Lord if enemy jungler + Retribution alive.",
+          "objective_trade": "Give Lord. Defend base together, clear waves, push opposite lane while Lord pushes."
+        },
+        {
+          "startSeconds": 720,
+          "endSeconds": 900,
+          "timeLabel": "12:00-15:00",
+          "phase": "Mid-Late",
+          "description": "Don't walk alone into a dark bush. Keep one stun ready to protect your carry if an enemy jumps on them (this is called peel).",
+          "checklist": [
+            "Stay within 2s of carry",
+            "Save stun/slow for diver",
+            "Ward Lord pit via presence"
+          ],
+          "vision": "Lord pit + enemy jungle exit",
+          "decision": "Start fight if enemy diver commits and your carry is safe.",
+          "dont": "Don't chase a kill across map with Lord up.",
+          "callout": "Keep stun, don't walk alone",
+          "compact": "Mid-Late - Keep stun, don't walk alone",
+          "instruction": "Don't walk alone into a dark bush. Keep one stun ready to protect your carry if an enemy jumps on them (this is called peel).",
+          "objective_contest": "Go Lord pit early, zone front. Save Ultimate for Lord fight. Don't start Lord if enemy jungler + Retribution alive.",
+          "objective_trade": "Give Lord. Defend base together, clear waves, push opposite lane while Lord pushes."
+        },
+        {
+          "startSeconds": 900,
+          "endSeconds": 1080,
+          "timeLabel": "15:00-18:00",
+          "phase": "Late / Evolved Lord",
+          "description": "Stay close to carry and protect them (peel). Use Conceal to start fight together or run away together (disengage).",
+          "checklist": [
+            "Group before Evolved Lord",
+            "Conceal + Ultimate combo ready",
+            "Buy Immortality / Winter Crown if ahead/behind"
+          ],
+          "vision": "Evolved Lord pit — walk first, team close behind",
+          "decision": "Fight only with full team + Ultimate + Conceal ready.",
+          "dont": "Don't die alone scouting with no info gained.",
+          "callout": "Protect carry, use Conceal together",
+          "compact": "Late / Evolved Lord - Protect carry, use Conceal together",
+          "instruction": "Stay close to carry and protect them (peel). Use Conceal to start fight together or run away together (disengage).",
+          "objective_contest": "Go Lord pit early, zone front. Save Ultimate for Lord fight. Don't start Lord if enemy jungler + Retribution alive.",
+          "objective_trade": "Give Lord. Defend base together, clear waves, push opposite lane while Lord pushes."
+        }
+      ],
+      "objective_templates": {
+        "turtle_contest": "Go Turtle pit early, stand in front (zoning). Save AoE Ultimate to control many enemies or protect jungler's Retribution.",
+        "turtle_trade": "Give Turtle. Push opposite lane + take tower / steal buff. Don't waste AoE Ultimate on 4v5 without team.",
+        "lord_contest": "Go Lord pit early, zone front. Save AoE Ultimate for Lord fight. Don't start Lord if enemy jungler + Retribution alive.",
+        "lord_trade": "Give Lord. Defend base together, clear waves, push opposite lane while Lord pushes."
+      }
+    },
+    {
+      "id": "initiator",
+      "label": "Initiator - Start Fight",
+      "blessing": "Conceal",
+      "blessing_id": "conceal",
+      "blessing_alt": "encourage",
+      "playstyle": "In-game specialty: Initiator - Good at starting teamfights and can start important comebacks. Tank/Support only. You start on 1-2 enemies, not full AoE.",
+      "heroes": [
+        {
+          "name": "Atlas",
+          "archetype": "",
+          "note": ""
+        },
+        {
+          "name": "Franco",
+          "archetype": "",
+          "note": ""
+        },
+        {
+          "name": "Grock",
+          "archetype": "",
+          "note": ""
+        },
+        {
+          "name": "Hylos",
+          "archetype": "",
+          "note": ""
+        },
+        {
+          "name": "Khufra",
+          "archetype": "",
+          "note": ""
+        },
+        {
+          "name": "Mathilda",
+          "archetype": "",
+          "note": ""
+        }
+      ],
+      "battle_spells": [
+        "Flicker (default for fight starters)",
+        "Vengeance (vs burst / when you will be focused)",
+        "Petrify (second area skill stun if team lacks stun/slow)"
+      ],
+      "emblem": "Tank Emblem — Concussive Blast or Focusing Mark. Prioritize HP + Hybrid Defense + Tenacity.",
+      "strengths": [
+        "Wins Turtle/Lord fights with one good start fight",
+        "Best vision + walk alone into dark bush tank"
+      ],
+      "weaknesses": [
+        "Useless if you start fight without damage follow-up",
+        "Long cooldowns — if you miss Ultimate, run away"
+      ],
+      "win_condition": "Land a mUltimatei-man stun/slow when your damage dealers are in range, then convert to Turtle/Lord/tower.",
+      "lose_condition": "Starting a fight alone, or using Conceal to walk into dark bush with no team behind you.",
+      "steps": [
+        {
+          "startSeconds": 0,
+          "endSeconds": 40,
+          "timeLabel": "0:00-0:40",
+          "phase": "Setup",
+          "description": "Buy Roam boots. Stay near jungler's buff, watch bush. You start fights - don't start alone at Lv1, team must follow.",
+          "checklist": [
+            "Buy Roam blessing",
+            "Stand in bush near jungler's buff",
+            "Ping enemy invade if seen"
+          ],
+          "vision": "Bush at jungler's buff + river entrance",
+          "decision": "If enemy invades with 3+, give buff and trade opposite side.",
+          "dont": "Don't walk alone into dark bush enemy jungle alone at Lv1.",
+          "callout": "Guard buff, don't start alone",
+          "compact": "Setup - Guard buff, don't feed",
+          "instruction": "Buy Roam boots. Stay near your jungler's first buff and watch the bush. Don't fight alone at level 1, you will die first.",
+          "objective_contest": "Go Turtle pit early, stand in front (zoning). Save Ultimate to start fight or protect jungler's Retribution.",
+          "objective_trade": "Give Turtle. Push opposite lane + take tower / steal buff. Don't fight 4v5 without Ultimate."
+        },
+        {
+          "startSeconds": 40,
+          "endSeconds": 80,
+          "timeLabel": "0:40-1:20",
+          "phase": "Early Rotate",
+          "description": "Help mid clear first wave, then stay with jungler. Keep start skill ready. Only start if team can follow in 2s.",
+          "checklist": [
+            "Help mid (don't take last hits)",
+            "Move to jungler's second buff",
+            "Reveal enemy jungler/mid if safe"
+          ],
+          "vision": "Mid river bush + Gold-lane river bush",
+          "decision": "Start fight only if mid + jungler can follow in 2s.",
+          "dont": "Don't stay in mid to farm.",
+          "callout": "Help mid, stay ready to start",
+          "compact": "Early Rotate - Help mid, stay with jungler",
+          "instruction": "Help mid clear the first wave, then stay with your jungler. Keep your stun ready. Only fight if your team is nearby.",
+          "objective_contest": "Go Turtle pit early, stand in front (zoning). Save Ultimate to start fight or protect jungler's Retribution.",
+          "objective_trade": "Give Turtle. Push opposite lane + take tower / steal buff. Don't fight 4v5 without Ultimate."
+        },
+        {
+          "startSeconds": 80,
+          "endSeconds": 120,
+          "timeLabel": "1:20-2:00",
+          "phase": "Turtle Setup",
+          "description": "Go Turtle early, about 30s before 2:00. Hide in bush, check bushes. You start when team is close.",
+          "checklist": [
+            "Be at Turtle-side river by 1:30",
+            "Check 2 bushes: river + pit entrance",
+            "Ping Turtle spawn timer"
+          ],
+          "vision": "Turtle pit entrance + enemy jungle exit",
+          "decision": "If enemy has numbers, poke + delay — don't start Turtle 2v4.",
+          "dont": "Don't start Turtle without your jungler.",
+          "callout": "Go Turtle early, hide to start",
+          "compact": "Turtle Setup - Go Turtle early",
+          "instruction": "Go to Turtle early, about 30 seconds before it appears at 2:00. Check bushes and keep a way to run away.",
+          "objective_contest": "Go Turtle pit early, stand in front (zoning). Save Ultimate to start fight or protect jungler's Retribution.",
+          "objective_trade": "Give Turtle. Push opposite lane + take tower / steal buff. Don't fight 4v5 without Ultimate."
+        },
+        {
+          "startSeconds": 120,
+          "endSeconds": 150,
+          "timeLabel": "2:00-2:30",
+          "phase": "First Turtle",
+          "description": "Hide then start fight on 1-2 enemies (not full AoE). Catch jungler or mid = Turtle is 5v4. Save follow-up for Retribution.",
+          "checklist": [
+            "Block enemy jungler/mid from pit",
+            "Save Ultimate for enemy start fight or Retribution denial",
+            "Protect if enemy dives your jungler"
+          ],
+          "vision": "Pit + flanking bush",
+          "decision": "Start fight if enemy jungler is isolated or uses Retribution early.",
+          "dont": "Don't chase a low-HP enemy while Turtle is up.",
+          "callout": "Start Turtle fight, catch 1-2",
+          "compact": "First Turtle - Block Turtle pit, save Ultimate",
+          "instruction": "Stand in front of Turtle pit to block enemies (zoning). Save Ultimate to start fight or protect jungler's Retribution.",
+          "objective_contest": "Go Turtle pit early, stand in front (zoning). Save Ultimate to start fight or protect jungler's Retribution.",
+          "objective_trade": "Give Turtle. Push opposite lane + take tower / steal buff. Don't fight 4v5 without Ultimate."
+        },
+        {
+          "startSeconds": 150,
+          "endSeconds": 240,
+          "timeLabel": "2:30-4:00",
+          "phase": "Post-Turtle",
+          "description": "After Turtle, stay near carry/mid. You started, now protect. Don't chase dark bush alone.",
+          "checklist": [
+            "Escort marksman or mid back to lane",
+            "Check Gold-lane bush before marksman walks in",
+            "Reset + buy first defense item"
+          ],
+          "vision": "Gold-lane river + mid bush",
+          "decision": "If Turtle won: push tower. If lost: trade opposite buff/tower.",
+          "dont": "Don't stay in river alone after Turtle.",
+          "callout": "Stay with carry, reset",
+          "compact": "Post-Turtle - Stay with carry, reset",
+          "instruction": "After Turtle, stay near carry and mid. You have Turtle shield, can play forward, but don't chase into dark bush.",
+          "objective_contest": "Go Turtle pit early, stand in front (zoning). Save Ultimate to start fight or protect jungler's Retribution.",
+          "objective_trade": "Give Turtle. Push opposite lane + take tower / steal buff. Don't fight 4v5 without Ultimate."
+        },
+        {
+          "startSeconds": 240,
+          "endSeconds": 300,
+          "timeLabel": "4:00-5:00",
+          "phase": "Second Turtle",
+          "description": "Next Turtle near 4:00. Go early, start fight on isolated enemy. After 5:00 towers lose shield, pushing matters more.",
+          "checklist": [
+            "Check actual Turtle timer (in-game)",
+            "Setup 20s early again",
+            "After 5:00, help push weakest tower"
+          ],
+          "vision": "Turtle pit + enemy rotation path",
+          "decision": "If enemy is ahead, give Turtle and take tower/buff trade.",
+          "dont": "Don't force second Turtle if your team is behind and split.",
+          "callout": "2nd Turtle, start again",
+          "compact": "Second Turtle - 2nd Turtle, push after 5:00",
+          "instruction": "Next Turtle near 4:00. Go early, save Ultimate. After 5:00 towers lose shield, pushing matters more.",
+          "objective_contest": "Go Turtle pit early, stand in front (zoning). Save Ultimate to start fight or protect jungler's Retribution.",
+          "objective_trade": "Give Turtle. Push opposite lane + take tower / steal buff. Don't fight 4v5 without Ultimate."
+        },
+        {
+          "startSeconds": 300,
+          "endSeconds": 480,
+          "timeLabel": "5:00-8:00",
+          "phase": "Mid Game / Third Turtle",
+          "description": "Walk with team through river, stay in front. Conceal ready, use only when team grouped. Start on isolated enemy, not 5v5 head-on.",
+          "checklist": [
+            "Unlock Conceal/Encourage",
+            "Rotate mid <-> Gold <-> Turtle side",
+            "Buy anti-heal if enemy sustains (Dominance Ice)"
+          ],
+          "vision": "Lord pit entrance by 7:30",
+          "decision": "Use Conceal only when team is grouped and ready to fight.",
+          "dont": "Don't use Conceal to roam alone.",
+          "callout": "Mid game, control river",
+          "compact": "Mid Game / Third Turtle - Control river, get ready for Lord",
+          "instruction": "Walk with team through river, stay in front of damage dealers. Conceal ready, use only when team is together.",
+          "objective_contest": "Go Turtle pit early, stand in front (zoning). Save Ultimate to start fight or protect jungler's Retribution.",
+          "objective_trade": "Give Turtle. Push opposite lane + take tower / steal buff. Don't fight 4v5 without Ultimate."
+        },
+        {
+          "startSeconds": 480,
+          "endSeconds": 600,
+          "timeLabel": "8:00-10:00",
+          "phase": "First Lord",
+          "description": "Lord at 8:00. Get vision early. Only start Lord if more of your team alive. Start Lord fight after pick, not 50/50.",
+          "checklist": [
+            "Vision Lord pit by 7:40",
+            "Force a pick before Lord if possible",
+            "Don't start Lord 50/50 vs alive enemy jungler"
+          ],
+          "vision": "Lord pit + both jungle exits",
+          "decision": "Start Lord only after won fight or enemy jungler dead/missing far.",
+          "dont": "Don't start Lord while your marksman is clearing bot alone.",
+          "callout": "First Lord, vision then start",
+          "compact": "First Lord - Get vision at Lord, need more players",
+          "instruction": "Lord appears at 8:00. Get vision around Lord early. Only start Lord if more of your team is alive than theirs.",
+          "objective_contest": "Go Lord pit early, zone front. Save Ultimate for Lord fight. Don't start Lord if enemy jungler + Retribution alive.",
+          "objective_trade": "Give Lord. Defend base together, clear waves, push opposite lane while Lord pushes."
+        },
+        {
+          "startSeconds": 600,
+          "endSeconds": 720,
+          "timeLabel": "10:00-12:00",
+          "phase": "Lord Push",
+          "description": "Push with Lord wave. Check bush before carry walks in. After won fight, take tower or Lord.",
+          "checklist": [
+            "Push with Lord wave",
+            "Check bush before team crosses river",
+            "Protect marksman from assassin dive"
+          ],
+          "vision": "Push lane bushes + Lord pit",
+          "decision": "Push if Lord alive + team grouped. Reset if Lord dead and enemy respawns.",
+          "dont": "Don't dive inhibitor without minions.",
+          "callout": "Push with Lord",
+          "compact": "Lord Push - Push with Lord",
+          "instruction": "Push with the Lord wave. Check bushes before your carry walks in. After you win a fight, take a tower or another Lord.",
+          "objective_contest": "Go Lord pit early, zone front. Save Ultimate for Lord fight. Don't start Lord if enemy jungler + Retribution alive.",
+          "objective_trade": "Give Lord. Defend base together, clear waves, push opposite lane while Lord pushes."
+        },
+        {
+          "startSeconds": 720,
+          "endSeconds": 900,
+          "timeLabel": "12:00-15:00",
+          "phase": "Mid-Late",
+          "description": "Don't walk alone dark bush. Keep start skill to catch diver or start fight when carry safe.",
+          "checklist": [
+            "Stay within 2s of carry",
+            "Save stun/slow for diver",
+            "Ward Lord pit via presence"
+          ],
+          "vision": "Lord pit + enemy jungle exit",
+          "decision": "Start fight if enemy diver commits and your carry is safe.",
+          "dont": "Don't chase a kill across map with Lord up.",
+          "callout": "Keep start skill, don't walk alone",
+          "compact": "Mid-Late - Keep stun, don't walk alone",
+          "instruction": "Don't walk alone into a dark bush. Keep one stun ready to protect your carry if an enemy jumps on them (this is called peel).",
+          "objective_contest": "Go Lord pit early, zone front. Save Ultimate for Lord fight. Don't start Lord if enemy jungler + Retribution alive.",
+          "objective_trade": "Give Lord. Defend base together, clear waves, push opposite lane while Lord pushes."
+        },
+        {
+          "startSeconds": 900,
+          "endSeconds": 1080,
+          "timeLabel": "15:00-18:00",
+          "phase": "Late / Evolved Lord",
+          "description": "Stay close to carry, protect (peel). Use Conceal to start together or run away together (disengage).",
+          "checklist": [
+            "Group before Evolved Lord",
+            "Conceal + Ultimate combo ready",
+            "Buy Immortality / Winter Crown if ahead/behind"
+          ],
+          "vision": "Evolved Lord pit — walk first, team close behind",
+          "decision": "Fight only with full team + Ultimate + Conceal ready.",
+          "dont": "Don't die alone scouting with no info gained.",
+          "callout": "Late, start together",
+          "compact": "Late / Evolved Lord - Protect carry, use Conceal together",
+          "instruction": "Stay close to carry and protect them (peel). Use Conceal to start fight together or run away together (disengage).",
+          "objective_contest": "Go Lord pit early, zone front. Save Ultimate for Lord fight. Don't start Lord if enemy jungler + Retribution alive.",
+          "objective_trade": "Give Lord. Defend base together, clear waves, push opposite lane while Lord pushes."
+        }
+      ],
+      "objective_templates": {
+        "turtle_contest": "Go Turtle early, hide in bush, then start fight on 1-2 enemies. Catch jungler/mid = Turtle is 5v4. Don't start if team not near.",
+        "turtle_trade": "Give Turtle. Push opposite lane + take tower. Don't start 4v5 alone to be hero.",
+        "lord_contest": "Go Lord early, get vision, start fight after pick. Don't start Lord 50/50 vs alive enemy jungler.",
+        "lord_trade": "Give Lord. Defend base together, start fight when enemy splits to push."
+      }
+    },
+    {
+      "id": "charge",
+      "label": "Charge - Dash In",
+      "blessing": "Conceal / Dire Hit",
+      "blessing_id": "dire_hit",
+      "playstyle": "In-game specialty: Charge - Has guaranteed ability to dash fast into teamfights. Tank/Support + Current Roam only. Johnson, Grock, Kaja, Chip, Baxia dash fast in. Official Charge tag is mostly Fighters (Jawhead, Alpha, etc.), so those are excluded. Barats removed - Exp Lane only, not Roam.",
+      "heroes": [
+        {
+          "name": "Johnson",
+          "archetype": "",
+          "note": ""
+        },
+        {
+          "name": "Grock",
+          "archetype": "",
+          "note": ""
+        },
+        {
+          "name": "Kaja",
+          "archetype": "",
+          "note": ""
+        },
+        {
+          "name": "Chip",
+          "archetype": "",
+          "note": ""
+        },
+        {
+          "name": "Baxia",
+          "archetype": "",
+          "note": ""
+        }
+      ],
+      "battle_spells": [
+        "Execute (finish)",
+        "Flicker (reposition for burst)",
+        "Petrify (extra lock)"
+      ],
+      "emblem": "Assassin Emblem — Killing Spree or Focusing Mark. Prioritize Adaptive Attack + Move Speed + Penetration.",
+      "strengths": [
+        "Best early picks + vision (Selena traps)",
+        "Dire Hit finishes low-HP targets"
+      ],
+      "weaknesses": [
+        "No frontline — team will be squishy",
+        "Falls off if you don't snowball"
+      ],
+      "win_condition": "Get early picks, snowball jungler/marksman, and end before enemy tank scales.",
+      "lose_condition": "Trading your life for a support, or diving without exit.",
+      "steps": [
+        {
+          "startSeconds": 0,
+          "endSeconds": 40,
+          "timeLabel": "0:00-0:40",
+          "phase": "Setup",
+          "description": "Buy Roam boots. Scout, don't force Lv1 fight. Your dash is your start - save it, don't waste on poke.",
+          "checklist": [
+            "Buy Roam",
+            "Place trap/scout",
+            "Ping enemy positions"
+          ],
+          "vision": "Enemy buff + river",
+          "decision": "Leave if enemy collapses 3+.",
+          "dont": "Don't force Lv1 fight.",
+          "callout": "Scout, don't force fight",
+          "compact": "Setup - Scout, don't force fight",
+          "instruction": "Buy Roam boots. Scout, don't force level 1 fight. Leave if outnumbered. Selena: traps at buff/river.",
+          "objective_contest": "Traps / burst to show enemies. Protect jungler's Retribution. Turtle > solo kill.",
+          "objective_trade": "Give Turtle. Move with teammate, punish lone enemy elsewhere. If fail in 10s, leave."
+        },
+        {
+          "startSeconds": 40,
+          "endSeconds": 80,
+          "timeLabel": "0:40-1:20",
+          "phase": "Early Rotate",
+          "description": "Help mid get control, then look for a chance on a side lane. Don't steal your jungler's monsters.",
+          "checklist": [
+            "Help mid",
+            "Threaten Gold/EXP angle",
+            "Don't take camps"
+          ],
+          "vision": "Mid + side bush",
+          "decision": "Pick if enemy overextends with no escape.",
+          "dont": "Don't steal camps.",
+          "callout": "Help mid, look for side chance",
+          "compact": "Early Rotate - Help mid, look for side chance",
+          "instruction": "Help mid get control, then look for a chance on a side lane. Don't steal your jungler's monsters.",
+          "objective_contest": "Traps / burst to show enemies. Protect jungler's Retribution. Turtle > solo kill.",
+          "objective_trade": "Give Turtle. Move with teammate, punish lone enemy elsewhere. If fail in 10s, leave."
+        },
+        {
+          "startSeconds": 80,
+          "endSeconds": 120,
+          "timeLabel": "1:20-2:00",
+          "phase": "Turtle Setup",
+          "description": "Look for a safe pick near Turtle. Keep your burst skill ready for the Turtle fight. Vision is more important than a risky kill.",
+          "checklist": [
+            "Trap/scout Turtle river",
+            "Keep burst ready",
+            "Be at Turtle river by 1:30"
+          ],
+          "vision": "Turtle river",
+          "decision": "Pick only if you can still contest Turtle.",
+          "dont": "Don't burn all cooldowns before Turtle.",
+          "callout": "Safe pick, save burst",
+          "compact": "Turtle Setup - Safe pick, save burst",
+          "instruction": "Look for a safe pick near Turtle. Keep your burst skill ready for the Turtle fight. Vision is more important than a risky kill.",
+          "objective_contest": "Traps / burst to show enemies. Protect jungler's Retribution. Turtle > solo kill.",
+          "objective_trade": "Give Turtle. Move with teammate, punish lone enemy elsewhere. If fail in 10s, leave."
+        },
+        {
+          "startSeconds": 120,
+          "endSeconds": 150,
+          "timeLabel": "2:00-2:30",
+          "phase": "First Turtle",
+          "description": "Dash fast to Turtle pit, burst jungler or lone enemy, then leave. Keep escape ready. Turtle > solo kill.",
+          "checklist": [
+            "Reveal enemy jungler",
+            "Pressure approaches",
+            "Protect jungler's Retribution"
+          ],
+          "vision": "Pit + approaches",
+          "decision": "Burst enemy jungler if they step for steal.",
+          "dont": "Don't dive pit alone.",
+          "callout": "Dash to Turtle, burst then leave",
+          "compact": "First Turtle - Show enemies, protect Retribution",
+          "instruction": "At Turtle, use traps/burst to show enemies. Protect jungler's Retribution. Turtle > solo kill.",
+          "objective_contest": "Traps / burst to show enemies. Protect jungler's Retribution. Turtle > solo kill.",
+          "objective_trade": "Give Turtle. Move with teammate, punish lone enemy elsewhere. If fail in 10s, leave."
+        },
+        {
+          "startSeconds": 150,
+          "endSeconds": 240,
+          "timeLabel": "2:30-4:00",
+          "phase": "Post-Turtle",
+          "description": "Move through dark bushes with teammate, punish lone enemy. If fail, leave in 10s. Don't get surrounded.",
+          "checklist": [
+            "Rotate with ally",
+            "Pick squishy",
+            "Leave after 10s if fail"
+          ],
+          "vision": "Dark bush bushes",
+          "decision": "Pick if ally can follow.",
+          "dont": "Don't solo dive 1v2.",
+          "callout": "Catch alone enemy, leave fast",
+          "compact": "Post-Turtle - Catch alone enemy, leave fast",
+          "instruction": "Move through dark bushes with teammate, punish lone enemy. If fail, leave in 10s. Don't get surrounded.",
+          "objective_contest": "Traps / burst to show enemies. Protect jungler's Retribution. Turtle > solo kill.",
+          "objective_trade": "Give Turtle. Move with teammate, punish lone enemy elsewhere. If fail in 10s, leave."
+        },
+        {
+          "startSeconds": 240,
+          "endSeconds": 300,
+          "timeLabel": "4:00-5:00",
+          "phase": "Second Turtle",
+          "description": "Next Turtle is near 4:00. Pressure the enemy damage dealer before your team starts Turtle. One pick means easy Turtle.",
+          "checklist": [
+            "Setup 20s early",
+            "Pressure enemy marksman/mid",
+            "Take Turtle after pick"
+          ],
+          "vision": "Turtle pit",
+          "decision": "Pick = Turtle.",
+          "dont": "Don't chase after pick.",
+          "callout": "Catch one before Turtle",
+          "compact": "Second Turtle - Catch one before Turtle",
+          "instruction": "Next Turtle is near 4:00. Pressure the enemy damage dealer before your team starts Turtle. One pick means easy Turtle.",
+          "objective_contest": "Traps / burst to show enemies. Protect jungler's Retribution. Turtle > solo kill.",
+          "objective_trade": "Give Turtle. Move with teammate, punish lone enemy elsewhere. If fail in 10s, leave."
+        },
+        {
+          "startSeconds": 300,
+          "endSeconds": 480,
+          "timeLabel": "5:00-8:00",
+          "phase": "Mid Game",
+          "description": "Control side bushes and stop enemy rotations. Don't trade your life for a low-value support. Save your burst for the enemy carry.",
+          "checklist": [
+            "Control side bush",
+            "Deny rotation",
+            "Save burst for carry"
+          ],
+          "vision": "Side bushes + Lord pit by 7:30",
+          "decision": "Burst carry if isolated.",
+          "dont": "Don't trade 1-for-1 with support.",
+          "callout": "Control bush, save burst",
+          "compact": "Mid Game - Control bush, save burst",
+          "instruction": "Control side bushes and stop enemy rotations. Don't trade your life for a low-value support. Save your burst for the enemy carry.",
+          "objective_contest": "Traps / burst to show enemies. Protect jungler's Retribution. Turtle > solo kill.",
+          "objective_trade": "Give Turtle. Move with teammate, punish lone enemy elsewhere. If fail in 10s, leave."
+        },
+        {
+          "startSeconds": 480,
+          "endSeconds": 600,
+          "timeLabel": "8:00-10:00",
+          "phase": "First Lord",
+          "description": "Lord is at 8:00. Get vision and look for an enemy who checks alone. Don't start Lord while your team is split.",
+          "checklist": [
+            "Vision Lord pit",
+            "Pick lone checker",
+            "Group before Lord"
+          ],
+          "vision": "Lord pit",
+          "decision": "Pick = Lord. No pick = don't start.",
+          "dont": "Don't start Lord split.",
+          "callout": "Catch lone checker, group up",
+          "compact": "First Lord - Catch lone checker, group up",
+          "instruction": "Lord is at 8:00. Get vision and look for an enemy who checks alone. Don't start Lord while your team is split.",
+          "objective_contest": "Burst to remove vision, threaten backline. Keep escape. Dire Hit finishes low HP, not starts fight.",
+          "objective_trade": "Give Lord. Wait for enemy split, then jump in. Don't start Lord alone."
+        },
+        {
+          "startSeconds": 600,
+          "endSeconds": 720,
+          "timeLabel": "10:00-12:00",
+          "phase": "Lord Push",
+          "description": "Use burst on backline, keep escape. Dire Hit finishes low-health enemies.",
+          "checklist": [
+            "Burst backline",
+            "Keep exit",
+            "Push with Lord wave"
+          ],
+          "vision": "Push lane",
+          "decision": "Dive only with exit.",
+          "dont": "Don't dive without exit.",
+          "callout": "Burst backline, keep escape",
+          "compact": "Lord Push - Burst backline, keep escape",
+          "instruction": "Use burst on backline, keep escape. Dire Hit finishes low-health enemies.",
+          "objective_contest": "Burst to remove vision, threaten backline. Keep escape. Dire Hit finishes low HP, not starts fight.",
+          "objective_trade": "Give Lord. Wait for enemy split, then jump in. Don't start Lord alone."
+        },
+        {
+          "startSeconds": 720,
+          "endSeconds": 900,
+          "timeLabel": "12:00-15:00",
+          "phase": "Mid-Late",
+          "description": "Watch enemy defensive skills like Purify or Immortality. If the enemy carry is protected, go back to scouting and pressuring Lord.",
+          "checklist": [
+            "Track enemy Purify/Immortality",
+            "Scout if carry protected",
+            "Pressure Lord"
+          ],
+          "vision": "Lord pit",
+          "decision": "Burst only if defensive cooldowns down.",
+          "dont": "Don't dive protected carry.",
+          "callout": "Watch Purify, then decide",
+          "compact": "Mid-Late - Watch Purify, then decide",
+          "instruction": "Watch enemy defensive skills like Purify or Immortality. If the enemy carry is protected, go back to scouting and pressuring Lord.",
+          "objective_contest": "Burst to remove vision, threaten backline. Keep escape. Dire Hit finishes low HP, not starts fight.",
+          "objective_trade": "Give Lord. Wait for enemy split, then jump in. Don't start Lord alone."
+        },
+        {
+          "startSeconds": 900,
+          "endSeconds": 1080,
+          "timeLabel": "15:00-18:00",
+          "phase": "Late / Evolved Lord",
+          "description": "Wait until enemy team splits before you jump in. Dire Hit finishes, not starts fight.",
+          "checklist": [
+            "Wait for break",
+            "Finish low-HP carry",
+            "Group for Evolved Lord"
+          ],
+          "vision": "Evolved Lord pit",
+          "decision": "Dive only when formation breaks.",
+          "dont": "Don't dive first into 5.",
+          "callout": "Wait for split, finish target",
+          "compact": "Late / Evolved Lord - Wait for split, finish target",
+          "instruction": "Wait until enemy team splits before you jump in. Dire Hit finishes, not starts fight.",
+          "objective_contest": "Burst to remove vision, threaten backline. Keep escape. Dire Hit finishes low HP, not starts fight.",
+          "objective_trade": "Give Lord. Wait for enemy split, then jump in. Don't start Lord alone."
+        }
+      ],
+      "objective_templates": {
+        "turtle_contest": "Dash fast into Turtle pit, burst jungler or backline, then leave. Don't stay to tank. Turtle > solo kill.",
+        "turtle_trade": "Give Turtle. Dash to punish lone enemy elsewhere. If fail in 10s, leave.",
+        "lord_contest": "Dash to remove vision, threaten backline. Keep escape. Dire Hit finishes low HP, not starts fight.",
+        "lord_trade": "Give Lord. Wait for enemy split, then dash in. Don't start Lord alone."
+      }
+    },
+    {
+      "id": "control",
+      "label": "Control - Single Lock",
+      "blessing": "Conceal / Dire Hit",
+      "blessing_id": "conceal",
+      "blessing_alt": "dire_hit",
+      "playstyle": "In-game specialty: Control - Has guaranteed disable on one or multiple abilities. Tank/Support + Current Roam only. One lock = pick. Edith removed - Exp Lane only, not Roam.",
+      "heroes": [
+        {
+          "name": "Franco",
+          "archetype": "",
+          "note": ""
+        },
+        {
+          "name": "Kaja",
+          "archetype": "",
+          "note": ""
+        },
+        {
+          "name": "Kalea",
+          "archetype": "",
+          "note": ""
+        },
+        {
+          "name": "Gloo",
+          "archetype": "",
+          "note": ""
+        }
+      ],
+      "battle_spells": [
+        "Flicker (extend hook/suppress range)",
+        "Petrify (extra lock after pull)",
+        "Sprint (reposition for flank)"
+      ],
+      "emblem": "Tank or Support — Focusing Mark to amplify team burst after catch. Move Speed + HP.",
+      "strengths": [
+        "One pick = objective",
+        "Best at denying enemy Retribution user"
+      ],
+      "weaknesses": [
+        "No teamfight if you miss catch",
+        "Squishier than start fight tanks if you get surrounded"
+      ],
+      "win_condition": "Catch the enemy jungler, mid, or marksman before objective, then take objective 5v4.",
+      "lose_condition": "Forcing hooks when your burst ally is clearing wave or dead.",
+      "steps": [
+        {
+          "startSeconds": 0,
+          "endSeconds": 40,
+          "timeLabel": "0:00-0:40",
+          "phase": "Setup",
+          "description": "Buy Roam boots. Try to guess where the enemy jungler starts. Don't fight alone.",
+          "checklist": [
+            "Buy Roam",
+            "Check enemy buff bush from safe angle",
+            "Ping jungler start"
+          ],
+          "vision": "Enemy buff entrance",
+          "decision": "Only invade if you have 3+ and enemy is spotted opposite side.",
+          "dont": "Don't hook Lv1 with no follow-up.",
+          "callout": "Guess jungler start",
+          "compact": "Setup - Guess jungler start",
+          "instruction": "Buy Roam boots. Try to guess where the enemy jungler starts. Don't fight alone.",
+          "objective_contest": "Hide in bush near pit, hook / catch jungler or lone enemy before Turtle. Catch = Turtle is 5v4.",
+          "objective_trade": "Give Turtle. Catch lone enemy on opposite side, push tower. Don't force hook into 1v4."
+        },
+        {
+          "startSeconds": 40,
+          "endSeconds": 80,
+          "timeLabel": "0:40-1:20",
+          "phase": "Early Rotate",
+          "description": "Hide in the mid bush. Only use your lock or grab if a teammate is close enough to help you kill.",
+          "checklist": [
+            "Stay in mid bush, not in lane",
+            "Wait for mid to be in burst range",
+            "Reveal enemy for Thriving"
+          ],
+          "vision": "Mid river bush",
+          "decision": "Hook if ally can burst in 1s and you have escape.",
+          "dont": "Don't show yourself for poke.",
+          "callout": "Hide, hook with help",
+          "compact": "Early Rotate - Hide, hook with help",
+          "instruction": "Hide in the mid bush. Only use your hook or grab if a teammate is close enough to help you kill.",
+          "objective_contest": "Hide in bush near pit, hook / catch jungler or lone enemy before Turtle. Catch = Turtle is 5v4.",
+          "objective_trade": "Give Turtle. Catch lone enemy on opposite side, push tower. Don't force hook into 1v4."
+        },
+        {
+          "startSeconds": 80,
+          "endSeconds": 120,
+          "timeLabel": "1:20-2:00",
+          "phase": "Turtle Setup",
+          "description": "Go to Turtle river and watch the enemy jungler or mid. Keep your lock ready, don't use it on the enemy tank.",
+          "checklist": [
+            "Be in Turtle-side bush by 1:30",
+            "Ping enemy jungler position",
+            "Save hook/suppress for Turtle fight"
+          ],
+          "vision": "Turtle pit bush + river",
+          "decision": "Catch if enemy jungler steps up alone.",
+          "dont": "Don't hook the tank to start Turtle.",
+          "callout": "Watch jungler, save hook",
+          "compact": "Turtle Setup - Watch jungler, save hook",
+          "instruction": "Go to Turtle river and watch the enemy jungler or mid. Keep your hook ready, don't use it on the enemy tank.",
+          "objective_contest": "Hide in bush near pit, hook / catch jungler or lone enemy before Turtle. Catch = Turtle is 5v4.",
+          "objective_trade": "Give Turtle. Catch lone enemy on opposite side, push tower. Don't force hook into 1v4."
+        },
+        {
+          "startSeconds": 120,
+          "endSeconds": 150,
+          "timeLabel": "2:00-2:30",
+          "phase": "First Turtle",
+          "description": "At Turtle, grab the enemy jungler or a lone enemy. This stops them from stealing Turtle with Retribution. Stay near your jungler.",
+          "checklist": [
+            "Hook/suppress enemy jungler when Turtle low",
+            "Body-block pit entrance",
+            "Protect if enemy dives your jungler"
+          ],
+          "vision": "Pit entrance",
+          "decision": "Use Ultimate on jungler if Turtle < Retribution range.",
+          "dont": "Don't chase kill while Turtle is being stolen.",
+          "callout": "Hook jungler, stop Retribution",
+          "compact": "First Turtle - Hook jungler, stop Retribution",
+          "instruction": "At Turtle, grab the enemy jungler or a lone enemy. This stops them from stealing Turtle with Retribution. Stay near your jungler.",
+          "objective_contest": "Hide in bush near pit, hook / catch jungler or lone enemy before Turtle. Catch = Turtle is 5v4.",
+          "objective_trade": "Give Turtle. Catch lone enemy on opposite side, push tower. Don't force hook into 1v4."
+        },
+        {
+          "startSeconds": 150,
+          "endSeconds": 240,
+          "timeLabel": "2:30-4:00",
+          "phase": "Roam Pick",
+          "description": "Move between mid and Gold lane. Wait in a bush for a short time, try for a catch, then leave before the whole enemy team comes.",
+          "checklist": [
+            "Bush in Gold river",
+            "Hook marksman/mid if isolated",
+            "Leave after 10s if no pick"
+          ],
+          "vision": "Gold-lane bush + mid bush",
+          "decision": "If no pick in 10s, rotate — don't camp empty bush.",
+          "dont": "Don't stay in one bush for 30s while team fights elsewhere.",
+          "callout": "Short wait, then leave",
+          "compact": "Roam Pick - Short wait, then leave",
+          "instruction": "Move between mid and Gold lane. Wait in a bush for a short time, try for a catch, then leave before the whole enemy team comes.",
+          "objective_contest": "Hide in bush near pit, hook / catch jungler or lone enemy before Turtle. Catch = Turtle is 5v4.",
+          "objective_trade": "Give Turtle. Catch lone enemy on opposite side, push tower. Don't force hook into 1v4."
+        },
+        {
+          "startSeconds": 240,
+          "endSeconds": 300,
+          "timeLabel": "4:00-5:00",
+          "phase": "Second Turtle",
+          "description": "Next Turtle near 4:00. Catch one enemy first. 5 vs 4 = easy Turtle. Don't chase second kill.",
+          "checklist": [
+            "Setup 20s early",
+            "Catch before Turtle starts",
+            "Take Turtle 5v4"
+          ],
+          "vision": "Turtle pit",
+          "decision": "If pick lands, take Turtle immediately.",
+          "dont": "Don't chase second kill after pick.",
+          "callout": "Catch one before Turtle",
+          "compact": "Second Turtle - Catch one before Turtle",
+          "instruction": "Next Turtle near 4:00. Catch one enemy first. 5 vs 4 = easy Turtle. Don't chase second kill.",
+          "objective_contest": "Hide in bush near pit, hook / catch jungler or lone enemy before Turtle. Catch = Turtle is 5v4.",
+          "objective_trade": "Give Turtle. Catch lone enemy on opposite side, push tower. Don't force hook into 1v4."
+        },
+        {
+          "startSeconds": 300,
+          "endSeconds": 480,
+          "timeLabel": "5:00-8:00",
+          "phase": "Mid Game",
+          "description": "Watch where the enemy carry goes and hide on the side. Save your Ultimate for the enemy carry or jungler, not the tank.",
+          "checklist": [
+            "Flank from side bush",
+            "Save Ultimate for carry/jungler",
+            "Help push after pick"
+          ],
+          "vision": "Side bushes + Lord pit by 7:30",
+          "decision": "Catch carry if they check bush alone.",
+          "dont": "Don't Ultimate the roamer/tank.",
+          "callout": "Hide for carry, save Ultimate",
+          "compact": "Mid Game - Hide for carry, save Ultimate",
+          "instruction": "Watch where the enemy carry goes and hide on the side. Save your Ultimate for the enemy carry or jungler, not the tank.",
+          "objective_contest": "Hide in bush near pit, hook / catch jungler or lone enemy before Turtle. Catch = Turtle is 5v4.",
+          "objective_trade": "Give Turtle. Catch lone enemy on opposite side, push tower. Don't force hook into 1v4."
+        },
+        {
+          "startSeconds": 480,
+          "endSeconds": 600,
+          "timeLabel": "8:00-10:00",
+          "phase": "First Lord",
+          "description": "Lord is at 8:00. Hide on the side of Lord pit and try to catch an enemy who walks alone. Only start Lord if you have more players.",
+          "checklist": [
+            "Side bush at Lord pit",
+            "Catch rotator",
+            "Start Lord only 5v4"
+          ],
+          "vision": "Lord pit sides",
+          "decision": "If no pick, don't start Lord 50/50.",
+          "dont": "Don't start Lord while enemy jungler alive.",
+          "callout": "Catch someone alone, then Lord",
+          "compact": "First Lord - Catch someone alone, then Lord",
+          "instruction": "Lord is at 8:00. Hide on the side of Lord pit and try to catch an enemy who walks alone. Only start Lord if you have more players.",
+          "objective_contest": "Hide near Lord, threaten catch. Catch = free Lord. No catch = protect carry, don't start Lord 50/50.",
+          "objective_trade": "Give Lord. Hide for pick on Lord defender, or split push while enemy groups for Lord."
+        },
+        {
+          "startSeconds": 600,
+          "endSeconds": 720,
+          "timeLabel": "10:00-12:00",
+          "phase": "Lord Push",
+          "description": "Stay next to your teammate who has big burst damage (quick big damage). Don't start a fight while they are busy clearing minions.",
+          "checklist": [
+            "Stay near burst ally",
+            "Communicate hook cooldown",
+            "Push with Lord wave"
+          ],
+          "vision": "Push lane bush",
+          "decision": "Start fight only if burst ally is within 2s.",
+          "dont": "Don't hook without burst ally.",
+          "callout": "Stay with burst teammate",
+          "compact": "Lord Push - Stay with burst teammate",
+          "instruction": "Stay next to your teammate who has big burst damage (quick big damage). Don't start a fight while they are busy clearing minions.",
+          "objective_contest": "Hide near Lord, threaten catch. Catch = free Lord. No catch = protect carry, don't start Lord 50/50.",
+          "objective_trade": "Give Lord. Hide for pick on Lord defender, or split push while enemy groups for Lord."
+        },
+        {
+          "startSeconds": 720,
+          "endSeconds": 900,
+          "timeLabel": "12:00-15:00",
+          "phase": "Mid-Late",
+          "description": "Hide near Lord, threaten catch. No safe catch = stay near carry and protect them.",
+          "checklist": [
+            "Threaten Lord pit angles",
+            "Fall back to protect if no pick",
+            "Save Ultimate for diver"
+          ],
+          "vision": "Lord pit + carry flank",
+          "decision": "Force only if enemy carry is isolated and your team is grouped.",
+          "dont": "Don't force a pick when behind.",
+          "callout": "Threaten catch, else protect carry",
+          "compact": "Mid-Late - Threaten catch, else protect carry",
+          "instruction": "Hide near Lord, threaten catch. No safe catch = stay near carry and protect them.",
+          "objective_contest": "Hide near Lord, threaten catch. Catch = free Lord. No catch = protect carry, don't start Lord 50/50.",
+          "objective_trade": "Give Lord. Hide for pick on Lord defender, or split push while enemy groups for Lord."
+        },
+        {
+          "startSeconds": 900,
+          "endSeconds": 1080,
+          "timeLabel": "15:00-18:00",
+          "phase": "Late / Evolved Lord",
+          "description": "Save your grab for the most dangerous enemy carry. One good catch late in the game can win.",
+          "checklist": [
+            "Save Ultimate for carry/jungler",
+            "Group before Evolved Lord",
+            "Conceal to flank"
+          ],
+          "vision": "Evolved Lord pit",
+          "decision": "Catch = start Lord. Miss = run away.",
+          "dont": "Don't Ultimate early on tank in late game.",
+          "callout": "Save catch for carry",
+          "compact": "Late / Evolved Lord - Save catch for carry",
+          "instruction": "Save your grab for the most dangerous enemy carry. One good catch late in the game can win.",
+          "objective_contest": "Hide near Lord, threaten catch. Catch = free Lord. No catch = protect carry, don't start Lord 50/50.",
+          "objective_trade": "Give Lord. Hide for pick on Lord defender, or split push while enemy groups for Lord."
+        }
+      ],
+      "objective_templates": {
+        "turtle_contest": "Hide in bush near pit, lock jungler or lone enemy before Turtle. Lock = Turtle is 5v4. Don't waste lock on tank.",
+        "turtle_trade": "Give Turtle. Lock lone enemy on opposite side, push tower. Don't force lock into 1v4.",
+        "lord_contest": "Hide near Lord, threaten lock. Lock = free Lord. No lock = protect carry, don't start Lord 50/50.",
+        "lord_trade": "Give Lord. Hide for lock on Lord defender, or split push while enemy groups for Lord."
+      }
+    },
+    {
+      "id": "support",
+      "label": "Support - Guard",
+      "blessing": "Encourage / Favor",
+      "blessing_id": "encourage",
+      "playstyle": "In-game specialties: Support + Guard - Save allies from certain death. Support only. You save allies with shield / cleanse / speed, not heal.",
+      "heroes": [
+        {
+          "name": "Angela",
+          "archetype": "",
+          "note": ""
+        },
+        {
+          "name": "Diggie",
+          "archetype": "",
+          "note": ""
+        },
+        {
+          "name": "Lolita",
+          "archetype": "",
+          "note": ""
+        },
+        {
+          "name": "Mathilda",
+          "archetype": "",
+          "note": ""
+        },
+        {
+          "name": "Chip",
+          "archetype": "",
+          "note": ""
+        },
+        {
+          "name": "Johnson",
+          "archetype": "",
+          "note": ""
+        }
+      ],
+      "battle_spells": [
+        "Flicker (reposition for Ultimate)",
+        "Revitalize (sustain)",
+        "Purify (if you will be focused)"
+      ],
+      "emblem": "Support Emblem — Focusing Mark or Pull Yourself Together (reduces Ultimate cooldown). Move Speed + Heal Effect.",
+      "strengths": [
+        "Best at stopping enemy start fight",
+        "Wins fights by resetting bad fights"
+      ],
+      "weaknesses": [
+        "No hard start fight alone",
+        "Utility wasted if used on poke"
+      ],
+      "win_condition": "Use utility when mUltimateiple allies benefit — cleanse the start fight, shield the carry, portal for numbers.",
+      "lose_condition": "Spending Ultimate/cleanse on one low-value target or on harmless poke.",
+      "steps": [
+        {
+          "startSeconds": 0,
+          "endSeconds": 40,
+          "timeLabel": "0:00-0:40",
+          "phase": "Setup",
+          "description": "Buy Roam boots. Scout safely and see what your team needs: protection, speed, or a way to start fights.",
+          "checklist": [
+            "Buy Roam",
+            "Scout enemy jungle entrance",
+            "Ping team need"
+          ],
+          "vision": "River + jungler buff",
+          "decision": "If enemy invades, use utility to run away.",
+          "dont": "Don't spend escape/cleanse Lv1.",
+          "callout": "Scout, see what team needs",
+          "compact": "Setup - Scout, see what team needs",
+          "instruction": "Buy Roam boots. Scout safely and see what your team needs: protection, speed, or a way to start fights.",
+          "objective_contest": "At Turtle, shields / cleanse / speed when fight starts, not for poke. Block side attacks.",
+          "objective_trade": "Give Turtle. Make safe path opposite side, vision + push tower. Don't die for lost Turtle."
+        },
+        {
+          "startSeconds": 40,
+          "endSeconds": 80,
+          "timeLabel": "0:40-1:20",
+          "phase": "Early Rotate",
+          "description": "Help mid clear and keep the river safe. Don't use your escape or cleanse skill too early.",
+          "checklist": [
+            "Help mid",
+            "Secure river bush",
+            "Save cleanse/escape"
+          ],
+          "vision": "Mid river",
+          "decision": "Use utility only if ally will die.",
+          "dont": "Don't use Ultimate on poke.",
+          "callout": "Help mid, save cleanse",
+          "compact": "Early Rotate - Help mid, save cleanse",
+          "instruction": "Help mid clear and keep the river safe. Don't use your escape or cleanse skill too early.",
+          "objective_contest": "At Turtle, shields / cleanse / speed when fight starts, not for poke. Block side attacks.",
+          "objective_trade": "Give Turtle. Make safe path opposite side, vision + push tower. Don't die for lost Turtle."
+        },
+        {
+          "startSeconds": 80,
+          "endSeconds": 120,
+          "timeLabel": "1:20-2:00",
+          "phase": "Turtle Setup",
+          "description": "Go to Turtle with a teammate and get vision. Keep a safe way to run away. You are not the tank.",
+          "checklist": [
+            "Be at Turtle river by 1:30 with teammate",
+            "Vision pit entrance",
+            "Plan retreat"
+          ],
+          "vision": "Turtle pit",
+          "decision": "If enemy collapses, run away with utility.",
+          "dont": "Don't walk alone into dark bush alone.",
+          "callout": "Get vision with teammate",
+          "compact": "Turtle Setup - Get vision with teammate",
+          "instruction": "Go to Turtle with a teammate and get vision. Keep a safe way to run away. You are not the tank.",
+          "objective_contest": "At Turtle, shields / cleanse / speed when fight starts, not for poke. Block side attacks.",
+          "objective_trade": "Give Turtle. Make safe path opposite side, vision + push tower. Don't die for lost Turtle."
+        },
+        {
+          "startSeconds": 120,
+          "endSeconds": 150,
+          "timeLabel": "2:00-2:30",
+          "phase": "First Turtle",
+          "description": "At Turtle, use shields, cleanse, or speed. Use when fight starts, not for small damage.",
+          "checklist": [
+            "Shield/cleanse when enemy engages",
+            "Disrupt enemy jungler",
+            "Protect for jungler"
+          ],
+          "vision": "Pit",
+          "decision": "Use Ultimate when enemy commits.",
+          "dont": "Don't dive alone.",
+          "callout": "Shield / cleanse when fight starts",
+          "compact": "First Turtle - Shield / cleanse when fight starts",
+          "instruction": "At Turtle, use shields, cleanse, or speed. Use when fight starts, not for small damage.",
+          "objective_contest": "At Turtle, shields / cleanse / speed when fight starts, not for poke. Block side attacks.",
+          "objective_trade": "Give Turtle. Make safe path opposite side, vision + push tower. Don't die for lost Turtle."
+        },
+        {
+          "startSeconds": 150,
+          "endSeconds": 240,
+          "timeLabel": "2:30-4:00",
+          "phase": "Post-Turtle",
+          "description": "Help your teammates move between lanes faster. Use your defensive skills when the enemy jumps in, not for small poke.",
+          "checklist": [
+            "Rotate mid <-> Gold",
+            "Use mobility to help ally escape",
+            "Save utility for fight"
+          ],
+          "vision": "Lane bushes",
+          "decision": "Rotate to lane with kill chance.",
+          "dont": "Don't waste utility on one poke.",
+          "callout": "Help lanes move faster, save skills",
+          "compact": "Post-Turtle - Help lanes move faster, save skills",
+          "instruction": "Help your teammates move between lanes faster. Use your defensive skills when the enemy jumps in, not for small poke.",
+          "objective_contest": "At Turtle, shields / cleanse / speed when fight starts, not for poke. Block side attacks.",
+          "objective_trade": "Give Turtle. Make safe path opposite side, vision + push tower. Don't die for lost Turtle."
+        },
+        {
+          "startSeconds": 240,
+          "endSeconds": 300,
+          "timeLabel": "4:00-5:00",
+          "phase": "Second Turtle",
+          "description": "Next Turtle is near 4:00. Walk with your jungler through the river. Save your cleanse or escape for the Turtle fight.",
+          "checklist": [
+            "Escort jungler",
+            "Setup 20s early",
+            "Save Ultimate for Turtle fight"
+          ],
+          "vision": "Turtle pit",
+          "decision": "If enemy engages, cleanse + run away.",
+          "dont": "Don't start Turtle without team.",
+          "callout": "Walk with jungler, save cleanse",
+          "compact": "Second Turtle - Walk with jungler, save cleanse",
+          "instruction": "Next Turtle is near 4:00. Walk with your jungler through the river. Save your cleanse or escape for the Turtle fight.",
+          "objective_contest": "At Turtle, shields / cleanse / speed when fight starts, not for poke. Block side attacks.",
+          "objective_trade": "Give Turtle. Make safe path opposite side, vision + push tower. Don't die for lost Turtle."
+        },
+        {
+          "startSeconds": 300,
+          "endSeconds": 480,
+          "timeLabel": "5:00-8:00",
+          "phase": "Mid Game",
+          "description": "Make safe paths, block side attacks. Use area skills to split enemy. Encourage helps when grouped.",
+          "checklist": [
+            "Create safe path",
+            "Deny flank bush",
+            "Use area skill to split"
+          ],
+          "vision": "Lord pit by 7:30",
+          "decision": "Split fight if enemy groups.",
+          "dont": "Don't group in one area skill.",
+          "callout": "Make safe paths, block side attack",
+          "compact": "Mid Game - Make safe paths, block side attack",
+          "instruction": "Make safe paths, block side attacks. Use area skills to split enemy. Encourage helps when grouped.",
+          "objective_contest": "At Turtle, shields / cleanse / speed when fight starts, not for poke. Block side attacks.",
+          "objective_trade": "Give Turtle. Make safe path opposite side, vision + push tower. Don't die for lost Turtle."
+        },
+        {
+          "startSeconds": 480,
+          "endSeconds": 600,
+          "timeLabel": "8:00-10:00",
+          "phase": "First Lord",
+          "description": "Lord is at 8:00. Get ready with safe routes around Lord. If the setup is bad, run away and reset, don't gamble on a 50/50 Lord.",
+          "checklist": [
+            "Vision Lord pit",
+            "Prepare reset route",
+            "Portal if numbers advantage"
+          ],
+          "vision": "Lord pit",
+          "decision": "Reset if setup is bad.",
+          "dont": "Don't force Lord 50/50.",
+          "callout": "Get ready, run if setup bad",
+          "compact": "First Lord - Get ready, run if setup bad",
+          "instruction": "Lord is at 8:00. Get ready with safe routes around Lord. If the setup is bad, run away and reset, don't gamble on a 50/50 Lord.",
+          "objective_contest": "At Lord, shields / speed when fight starts. Keep skill to stop enemy dive. Don't start Lord without team.",
+          "objective_trade": "Give Lord. Stay grouped, stop dive on carry, clear waves. Trade opposite tower while Lord pushes."
+        },
+        {
+          "startSeconds": 600,
+          "endSeconds": 720,
+          "timeLabel": "10:00-12:00",
+          "phase": "Lord Push",
+          "description": "Stay near the teammate most likely to get caught. Show where enemies are coming from and keep your skill ready to stop their fight.",
+          "checklist": [
+            "Stay near marksman",
+            "Reveal flank",
+            "Save utility for counter"
+          ],
+          "vision": "Push lane",
+          "decision": "Counter-fight when enemy dives.",
+          "dont": "Don't use utility to start fight alone.",
+          "callout": "Stay near teammate who may get caught",
+          "compact": "Lord Push - Stay near teammate who may get caught",
+          "instruction": "Stay near the teammate most likely to get caught. Show where enemies are coming from and keep your skill ready to stop their fight.",
+          "objective_contest": "At Lord, shields / speed when fight starts. Keep skill to stop enemy dive. Don't start Lord without team.",
+          "objective_trade": "Give Lord. Stay grouped, stop dive on carry, clear waves. Trade opposite tower while Lord pushes."
+        },
+        {
+          "startSeconds": 720,
+          "endSeconds": 900,
+          "timeLabel": "12:00-15:00",
+          "phase": "Mid-Late",
+          "description": "Stay near teammate who may get caught. Show enemy path, save skill to stop their fight.",
+          "checklist": [
+            "Wait for mUltimatei-ally value",
+            "Cleanse mUltimatei-stun/slow",
+            "Protect diver"
+          ],
+          "vision": "Lord pit",
+          "decision": "Use Ultimate if 2+ allies benefit.",
+          "dont": "Don't Ultimate for one target.",
+          "callout": "Ultimate for 2+ teammates",
+          "compact": "Mid-Late - Ultimate for 2+ teammates",
+          "instruction": "Stay near teammate who may get caught. Show enemy path, save skill to stop their fight.",
+          "objective_contest": "At Lord, shields / speed when fight starts. Keep skill to stop enemy dive. Don't start Lord without team.",
+          "objective_trade": "Give Lord. Stay grouped, stop dive on carry, clear waves. Trade opposite tower while Lord pushes."
+        },
+        {
+          "startSeconds": 900,
+          "endSeconds": 1080,
+          "timeLabel": "15:00-18:00",
+          "phase": "Late / Evolved Lord",
+          "description": "Stay grouped. Stop enemies diving carry, help carry to safe spot, use Encourage together.",
+          "checklist": [
+            "Stay grouped",
+            "Stop dive with stun/slow/cleanse",
+            "Save Ultimate for Evolved Lord fight"
+          ],
+          "vision": "Evolved Lord pit",
+          "decision": "Fight only grouped.",
+          "dont": "Don't split late.",
+          "callout": "Stay grouped, protect carry",
+          "compact": "Late / Evolved Lord - Stay grouped, protect carry",
+          "instruction": "Stay grouped. Stop enemies diving carry, help carry to safe spot, use Encourage together.",
+          "objective_contest": "At Lord, shields / speed when fight starts. Keep skill to stop enemy dive. Don't start Lord without team.",
+          "objective_trade": "Give Lord. Stay grouped, stop dive on carry, clear waves. Trade opposite tower while Lord pushes."
+        }
+      ],
+      "objective_templates": {
+        "turtle_contest": "At Turtle, shields / cleanse / speed when fight starts, not for poke. Save ally from certain death (Guard). Block side attacks.",
+        "turtle_trade": "Give Turtle. Make safe path opposite side, vision + push tower. Don't die for lost Turtle.",
+        "lord_contest": "At Lord, shields / speed when fight starts. Keep skill to save carry from dive. Don't start Lord without team.",
+        "lord_trade": "Give Lord. Stay grouped, save carry, clear waves. Trade opposite tower while Lord pushes."
+      }
+    },
+    {
+      "id": "heal",
+      "label": "Heal - Regen",
+      "blessing": "Favor",
+      "blessing_id": "favor",
+      "playstyle": "In-game specialty: Regen (Heal) - Has ability to regenerate lost HP during laning / clashes. Support/Tank only. You heal team through poke, stay behind tank, save Ultimate for fight.",
+      "heroes": [
+        {
+          "name": "Estes",
+          "archetype": "",
+          "note": ""
+        },
+        {
+          "name": "Floryn",
+          "archetype": "",
+          "note": ""
+        },
+        {
+          "name": "Rafaela",
+          "archetype": "",
+          "note": ""
+        },
+        {
+          "name": "Angela",
+          "archetype": "",
+          "note": ""
+        },
+        {
+          "name": "Carmilla",
+          "archetype": "",
+          "note": ""
+        },
+        {
+          "name": "Minotaur",
+          "archetype": "",
+          "note": ""
+        }
+      ],
+      "battle_spells": [
+        "Revitalize (sustain in long fights)",
+        "Aegis (burst protection)",
+        "Flicker (escape / reposition)"
+      ],
+      "emblem": "Support Emblem — Focusing Mark. Prioritize Heal Effect + Movement Speed + Hybrid Defense.",
+      "strengths": [
+        "Wins poke wars and long fights",
+        "Best at keeping marksman alive vs dive"
+      ],
+      "weaknesses": [
+        "No start fight — needs tank/fighter to start",
+        "Dies if caught alone"
+      ],
+      "win_condition": "Survive first burst, heal team through it, then win the extended fight.",
+      "lose_condition": "Face-checking, or using Ultimate/heal before enemy engages.",
+      "steps": [
+        {
+          "startSeconds": 0,
+          "endSeconds": 40,
+          "timeLabel": "0:00-0:40",
+          "phase": "Setup",
+          "description": "Buy Roam boots. Stay near your team. Don't take jungle monsters or minions, your gold comes from helping.",
+          "checklist": [
+            "Buy Roam",
+            "Stay near mid/jungler",
+            "Don't walk alone into dark bush enemy buff"
+          ],
+          "vision": "Mid bush + jungler buff",
+          "decision": "If invade, retreat and ping — don't trade HP.",
+          "dont": "Don't take jungler's camps.",
+          "callout": "Stay safe, don't take farm",
+          "compact": "Setup - Stay safe, don't take farm",
+          "instruction": "Buy Roam boots. Stay near your team. Don't take jungle monsters or minions, your gold comes from helping.",
+          "objective_contest": "Get to Turtle early, stay behind tank. Heal jungler, don't group where one AoE hits all.",
+          "objective_trade": "Give Turtle. Follow carry, heal + farm safe. Don't walk dark river alone."
+        },
+        {
+          "startSeconds": 40,
+          "endSeconds": 80,
+          "timeLabel": "0:40-1:20",
+          "phase": "Early Rotate",
+          "description": "Help mid clear and heal them after they take damage. Then go to the lane that needs help most.",
+          "checklist": [
+            "Help mid (don't take last hits)",
+            "Heal mid after poke",
+            "Rotate to Gold if marksman pressured"
+          ],
+          "vision": "Mid + Gold river",
+          "decision": "Follow strongest nearby teammate.",
+          "dont": "Don't heal full-HP ally — waste of Favor proc.",
+          "callout": "Help mid, heal and rotate",
+          "compact": "Early Rotate - Help mid, heal and rotate",
+          "instruction": "Help mid clear and heal them after they take damage. Then go to the lane that needs help most.",
+          "objective_contest": "Get to Turtle early, stay behind tank. Heal jungler, don't group where one AoE hits all.",
+          "objective_trade": "Give Turtle. Follow carry, heal + farm safe. Don't walk dark river alone."
+        },
+        {
+          "startSeconds": 80,
+          "endSeconds": 120,
+          "timeLabel": "1:20-2:00",
+          "phase": "Turtle Setup",
+          "description": "Go with a teammate to Turtle river. Keep your heal ready for the first fight. Stay behind your tank.",
+          "checklist": [
+            "Be at Turtle river by 1:30 with ally",
+            "Favor proc ready",
+            "Position behind frontline"
+          ],
+          "vision": "Turtle river bush",
+          "decision": "If team is split, don't go alone.",
+          "dont": "Don't stand in area skill at pit entrance.",
+          "callout": "Go with teammate, save heal",
+          "compact": "Turtle Setup - Go with teammate, save heal",
+          "instruction": "Go with a teammate to Turtle river. Keep your heal ready for the first fight. Stay behind your tank.",
+          "objective_contest": "Get to Turtle early, stay behind tank. Heal jungler, don't group where one AoE hits all.",
+          "objective_trade": "Give Turtle. Follow carry, heal + farm safe. Don't walk dark river alone."
+        },
+        {
+          "startSeconds": 120,
+          "endSeconds": 150,
+          "timeLabel": "2:00-2:30",
+          "phase": "First Turtle",
+          "description": "Get to Turtle early. Heal jungler, don't stand together where one skill hits everyone (AoE).",
+          "checklist": [
+            "Heal jungler when focused",
+            "Use stun/slow to protect",
+            "Don't stack with team in pit"
+          ],
+          "vision": "Pit entrance",
+          "decision": "Save Ultimate for enemy start fight.",
+          "dont": "Don't Ultimate at full HP.",
+          "callout": "Heal jungler, don't group too close",
+          "compact": "First Turtle - Heal jungler, don't group too close",
+          "instruction": "Get to Turtle early. Heal jungler, don't stand together where one skill hits everyone (AoE).",
+          "objective_contest": "Get to Turtle early, stay behind tank. Heal jungler, don't group where one AoE hits all.",
+          "objective_trade": "Give Turtle. Follow carry, heal + farm safe. Don't walk dark river alone."
+        },
+        {
+          "startSeconds": 150,
+          "endSeconds": 240,
+          "timeLabel": "2:30-4:00",
+          "phase": "Post-Turtle",
+          "description": "Follow strongest teammate. Heal after fights, go base if low. Don't walk dark river alone.",
+          "checklist": [
+            "Heal lowest-HP ally",
+            "Reset if low",
+            "Escort marksman/mid"
+          ],
+          "vision": "Lane bushes",
+          "decision": "If low on heal/Ultimate, run away.",
+          "dont": "Don't walk alone into dark bush river alone.",
+          "callout": "Follow carry, go back if low",
+          "compact": "Post-Turtle - Follow carry, go back if low",
+          "instruction": "Follow strongest teammate. Heal after fights, go base if low. Don't walk dark river alone.",
+          "objective_contest": "Get to Turtle early, stay behind tank. Heal jungler, don't group where one AoE hits all.",
+          "objective_trade": "Give Turtle. Follow carry, heal + farm safe. Don't walk dark river alone."
+        },
+        {
+          "startSeconds": 240,
+          "endSeconds": 300,
+          "timeLabel": "4:00-5:00",
+          "phase": "Second Turtle",
+          "description": "Next Turtle near 4:00. Heal team to full first. Don't start Turtle while heal is cooling down.",
+          "checklist": [
+            "Heal team to full before Turtle",
+            "Setup 20s early",
+            "Favor proc ready"
+          ],
+          "vision": "Turtle pit",
+          "decision": "If team low, delay Turtle and heal first.",
+          "dont": "Don't start Turtle while healing on cooldown.",
+          "callout": "Heal full before Turtle",
+          "compact": "Second Turtle - Heal full before Turtle",
+          "instruction": "Next Turtle near 4:00. Heal team to full first. Don't start Turtle while heal is cooling down.",
+          "objective_contest": "Get to Turtle early, stay behind tank. Heal jungler, don't group where one AoE hits all.",
+          "objective_trade": "Give Turtle. Follow carry, heal + farm safe. Don't walk dark river alone."
+        },
+        {
+          "startSeconds": 300,
+          "endSeconds": 480,
+          "timeLabel": "5:00-8:00",
+          "phase": "Mid Game",
+          "description": "Stay near frontline + marksman. Save Ultimate for team fight, not for small poke damage.",
+          "checklist": [
+            "Stay behind tank, near marksman",
+            "Save Ultimate for enemy Ultimate",
+            "Buy anti-heal if needed"
+          ],
+          "vision": "Mid + Lord pit by 7:30",
+          "decision": "Use Ultimate when enemy commits, not on poke.",
+          "dont": "Don't use Ultimate to heal one poke.",
+          "callout": "Save Ultimate for team fight",
+          "compact": "Mid Game - Save Ultimate for team fight",
+          "instruction": "Stay near frontline + marksman. Save Ultimate for team fight, not for small poke damage.",
+          "objective_contest": "Get to Turtle early, stay behind tank. Heal jungler, don't group where one AoE hits all.",
+          "objective_trade": "Give Turtle. Follow carry, heal + farm safe. Don't walk dark river alone."
+        },
+        {
+          "startSeconds": 480,
+          "endSeconds": 600,
+          "timeLabel": "8:00-10:00",
+          "phase": "First Lord",
+          "description": "Group up before Lord at 8:00. Heal between small fights and stay behind your tank. Let the tank check bushes first.",
+          "checklist": [
+            "Group before Lord",
+            "Heal between pokes",
+            "Stay behind tank"
+          ],
+          "vision": "Lord pit entrance",
+          "decision": "If team low, reset before Lord.",
+          "dont": "Don't enter dark river first.",
+          "callout": "Group, heal between fights",
+          "compact": "First Lord - Group, heal between fights",
+          "instruction": "Group up before Lord at 8:00. Heal between small fights and stay behind your tank. Let the tank check bushes first.",
+          "objective_contest": "Stay behind frontline, heal team to full before Lord. Save Ultimate for Lord fight, not poke.",
+          "objective_trade": "Give Lord. Stay with carry, defend base, heal through Lord push. Don't fight without Ultimate."
+        },
+        {
+          "startSeconds": 600,
+          "endSeconds": 720,
+          "timeLabel": "10:00-12:00",
+          "phase": "Lord Push",
+          "description": "Walk with your team and let the tank walk first into dark areas. Heal your team while pushing with Lord.",
+          "checklist": [
+            "Escort marksman",
+            "Let tank walk alone into dark bush",
+            "Heal after tower poke"
+          ],
+          "vision": "Push lane",
+          "decision": "Push with Lord wave if team healthy.",
+          "dont": "Don't walk ahead of tank.",
+          "callout": "Let tank check, walk together",
+          "compact": "Lord Push - Let tank check, walk together",
+          "instruction": "Walk with your team and let the tank walk first into dark areas. Heal your team while pushing with Lord.",
+          "objective_contest": "Stay behind frontline, heal team to full before Lord. Save Ultimate for Lord fight, not poke.",
+          "objective_trade": "Give Lord. Stay with carry, defend base, heal through Lord push. Don't fight without Ultimate."
+        },
+        {
+          "startSeconds": 720,
+          "endSeconds": 900,
+          "timeLabel": "12:00-15:00",
+          "phase": "Mid-Late",
+          "description": "Heal the teammate who deals the most damage first, usually your marksman or jungler. Use Favor to heal the lowest health teammate.",
+          "checklist": [
+            "Heal marksman/jungler first",
+            "Save Ultimate for dive",
+            "Position behind frontline"
+          ],
+          "vision": "Lord pit",
+          "decision": "Protect diver, don't chase.",
+          "dont": "Don't heal tank while marksman dies.",
+          "callout": "Heal marksman first",
+          "compact": "Mid-Late - Heal marksman first",
+          "instruction": "Heal the teammate who deals the most damage first, usually your marksman or jungler. Use Favor to heal the lowest health teammate.",
+          "objective_contest": "Stay behind frontline, heal team to full before Lord. Save Ultimate for Lord fight, not poke.",
+          "objective_trade": "Give Lord. Stay with carry, defend base, heal through Lord push. Don't fight without Ultimate."
+        },
+        {
+          "startSeconds": 900,
+          "endSeconds": 1080,
+          "timeLabel": "15:00-18:00",
+          "phase": "Late / Evolved Lord",
+          "description": "Keep carry alive through first burst (quick big damage). No Ultimate = run away and regroup.",
+          "checklist": [
+            "Save Ultimate for Evolved Lord fight",
+            "Stay near carry",
+            "Buy Immortality / Winter Crown"
+          ],
+          "vision": "Evolved Lord pit",
+          "decision": "Fight only if heal/Ultimate ready.",
+          "dont": "Don't fight without Ultimate.",
+          "callout": "Keep carry alive",
+          "compact": "Late / Evolved Lord - Keep carry alive",
+          "instruction": "Keep carry alive through first burst (quick big damage). No Ultimate = run away and regroup.",
+          "objective_contest": "Stay behind frontline, heal team to full before Lord. Save Ultimate for Lord fight, not poke.",
+          "objective_trade": "Give Lord. Stay with carry, defend base, heal through Lord push. Don't fight without Ultimate."
+        }
+      ],
+      "objective_templates": {
+        "turtle_contest": "Get to Turtle early, stay behind tank. Heal jungler, don't group where one AoE hits all. Save heal for fight.",
+        "turtle_trade": "Give Turtle. Follow carry, heal + farm safe. Don't walk dark river alone.",
+        "lord_contest": "Stay behind frontline, heal team to full before Lord. Save Ultimate for Lord fight, not poke.",
+        "lord_trade": "Give Lord. Stay with carry, defend base, heal through Lord push. Don't fight without Ultimate."
+      }
+    }
+  ],
+  "changelog": {
+    "from_v1_to_v2": [
+      "Fixed Turtle timing: first Turtle 2:00, respawn ~2 min, stops at 8:00 — original 110-150s window overlapped spawn and missed respawn logic",
+      "Fixed Lord timing: first Lord 8:00, Evolved Lord ~18:00 — original said 'Lord becomes available' vaguely at 480-600s without evolve note",
+      "Added outer turret shield end at 5:00, Lithowanderer at 0:45, jungler Lv4 window 1:35-1:45",
+      "Changed heroes from single string to structured array with archetype + S42 notes; added Marcel (S-tier), Carmilla, Kaja buff, Kalea buff, and clarified flex picks (Natalia, Hirara, Alice, Nana)",
+      "Added blessings as structured objects with exact effects, cooldowns, and unlock (1000g Thriving)",
+      "Added roam economy: Devotion 30% rule, Thriving 6g+12exp -> 8g+16exp per 5s, stay lowest gold",
+      "Added per-step phase, objective, checklist, vision, decision, dont — so table is usable as in-game timer UI",
+      "Added solo-queue adaptations: 5-second reveal rule, fake rotation note, don't babysit marksman, trade objectives when behind",
+      "Added battle spells + emblem per role"
+    ]
+  },
+  "objectives": {
+    "turtle": {
+      "first_spawn": 120,
+      "respawn_after_slain": 120,
+      "max_count": 3,
+      "no_new_after_last_slain": 360,
+      "auto_convert_at": 480
+    },
+    "lord": {
+      "delay_after_last_turtle": 120,
+      "respawn_before_18min": 180,
+      "respawn_after_18min": 120,
+      "evolves_at": 1080
+    }
+  },
+  "battle_spells": {
+    "source": "Liquipedia Battle Spells ledger, Season 42 Patch 2.2.16 - 12 spells",
+    "note": "Defaults for enemy tracker: JG = Retribution, EXP/MID/GOLD/ROAM = Flicker. Tap = enemy used spell, bar fills empty->full over CD. Long-press = switch spell.",
+    "spells": [
+      {
+        "name": "Flicker",
+        "cooldown_seconds": 120,
+        "note": "Blink, longest CD"
+      },
+      {
+        "name": "Retribution",
+        "cooldown_seconds": 35,
+        "note": "Jungle, shortest CD, secures Turtle/Lord"
+      },
+      {
+        "name": "Purify",
+        "cooldown_seconds": 90,
+        "note": "Cleanse, raised from 75 to 90"
+      },
+      {
+        "name": "Sprint",
+        "cooldown_seconds": 100,
+        "note": "+50% MS 6s, slow immune"
+      },
+      {
+        "name": "Execute",
+        "cooldown_seconds": 90,
+        "note": "Finisher true damage"
+      },
+      {
+        "name": "Petrify",
+        "cooldown_seconds": 75,
+        "note": "AoE stun 0.8s"
+      },
+      {
+        "name": "Inspire",
+        "cooldown_seconds": 75,
+        "note": "Attack speed burst"
+      },
+      {
+        "name": "Aegis",
+        "cooldown_seconds": 75,
+        "note": "Shield"
+      },
+      {
+        "name": "Vengeance",
+        "cooldown_seconds": 75,
+        "note": "Reflect + damage reduction"
+      },
+      {
+        "name": "Flameshot",
+        "cooldown_seconds": 50,
+        "note": "Shortest non-Retri CD, knockback"
+      },
+      {
+        "name": "Arrival",
+        "cooldown_seconds": 75,
+        "note": "Teleport to turret/minion"
+      },
+      {
+        "name": "Revitalize",
+        "cooldown_seconds": 75,
+        "note": "AoE heal zone"
+      }
+    ],
+    "defaults": {
+      "EXP": "Flicker",
+      "JG": "Retribution",
+      "MID": "Flicker",
+      "GOLD": "Flicker",
+      "ROAM": "Flicker"
+    }
+  }
+}
