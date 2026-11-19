@@ -19,8 +19,8 @@ jobs:
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
-          distribution: 'temurin'
-          java-version: '17'
+          distribution: temurin
+          java-version: "17"
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
@@ -28,52 +28,48 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      - name: Accept Android SDK licenses and install Platform 36 + Build-Tools 36.0.0
+      - name: Accept Android SDK licenses and install Platform 37
         run: |
           yes | "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" --licenses
-          "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" "platforms;android-36" "build-tools;36.0.0" "platform-tools"
+          "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" \
+            "platforms;android-37" \
+            "build-tools;36.0.0" \
+            "platform-tools"
 
-      # --- DIAGNOSTIC: print the versions checkReleaseAarMetadata compares ---
-      # checkReleaseAarMetadata compares 3 numbers from every AAR's
-      # META-INF/com/android/build/gradle/aar-metadata.properties
-      # against your project:
-      #   minCompileSdk  vs  app compileSdk  (currently 36)
-      #   minAgpVersion  vs  AGP version in libs.versions.toml
-      #   minSdkVersion  vs  app minSdk       (currently 29)
-      # If any AAR needs MORE than you have, the task fails. This step
-      # prints all three sides so the next step's error is interpretable.
-      - name: Print versions that AAR metadata is checked against
+      - name: Print build and dependency versions
         run: |
           echo "=== Gradle / AGP / SDK ==="
           ./gradlew --version --no-daemon
+
           echo "=== gradle-wrapper.properties ==="
           cat gradle/wrapper/gradle-wrapper.properties
-          echo "=== libs.versions.toml (AGP + Compose BOM + Coil) ==="
-          cat gradle/libs.versions.toml || echo "NO libs.versions.toml - check settings.gradle / build.gradle for versions"
-          echo "=== app/build.gradle.kts - compileSdk / minSdk / targetSdk ==="
-          grep -n -E "compileSdk|minSdk|targetSdk|namespace|applicationId" app/build.gradle.kts
-          echo "=== app dependencies (releaseRuntimeClasspath) ==="
-          ./gradlew :app:dependencies --configuration releaseRuntimeClasspath --no-daemon | head -n 200
 
-      # --- THE FIX FOR THE HIDDEN ERROR ---
-      # Old workflow ran only: ./gradlew assembleRelease --no-daemon
-      # That hides the dependency name. checkReleaseAarMetadata runs
-      # inside assembleRelease, but without --info its
-      # CheckAarMetadataWorkAction error is just "validation found a
-      # problem" with no dependency named.
-      # Run the failing task ALONE, WITH --info, and tee its output to a
-      # file. --info is what prints the actual line, e.g.:
-      #   "The minCompileSdk (35) specified in a dependency's AAR metadata
-      #    is greater than this module's compileSdk (34)."
-      #   "The minAgpVersion (8.6.0) ... is greater than ..."
-      #   "The minSdkVersion (24) ... is greater than ..."
-      # Do NOT add --info to every build forever - keep it here until
-      # this is fixed, then drop back to plain assembleRelease.
-      - name: Diagnose AAR metadata (this is the failing task, with --info)
+          echo "=== libs.versions.toml ==="
+          cat gradle/libs.versions.toml
+
+          echo "=== app/build.gradle.kts ==="
+          grep -n -E \
+            "compileSdk|minSdk|targetSdk|namespace|applicationId" \
+            app/build.gradle.kts
+
+          echo "=== releaseRuntimeClasspath ==="
+          ./gradlew :app:dependencies \
+            --configuration releaseRuntimeClasspath \
+            --no-daemon
+
+      - name: Diagnose AAR metadata
         run: |
-          ./gradlew :app:checkReleaseAarMetadata --info --stacktrace --no-daemon 2>&1 | tee aar-metadata.log
+          set -o pipefail
+          ./gradlew :app:checkReleaseAarMetadata \
+            --info \
+            --stacktrace \
+            --no-daemon \
+            2>&1 | tee aar-metadata.log
+
           echo "--- grep for the exact incompatibility ---"
-          grep -i -A 10 -B 2 -E "AAR metadata|minCompileSdk|minAgpVersion|minSdkVersion|CheckAarMetadata" aar-metadata.log || true
+          grep -i -A 10 -B 2 -E \
+            "AAR metadata|minCompileSdk|minAgpVersion|minSdkVersion|CheckAarMetadata" \
+            aar-metadata.log || true
 
       - name: Generate ephemeral signing keystore
         run: |
@@ -87,16 +83,33 @@ jobs:
             -keypass android \
             -dname "CN=CI Build, OU=Dev, O=MLBB Assistant, L=Unknown, S=Unknown, C=US"
 
-      # Keep --info here until the AAR failure is fixed. Once green,
-      # you can drop --info / --stacktrace back to plain assembleRelease.
-      - name: Build release APK (minified + resource-shrunk)
-        run: ./gradlew assembleRelease --info --stacktrace --no-daemon 2>&1 | tee assemble-release.log
+      - name: Build release APK
+        run: |
+          set -o pipefail
+          ./gradlew assembleRelease \
+            --info \
+            --stacktrace \
+            --no-daemon \
+            2>&1 | tee assemble-release.log
 
       - name: Align APK
         run: |
-          APK=$(find app/build/outputs/apk/release -name "*.apk" | head -1)
+          set -euo pipefail
+
+          APK=$(find app/build/outputs/apk/release \
+            -name "*.apk" \
+            -print \
+            -quit)
+
+          if [[ -z "$APK" ]]; then
+            echo "No release APK was produced" >&2
+            exit 1
+          fi
+
           echo "Aligning $APK"
-          "$ANDROID_SDK_ROOT/build-tools/36.0.0/zipalign" -v 4 "$APK" app-release-aligned.apk
+
+          "$ANDROID_SDK_ROOT/build-tools/36.0.0/zipalign" \
+            -v 4 "$APK" app-release-aligned.apk
 
       - name: Sign APK
         run: |
@@ -120,9 +133,7 @@ jobs:
           path: app-release-signed.apk
           retention-days: 30
 
-      # Upload logs even when the build fails, otherwise the --info
-      # output that names the dependency is lost with the runner.
-      - name: Upload build logs (always, even on failure)
+      - name: Upload build logs
         if: always()
         uses: actions/upload-artifact@v4
         with:
