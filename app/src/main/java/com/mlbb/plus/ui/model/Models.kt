@@ -57,6 +57,7 @@ import org.json.JSONObject
 // ============================================================
 
 const val FALLBACK_PATCH_VERSION = "2.2.23"
+const val FALLBACK_ADVANCED_PATCH_VERSION = "2.2.32"
 
 // Single source of truth for Role -> RoleType. Used by
 // MainActivity (auto-correct) and HomeScreen (dropdown).
@@ -223,6 +224,9 @@ data class PatchNotesFile(
 ) {
     // FIX [9]: single fallback, use this everywhere.
     val displayVersion: String get() = originalServer.version.ifBlank { FALLBACK_PATCH_VERSION }
+    // NEW batch: same fallback for Advanced server. Old code hardcoded
+    // "2.2.32" in SettingsScreen + PatchNotesScreen. Use this instead.
+    val advancedDisplayVersion: String get() = advancedServer.version.ifBlank { FALLBACK_ADVANCED_PATCH_VERSION }
 }
 
 // ---------- LOADER ----------
