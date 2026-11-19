@@ -14,6 +14,7 @@ class WidgetOverlayService : Service() {
 
     override fun onCreate() {
         super.onCreate()
+        isRunning = true
         createChannel()
         val notification = Notification.Builder(this, CHANNEL_ID)
             .setContentTitle("MLBB Plus running")
@@ -35,6 +36,7 @@ class WidgetOverlayService : Service() {
     }
 
     override fun onDestroy() {
+        isRunning = false
         JetOverlay.hide()
         super.onDestroy()
     }
@@ -52,6 +54,8 @@ class WidgetOverlayService : Service() {
     }
 
     companion object {
+        var isRunning = false
+            private set
         private const val CHANNEL_ID = "mlbb_plus"
     }
 }
