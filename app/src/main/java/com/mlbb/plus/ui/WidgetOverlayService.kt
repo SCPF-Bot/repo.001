@@ -73,7 +73,8 @@ class WidgetOverlayService : Service() {
             this,
             1,
             buildNotification(currentRole, currentRoleType),
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            // SPECIAL_USE only exists on API 34+; passing it on 29-33 is invalid.
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
                 ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE
             } else {
                 0

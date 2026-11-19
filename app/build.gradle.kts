@@ -4,10 +4,10 @@ plugins {
 }
 
 android {
-    // namespace must match applicationId base and Kotlin packages.
+    // namespace must match the Kotlin packages (com.mlbb.plus.*).
     namespace = "com.mlbb.plus"
 
-    // Compose BOM 2026.06.00 requires compileSdk 37.
+    // Compose 1.12 (BOM 2026.06.00) requires compileSdk 37 + AGP 9.
     compileSdk = 37
 
     defaultConfig {
@@ -44,6 +44,7 @@ android {
         }
     }
 
+    // Kotlin's jvmTarget follows this; no separate kotlin { } block needed with AGP 9.
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
@@ -57,7 +58,6 @@ android {
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
-            pickFirsts += "META-INF/versions/9/OSGI-INF/MANIFEST.MF"
         }
     }
 
@@ -67,32 +67,22 @@ android {
     }
 }
 
-kotlin {
-    jvmToolchain(17)
-
-    compilerOptions {
-        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
-    }
-}
-
 dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.lifecycle.viewmodel)
     implementation(libs.androidx.activity.compose)
-    implementation(libs.kotlinx.coroutines.android)
-
-    implementation("io.coil-kt.coil3:coil-compose:3.0.4")
-    implementation("androidx.savedstate:savedstate:1.2.1")
+    // OverlayWidgets.kt builds its own SavedStateRegistryOwner for the overlay ComposeView.
+    implementation(libs.androidx.savedstate)
 
     implementation(platform(libs.compose.bom))
     implementation(libs.compose.ui)
     implementation(libs.compose.ui.graphics)
-    implementation(libs.compose.ui.tooling.preview)
+    implementation(libs.compose.foundation)
     implementation(libs.compose.material3)
+    implementation(libs.compose.ui.tooling.preview)
     debugImplementation(libs.compose.ui.tooling)
 
-    // Uncomment only if the app uses kotlinx.serialization JSON:
-    // implementation(libs.kotlinx.serialization.json)
+    implementation(libs.coil.compose)
 }

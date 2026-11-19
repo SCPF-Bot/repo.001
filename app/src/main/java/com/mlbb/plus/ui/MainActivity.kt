@@ -1,5 +1,6 @@
 package com.mlbb.plus.ui
 
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -12,11 +13,11 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.mlbb.plus.ui.model.GameData
 import com.mlbb.plus.ui.model.RoleTypes
 import com.mlbb.plus.ui.model.Hero
@@ -129,7 +130,7 @@ private fun MLBBPlusApp(onLaunchWidget: (String, String) -> Unit) {
     // FIX [5]: real auto-start state, persisted.
     var autoStartLastRole by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) {
-        val prefs = ctx.getSharedPreferences("mlbb_plus_prefs", ComponentActivity.MODE_PRIVATE)
+        val prefs = ctx.getSharedPreferences("mlbb_plus_prefs", Context.MODE_PRIVATE)
         autoStartLastRole = prefs.getBoolean("auto_start_last_role", false)
     }
 
@@ -255,7 +256,7 @@ private fun MLBBPlusApp(onLaunchWidget: (String, String) -> Unit) {
                         autoStartLastRole = autoStartLastRole,
                         onAutoStartChange = { value ->
                             autoStartLastRole = value
-                            ctx.getSharedPreferences("mlbb_plus_prefs", ComponentActivity.MODE_PRIVATE)
+                            ctx.getSharedPreferences("mlbb_plus_prefs", Context.MODE_PRIVATE)
                                 .edit().putBoolean("auto_start_last_role", value).apply()
                         }
                     )

@@ -1,197 +1,36 @@
 [versions]
-# ── Build toolchain ────────────────────────────────────────────────────────
-agp                          = "9.2.1"
-kotlin                       = "2.1.0"
-ksp                          = "2.3.9"
-detekt                       = "1.23.8"
+# AGP 9.x requires Kotlin Gradle plugin >= 2.2.10 (AGP 9.2 itself depends on 2.3.x).
+# 2.1.0 was below that floor and broke configuration. The Compose compiler plugin
+# version MUST equal the Kotlin version.
+agp              = "9.2.1"
+kotlin           = "2.3.21"
 
-# ── AndroidX core ─────────────────────────────────────────────────────────
-coreKtx                      = "1.16.0"
-lifecycleRuntime             = "2.11.0"
-activityCompose              = "1.13.0"
-composeBom                   = "2026.06.00"
-
-# ── Jetpack ───────────────────────────────────────────────────────────────
-room                         = "2.7.1"
-datastore                    = "1.2.1"
-navigationCompose            = "2.9.0"
-paging                       = "3.5.0"
-workRuntime                  = "2.11.2"
-
-# ── DI ────────────────────────────────────────────────────────────────────
-hilt                         = "2.60"
-hiltNavCompose               = "1.3.0"
-hiltWork                     = "1.3.0"
-
-# ── Network ───────────────────────────────────────────────────────────────
-retrofit                     = "2.11.0"
-# Retrofit converter for kotlinx.serialization (replaces GsonConverterFactory)
-retrofitKotlinxConverter     = "1.0.0"
-okhttp                       = "4.12.0"
-gson                         = "2.14.0"
-
-# ── Async / Kotlin stdlib extensions ──────────────────────────────────────
-coroutines                   = "1.11.0"
-kotlinxSerialization         = "1.7.3"
-
-# ── Image loading ─────────────────────────────────────────────────────────
-coil                         = "3.1.0"
-
-# ── UI enhancement ────────────────────────────────────────────────────────
-shimmer                      = "1.3.0"
-composeCharts                = "0.2.5"
-lottie                       = "6.7.1"
-# skydoves/Balloon: Compose tooltip for hero suggestion long-press (rec. §8.4, RA-06)
-# JitPack: com.github.skydoves:balloon:1.6.12
-balloon                      = "1.6.12"
-
-# ── ML / CV ───────────────────────────────────────────────────────────────
-mlkitTextRec                 = "16.0.1"
-# ML Kit Object Detection removed (2026-07-03): HeroPortraitObjectDetector is a stub
-# that returns emptyList() and never calls the ML Kit API — no trained SSD/YOLO model
-# exists yet (see roadmap.md RA-05). Re-add mlkitObjectDetection = "17.0.0" and the
-# mlkit-objectdetection library entry below when that model is trained and wired in.
-# TFLite runtime — powers HeroClassifier (MobileNetV3Small hero portrait classifier)
-# assets/mlbb_hero_classifier.tflite is a trained [1,224,224,3]→[1,120] softmax model
-tensorflowLite               = "2.16.1"
-
-# ── OEM / platform utilities ──────────────────────────────────────────────
-# judemanutd/AutoStarter: OEM auto-start settings deep-link (rec. §2.4)
-# JitPack: com.github.judemanutd:autostarter:1.1.0
-autoStarter                  = "1.1.0"
-
-# ── Logging / debug ───────────────────────────────────────────────────────
-timber                       = "5.0.1"
-# Pluto: embedded debug companion (floating bubble, log/network/crash/DB inspector)
-# No Play Store or Google Play Services required. Debug APK only; release uses no-ops.
-# https://github.com/androidPluto/pluto
-pluto                        = "3.0.0"
-
-# ── Test ──────────────────────────────────────────────────────────────────
-junit                        = "4.13.2"
-junitExt                     = "1.2.1"
-espresso                     = "3.6.1"
-mockk                        = "1.13.12"
-turbine                      = "1.2.0"
-robolectric                  = "4.14.1"
+coreKtx          = "1.16.0"
+lifecycle        = "2.11.0"
+activityCompose  = "1.13.0"
+composeBom       = "2026.06.00"
+coil             = "3.0.4"
+savedstate       = "1.2.1"
 
 [libraries]
-# ── AndroidX core ─────────────────────────────────────────────────────────
-androidx-core-ktx                  = { group = "androidx.core",              name = "core-ktx",                       version.ref = "coreKtx" }
-androidx-lifecycle-runtime-ktx     = { group = "androidx.lifecycle",         name = "lifecycle-runtime-ktx",          version.ref = "lifecycleRuntime" }
-androidx-lifecycle-runtime-compose = { group = "androidx.lifecycle",         name = "lifecycle-runtime-compose",      version.ref = "lifecycleRuntime" }
-androidx-lifecycle-viewmodel       = { group = "androidx.lifecycle",         name = "lifecycle-viewmodel-ktx",        version.ref = "lifecycleRuntime" }
-androidx-activity-compose          = { group = "androidx.activity",          name = "activity-compose",               version.ref = "activityCompose" }
+androidx-core-ktx                  = { group = "androidx.core",       name = "core-ktx",                  version.ref = "coreKtx" }
+androidx-lifecycle-runtime-ktx     = { group = "androidx.lifecycle",  name = "lifecycle-runtime-ktx",     version.ref = "lifecycle" }
+androidx-lifecycle-runtime-compose = { group = "androidx.lifecycle",  name = "lifecycle-runtime-compose", version.ref = "lifecycle" }
+androidx-lifecycle-viewmodel       = { group = "androidx.lifecycle",  name = "lifecycle-viewmodel-ktx",   version.ref = "lifecycle" }
+androidx-activity-compose          = { group = "androidx.activity",   name = "activity-compose",          version.ref = "activityCompose" }
+androidx-savedstate                = { group = "androidx.savedstate", name = "savedstate",                version.ref = "savedstate" }
 
-# ── Compose BOM + modules ─────────────────────────────────────────────────
-compose-bom                        = { group = "androidx.compose",           name = "compose-bom",                    version.ref = "composeBom" }
-compose-ui                         = { group = "androidx.compose.ui",        name = "ui" }
-compose-ui-graphics                = { group = "androidx.compose.ui",        name = "ui-graphics" }
-compose-ui-tooling-preview         = { group = "androidx.compose.ui",        name = "ui-tooling-preview" }
-compose-ui-tooling                 = { group = "androidx.compose.ui",        name = "ui-tooling" }
-compose-ui-test-junit4             = { group = "androidx.compose.ui",        name = "ui-test-junit4" }
-compose-ui-test-manifest           = { group = "androidx.compose.ui",        name = "ui-test-manifest" }
-compose-material3                  = { group = "androidx.compose.material3", name = "material3" }
-compose-material-icons-extended    = { group = "androidx.compose.material",  name = "material-icons-extended" }
-compose-animation                  = { group = "androidx.compose.animation", name = "animation" }
+compose-bom                        = { group = "androidx.compose",    name = "compose-bom",               version.ref = "composeBom" }
+compose-ui                         = { group = "androidx.compose.ui", name = "ui" }
+compose-ui-graphics                = { group = "androidx.compose.ui", name = "ui-graphics" }
+compose-ui-tooling-preview         = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
+compose-ui-tooling                 = { group = "androidx.compose.ui", name = "ui-tooling" }
+compose-foundation                 = { group = "androidx.compose.foundation", name = "foundation" }
+compose-material3                  = { group = "androidx.compose.material3",  name = "material3" }
 
-# ── Jetpack ───────────────────────────────────────────────────────────────
-navigation-compose                 = { group = "androidx.navigation",        name = "navigation-compose",             version.ref = "navigationCompose" }
-room-runtime                       = { group = "androidx.room",              name = "room-runtime",                   version.ref = "room" }
-room-ktx                           = { group = "androidx.room",              name = "room-ktx",                      version.ref = "room" }
-room-compiler                      = { group = "androidx.room",              name = "room-compiler",                  version.ref = "room" }
-room-paging                        = { group = "androidx.room",              name = "room-paging",                    version.ref = "room" }
-datastore-preferences              = { group = "androidx.datastore",         name = "datastore-preferences",          version.ref = "datastore" }
-paging-runtime                     = { group = "androidx.paging",            name = "paging-runtime",                 version.ref = "paging" }
-paging-compose                     = { group = "androidx.paging",            name = "paging-compose",                 version.ref = "paging" }
-work-runtime                       = { group = "androidx.work",              name = "work-runtime-ktx",               version.ref = "workRuntime" }
-
-# ── Hilt ──────────────────────────────────────────────────────────────────
-hilt-android                       = { group = "com.google.dagger",          name = "hilt-android",                   version.ref = "hilt" }
-hilt-compiler                      = { group = "com.google.dagger",          name = "hilt-android-compiler",          version.ref = "hilt" }
-hilt-navigation-compose            = { group = "androidx.hilt",              name = "hilt-navigation-compose",        version.ref = "hiltNavCompose" }
-hilt-work                          = { group = "androidx.hilt",              name = "hilt-work",                      version.ref = "hiltWork" }
-hilt-work-compiler                 = { group = "androidx.hilt",              name = "hilt-compiler",                  version.ref = "hiltWork" }
-
-# ── Network ───────────────────────────────────────────────────────────────
-retrofit-core                      = { group = "com.squareup.retrofit2",     name = "retrofit",                       version.ref = "retrofit" }
-retrofit-gson                      = { group = "com.squareup.retrofit2",     name = "converter-gson",                 version.ref = "retrofit" }
-# kotlinx.serialization Retrofit converter — replaces GsonConverterFactory in NetworkModule
-retrofit-kotlinx-converter         = { group = "com.jakewharton.retrofit",   name = "retrofit2-kotlinx-serialization-converter", version.ref = "retrofitKotlinxConverter" }
-okhttp-logging                     = { group = "com.squareup.okhttp3",       name = "logging-interceptor",            version.ref = "okhttp" }
-# gson kept in Gradle until minified-build smoke test confirms R8 rules are clean (todo.md §5.5 step 5)
-gson                               = { group = "com.google.code.gson",       name = "gson",                           version.ref = "gson" }
-
-# ── Async / Kotlin extensions ─────────────────────────────────────────────
-kotlinx-coroutines-android         = { group = "org.jetbrains.kotlinx",      name = "kotlinx-coroutines-android",     version.ref = "coroutines" }
-kotlinx-coroutines-test            = { group = "org.jetbrains.kotlinx",      name = "kotlinx-coroutines-test",        version.ref = "coroutines" }
-kotlinx-serialization-json         = { group = "org.jetbrains.kotlinx",      name = "kotlinx-serialization-json",     version.ref = "kotlinxSerialization" }
-
-# ── Image loading ─────────────────────────────────────────────────────────
-coil-compose                       = { group = "io.coil-kt.coil3",           name = "coil-compose",                   version.ref = "coil" }
-coil-network                       = { group = "io.coil-kt.coil3",           name = "coil-network-okhttp",            version.ref = "coil" }
-
-# ── UI enhancement ────────────────────────────────────────────────────────
-compose-shimmer                    = { group = "com.valentinilk.shimmer",    name = "compose-shimmer",                version.ref = "shimmer" }
-compose-charts                     = { group = "io.github.ehsannarmani",     name = "compose-charts",                 version.ref = "composeCharts" }
-lottie-compose                     = { group = "com.airbnb.android",         name = "lottie-compose",                 version.ref = "lottie" }
-# JitPack: com.github.skydoves:balloon:1.6.12
-balloon                            = { group = "com.github.skydoves",        name = "balloon",                        version.ref = "balloon" }
-
-# ── ML / CV ───────────────────────────────────────────────────────────────
-mlkit-text-recognition             = { group = "com.google.mlkit",           name = "text-recognition",               version.ref = "mlkitTextRec" }
-# TFLite runtime — direct Interpreter API for HeroClassifier (MobileNetV3Small portrait classifier)
-# Model asset: assets/mlbb_hero_classifier.tflite  Labels: assets/hero_classifier_labels.txt
-tensorflow-lite                    = { group = "org.tensorflow",              name = "tensorflow-lite",                version.ref = "tensorflowLite" }
-# JImageHash removed from Gradle: JitPack build is unavailable and the library uses
-# java.awt which does not exist on Android. PortraitMatcher.kt loads it via reflection
-# with runCatching so the dHash fallback is used automatically at runtime.
-
-# ── OEM / platform utilities ──────────────────────────────────────────────
-# JitPack: com.github.judemanutd:autostarter:1.1.0
-autostarter                        = { group = "com.github.judemanutd",      name = "autostarter",                    version.ref = "autoStarter" }
-
-# ── Logging ───────────────────────────────────────────────────────────────
-timber                             = { group = "com.jakewharton.timber",      name = "timber",                         version.ref = "timber" }
-
-# ── Pluto — embedded debug companion ─────────────────────────────────────
-# All artifacts on Maven Central under com.androidpluto / com.androidpluto.plugins.
-# Each plugin has a matching no-op that is a compile-time-only stub (zero runtime).
-# Core (floating bubble + plugin host)
-pluto                              = { group = "com.androidpluto",         name = "pluto",                    version.ref = "pluto" }
-pluto-no-op                        = { group = "com.androidpluto",         name = "pluto-no-op",              version.ref = "pluto" }
-# Plugin: exception / crash capture
-pluto-plugin-exceptions            = { group = "com.androidpluto.plugins", name = "exceptions",               version.ref = "pluto" }
-pluto-plugin-exceptions-no-op      = { group = "com.androidpluto.plugins", name = "exceptions-no-op",         version.ref = "pluto" }
-# Plugin: log viewer — shows all Timber output in the bubble panel
-pluto-plugin-logger                = { group = "com.androidpluto.plugins", name = "logger",                   version.ref = "pluto" }
-pluto-plugin-logger-no-op          = { group = "com.androidpluto.plugins", name = "logger-no-op",             version.ref = "pluto" }
-# Plugin: OkHttp network inspector (full request/response body viewer)
-pluto-plugin-network               = { group = "com.androidpluto.plugins", name = "network",                  version.ref = "pluto" }
-pluto-plugin-network-no-op         = { group = "com.androidpluto.plugins", name = "network-no-op",            version.ref = "pluto" }
-# Plugin: Room database browser
-pluto-plugin-rooms                 = { group = "com.androidpluto.plugins", name = "rooms-db",                 version.ref = "pluto" }
-pluto-plugin-rooms-no-op           = { group = "com.androidpluto.plugins", name = "rooms-db-no-op",           version.ref = "pluto" }
-# Plugin: DataStore preferences viewer
-pluto-plugin-datastore             = { group = "com.androidpluto.plugins", name = "datastore-pref",           version.ref = "pluto" }
-pluto-plugin-datastore-no-op       = { group = "com.androidpluto.plugins", name = "datastore-pref-no-op",     version.ref = "pluto" }
-# Plugin: SharedPreferences viewer
-pluto-plugin-prefs                 = { group = "com.androidpluto.plugins", name = "preferences",              version.ref = "pluto" }
-pluto-plugin-prefs-no-op           = { group = "com.androidpluto.plugins", name = "preferences-no-op",        version.ref = "pluto" }
-
-# ── Test ──────────────────────────────────────────────────────────────────
-junit                              = { group = "junit",                      name = "junit",                          version.ref = "junit" }
-junit-ext                          = { group = "androidx.test.ext",          name = "junit",                          version.ref = "junitExt" }
-espresso-core                      = { group = "androidx.test.espresso",     name = "espresso-core",                  version.ref = "espresso" }
-mockk                              = { group = "io.mockk",                   name = "mockk",                          version.ref = "mockk" }
-turbine                            = { group = "app.cash.turbine",           name = "turbine",                        version.ref = "turbine" }
-robolectric                        = { group = "org.robolectric",            name = "robolectric",                    version.ref = "robolectric" }
+coil-compose                       = { group = "io.coil-kt.coil3",    name = "coil-compose",              version.ref = "coil" }
 
 [plugins]
-android-application      = { id = "com.android.application",                    version.ref = "agp" }
-android-library          = { id = "com.android.library",                        version.ref = "agp" }
-kotlin-android           = { id = "org.jetbrains.kotlin.android",               version.ref = "kotlin" }
-kotlin-compose           = { id = "org.jetbrains.kotlin.plugin.compose",        version.ref = "kotlin" }
-kotlin-serialization     = { id = "org.jetbrains.kotlin.plugin.serialization",  version.ref = "kotlin" }
-ksp                      = { id = "com.google.devtools.ksp",                    version.ref = "ksp" }
-hilt                     = { id = "com.google.dagger.hilt.android",             version.ref = "hilt" }
+android-application = { id = "com.android.application",                version.ref = "agp" }
+# AGP 9 has built-in Kotlin, so org.jetbrains.kotlin.android is not applied.
+kotlin-compose      = { id = "org.jetbrains.kotlin.plugin.compose",     version.ref = "kotlin" }

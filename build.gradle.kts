@@ -1,16 +1,9 @@
+// Top-level build file. Only plugins the :app module actually applies are declared here.
+// (ksp / hilt / detekt / serialization / android-library were declared but never used;
+// `apply false` still forces Gradle to resolve them, so an unresolvable version broke
+// the build before any Kotlin was compiled.)
 plugins {
     alias(libs.plugins.android.application) apply false
-    alias(libs.plugins.android.library)     apply false
-    // kotlin.android removed: AGP 9.x auto-applies it; see app/build.gradle.kts note.
-    alias(libs.plugins.kotlin.compose)      apply false
-    alias(libs.plugins.kotlin.serialization) apply false
-    alias(libs.plugins.ksp)                 apply false
-    alias(libs.plugins.hilt)                apply false
-
-    // detekt static analysis — P3-03 (recommendations.md §5.1).
-    // Configured with a baseline so CI catches NEW violations without forcing
-    // instant cleanup of OverlayService (LargeClass rule) or other pre-existing debt.
-    // Generate baseline: ./gradlew detektBaseline
-    // Run analysis:      ./gradlew detekt
-    id("io.gitlab.arturbosch.detekt") version "1.23.8" apply false
+    // kotlin.android is intentionally absent: AGP 9.x has built-in Kotlin support.
+    alias(libs.plugins.kotlin.compose) apply false
 }
