@@ -1,20 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--
-    Theme.MLBBAssistant: base XML theme for the Activity window.
-    This app is Compose-only, so the parent only needs to:
-      1. Remove the system ActionBar (NoActionBar)
-      2. Provide a dark window background to prevent white flash before Compose renders
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-    android:Theme.Material.Light.NoActionBar is part of the Android SDK (API 21+)
-    and requires no external dependency.  com.google.android.material (MDC) is not
-    in this project's deps, so Theme.Material3.DayNight.NoActionBar is unavailable.
--->
-<resources>
-    <style name="Theme.MLBBAssistant" parent="android:Theme.Material.Light.NoActionBar">
-        <!-- Match SurfaceDark (#0D0D14) so the window is dark before Compose paints -->
-        <item name="android:windowBackground">#0D0D14</item>
-        <item name="android:statusBarColor">#0D0D14</item>
-        <item name="android:navigationBarColor">#0D0D14</item>
-        <item name="android:windowLightStatusBar">false</item>
-    </style>
-</resources>
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+    <application
+        android:allowBackup="false"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.MLBBPlus">
+
+        <activity
+            android:name=".ui.MainActivity"
+            android:exported="true"
+            android:windowSoftInputMode="adjustResize">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <service
+            android:name=".ui.WidgetOverlayService"
+            android:exported="false"
+            android:foregroundServiceType="specialUse">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="MLBB Plus overlay" />
+        </service>
+
+    </application>
+
+</manifest>
