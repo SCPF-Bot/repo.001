@@ -1,4 +1,4 @@
-package com.mlbb.assistant.presentation.overlay
+package com.mlbb.ui.widgets
 
 // V8 — (1) Drag restored with 8px tap threshold, no fling. (2) WRAP_CONTENT + NOT_TOUCH_MODAL kept.
 
