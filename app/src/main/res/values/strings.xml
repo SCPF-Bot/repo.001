@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="Theme.MLBBPlus" parent="android:Theme.Material.Light.NoActionBar">
-        <item name="android:windowBackground">@color/white</item>
-        <item name="android:textColor">@color/black</item>
-    </style>
+    <string name="app_name">MLBB Plus</string>
+    <string name="roam_guide_running">MLBB Plus running</string>
+    <string name="roam_guide_stop_hint">Tap Stop in the app to hide it</string>
 </resources>
