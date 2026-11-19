@@ -44,5 +44,4 @@ val TierS = MLBBPlusColors.Gold
 val TierSPlus = MLBBPlusColors.Gold
 val TierA = MLBBPlusColors.Gold
 val TierAPlus = MLBBPlusColors.Gold
-val TierB = MLBBPlusColors.GithubSeco
-ndary
+val TierB = MLBBPlusColors.GithubSecondary
