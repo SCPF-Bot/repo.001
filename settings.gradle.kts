@@ -22,14 +22,3 @@ rootProject.name = "MLBB Assistant 2.0"
 
 // ── Application ───────────────────────────────────────────────────────────────
 include(":app")
-
-// ── Core modules ─────────────────────────────────────────────────────────────
-include(":core:scoring")       // Pure-domain logic, models, scoring engine, advisors (zero android.* imports)
-include(":core:data")          // Room, DataStore, Retrofit, repositories
-include(":core:cv")            // MediaProjection, FrameProcessor, TFLite, ML Kit
-include(":core:designsystem")  // Shared Compose UI, Material 3 theme
-
-// ── Feature modules ───────────────────────────────────────────────────────────
-include(":feature:overlay")    // Floating UI, JetOverlay integration
-include(":feature:draft")      // Manual draft fallback, state machine UI
-include(":feature:settings")   // Calibration, safe-zones, telemetry toggles
