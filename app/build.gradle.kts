@@ -128,8 +128,6 @@ dependencies {
     implementation(libs.compose.material3)
     debugImplementation(libs.compose.ui.tooling)
 
-    // OPTIONAL - uncomment ONLY if GameData.load() uses kotlinx.serialization:
-    // (GameData in this batch uses org.json, so leave it commented out.)
     // OPTIONAL - uncomment ONLY if GameData.load() uses it:
     // If GameData parses heroes.json / items.json / patch_notes.json
     // with kotlinx.serialization, you MUST add this - it is currently
