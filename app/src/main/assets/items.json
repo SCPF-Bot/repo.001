@@ -1,0 +1,1902 @@
+{
+  "version": "2.2.23",
+  "updated": "2026-11-11",
+  "source": "MLBB Plus local data. Item IDs are stable MLBB Plus IDs (1000 Attack, 2000 Magic, 3000 Defense, 4000 Roam, 5000 Movement, 6000 Jungle) because Moonton does not publish a public official numeric item ID like hero IDs. Use this ID as primary key.",
+  "totalItems": 40,
+  "schema": {
+    "id": "Stable MLBB Plus item ID. Heroes.json coreItems and coreBuild reference this ID.",
+    "name": "Official in-game item name",
+    "category": "Attack / Magic / Defense / Movement / Roam / Jungle",
+    "price": "Gold cost in shop",
+    "stats": "Display strings for Items screen — shown as bullet list",
+    "statsDetailed": "Structured stats for future filtering / comparison",
+    "passive/active": "Passive and Active effects, or null if none",
+    "buildPath": "Component item names — shown as Build Path in Detail",
+    "counters/counteredBy": "Item IDs that counter / are countered by this item",
+    "synergiesHeroes/worksAgainstHeroes": "Hero IDs from heroes.json",
+    "image": "Relative path in assets/ — assets/items/{id}.webp"
+  },
+  "items": [
+    {
+      "id": 1001,
+      "name": "Blade of Despair",
+      "slug": "blade-of-despair",
+      "category": "Attack",
+      "tier": "S",
+      "price": 3010,
+      "sellPrice": 1806,
+      "stats": [
+        "+160 Physical Attack"
+      ],
+      "statsDetailed": [
+        {
+          "stat": "Physical Attack",
+          "value": 160
+        }
+      ],
+      "passive": {
+        "name": "Despair",
+        "description": "Dealing damage to enemies below 50% HP increases damage by 25%."
+      },
+      "active": null,
+      "description": "The highest Physical Attack item. Core for burst marksmen and assassins.",
+      "lore": "A blade that thirsts for despair.",
+      "buildPath": [
+        "Legion Sword",
+        "Blade of Despair Fragment"
+      ],
+      "buildsInto": [],
+      "image": "items/1001.webp",
+      "counters": [
+        3001,
+        3002
+      ],
+      "counteredBy": [
+        3001,
+        3003
+      ],
+      "synergiesHeroes": [
+        60,
+        31,
+        79
+      ],
+      "worksAgainstHeroes": [
+        15,
+        25,
+        61
+      ],
+      "recommendedFor": [
+        "Marksman",
+        "Assassin"
+      ],
+      "tags": [
+        "attack",
+        "burst"
+      ]
+    },
+    {
+      "id": 1002,
+      "name": "Demon Hunter Sword",
+      "slug": "demon-hunter-sword",
+      "category": "Attack",
+      "tier": "S",
+      "price": 2180,
+      "sellPrice": 1308,
+      "stats": [
+        "+35 Physical Attack",
+        "+25% Attack Speed",
+        "+10% Lifesteal"
+      ],
+      "statsDetailed": [
+        {
+          "stat": "Physical Attack",
+          "value": 35
+        },
+        {
+          "stat": "Attack Speed",
+          "value": "25%"
+        },
+        {
+          "stat": "Lifesteal",
+          "value": "10%"
+        }
+      ],
+      "passive": {
+        "name": "Devour",
+        "description": "Basic attacks deal extra Physical Damage equal to 9% of target's current HP and restore HP."
+      },
+      "active": null,
+      "description": "A feared blade forged from the bones of an ancient golem, designed to shred high-health foes. Its passive allows basic attacks to deal extra physical damage based on the target's current HP, while also granting lifesteal, making it essential for marksmen fighting tanky opponents.",
+      "lore": "\"A blade with its core carved from the bones of an Iceland Golem, the power that resides within almost seems to impart the fierce history of those giants in the time before they were slain.\"",
+      "buildPath": [
+        "Dagger",
+        "Vampire Mallet"
+      ],
+      "buildsInto": [],
+      "image": "items/1002.webp",
+      "counters": [
+        3001,
+        3003
+      ],
+      "counteredBy": [
+        3002,
+        3003,
+        3004
+      ],
+      "synergiesHeroes": [
+        60,
+        87,
+        31
+      ],
+      "worksAgainstHeroes": [
+        70,
+        104,
+        117
+      ],
+      "recommendedFor": [
+        "Marksman",
+        "Fighter"
+      ],
+      "tags": [
+        "attack",
+        "anti-tank"
+      ]
+    },
+    {
+      "id": 1003,
+      "name": "Berserker's Fury",
+      "slug": "berserkers-fury",
+      "category": "Attack",
+      "tier": "S",
+      "price": 2350,
+      "sellPrice": 1410,
+      "stats": [
+        "+65 Physical Attack",
+        "+25% Critical Chance"
+      ],
+      "statsDetailed": [
+        {
+          "stat": "Physical Attack",
+          "value": 65
+        },
+        {
+          "stat": "Crit Chance",
+          "value": "25%"
+        }
+      ],
+      "passive": {
+        "name": "Doom",
+        "description": "Crits deal +40% extra damage."
+      },
+      "active": null,
+      "description": "Core crit item for marksmen. Big burst on crits.",
+      "lore": "Fury of a berserker.",
+      "buildPath": [
+        "Blade of Despair Fragment",
+        "Javelin"
+      ],
+      "buildsInto": [],
+      "image": "items/1003.webp",
+      "counters": [],
+      "counteredBy": [
+        3001
+      ],
+      "synergiesHeroes": [
+        60,
+        13,
+        43
+      ],
+      "worksAgainstHeroes": [
+        15,
+        25
+      ],
+      "recommendedFor": [
+        "Marksman"
+      ],
+      "tags": [
+        "attack",
+        "crit"
+      ]
+    },
+    {
+      "id": 1004,
+      "name": "Malefic Roar",
+      "slug": "malefic-roar",
+      "category": "Attack",
+      "tier": "S",
+      "price": 2060,
+      "sellPrice": 1236,
+      "stats": [
+        "+60 Physical Attack",
+        "+30% Physical Penetration"
+      ],
+      "statsDetailed": [
+        {
+          "stat": "Physical Attack",
+          "value": 60
+        },
+        {
+          "stat": "Physical Penetration",
+          "value": "30%"
+        }
+      ],
+      "passive": {
+        "name": "Armor Buster",
+        "description": "Physical Penetration increases against high-defense targets."
+      },
+      "active": null,
+      "description": "Anti-tank penetration. Essential vs Defense-heavy teams.",
+      "lore": "Roar that shatters armor.",
+      "buildPath": [
+        "Legion Sword",
+        "Pirate's Dagger"
+      ],
+      "buildsInto": [],
+      "image": "items/1004.webp",
+      "counters": [
+        3001,
+        3002,
+        3003
+      ],
+      "counteredBy": [],
+      "synergiesHeroes": [
+        60,
+        79,
+        88
+      ],
+      "worksAgainstHeroes": [
+        70,
+        104,
+        6
+      ],
+      "recommendedFor": [
+        "Marksman",
+        "Fighter"
+      ],
+      "tags": [
+        "attack",
+        "penetration"
+      ]
+    },
+    {
+      "id": 1005,
+      "name": "Wind of Nature",
+      "slug": "wind-of-nature",
+      "category": "Attack",
+      "tier": "S",
+      "price": 1910,
+      "sellPrice": 1146,
+      "stats": [
+        "+30 Physical Attack",
+        "+20% Attack Speed",
+        "+10% Lifesteal"
+      ],
+      "statsDetailed": [
+        {
+          "stat": "Physical Attack",
+          "value": 30
+        },
+        {
+          "stat": "Attack Speed",
+          "value": "20%"
+        }
+      ],
+      "passive": null,
+      "active": {
+        "name": "Wind Chant",
+        "description": "Become immune to all Physical Damage for 2s. Cooldown 70s."
+      },
+      "description": "Defensive active for marksmen vs burst physical damage.",
+      "lore": "Wind that protects.",
+      "buildPath": [
+        "Dagger",
+        "Vampire Mallet"
+      ],
+      "buildsInto": [],
+      "image": "items/1005.webp",
+      "counters": [
+        1001
+      ],
+      "counteredBy": [],
+      "synergiesHeroes": [
+        60,
+        31,
+        88
+      ],
+      "worksAgainstHeroes": [
+        21,
+        47,
+        17
+      ],
+      "recommendedFor": [
+        "Marksman"
+      ],
+      "tags": [
+        "attack",
+        "defensive"
+      ]
+    },
+    {
+      "id": 1006,
+      "name": "Blade of Heptaseas",
+      "slug": "blade-of-heptaseas",
+      "category": "Attack",
+      "tier": "A",
+      "price": 1950,
+      "sellPrice": 1170,
+      "stats": [
+        "+65 Physical Attack",
+        "+250 HP",
+        "+15 Physical Penetration"
+      ],
+      "statsDetailed": [
+        {
+          "stat": "Physical Attack",
+          "value": 65
+        }
+      ],
+      "passive": {
+        "name": "Ambush",
+        "description": "Next basic attack after 5s out of combat deals bonus damage and slows."
+      },
+      "active": null,
+      "description": "Burst for assassins and poke fighters.",
+      "lore": "",
+      "buildPath": [],
+      "buildsInto": [],
+      "image": "items/1006.webp",
+      "counters": [],
+      "counteredBy": [],
+      "synergiesHeroes": [
+        3,
+        21,
+        47
+      ],
+      "worksAgainstHeroes": [
+        15,
+        25
+      ],
+      "recommendedFor": [
+        "Assassin"
+      ],
+      "tags": [
+        "attack"
+      ]
+    },
+    {
+      "id": 1007,
+      "name": "Hunter Strike",
+      "slug": "hunter-strike",
+      "category": "Attack",
+      "tier": "A",
+      "price": 2010,
+      "sellPrice": 1206,
+      "stats": [
+        "+80 Physical Attack",
+        "+10% Cooldown Reduction"
+      ],
+      "statsDetailed": [
+        {
+          "stat": "Physical Attack",
+          "value": 80
+        }
+      ],
+      "passive": {
+        "name": "Predator",
+        "description": "Dealing damage 5 times grants movement speed."
+      },
+      "active": null,
+      "description": "Chase and CDR for fighters.",
+      "lore": "",
+      "buildPath": [],
+      "buildsInto": [],
+      "image": "items/1007.webp",
+      "counters": [],
+      "counteredBy": [],
+      "synergiesHeroes": [
+        7,
+        58,
+        26
+      ],
+      "worksAgainstHeroes": [],
+      "recommendedFor": [
+        "Fighter"
+      ],
+      "tags": [
+        "attack"
+      ]
+    },
+    {
+      "id": 1008,
+      "name": "Endless Battle",
+      "slug": "endless-battle",
+      "category": "Attack",
+      "tier": "A",
+      "price": 2470,
+      "sellPrice": 1482,
+      "stats": [
+        "+65 Physical Attack",
+        "+25% Attack Speed",
+        "+15% Lifesteal",
+        "+250 HP",
+        "+5% Movement Speed"
+      ],
+      "statsDetailed": [
+        {
+          "stat": "Physical Attack",
+          "value": 65
+        }
+      ],
+      "passive": {
+        "name": "Divine Justice",
+        "description": "After using a skill, next basic attack deals true damage."
+      },
+      "active": null,
+      "description": "Hybrid sustain + true damage for skill-based fighters.",
+      "lore": "",
+      "buildPath": [],
+      "buildsInto": [],
+      "image": "items/1008.webp",
+      "counters": [],
+      "counteredBy": [],
+      "synergiesHeroes": [
+        26,
+        7,
+        58
+      ],
+      "worksAgainstHeroes": [],
+      "recommendedFor": [
+        "Fighter",
+        "Assassin"
+      ],
+      "tags": [
+        "attack"
+      ]
+    },
+    {
+      "id": 1009,
+      "name": "Windtalker",
+      "slug": "windtalker",
+      "category": "Attack",
+      "tier": "S",
+      "price": 1870,
+      "sellPrice": 1122,
+      "stats": [
+        "+40% Attack Speed",
+        "+20 Movement Speed",
+        "+10% Critical Chance"
+      ],
+      "statsDetailed": [
+        {
+          "stat": "Attack Speed",
+          "value": "40%"
+        }
+      ],
+      "passive": {
+        "name": "Typhoon",
+        "description": "Every 3s, next basic attack deals magic damage to nearby enemies."
+      },
+      "active": null,
+      "description": "Attack speed + wave clear for marksmen.",
+      "lore": "",
+      "buildPath": [
+        "Dagger",
+        "Javelin"
+      ],
+      "buildsInto": [],
+      "image": "items/1009.webp",
+      "counters": [],
+      "counteredBy": [],
+      "synergiesHeroes": [
+        60,
+        31,
+        100
+      ],
+      "worksAgainstHeroes": [],
+      "recommendedFor": [
+        "Marksman"
+      ],
+      "tags": [
+        "attack"
+      ]
+    },
+    {
+      "id": 1010,
+      "name": "Malefic Gun",
+      "slug": "malefic-gun",
+      "category": "Attack",
+      "tier": "S",
+      "price": 2100,
+      "sellPrice": 1260,
+      "stats": [
+        "+55 Physical Attack",
+        "+25% Attack Speed",
+        "+15% Physical Penetration"
+      ],
+      "statsDetailed": [
+        {
+          "stat": "Physical Attack",
+          "value": 55
+        }
+      ],
+      "passive": {
+        "name": "Malefic Energy",
+        "description": "Increases range and penetration on basic attacks."
+      },
+      "active": null,
+      "description": "Range + penetration for marksmen.",
+      "lore": "",
+      "buildPath": [],
+      "buildsInto": [],
+      "image": "items/1010.webp",
+      "counters": [],
+      "counteredBy": [],
+      "synergiesHeroes": [
+        60,
+        88,
+        31
+      ],
+      "worksAgainstHeroes": [],
+      "recommendedFor": [
+        "Marksman"
+      ],
+      "tags": [
+        "attack"
+      ]
+    },
+    {
+      "id": 1011,
+      "name": "Corrosion Scythe",
+      "slug": "corrosion-scythe",
+      "category": "Attack",
+      "tier": "A",
+      "price": 2150,
+      "sellPrice": 1290,
+      "stats": [
+        "+50 Physical Attack",
+        "+30% Attack Speed",
+        "+10% Lifesteal"
+      ],
+      "statsDetailed": [
+        {
+          "stat": "Physical Attack",
+          "value": 50
+        }
+      ],
+      "passive": {
+        "name": "Corrosion",
+        "description": "Basic attacks slow enemies and reduce their defense."
+      },
+      "active": null,
+      "description": "Slow + shred for kiting marksmen.",
+      "lore": "",
+      "buildPath": [],
+      "buildsInto": [],
+      "image": "items/1011.webp",
+      "counters": [],
+      "counteredBy": [],
+      "synergiesHeroes": [
+        94,
+        88,
+        60
+      ],
+      "worksAgainstHeroes": [],
+      "recommendedFor": [
+        "Marksman"
+      ],
+      "tags": [
+        "attack"
+      ]
+    },
+    {
+      "id": 1012,
+      "name": "Golden Staff",
+      "slug": "golden-staff",
+      "category": "Attack",
+      "tier": "A",
+      "price": 2250,
+      "sellPrice": 1350,
+      "stats": [
+        "+65 Physical Attack",
+        "+30% Attack Speed"
+      ],
+      "statsDetailed": [
+        {
+          "stat": "Physical Attack",
+          "value": 65
+        }
+      ],
+      "passive": {
+        "name": "Swift",
+        "description": "Attack speed increases with consecutive hits."
+      },
+      "active": null,
+      "description": "Stacking attack speed for DPS marksmen.",
+      "lore": "",
+      "buildPath": [],
+      "buildsInto": [],
+      "image": "items/1012.webp",
+      "counters": [],
+      "counteredBy": [],
+      "synergiesHeroes": [
+        60,
+        88
+      ],
+      "worksAgainstHeroes": [],
+      "recommendedFor": [
+        "Marksman"
+      ],
+      "tags": [
+        "attack"
+      ]
+    },
+    {
+      "id": 1013,
+      "name": "Haas's Claws",
+      "slug": "haas-claws",
+      "category": "Attack",
+      "tier": "A",
+      "price": 1810,
+      "sellPrice": 1086,
+      "stats": [
+        "+70 Physical Attack",
+        "+20% Lifesteal"
+      ],
+      "statsDetailed": [
+        {
+          "stat": "Physical Attack",
+          "value": 70
+        }
+      ],
+      "passive": {
+        "name": "Insanity",
+        "description": "When HP drops below 40%, gain extra lifesteal."
+      },
+      "active": null,
+      "description": "Sustain for marksmen who need to stay in fight.",
+      "lore": "",
+      "buildPath": [],
+      "buildsInto": [],
+      "image": "items/1013.webp",
+      "counters": [],
+      "counteredBy": [],
+      "synergiesHeroes": [
+        60,
+        12
+      ],
+      "worksAgainstHeroes": [],
+      "recommendedFor": [
+        "Marksman"
+      ],
+      "tags": [
+        "attack"
+      ]
+    },
+    {
+      "id": 1014,
+      "name": "War Axe",
+      "slug": "war-axe",
+      "category": "Attack",
+      "tier": "A",
+      "price": 2100,
+      "sellPrice": 1260,
+      "stats": [
+        "+55 Physical Attack",
+        "+550 HP",
+        "+10% Cooldown Reduction"
+      ],
+      "statsDetailed": [
+        {
+          "stat": "Physical Attack",
+          "value": 55
+        }
+      ],
+      "passive": {
+        "name": "Fighting Spirit",
+        "description": "Dealing damage stacks Physical Attack and Spell Vamp."
+      },
+      "active": null,
+      "description": "Brawler sustain for fighters.",
+      "lore": "",
+      "buildPath": [],
+      "buildsInto": [],
+      "image": "items/1014.webp",
+      "counters": [],
+      "counteredBy": [],
+      "synergiesHeroes": [
+        58,
+        26,
+        87
+      ],
+      "worksAgainstHeroes": [],
+      "recommendedFor": [
+        "Fighter"
+      ],
+      "tags": [
+        "attack"
+      ]
+    },
+    {
+      "id": 1015,
+      "name": "Sea Halberd",
+      "slug": "sea-halberd",
+      "category": "Attack",
+      "tier": "A",
+      "price": 1950,
+      "sellPrice": 1170,
+      "stats": [
+        "+80 Physical Attack",
+        "+25% Attack Speed"
+      ],
+      "statsDetailed": [
+        {
+          "stat": "Physical Attack",
+          "value": 80
+        }
+      ],
+      "passive": {
+        "name": "Life Drain",
+        "description": "Basic attacks reduce target's HP regen and shield."
+      },
+      "active": null,
+      "description": "Anti-heal for marksmen vs Estes / Rafaela / heal comps.",
+      "lore": "",
+      "buildPath": [],
+      "buildsInto": [],
+      "image": "items/1015.webp",
+      "counters": [
+        4001
+      ],
+      "counteredBy": [],
+      "synergiesHeroes": [
+        60,
+        88
+      ],
+      "worksAgainstHeroes": [
+        34,
+        14,
+        76
+      ],
+      "recommendedFor": [
+        "Marksman"
+      ],
+      "tags": [
+        "attack",
+        "anti-heal"
+      ]
+    },
+    {
+      "id": 1016,
+      "name": "Sky Piercer",
+      "slug": "sky-piercer",
+      "category": "Attack",
+      "tier": "A",
+      "price": 1950,
+      "sellPrice": 1170,
+      "stats": [
+        "+60 Physical Attack",
+        "+15% Cooldown Reduction"
+      ],
+      "statsDetailed": [
+        {
+          "stat": "Physical Attack",
+          "value": 60
+        }
+      ],
+      "passive": {
+        "name": "Pierce",
+        "description": "Execute enemies below threshold HP."
+      },
+      "active": null,
+      "description": "Execute for assassins.",
+      "lore": "",
+      "buildPath": [],
+      "buildsInto": [],
+      "image": "items/1016.webp",
+      "counters": [],
+      "counteredBy": [],
+      "synergiesHeroes": [
+        21,
+        47,
+        17
+      ],
+      "worksAgainstHeroes": [],
+      "recommendedFor": [
+        "Assassin"
+      ],
+      "tags": [
+        "attack"
+      ]
+    },
+    {
+      "id": 2001,
+      "name": "Lightning Truncheon",
+      "slug": "lightning-truncheon",
+      "category": "Magic",
+      "tier": "S",
+      "price": 2250,
+      "sellPrice": 1350,
+      "stats": [
+        "+75 Magic Power",
+        "+300 Mana",
+        "+10% Cooldown Reduction"
+      ],
+      "statsDetailed": [
+        {
+          "stat": "Magic Power",
+          "value": 75
+        }
+      ],
+      "passive": {
+        "name": "Resonate",
+        "description": "Every 6s, next skill deals bonus magic damage to nearby enemies."
+      },
+      "active": null,
+      "description": "Core burst mage item.",
+      "lore": "",
+      "buildPath": [],
+      "buildsInto": [],
+      "image": "items/2001.webp",
+      "counters": [],
+      "counteredBy": [
+        3005
+      ],
+      "synergiesHeroes": [
+        25,
+        68,
+        115
+      ],
+      "worksAgainstHeroes": [],
+      "recommendedFor": [
+        "Mage"
+      ],
+      "tags": [
+        "magic"
+      ]
+    },
+    {
+      "id": 2002,
+      "name": "Holy Crystal",
+      "slug": "holy-crystal",
+      "category": "Magic",
+      "tier": "S",
+      "price": 2180,
+      "sellPrice": 1308,
+      "stats": [
+        "+100 Magic Power"
+      ],
+      "statsDetailed": [
+        {
+          "stat": "Magic Power",
+          "value": 100
+        }
+      ],
+      "passive": {
+        "name": "Mystery",
+        "description": "Increases Magic Power by 21-35%."
+      },
+      "active": null,
+      "description": "Highest Magic Power. Late-game mage core.",
+      "lore": "",
+      "buildPath": [],
+      "buildsInto": [],
+      "image": "items/2002.webp",
+      "counters": [],
+      "counteredBy": [],
+      "synergiesHeroes": [
+        68,
+        115,
+        25
+      ],
+      "worksAgainstHeroes": [],
+      "recommendedFor": [
+        "Mage"
+      ],
+      "tags": [
+        "magic"
+      ]
+    },
+    {
+      "id": 2003,
+      "name": "Genius Wand",
+      "slug": "genius-wand",
+      "category": "Magic",
+      "tier": "A",
+      "price": 2000,
+      "sellPrice": 1200,
+      "stats": [
+        "+75 Magic Power",
+        "+5% Movement Speed"
+      ],
+      "statsDetailed": [
+        {
+          "stat": "Magic Power",
+          "value": 75
+        }
+      ],
+      "passive": {
+        "name": "Magic",
+        "description": "Dealing damage reduces enemy Magic Defense."
+      },
+      "active": null,
+      "description": "Magic penetration for mages.",
+      "lore": "",
+      "buildPath": [],
+      "buildsInto": [],
+      "image": "items/2003.webp",
+      "counters": [
+        3005
+      ],
+      "counteredBy": [],
+      "synergiesHeroes": [
+        68,
+        115
+      ],
+      "worksAgainstHeroes": [],
+      "recommendedFor": [
+        "Mage"
+      ],
+      "tags": [
+        "magic"
+      ]
+    },
+    {
+      "id": 2004,
+      "name": "Glowing Wand",
+      "slug": "glowing-wand",
+      "category": "Magic",
+      "tier": "A",
+      "price": 2120,
+      "sellPrice": 1272,
+      "stats": [
+        "+75 Magic Power",
+        "+400 HP",
+        "+5% Movement Speed"
+      ],
+      "statsDetailed": [
+        {
+          "stat": "Magic Power",
+          "value": 75
+        }
+      ],
+      "passive": {
+        "name": "Scorch",
+        "description": "Skills burn enemies over time."
+      },
+      "active": null,
+      "description": "Burn for poke mages.",
+      "lore": "",
+      "buildPath": [],
+      "buildsInto": [],
+      "image": "items/2004.webp",
+      "counters": [],
+      "counteredBy": [],
+      "synergiesHeroes": [
+        61,
+        73
+      ],
+      "worksAgainstHeroes": [],
+      "recommendedFor": [
+        "Mage"
+      ],
+      "tags": [
+        "magic"
+      ]
+    },
+    {
+      "id": 2005,
+      "name": "Blood Wings",
+      "slug": "blood-wings",
+      "category": "Magic",
+      "tier": "A",
+      "price": 3000,
+      "sellPrice": 1800,
+      "stats": [
+        "+150 Magic Power",
+        "+500 HP"
+      ],
+      "statsDetailed": [
+        {
+          "stat": "Magic Power",
+          "value": 150
+        }
+      ],
+      "passive": {
+        "name": "Guard",
+        "description": "Grants shield based on Magic Power."
+      },
+      "active": null,
+      "description": "Tanky mage late game.",
+      "lore": "",
+      "buildPath": [],
+      "buildsInto": [],
+      "image": "items/2005.webp",
+      "counters": [],
+      "counteredBy": [],
+      "synergiesHeroes": [
+        68,
+        115
+      ],
+      "worksAgainstHeroes": [],
+      "recommendedFor": [
+        "Mage"
+      ],
+      "tags": [
+        "magic"
+      ]
+    },
+    {
+      "id": 2006,
+      "name": "Winter Crown",
+      "slug": "winter-crown",
+      "category": "Magic",
+      "tier": "A",
+      "price": 1910,
+      "sellPrice": 1146,
+      "stats": [
+        "+60 Magic Power",
+        "+25 Magic Defense",
+        "+400 HP"
+      ],
+      "statsDetailed": [
+        {
+          "stat": "Magic Power",
+          "value": 60
+        }
+      ],
+      "passive": null,
+      "active": {
+        "name": "Frozen",
+        "description": "Become immune and untargetable for 2s. Cooldown 80s."
+      },
+      "description": "Mage defensive active — like Wind of Nature for mages.",
+      "lore": "",
+      "buildPath": [],
+      "buildsInto": [],
+      "image": "items/2006.webp",
+      "counters": [],
+      "counteredBy": [],
+      "synergiesHeroes": [
+        25,
+        68,
+        115
+      ],
+      "worksAgainstHeroes": [
+        21,
+        47
+      ],
+      "recommendedFor": [
+        "Mage"
+      ],
+      "tags": [
+        "magic",
+        "defensive"
+      ]
+    },
+    {
+      "id": 3001,
+      "name": "Blade Armor",
+      "slug": "blade-armor",
+      "category": "Defense",
+      "tier": "A",
+      "price": 2200,
+      "sellPrice": 1320,
+      "stats": [
+        "+90 Physical Defense",
+        "+20% Crit Damage Reduction"
+      ],
+      "statsDetailed": [
+        {
+          "stat": "Physical Defense",
+          "value": 90
+        }
+      ],
+      "passive": {
+        "name": "Blade",
+        "description": "Reflects Physical Damage back to attacker."
+      },
+      "active": null,
+      "description": "Anti-crit / anti-marksman armor.",
+      "lore": "",
+      "buildPath": [],
+      "buildsInto": [],
+      "image": "items/3001.webp",
+      "counters": [
+        1002,
+        1001
+      ],
+      "counteredBy": [
+        1004
+      ],
+      "synergiesHeroes": [
+        6,
+        78,
+        104
+      ],
+      "worksAgainstHeroes": [
+        60,
+        31,
+        88
+      ],
+      "recommendedFor": [
+        "Tank"
+      ],
+      "tags": [
+        "defense"
+      ]
+    },
+    {
+      "id": 3002,
+      "name": "Dominance Ice",
+      "slug": "dominance-ice",
+      "category": "Defense",
+      "tier": "A",
+      "price": 2010,
+      "sellPrice": 1206,
+      "stats": [
+        "+70 Physical Defense",
+        "+10% Cooldown Reduction",
+        "+500 Mana"
+      ],
+      "statsDetailed": [
+        {
+          "stat": "Physical Defense",
+          "value": 70
+        }
+      ],
+      "passive": {
+        "name": "Arctic Cold",
+        "description": "Reduces nearby enemies' Attack Speed and Lifesteal."
+      },
+      "active": null,
+      "description": "Anti-attack-speed aura. Must-have vs marksmen.",
+      "lore": "",
+      "buildPath": [],
+      "buildsInto": [],
+      "image": "items/3002.webp",
+      "counters": [
+        1002,
+        1001
+      ],
+      "counteredBy": [],
+      "synergiesHeroes": [
+        6,
+        78,
+        104
+      ],
+      "worksAgainstHeroes": [
+        60,
+        88,
+        31
+      ],
+      "recommendedFor": [
+        "Tank"
+      ],
+      "tags": [
+        "defense"
+      ]
+    },
+    {
+      "id": 3003,
+      "name": "Antique Cuirass",
+      "slug": "antique-cuirass",
+      "category": "Defense",
+      "tier": "A",
+      "price": 2170,
+      "sellPrice": 1302,
+      "stats": [
+        "+92 Physical Defense",
+        "+4 HP Regen",
+        "+600 HP"
+      ],
+      "statsDetailed": [
+        {
+          "stat": "Physical Defense",
+          "value": 92
+        }
+      ],
+      "passive": {
+        "name": "Deter",
+        "description": "Reduces attacker's Physical Attack when hit."
+      },
+      "active": null,
+      "description": "Anti-burst physical armor.",
+      "lore": "",
+      "buildPath": [],
+      "buildsInto": [],
+      "image": "items/3003.webp",
+      "counters": [
+        1002
+      ],
+      "counteredBy": [
+        1004
+      ],
+      "synergiesHeroes": [
+        6,
+        78
+      ],
+      "worksAgainstHeroes": [
+        60,
+        79
+      ],
+      "recommendedFor": [
+        "Tank"
+      ],
+      "tags": [
+        "defense"
+      ]
+    },
+    {
+      "id": 3004,
+      "name": "Athena's Shield",
+      "slug": "athenas-shield",
+      "category": "Defense",
+      "tier": "S",
+      "price": 2150,
+      "sellPrice": 1290,
+      "stats": [
+        "+62 Magic Defense",
+        "+1000 HP",
+        "+2 HP Regen"
+      ],
+      "statsDetailed": [
+        {
+          "stat": "Magic Defense",
+          "value": 62
+        }
+      ],
+      "passive": {
+        "name": "Shield",
+        "description": "Grants magic shield when taking magic damage."
+      },
+      "active": null,
+      "description": "Core magic defense vs burst mages.",
+      "lore": "",
+      "buildPath": [],
+      "buildsInto": [],
+      "image": "items/3004.webp",
+      "counters": [
+        2001,
+        2002
+      ],
+      "counteredBy": [
+        2003
+      ],
+      "synergiesHeroes": [
+        6,
+        78,
+        104
+      ],
+      "worksAgainstHeroes": [
+        25,
+        68,
+        115
+      ],
+      "recommendedFor": [
+        "Tank"
+      ],
+      "tags": [
+        "defense"
+      ]
+    },
+    {
+      "id": 3005,
+      "name": "Radiant Armor",
+      "slug": "radiant-armor",
+      "category": "Defense",
+      "tier": "A",
+      "price": 1880,
+      "sellPrice": 1128,
+      "stats": [
+        "+52 Magic Defense",
+        "+950 HP",
+        "+12 HP Regen"
+      ],
+      "statsDetailed": [
+        {
+          "stat": "Magic Defense",
+          "value": 52
+        }
+      ],
+      "passive": {
+        "name": "Holy Blessing",
+        "description": "Taking magic damage increases Magic Defense stacks."
+      },
+      "active": null,
+      "description": "Anti-poke magic armor vs sustained magic damage.",
+      "lore": "",
+      "buildPath": [],
+      "buildsInto": [],
+      "image": "items/3005.webp",
+      "counters": [
+        2001,
+        2004
+      ],
+      "counteredBy": [],
+      "synergiesHeroes": [
+        6,
+        78
+      ],
+      "worksAgainstHeroes": [
+        61,
+        73
+      ],
+      "recommendedFor": [
+        "Tank"
+      ],
+      "tags": [
+        "defense"
+      ]
+    },
+    {
+      "id": 3006,
+      "name": "Immortality",
+      "slug": "immortality",
+      "category": "Defense",
+      "tier": "S",
+      "price": 2120,
+      "sellPrice": 1272,
+      "stats": [
+        "+800 HP",
+        "+40 Physical Defense"
+      ],
+      "statsDetailed": [
+        {
+          "stat": "HP",
+          "value": 800
+        }
+      ],
+      "passive": {
+        "name": "Immortal",
+        "description": "Revive after death with 16% HP and shield. Cooldown 210s."
+      },
+      "active": null,
+      "description": "Second life. Core for Roam / initiators.",
+      "lore": "",
+      "buildPath": [],
+      "buildsInto": [],
+      "image": "items/3006.webp",
+      "counters": [],
+      "counteredBy": [],
+      "synergiesHeroes": [
+        6,
+        78,
+        104,
+        26
+      ],
+      "worksAgainstHeroes": [],
+      "recommendedFor": [
+        "Tank",
+        "Fighter"
+      ],
+      "tags": [
+        "defense"
+      ]
+    },
+    {
+      "id": 3007,
+      "name": "Twilight Armor",
+      "slug": "twilight-armor",
+      "category": "Defense",
+      "tier": "A",
+      "price": 2100,
+      "sellPrice": 1260,
+      "stats": [
+        "+1200 HP",
+        "+20 Physical Defense"
+      ],
+      "statsDetailed": [
+        {
+          "stat": "HP",
+          "value": 1200
+        }
+      ],
+      "passive": {
+        "name": "Twilight",
+        "description": "Caps damage from a single hit."
+      },
+      "active": null,
+      "description": "Anti-burst vs one-shot mages / assassins.",
+      "lore": "",
+      "buildPath": [],
+      "buildsInto": [],
+      "image": "items/3007.webp",
+      "counters": [
+        1001,
+        2002
+      ],
+      "counteredBy": [],
+      "synergiesHeroes": [
+        6,
+        78
+      ],
+      "worksAgainstHeroes": [
+        68,
+        115,
+        21
+      ],
+      "recommendedFor": [
+        "Tank"
+      ],
+      "tags": [
+        "defense"
+      ]
+    },
+    {
+      "id": 3008,
+      "name": "Guardian Helmet",
+      "slug": "guardian-helmet",
+      "category": "Defense",
+      "tier": "A",
+      "price": 2200,
+      "sellPrice": 1320,
+      "stats": [
+        "+1550 HP",
+        "+20 HP Regen"
+      ],
+      "statsDetailed": [
+        {
+          "stat": "HP",
+          "value": 1550
+        }
+      ],
+      "passive": {
+        "name": "Recovery",
+        "description": "Regenerates HP rapidly out of combat."
+      },
+      "active": null,
+      "description": "Sustain tank helmet.",
+      "lore": "",
+      "buildPath": [],
+      "buildsInto": [],
+      "image": "items/3008.webp",
+      "counters": [],
+      "counteredBy": [],
+      "synergiesHeroes": [
+        6,
+        104
+      ],
+      "worksAgainstHeroes": [],
+      "recommendedFor": [
+        "Tank"
+      ],
+      "tags": [
+        "defense"
+      ]
+    },
+    {
+      "id": 4001,
+      "name": "Fleeting Time",
+      "slug": "fleeting-time",
+      "category": "Roam",
+      "tier": "A",
+      "price": 2010,
+      "sellPrice": 1206,
+      "stats": [
+        "+30 Magic Power",
+        "+600 HP",
+        "+15% Cooldown Reduction"
+      ],
+      "statsDetailed": [
+        {
+          "stat": "Magic Power",
+          "value": 30
+        }
+      ],
+      "passive": {
+        "name": "Timestream",
+        "description": "Assists reduce Ultimate cooldown."
+      },
+      "active": null,
+      "description": "Ultimate spam for supports / Roam.",
+      "lore": "",
+      "buildPath": [],
+      "buildsInto": [],
+      "image": "items/4001.webp",
+      "counters": [],
+      "counteredBy": [],
+      "synergiesHeroes": [
+        34,
+        55,
+        102
+      ],
+      "worksAgainstHeroes": [],
+      "recommendedFor": [
+        "Support",
+        "Roam"
+      ],
+      "tags": [
+        "roam"
+      ]
+    },
+    {
+      "id": 4002,
+      "name": "Flask of the Oasis",
+      "slug": "flask-of-the-oasis",
+      "category": "Roam",
+      "tier": "A",
+      "price": 1950,
+      "sellPrice": 1170,
+      "stats": [
+        "+60 Magic Power",
+        "+400 HP",
+        "+12% Cooldown Reduction"
+      ],
+      "statsDetailed": [
+        {
+          "stat": "Magic Power",
+          "value": 60
+        }
+      ],
+      "passive": {
+        "name": "Oasis",
+        "description": "Heals and shields grant extra shield."
+      },
+      "active": {
+        "name": "Oasis Blessing",
+        "description": "Grants shield to nearby allies."
+      },
+      "description": "Healer support item.",
+      "lore": "",
+      "buildPath": [],
+      "buildsInto": [],
+      "image": "items/4002.webp",
+      "counters": [],
+      "counteredBy": [
+        1015
+      ],
+      "synergiesHeroes": [
+        34,
+        14,
+        55
+      ],
+      "worksAgainstHeroes": [],
+      "recommendedFor": [
+        "Support"
+      ],
+      "tags": [
+        "roam"
+      ]
+    },
+    {
+      "id": 4003,
+      "name": "Courage Mask",
+      "slug": "courage-mask",
+      "category": "Roam",
+      "tier": "A",
+      "price": 1800,
+      "sellPrice": 1080,
+      "stats": [
+        "+700 HP",
+        "+10% Cooldown Reduction"
+      ],
+      "statsDetailed": [
+        {
+          "stat": "HP",
+          "value": 700
+        }
+      ],
+      "passive": {
+        "name": "Courage",
+        "description": "Grants bonus damage to nearby allies."
+      },
+      "active": {
+        "name": "Encourage",
+        "description": "Boosts nearby allies' attack."
+      },
+      "description": "Roam mask — team buff active.",
+      "lore": "",
+      "buildPath": [],
+      "buildsInto": [],
+      "image": "items/4003.webp",
+      "counters": [],
+      "counteredBy": [],
+      "synergiesHeroes": [
+        6,
+        78,
+        104
+      ],
+      "worksAgainstHeroes": [],
+      "recommendedFor": [
+        "Roam"
+      ],
+      "tags": [
+        "roam"
+      ]
+    },
+    {
+      "id": 4004,
+      "name": "Favor",
+      "slug": "favor",
+      "category": "Roam",
+      "tier": "A",
+      "price": 1800,
+      "sellPrice": 1080,
+      "stats": [
+        "+700 HP",
+        "+12% Cooldown Reduction"
+      ],
+      "statsDetailed": [
+        {
+          "stat": "HP",
+          "value": 700
+        }
+      ],
+      "passive": {
+        "name": "Favor",
+        "description": "Heals lowest-HP ally periodically."
+      },
+      "active": null,
+      "description": "Passive heal Roam blessing.",
+      "lore": "",
+      "buildPath": [],
+      "buildsInto": [],
+      "image": "items/4004.webp",
+      "counters": [],
+      "counteredBy": [
+        1015
+      ],
+      "synergiesHeroes": [
+        34,
+        55
+      ],
+      "worksAgainstHeroes": [],
+      "recommendedFor": [
+        "Roam"
+      ],
+      "tags": [
+        "roam"
+      ]
+    },
+    {
+      "id": 5001,
+      "name": "Swift Boots",
+      "slug": "swift-boots",
+      "category": "Movement",
+      "tier": "A",
+      "price": 710,
+      "sellPrice": 426,
+      "stats": [
+        "+40 Movement Speed",
+        "+15% Attack Speed"
+      ],
+      "statsDetailed": [
+        {
+          "stat": "Movement Speed",
+          "value": 40
+        }
+      ],
+      "passive": null,
+      "active": null,
+      "description": "Attack speed boots for marksmen.",
+      "lore": "",
+      "buildPath": [],
+      "buildsInto": [],
+      "image": "items/5001.webp",
+      "counters": [],
+      "counteredBy": [],
+      "synergiesHeroes": [
+        60,
+        88,
+        31
+      ],
+      "worksAgainstHeroes": [],
+      "recommendedFor": [
+        "Marksman"
+      ],
+      "tags": [
+        "movement"
+      ]
+    },
+    {
+      "id": 5002,
+      "name": "Warrior Boots",
+      "slug": "warrior-boots",
+      "category": "Movement",
+      "tier": "A",
+      "price": 720,
+      "sellPrice": 432,
+      "stats": [
+        "+40 Movement Speed",
+        "+22 Physical Defense"
+      ],
+      "statsDetailed": [
+        {
+          "stat": "Movement Speed",
+          "value": 40
+        }
+      ],
+      "passive": null,
+      "active": null,
+      "description": "Physical defense boots.",
+      "lore": "",
+      "buildPath": [],
+      "buildsInto": [],
+      "image": "items/5002.webp",
+      "counters": [],
+      "counteredBy": [],
+      "synergiesHeroes": [
+        6,
+        78
+      ],
+      "worksAgainstHeroes": [],
+      "recommendedFor": [
+        "Tank",
+        "Fighter"
+      ],
+      "tags": [
+        "movement"
+      ]
+    },
+    {
+      "id": 5003,
+      "name": "Tough Boots",
+      "slug": "tough-boots",
+      "category": "Movement",
+      "tier": "A",
+      "price": 700,
+      "sellPrice": 420,
+      "stats": [
+        "+40 Movement Speed",
+        "+22 Magic Defense"
+      ],
+      "statsDetailed": [
+        {
+          "stat": "Movement Speed",
+          "value": 40
+        }
+      ],
+      "passive": {
+        "name": "Fortitude",
+        "description": "Reduces CC duration."
+      },
+      "active": null,
+      "description": "Anti-CC boots vs mages.",
+      "lore": "",
+      "buildPath": [],
+      "buildsInto": [],
+      "image": "items/5003.webp",
+      "counters": [],
+      "counteredBy": [],
+      "synergiesHeroes": [
+        6,
+        78
+      ],
+      "worksAgainstHeroes": [
+        25,
+        68
+      ],
+      "recommendedFor": [
+        "Tank"
+      ],
+      "tags": [
+        "movement"
+      ]
+    },
+    {
+      "id": 5004,
+      "name": "Magic Shoes",
+      "slug": "magic-shoes",
+      "category": "Movement",
+      "tier": "A",
+      "price": 710,
+      "sellPrice": 426,
+      "stats": [
+        "+40 Movement Speed",
+        "+10% Cooldown Reduction"
+      ],
+      "statsDetailed": [
+        {
+          "stat": "Movement Speed",
+          "value": 40
+        }
+      ],
+      "passive": null,
+      "active": null,
+      "description": "CDR boots for mages / supports.",
+      "lore": "",
+      "buildPath": [],
+      "buildsInto": [],
+      "image": "items/5004.webp",
+      "counters": [],
+      "counteredBy": [],
+      "synergiesHeroes": [
+        25,
+        68,
+        34
+      ],
+      "worksAgainstHeroes": [],
+      "recommendedFor": [
+        "Mage",
+        "Support"
+      ],
+      "tags": [
+        "movement"
+      ]
+    },
+    {
+      "id": 5005,
+      "name": "Rapid Boots",
+      "slug": "rapid-boots",
+      "category": "Movement",
+      "tier": "A",
+      "price": 750,
+      "sellPrice": 450,
+      "stats": [
+        "+65 Movement Speed"
+      ],
+      "statsDetailed": [
+        {
+          "stat": "Movement Speed",
+          "value": 65
+        }
+      ],
+      "passive": {
+        "name": "Rapid",
+        "description": "Extra movement speed out of combat."
+      },
+      "active": null,
+      "description": "Roam speed boots for fast rotations.",
+      "lore": "",
+      "buildPath": [],
+      "buildsInto": [],
+      "image": "items/5005.webp",
+      "counters": [],
+      "counteredBy": [],
+      "synergiesHeroes": [
+        6,
+        78,
+        102
+      ],
+      "worksAgainstHeroes": [],
+      "recommendedFor": [
+        "Roam"
+      ],
+      "tags": [
+        "movement"
+      ]
+    },
+    {
+      "id": 6001,
+      "name": "Starlium Scythe",
+      "slug": "starlium-scythe",
+      "category": "Jungle",
+      "tier": "A",
+      "price": 1950,
+      "sellPrice": 1170,
+      "stats": [
+        "+70 Magic Power",
+        "+15% Cooldown Reduction"
+      ],
+      "statsDetailed": [
+        {
+          "stat": "Magic Power",
+          "value": 70
+        }
+      ],
+      "passive": {
+        "name": "Starlium",
+        "description": "Skills grant stacking Magic Power."
+      },
+      "active": null,
+      "description": "Mage jungle item.",
+      "lore": "",
+      "buildPath": [],
+      "buildsInto": [],
+      "image": "items/6001.webp",
+      "counters": [],
+      "counteredBy": [],
+      "synergiesHeroes": [
+        25,
+        68
+      ],
+      "worksAgainstHeroes": [],
+      "recommendedFor": [
+        "Jungle"
+      ],
+      "tags": [
+        "jungle"
+      ]
+    }
+  ]
+}

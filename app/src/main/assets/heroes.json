@@ -1,0 +1,7479 @@
+{
+  "version": "2.2.23",
+  "updated": "2026-11-11",
+  "source": "MLBB Plus local data. Hero IDs are official Moonton hero IDs (Miya=1, Hanabi=60, Popol and Kupa=94, etc.). Image files: assets/heroes/{id}.webp",
+  "totalHeroes": 130,
+  "schema": {
+    "id": "Official Moonton hero ID, stable across patches. Use this as primary key, NOT name.",
+    "name": "Display name",
+    "role": "Primary role: Tank / Fighter / Assassin / Mage / Marksman / Support",
+    "secondaryRole": "Secondary role or null",
+    "lane": "Best lane: Gold Lane / Mid Lane / EXP Lane / Jungle / Roam",
+    "tier": "S / A / B — current meta tier in patch 2.2.23",
+    "coreItems": "List of item IDs from items.json",
+    "counters/counteredBy/synergies": "Lists of hero IDs from this file",
+    "image": "Relative path in assets/"
+  },
+  "heroes": [
+    {
+      "id": 1,
+      "name": "Miya",
+      "slug": "miya",
+      "title": "",
+      "role": "Marksman",
+      "secondaryRole": null,
+      "lane": "Gold Lane",
+      "lanes": [
+        "Gold Lane"
+      ],
+      "tier": "A",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/1.webp",
+      "portrait": "heroes/1.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Marksman",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "marksman",
+        "gold-lane"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 2,
+      "name": "Balmond",
+      "slug": "balmond",
+      "title": "",
+      "role": "Fighter",
+      "secondaryRole": "Tank",
+      "lane": "EXP Lane",
+      "lanes": [
+        "EXP Lane"
+      ],
+      "tier": "B",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/2.webp",
+      "portrait": "heroes/2.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Fighter",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "fighter",
+        "exp-lane"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 3,
+      "name": "Saber",
+      "slug": "saber",
+      "title": "",
+      "role": "Assassin",
+      "secondaryRole": null,
+      "lane": "Jungle",
+      "lanes": [
+        "Jungle"
+      ],
+      "tier": "A",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/3.webp",
+      "portrait": "heroes/3.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Assassin",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "assassin",
+        "jungle"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 4,
+      "name": "Alice",
+      "slug": "alice",
+      "title": "",
+      "role": "Mage",
+      "secondaryRole": "Tank",
+      "lane": "Mid Lane",
+      "lanes": [
+        "Mid Lane"
+      ],
+      "tier": "B",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/4.webp",
+      "portrait": "heroes/4.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Mage",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "mage",
+        "mid-lane"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 5,
+      "name": "Nana",
+      "slug": "nana",
+      "title": "",
+      "role": "Mage",
+      "secondaryRole": "Support",
+      "lane": "Mid Lane",
+      "lanes": [
+        "Mid Lane"
+      ],
+      "tier": "A",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/5.webp",
+      "portrait": "heroes/5.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Mage",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "mage",
+        "mid-lane"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 6,
+      "name": "Tigreal",
+      "slug": "tigreal",
+      "title": "Warrior of Dawn",
+      "role": "Tank",
+      "secondaryRole": null,
+      "lane": "Roam",
+      "lanes": [
+        "Roam"
+      ],
+      "tier": "S",
+      "difficulty": 3,
+      "specialty": [
+        "Crowd Control",
+        "Initiator"
+      ],
+      "winRate": 0.55,
+      "pickRate": 0.08,
+      "banRate": 0.09,
+      "patchTrend": 0.02,
+      "isOP": false,
+      "isMeta": true,
+      "releaseYear": 2016,
+      "image": "heroes/6.webp",
+      "portrait": "heroes/6.webp",
+      "skills": [
+        {
+          "name": "Fearless",
+          "type": "Passive",
+          "description": "Gains Physical and Magic Defense when hit by basic attacks."
+        },
+        {
+          "name": "Attack Wave",
+          "type": "Skill 1",
+          "description": "Sends a shockwave that damages and slows enemies."
+        },
+        {
+          "name": "Sacred Hammer",
+          "type": "Skill 2",
+          "description": "Charges and slams, knocking enemies airborne."
+        },
+        {
+          "name": "Implosion",
+          "type": "Ultimate",
+          "description": "Blinks and pulls all nearby enemies to him, stunning them."
+        }
+      ],
+      "recommendedSpells": [
+        "Flicker",
+        "Revitalize"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Tank",
+        "talents": [
+          "Vitality",
+          "Tenacity",
+          "Concussive Blast"
+        ]
+      },
+      "coreItems": [
+        3001,
+        3002,
+        3003
+      ],
+      "coreBuild": [
+        {
+          "itemId": 3001,
+          "priority": 1
+        },
+        {
+          "itemId": 3002,
+          "priority": 2
+        },
+        {
+          "itemId": 3003,
+          "priority": 3
+        }
+      ],
+      "counters": [
+        60,
+        15,
+        25
+      ],
+      "counteredBy": [
+        78,
+        104,
+        47
+      ],
+      "synergies": [
+        60,
+        68,
+        115
+      ],
+      "countersReason": "Best engage tank. Loses to anti-CC and high mobility.",
+      "bestPartners": [
+        "Hanabi",
+        "Lunox",
+        "Xavier"
+      ],
+      "lore": "The leader of the Light's Order, sworn to protect the Moniyan Empire.",
+      "stats": {
+        "hp": 2890,
+        "hpGrowth": 210,
+        "attack": 112,
+        "attackGrowth": 8,
+        "defense": 25,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "tank",
+        "roam"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 7,
+      "name": "Alucard",
+      "slug": "alucard",
+      "title": "",
+      "role": "Fighter",
+      "secondaryRole": "Assassin",
+      "lane": "Jungle",
+      "lanes": [
+        "Jungle"
+      ],
+      "tier": "A",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/7.webp",
+      "portrait": "heroes/7.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Fighter",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "fighter",
+        "jungle"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 8,
+      "name": "Karina",
+      "slug": "karina",
+      "title": "",
+      "role": "Assassin",
+      "secondaryRole": "Mage",
+      "lane": "Jungle",
+      "lanes": [
+        "Jungle"
+      ],
+      "tier": "A",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/8.webp",
+      "portrait": "heroes/8.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Assassin",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "assassin",
+        "jungle"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 9,
+      "name": "Akai",
+      "slug": "akai",
+      "title": "",
+      "role": "Tank",
+      "secondaryRole": "Fighter",
+      "lane": "Roam",
+      "lanes": [
+        "Roam"
+      ],
+      "tier": "A",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/9.webp",
+      "portrait": "heroes/9.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Tank",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "tank",
+        "roam"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 10,
+      "name": "Franco",
+      "slug": "franco",
+      "title": "",
+      "role": "Tank",
+      "secondaryRole": null,
+      "lane": "Roam",
+      "lanes": [
+        "Roam"
+      ],
+      "tier": "A",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/10.webp",
+      "portrait": "heroes/10.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Tank",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "tank",
+        "roam"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 11,
+      "name": "Bane",
+      "slug": "bane",
+      "title": "",
+      "role": "Fighter",
+      "secondaryRole": null,
+      "lane": "EXP Lane",
+      "lanes": [
+        "EXP Lane"
+      ],
+      "tier": "B",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/11.webp",
+      "portrait": "heroes/11.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Fighter",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "fighter",
+        "exp-lane"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 12,
+      "name": "Bruno",
+      "slug": "bruno",
+      "title": "",
+      "role": "Marksman",
+      "secondaryRole": null,
+      "lane": "Gold Lane",
+      "lanes": [
+        "Gold Lane"
+      ],
+      "tier": "A",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/12.webp",
+      "portrait": "heroes/12.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Marksman",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "marksman",
+        "gold-lane"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 13,
+      "name": "Clint",
+      "slug": "clint",
+      "title": "",
+      "role": "Marksman",
+      "secondaryRole": null,
+      "lane": "Gold Lane",
+      "lanes": [
+        "Gold Lane"
+      ],
+      "tier": "S",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/13.webp",
+      "portrait": "heroes/13.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Marksman",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "marksman",
+        "gold-lane"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 14,
+      "name": "Rafaela",
+      "slug": "rafaela",
+      "title": "",
+      "role": "Support",
+      "secondaryRole": "Mage",
+      "lane": "Roam",
+      "lanes": [
+        "Roam"
+      ],
+      "tier": "A",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/14.webp",
+      "portrait": "heroes/14.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Support",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "support",
+        "roam"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 15,
+      "name": "Eudora",
+      "slug": "eudora",
+      "title": "",
+      "role": "Mage",
+      "secondaryRole": null,
+      "lane": "Mid Lane",
+      "lanes": [
+        "Mid Lane"
+      ],
+      "tier": "A",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/15.webp",
+      "portrait": "heroes/15.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Mage",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "mage",
+        "mid-lane"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 16,
+      "name": "Zilong",
+      "slug": "zilong",
+      "title": "",
+      "role": "Fighter",
+      "secondaryRole": "Assassin",
+      "lane": "EXP Lane",
+      "lanes": [
+        "EXP Lane"
+      ],
+      "tier": "B",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/16.webp",
+      "portrait": "heroes/16.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Fighter",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "fighter",
+        "exp-lane"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 17,
+      "name": "Fanny",
+      "slug": "fanny",
+      "title": "",
+      "role": "Assassin",
+      "secondaryRole": null,
+      "lane": "Jungle",
+      "lanes": [
+        "Jungle"
+      ],
+      "tier": "S",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/17.webp",
+      "portrait": "heroes/17.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Assassin",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "assassin",
+        "jungle"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 18,
+      "name": "Layla",
+      "slug": "layla",
+      "title": "",
+      "role": "Marksman",
+      "secondaryRole": null,
+      "lane": "Gold Lane",
+      "lanes": [
+        "Gold Lane"
+      ],
+      "tier": "B",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/18.webp",
+      "portrait": "heroes/18.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Marksman",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "marksman",
+        "gold-lane"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 19,
+      "name": "Minotaur",
+      "slug": "minotaur",
+      "title": "",
+      "role": "Tank",
+      "secondaryRole": "Support",
+      "lane": "Roam",
+      "lanes": [
+        "Roam"
+      ],
+      "tier": "A",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/19.webp",
+      "portrait": "heroes/19.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Tank",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "tank",
+        "roam"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 20,
+      "name": "Lolita",
+      "slug": "lolita",
+      "title": "",
+      "role": "Tank",
+      "secondaryRole": "Support",
+      "lane": "Roam",
+      "lanes": [
+        "Roam"
+      ],
+      "tier": "A",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/20.webp",
+      "portrait": "heroes/20.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Tank",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "tank",
+        "roam"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 21,
+      "name": "Hayabusa",
+      "slug": "hayabusa",
+      "title": "",
+      "role": "Assassin",
+      "secondaryRole": null,
+      "lane": "Jungle",
+      "lanes": [
+        "Jungle"
+      ],
+      "tier": "S",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/21.webp",
+      "portrait": "heroes/21.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Assassin",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "assassin",
+        "jungle"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 22,
+      "name": "Freya",
+      "slug": "freya",
+      "title": "",
+      "role": "Fighter",
+      "secondaryRole": null,
+      "lane": "EXP Lane",
+      "lanes": [
+        "EXP Lane"
+      ],
+      "tier": "A",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/22.webp",
+      "portrait": "heroes/22.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Fighter",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "fighter",
+        "exp-lane"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 23,
+      "name": "Gord",
+      "slug": "gord",
+      "title": "",
+      "role": "Mage",
+      "secondaryRole": null,
+      "lane": "Mid Lane",
+      "lanes": [
+        "Mid Lane"
+      ],
+      "tier": "A",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/23.webp",
+      "portrait": "heroes/23.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Mage",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "mage",
+        "mid-lane"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 24,
+      "name": "Natalia",
+      "slug": "natalia",
+      "title": "",
+      "role": "Assassin",
+      "secondaryRole": null,
+      "lane": "Roam",
+      "lanes": [
+        "Roam"
+      ],
+      "tier": "A",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/24.webp",
+      "portrait": "heroes/24.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Assassin",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "assassin",
+        "roam"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 25,
+      "name": "Kagura",
+      "slug": "kagura",
+      "title": "",
+      "role": "Mage",
+      "secondaryRole": null,
+      "lane": "Mid Lane",
+      "lanes": [
+        "Mid Lane"
+      ],
+      "tier": "S",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/25.webp",
+      "portrait": "heroes/25.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Mage",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "mage",
+        "mid-lane"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 26,
+      "name": "Chou",
+      "slug": "chou",
+      "title": "",
+      "role": "Fighter",
+      "secondaryRole": null,
+      "lane": "EXP Lane",
+      "lanes": [
+        "EXP Lane"
+      ],
+      "tier": "S",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/26.webp",
+      "portrait": "heroes/26.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Fighter",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "fighter",
+        "exp-lane"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 27,
+      "name": "Sun",
+      "slug": "sun",
+      "title": "",
+      "role": "Fighter",
+      "secondaryRole": null,
+      "lane": "EXP Lane",
+      "lanes": [
+        "EXP Lane"
+      ],
+      "tier": "B",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/27.webp",
+      "portrait": "heroes/27.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Fighter",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "fighter",
+        "exp-lane"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 28,
+      "name": "Alpha",
+      "slug": "alpha",
+      "title": "",
+      "role": "Fighter",
+      "secondaryRole": null,
+      "lane": "EXP Lane",
+      "lanes": [
+        "EXP Lane"
+      ],
+      "tier": "A",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/28.webp",
+      "portrait": "heroes/28.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Fighter",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "fighter",
+        "exp-lane"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 29,
+      "name": "Ruby",
+      "slug": "ruby",
+      "title": "",
+      "role": "Fighter",
+      "secondaryRole": "Tank",
+      "lane": "EXP Lane",
+      "lanes": [
+        "EXP Lane"
+      ],
+      "tier": "A",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/29.webp",
+      "portrait": "heroes/29.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Fighter",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "fighter",
+        "exp-lane"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 30,
+      "name": "Yi Sun-Shin",
+      "slug": "yi-sun-shin",
+      "title": "",
+      "role": "Marksman",
+      "secondaryRole": "Assassin",
+      "lane": "Gold Lane",
+      "lanes": [
+        "Gold Lane"
+      ],
+      "tier": "A",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/30.webp",
+      "portrait": "heroes/30.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Marksman",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "marksman",
+        "gold-lane"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 31,
+      "name": "Moskov",
+      "slug": "moskov",
+      "title": "",
+      "role": "Marksman",
+      "secondaryRole": null,
+      "lane": "Gold Lane",
+      "lanes": [
+        "Gold Lane"
+      ],
+      "tier": "S",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/31.webp",
+      "portrait": "heroes/31.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Marksman",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "marksman",
+        "gold-lane"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 32,
+      "name": "Johnson",
+      "slug": "johnson",
+      "title": "",
+      "role": "Tank",
+      "secondaryRole": "Support",
+      "lane": "Roam",
+      "lanes": [
+        "Roam"
+      ],
+      "tier": "B",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/32.webp",
+      "portrait": "heroes/32.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Tank",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "tank",
+        "roam"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 33,
+      "name": "Cyclops",
+      "slug": "cyclops",
+      "title": "",
+      "role": "Mage",
+      "secondaryRole": null,
+      "lane": "Mid Lane",
+      "lanes": [
+        "Mid Lane"
+      ],
+      "tier": "B",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/33.webp",
+      "portrait": "heroes/33.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Mage",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "mage",
+        "mid-lane"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 34,
+      "name": "Estes",
+      "slug": "estes",
+      "title": "Moon Elf King",
+      "role": "Support",
+      "secondaryRole": null,
+      "lane": "Roam",
+      "lanes": [
+        "Roam"
+      ],
+      "tier": "A",
+      "difficulty": 4,
+      "specialty": [
+        "Heal",
+        "Support"
+      ],
+      "winRate": 0.53,
+      "pickRate": 0.03,
+      "banRate": 0.04,
+      "patchTrend": 0.01,
+      "isOP": false,
+      "isMeta": true,
+      "releaseYear": 2016,
+      "image": "heroes/34.webp",
+      "portrait": "heroes/34.webp",
+      "skills": [
+        {
+          "name": "Moon Elf",
+          "type": "Passive",
+          "description": "Heals himself and nearby allies over time."
+        },
+        {
+          "name": "Moonlight Immersion",
+          "type": "Skill 1",
+          "description": "Heals a target ally and enhances their next basic attack."
+        },
+        {
+          "name": "Domain of Moon Goddess",
+          "type": "Skill 2",
+          "description": "Creates a domain that slows enemies and heals allies inside."
+        },
+        {
+          "name": "Blessing of Moon Goddess",
+          "type": "Ultimate",
+          "description": "Heals all allies over time and removes crowd control."
+        }
+      ],
+      "recommendedSpells": [
+        "Flicker",
+        "Revitalize"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Support",
+        "talents": [
+          "Agility",
+          "Pull Yourself Together",
+          "Focusing Mark"
+        ]
+      },
+      "coreItems": [
+        4001,
+        4002,
+        3002
+      ],
+      "coreBuild": [
+        {
+          "itemId": 4001,
+          "priority": 1
+        },
+        {
+          "itemId": 4002,
+          "priority": 2
+        },
+        {
+          "itemId": 3002,
+          "priority": 3
+        }
+      ],
+      "counters": [
+        60,
+        31,
+        88
+      ],
+      "counteredBy": [
+        64,
+        68,
+        115
+      ],
+      "synergies": [
+        60,
+        31,
+        88
+      ],
+      "countersReason": "Sustain healer for hyper-carry marksmen.",
+      "bestPartners": [
+        "Hanabi",
+        "Moskov",
+        "Wanwan"
+      ],
+      "lore": "King of the Moon Elves who heals his allies with the power of the Moonlight.",
+      "stats": {
+        "hp": 2450,
+        "hpGrowth": 140,
+        "attack": 105,
+        "attackGrowth": 7,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.8,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "support",
+        "roam"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 35,
+      "name": "Hilda",
+      "slug": "hilda",
+      "title": "",
+      "role": "Fighter",
+      "secondaryRole": "Tank",
+      "lane": "EXP Lane",
+      "lanes": [
+        "EXP Lane"
+      ],
+      "tier": "A",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/35.webp",
+      "portrait": "heroes/35.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Fighter",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "fighter",
+        "exp-lane"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 36,
+      "name": "Aurora",
+      "slug": "aurora",
+      "title": "",
+      "role": "Mage",
+      "secondaryRole": null,
+      "lane": "Mid Lane",
+      "lanes": [
+        "Mid Lane"
+      ],
+      "tier": "B",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/36.webp",
+      "portrait": "heroes/36.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Mage",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "mage",
+        "mid-lane"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 37,
+      "name": "Lapu-Lapu",
+      "slug": "lapu-lapu",
+      "title": "",
+      "role": "Fighter",
+      "secondaryRole": null,
+      "lane": "EXP Lane",
+      "lanes": [
+        "EXP Lane"
+      ],
+      "tier": "A",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/37.webp",
+      "portrait": "heroes/37.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Fighter",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "fighter",
+        "exp-lane"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 38,
+      "name": "Vexana",
+      "slug": "vexana",
+      "title": "",
+      "role": "Mage",
+      "secondaryRole": null,
+      "lane": "Mid Lane",
+      "lanes": [
+        "Mid Lane"
+      ],
+      "tier": "A",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/38.webp",
+      "portrait": "heroes/38.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Mage",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "mage",
+        "mid-lane"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 39,
+      "name": "Roger",
+      "slug": "roger",
+      "title": "",
+      "role": "Fighter",
+      "secondaryRole": "Marksman",
+      "lane": "Jungle",
+      "lanes": [
+        "Jungle"
+      ],
+      "tier": "A",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/39.webp",
+      "portrait": "heroes/39.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Fighter",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "fighter",
+        "jungle"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 40,
+      "name": "Karrie",
+      "slug": "karrie",
+      "title": "",
+      "role": "Marksman",
+      "secondaryRole": null,
+      "lane": "Gold Lane",
+      "lanes": [
+        "Gold Lane"
+      ],
+      "tier": "S",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/40.webp",
+      "portrait": "heroes/40.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Marksman",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "marksman",
+        "gold-lane"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 41,
+      "name": "Gatotkaca",
+      "slug": "gatotkaca",
+      "title": "",
+      "role": "Tank",
+      "secondaryRole": "Fighter",
+      "lane": "Roam",
+      "lanes": [
+        "Roam"
+      ],
+      "tier": "A",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/41.webp",
+      "portrait": "heroes/41.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Tank",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "tank",
+        "roam"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 42,
+      "name": "Harley",
+      "slug": "harley",
+      "title": "",
+      "role": "Mage",
+      "secondaryRole": "Assassin",
+      "lane": "Mid Lane",
+      "lanes": [
+        "Mid Lane"
+      ],
+      "tier": "B",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/42.webp",
+      "portrait": "heroes/42.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Mage",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "mage",
+        "mid-lane"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 43,
+      "name": "Irithel",
+      "slug": "irithel",
+      "title": "",
+      "role": "Marksman",
+      "secondaryRole": null,
+      "lane": "Gold Lane",
+      "lanes": [
+        "Gold Lane"
+      ],
+      "tier": "A",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/43.webp",
+      "portrait": "heroes/43.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Marksman",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "marksman",
+        "gold-lane"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 44,
+      "name": "Grock",
+      "slug": "grock",
+      "title": "",
+      "role": "Tank",
+      "secondaryRole": "Fighter",
+      "lane": "Roam",
+      "lanes": [
+        "Roam"
+      ],
+      "tier": "S",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/44.webp",
+      "portrait": "heroes/44.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Tank",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "tank",
+        "roam"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 45,
+      "name": "Argus",
+      "slug": "argus",
+      "title": "",
+      "role": "Fighter",
+      "secondaryRole": null,
+      "lane": "EXP Lane",
+      "lanes": [
+        "EXP Lane"
+      ],
+      "tier": "B",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/45.webp",
+      "portrait": "heroes/45.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Fighter",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "fighter",
+        "exp-lane"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 46,
+      "name": "Odette",
+      "slug": "odette",
+      "title": "",
+      "role": "Mage",
+      "secondaryRole": null,
+      "lane": "Mid Lane",
+      "lanes": [
+        "Mid Lane"
+      ],
+      "tier": "B",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/46.webp",
+      "portrait": "heroes/46.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Mage",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "mage",
+        "mid-lane"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 47,
+      "name": "Lancelot",
+      "slug": "lancelot",
+      "title": "",
+      "role": "Assassin",
+      "secondaryRole": null,
+      "lane": "Jungle",
+      "lanes": [
+        "Jungle"
+      ],
+      "tier": "S",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/47.webp",
+      "portrait": "heroes/47.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Assassin",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "assassin",
+        "jungle"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 48,
+      "name": "Diggie",
+      "slug": "diggie",
+      "title": "",
+      "role": "Support",
+      "secondaryRole": "Mage",
+      "lane": "Roam",
+      "lanes": [
+        "Roam"
+      ],
+      "tier": "A",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/48.webp",
+      "portrait": "heroes/48.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Support",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "support",
+        "roam"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 49,
+      "name": "Hylos",
+      "slug": "hylos",
+      "title": "",
+      "role": "Tank",
+      "secondaryRole": "Mage",
+      "lane": "Roam",
+      "lanes": [
+        "Roam"
+      ],
+      "tier": "A",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/49.webp",
+      "portrait": "heroes/49.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Tank",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "tank",
+        "roam"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 50,
+      "name": "Zhask",
+      "slug": "zhask",
+      "title": "",
+      "role": "Mage",
+      "secondaryRole": null,
+      "lane": "Mid Lane",
+      "lanes": [
+        "Mid Lane"
+      ],
+      "tier": "B",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/50.webp",
+      "portrait": "heroes/50.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Mage",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "mage",
+        "mid-lane"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 51,
+      "name": "Helcurt",
+      "slug": "helcurt",
+      "title": "",
+      "role": "Assassin",
+      "secondaryRole": null,
+      "lane": "Jungle",
+      "lanes": [
+        "Jungle"
+      ],
+      "tier": "A",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/51.webp",
+      "portrait": "heroes/51.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Assassin",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "assassin",
+        "jungle"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 52,
+      "name": "Pharsa",
+      "slug": "pharsa",
+      "title": "",
+      "role": "Mage",
+      "secondaryRole": null,
+      "lane": "Mid Lane",
+      "lanes": [
+        "Mid Lane"
+      ],
+      "tier": "A",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/52.webp",
+      "portrait": "heroes/52.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Mage",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "mage",
+        "mid-lane"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 53,
+      "name": "Lesley",
+      "slug": "lesley",
+      "title": "",
+      "role": "Marksman",
+      "secondaryRole": "Assassin",
+      "lane": "Gold Lane",
+      "lanes": [
+        "Gold Lane"
+      ],
+      "tier": "A",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/53.webp",
+      "portrait": "heroes/53.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Marksman",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "marksman",
+        "gold-lane"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 54,
+      "name": "Jawhead",
+      "slug": "jawhead",
+      "title": "",
+      "role": "Fighter",
+      "secondaryRole": null,
+      "lane": "EXP Lane",
+      "lanes": [
+        "EXP Lane"
+      ],
+      "tier": "B",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/54.webp",
+      "portrait": "heroes/54.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Fighter",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "fighter",
+        "exp-lane"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 55,
+      "name": "Angela",
+      "slug": "angela",
+      "title": "",
+      "role": "Support",
+      "secondaryRole": "Mage",
+      "lane": "Roam",
+      "lanes": [
+        "Roam"
+      ],
+      "tier": "S",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/55.webp",
+      "portrait": "heroes/55.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Support",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "support",
+        "roam"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 56,
+      "name": "Gusion",
+      "slug": "gusion",
+      "title": "",
+      "role": "Assassin",
+      "secondaryRole": "Mage",
+      "lane": "Mid Lane",
+      "lanes": [
+        "Mid Lane"
+      ],
+      "tier": "A",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/56.webp",
+      "portrait": "heroes/56.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Assassin",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "assassin",
+        "mid-lane"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 57,
+      "name": "Valir",
+      "slug": "valir",
+      "title": "",
+      "role": "Mage",
+      "secondaryRole": null,
+      "lane": "Mid Lane",
+      "lanes": [
+        "Mid Lane"
+      ],
+      "tier": "A",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/57.webp",
+      "portrait": "heroes/57.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Mage",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "mage",
+        "mid-lane"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 58,
+      "name": "Martis",
+      "slug": "martis",
+      "title": "",
+      "role": "Fighter",
+      "secondaryRole": null,
+      "lane": "EXP Lane",
+      "lanes": [
+        "EXP Lane"
+      ],
+      "tier": "A",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/58.webp",
+      "portrait": "heroes/58.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Fighter",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "fighter",
+        "exp-lane"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 59,
+      "name": "Uranus",
+      "slug": "uranus",
+      "title": "",
+      "role": "Tank",
+      "secondaryRole": null,
+      "lane": "EXP Lane",
+      "lanes": [
+        "EXP Lane"
+      ],
+      "tier": "A",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/59.webp",
+      "portrait": "heroes/59.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Tank",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "tank",
+        "exp-lane"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 60,
+      "name": "Hanabi",
+      "slug": "hanabi",
+      "title": "Scarlet Flower",
+      "role": "Marksman",
+      "secondaryRole": null,
+      "lane": "Gold Lane",
+      "lanes": [
+        "Gold Lane"
+      ],
+      "tier": "S",
+      "difficulty": 4,
+      "specialty": [
+        "Burst",
+        "Push"
+      ],
+      "winRate": 0.55,
+      "pickRate": 0.03,
+      "banRate": 0.11,
+      "patchTrend": 0.0,
+      "isOP": true,
+      "isMeta": true,
+      "releaseYear": 2018,
+      "image": "heroes/60.webp",
+      "portrait": "heroes/60.webp",
+      "skills": [
+        {
+          "name": "Ninjutsu: Petal Barrage",
+          "type": "Passive",
+          "description": "Basic attacks bounce to nearby enemies and mark them. Marked enemies take extra damage from Hanabi's skills."
+        },
+        {
+          "name": "Ninjutsu: Petal Barrage",
+          "type": "Skill 1",
+          "description": "Enhances basic attacks to bounce and gain lifesteal. Toggle skill."
+        },
+        {
+          "name": "Ninjutsu: Soul Scroll",
+          "type": "Skill 2",
+          "description": "Throws a scroll that damages and slows enemies in a line, restoring mana on hit."
+        },
+        {
+          "name": "Forbidden Jutsu: Higanbana",
+          "type": "Ultimate",
+          "description": "Throws a Higanbana that blooms on hit, immobilizing and bouncing to nearby enemies."
+        }
+      ],
+      "recommendedSpells": [
+        "Inspire",
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Marksman",
+        "talents": [
+          "Swift",
+          "Weapon Master",
+          "Weakness Finder"
+        ]
+      },
+      "coreItems": [
+        1002,
+        1009,
+        1010
+      ],
+      "coreBuild": [
+        {
+          "itemId": 1002,
+          "priority": 1
+        },
+        {
+          "itemId": 1009,
+          "priority": 2
+        },
+        {
+          "itemId": 1010,
+          "priority": 3
+        }
+      ],
+      "counters": [
+        5,
+        6,
+        7
+      ],
+      "counteredBy": [
+        2,
+        3,
+        4
+      ],
+      "synergies": [
+        8,
+        9,
+        10
+      ],
+      "countersReason": "Hanabi beats immobile mages and slow fighters she can kite. She loses to dive assassins and hard engage tanks.",
+      "bestPartners": [
+        "Tigreal",
+        "Estes",
+        "Mathilda"
+      ],
+      "lore": "A young ninja of the Scarlet Sect who carries the weight of her clan. Her Higanbana blooms where enemies fall.",
+      "stats": {
+        "hp": 2520,
+        "hpGrowth": 135,
+        "attack": 118,
+        "attackGrowth": 11,
+        "defense": 17,
+        "magicDefense": 15,
+        "attackSpeed": 0.85,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "marksman",
+        "gold-lane"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 61,
+      "name": "Chang'e",
+      "slug": "change",
+      "title": "",
+      "role": "Mage",
+      "secondaryRole": null,
+      "lane": "Mid Lane",
+      "lanes": [
+        "Mid Lane"
+      ],
+      "tier": "A",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/61.webp",
+      "portrait": "heroes/61.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Mage",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "mage",
+        "mid-lane"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 62,
+      "name": "Kaja",
+      "slug": "kaja",
+      "title": "",
+      "role": "Fighter",
+      "secondaryRole": "Support",
+      "lane": "Roam",
+      "lanes": [
+        "Roam"
+      ],
+      "tier": "A",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/62.webp",
+      "portrait": "heroes/62.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Fighter",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "fighter",
+        "roam"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 63,
+      "name": "Selena",
+      "slug": "selena",
+      "title": "",
+      "role": "Assassin",
+      "secondaryRole": "Mage",
+      "lane": "Mid Lane",
+      "lanes": [
+        "Mid Lane"
+      ],
+      "tier": "A",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/63.webp",
+      "portrait": "heroes/63.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Assassin",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "assassin",
+        "mid-lane"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 64,
+      "name": "Aldous",
+      "slug": "aldous",
+      "title": "",
+      "role": "Fighter",
+      "secondaryRole": null,
+      "lane": "EXP Lane",
+      "lanes": [
+        "EXP Lane"
+      ],
+      "tier": "A",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/64.webp",
+      "portrait": "heroes/64.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Fighter",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "fighter",
+        "exp-lane"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 65,
+      "name": "Claude",
+      "slug": "claude",
+      "title": "",
+      "role": "Marksman",
+      "secondaryRole": null,
+      "lane": "Gold Lane",
+      "lanes": [
+        "Gold Lane"
+      ],
+      "tier": "S",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/65.webp",
+      "portrait": "heroes/65.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Marksman",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "marksman",
+        "gold-lane"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 66,
+      "name": "Vale",
+      "slug": "vale",
+      "title": "",
+      "role": "Mage",
+      "secondaryRole": null,
+      "lane": "Mid Lane",
+      "lanes": [
+        "Mid Lane"
+      ],
+      "tier": "B",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/66.webp",
+      "portrait": "heroes/66.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Mage",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "mage",
+        "mid-lane"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 67,
+      "name": "Leomord",
+      "slug": "leomord",
+      "title": "",
+      "role": "Fighter",
+      "secondaryRole": null,
+      "lane": "Jungle",
+      "lanes": [
+        "Jungle"
+      ],
+      "tier": "A",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/67.webp",
+      "portrait": "heroes/67.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Fighter",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "fighter",
+        "jungle"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 68,
+      "name": "Lunox",
+      "slug": "lunox",
+      "title": "",
+      "role": "Mage",
+      "secondaryRole": null,
+      "lane": "Mid Lane",
+      "lanes": [
+        "Mid Lane"
+      ],
+      "tier": "S",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/68.webp",
+      "portrait": "heroes/68.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Mage",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "mage",
+        "mid-lane"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 69,
+      "name": "Hanzo",
+      "slug": "hanzo",
+      "title": "",
+      "role": "Assassin",
+      "secondaryRole": null,
+      "lane": "Jungle",
+      "lanes": [
+        "Jungle"
+      ],
+      "tier": "A",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/69.webp",
+      "portrait": "heroes/69.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Assassin",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "assassin",
+        "jungle"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 70,
+      "name": "Belerick",
+      "slug": "belerick",
+      "title": "",
+      "role": "Tank",
+      "secondaryRole": null,
+      "lane": "Roam",
+      "lanes": [
+        "Roam"
+      ],
+      "tier": "A",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/70.webp",
+      "portrait": "heroes/70.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Tank",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "tank",
+        "roam"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 71,
+      "name": "Kimmy",
+      "slug": "kimmy",
+      "title": "",
+      "role": "Marksman",
+      "secondaryRole": "Mage",
+      "lane": "Gold Lane",
+      "lanes": [
+        "Gold Lane"
+      ],
+      "tier": "B",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/71.webp",
+      "portrait": "heroes/71.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Marksman",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "marksman",
+        "gold-lane"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 72,
+      "name": "Thamuz",
+      "slug": "thamuz",
+      "title": "",
+      "role": "Fighter",
+      "secondaryRole": null,
+      "lane": "EXP Lane",
+      "lanes": [
+        "EXP Lane"
+      ],
+      "tier": "A",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/72.webp",
+      "portrait": "heroes/72.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Fighter",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "fighter",
+        "exp-lane"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 73,
+      "name": "Harith",
+      "slug": "harith",
+      "title": "",
+      "role": "Mage",
+      "secondaryRole": null,
+      "lane": "Mid Lane",
+      "lanes": [
+        "Mid Lane"
+      ],
+      "tier": "A",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/73.webp",
+      "portrait": "heroes/73.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Mage",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "mage",
+        "mid-lane"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 74,
+      "name": "Minsitthar",
+      "slug": "minsitthar",
+      "title": "",
+      "role": "Fighter",
+      "secondaryRole": null,
+      "lane": "EXP Lane",
+      "lanes": [
+        "EXP Lane"
+      ],
+      "tier": "B",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/74.webp",
+      "portrait": "heroes/74.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Fighter",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "fighter",
+        "exp-lane"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 75,
+      "name": "Kadita",
+      "slug": "kadita",
+      "title": "",
+      "role": "Mage",
+      "secondaryRole": "Assassin",
+      "lane": "Mid Lane",
+      "lanes": [
+        "Mid Lane"
+      ],
+      "tier": "A",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/75.webp",
+      "portrait": "heroes/75.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Mage",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "mage",
+        "mid-lane"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 76,
+      "name": "Faramis",
+      "slug": "faramis",
+      "title": "",
+      "role": "Mage",
+      "secondaryRole": "Support",
+      "lane": "Mid Lane",
+      "lanes": [
+        "Mid Lane"
+      ],
+      "tier": "A",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/76.webp",
+      "portrait": "heroes/76.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Mage",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "mage",
+        "mid-lane"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 77,
+      "name": "Badang",
+      "slug": "badang",
+      "title": "",
+      "role": "Fighter",
+      "secondaryRole": null,
+      "lane": "EXP Lane",
+      "lanes": [
+        "EXP Lane"
+      ],
+      "tier": "B",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/77.webp",
+      "portrait": "heroes/77.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Fighter",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "fighter",
+        "exp-lane"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 78,
+      "name": "Khufra",
+      "slug": "khufra",
+      "title": "Desert Tyrant",
+      "role": "Tank",
+      "secondaryRole": null,
+      "lane": "Roam",
+      "lanes": [
+        "Roam"
+      ],
+      "tier": "S",
+      "difficulty": 6,
+      "specialty": [
+        "Crowd Control",
+        "Anti-Dash"
+      ],
+      "winRate": 0.52,
+      "pickRate": 0.04,
+      "banRate": 0.06,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": true,
+      "releaseYear": 2019,
+      "image": "heroes/78.webp",
+      "portrait": "heroes/78.webp",
+      "skills": [
+        {
+          "name": "Spell Curse",
+          "type": "Passive",
+          "description": "Every 4th basic attack heals and enhances next skill."
+        },
+        {
+          "name": "Tyrant's Revenge",
+          "type": "Skill 1",
+          "description": "Dashes and knocks enemies airborne on landing."
+        },
+        {
+          "name": "Bouncing Ball",
+          "type": "Skill 2",
+          "description": "Turns into a ball that blocks dashes and knocks up enemies."
+        },
+        {
+          "name": "Tyrant's Rage",
+          "type": "Ultimate",
+          "description": "Pulls all nearby enemies to him and stuns them."
+        }
+      ],
+      "recommendedSpells": [
+        "Flicker",
+        "Petrify"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Tank",
+        "talents": [
+          "Vitality",
+          "Tenacity",
+          "Concussive Blast"
+        ]
+      },
+      "coreItems": [
+        3001,
+        3002,
+        3004
+      ],
+      "coreBuild": [
+        {
+          "itemId": 3001,
+          "priority": 1
+        },
+        {
+          "itemId": 3002,
+          "priority": 2
+        },
+        {
+          "itemId": 3004,
+          "priority": 3
+        }
+      ],
+      "counters": [
+        17,
+        89,
+        21
+      ],
+      "counteredBy": [
+        104,
+        6,
+        44
+      ],
+      "synergies": [
+        60,
+        65,
+        79
+      ],
+      "countersReason": "Hard counters dash heroes like Fanny, Ling, Hayabusa.",
+      "bestPartners": [
+        "Hanabi",
+        "Claude",
+        "Granger"
+      ],
+      "lore": "The tyrant of the Western Desert who feeds on the fear of his enemies.",
+      "stats": {
+        "hp": 2800,
+        "hpGrowth": 200,
+        "attack": 115,
+        "attackGrowth": 9,
+        "defense": 24,
+        "magicDefense": 14,
+        "attackSpeed": 0.84,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "tank",
+        "roam"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 79,
+      "name": "Granger",
+      "slug": "granger",
+      "title": "",
+      "role": "Marksman",
+      "secondaryRole": null,
+      "lane": "Gold Lane",
+      "lanes": [
+        "Gold Lane"
+      ],
+      "tier": "S",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/79.webp",
+      "portrait": "heroes/79.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Marksman",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "marksman",
+        "gold-lane"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 80,
+      "name": "Guinevere",
+      "slug": "guinevere",
+      "title": "",
+      "role": "Fighter",
+      "secondaryRole": "Mage",
+      "lane": "EXP Lane",
+      "lanes": [
+        "EXP Lane"
+      ],
+      "tier": "A",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/80.webp",
+      "portrait": "heroes/80.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Fighter",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "fighter",
+        "exp-lane"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 81,
+      "name": "Esmeralda",
+      "slug": "esmeralda",
+      "title": "",
+      "role": "Mage",
+      "secondaryRole": "Tank",
+      "lane": "EXP Lane",
+      "lanes": [
+        "EXP Lane"
+      ],
+      "tier": "A",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/81.webp",
+      "portrait": "heroes/81.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Mage",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "mage",
+        "exp-lane"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 82,
+      "name": "Terizla",
+      "slug": "terizla",
+      "title": "",
+      "role": "Fighter",
+      "secondaryRole": null,
+      "lane": "EXP Lane",
+      "lanes": [
+        "EXP Lane"
+      ],
+      "tier": "A",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/82.webp",
+      "portrait": "heroes/82.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Fighter",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "fighter",
+        "exp-lane"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 83,
+      "name": "X.Borg",
+      "slug": "xborg",
+      "title": "",
+      "role": "Fighter",
+      "secondaryRole": null,
+      "lane": "EXP Lane",
+      "lanes": [
+        "EXP Lane"
+      ],
+      "tier": "A",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/83.webp",
+      "portrait": "heroes/83.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Fighter",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "fighter",
+        "exp-lane"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 84,
+      "name": "Dyrroth",
+      "slug": "dyrroth",
+      "title": "",
+      "role": "Fighter",
+      "secondaryRole": null,
+      "lane": "Jungle",
+      "lanes": [
+        "Jungle"
+      ],
+      "tier": "A",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/84.webp",
+      "portrait": "heroes/84.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Fighter",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "fighter",
+        "jungle"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 85,
+      "name": "Lylia",
+      "slug": "lylia",
+      "title": "",
+      "role": "Mage",
+      "secondaryRole": null,
+      "lane": "Mid Lane",
+      "lanes": [
+        "Mid Lane"
+      ],
+      "tier": "A",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/85.webp",
+      "portrait": "heroes/85.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Mage",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "mage",
+        "mid-lane"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 86,
+      "name": "Baxia",
+      "slug": "baxia",
+      "title": "",
+      "role": "Tank",
+      "secondaryRole": null,
+      "lane": "Jungle",
+      "lanes": [
+        "Jungle"
+      ],
+      "tier": "A",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/86.webp",
+      "portrait": "heroes/86.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Tank",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "tank",
+        "jungle"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 87,
+      "name": "Masha",
+      "slug": "masha",
+      "title": "",
+      "role": "Fighter",
+      "secondaryRole": "Tank",
+      "lane": "EXP Lane",
+      "lanes": [
+        "EXP Lane"
+      ],
+      "tier": "S",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/87.webp",
+      "portrait": "heroes/87.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Fighter",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "fighter",
+        "exp-lane"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 88,
+      "name": "Wanwan",
+      "slug": "wanwan",
+      "title": "",
+      "role": "Marksman",
+      "secondaryRole": null,
+      "lane": "Gold Lane",
+      "lanes": [
+        "Gold Lane"
+      ],
+      "tier": "S",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/88.webp",
+      "portrait": "heroes/88.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Marksman",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "marksman",
+        "gold-lane"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 89,
+      "name": "Ling",
+      "slug": "ling",
+      "title": "",
+      "role": "Assassin",
+      "secondaryRole": null,
+      "lane": "Jungle",
+      "lanes": [
+        "Jungle"
+      ],
+      "tier": "S",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/89.webp",
+      "portrait": "heroes/89.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Assassin",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "assassin",
+        "jungle"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 90,
+      "name": "Silvanna",
+      "slug": "silvanna",
+      "title": "",
+      "role": "Fighter",
+      "secondaryRole": "Mage",
+      "lane": "EXP Lane",
+      "lanes": [
+        "EXP Lane"
+      ],
+      "tier": "B",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/90.webp",
+      "portrait": "heroes/90.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Fighter",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "fighter",
+        "exp-lane"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 91,
+      "name": "Cecilion",
+      "slug": "cecilion",
+      "title": "",
+      "role": "Mage",
+      "secondaryRole": null,
+      "lane": "Mid Lane",
+      "lanes": [
+        "Mid Lane"
+      ],
+      "tier": "A",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/91.webp",
+      "portrait": "heroes/91.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Mage",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "mage",
+        "mid-lane"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 92,
+      "name": "Carmilla",
+      "slug": "carmilla",
+      "title": "",
+      "role": "Support",
+      "secondaryRole": "Tank",
+      "lane": "Roam",
+      "lanes": [
+        "Roam"
+      ],
+      "tier": "A",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/92.webp",
+      "portrait": "heroes/92.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Support",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "support",
+        "roam"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 93,
+      "name": "Atlas",
+      "slug": "atlas",
+      "title": "",
+      "role": "Tank",
+      "secondaryRole": null,
+      "lane": "Roam",
+      "lanes": [
+        "Roam"
+      ],
+      "tier": "A",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/93.webp",
+      "portrait": "heroes/93.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Tank",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "tank",
+        "roam"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 94,
+      "name": "Popol and Kupa",
+      "slug": "popol-kupa",
+      "title": "Brave Companions",
+      "role": "Marksman",
+      "secondaryRole": null,
+      "lane": "Gold Lane",
+      "lanes": [
+        "Gold Lane"
+      ],
+      "tier": "A",
+      "difficulty": 5,
+      "specialty": [
+        "Push",
+        "Burst"
+      ],
+      "winRate": 0.52,
+      "pickRate": 0.04,
+      "banRate": 0.02,
+      "patchTrend": 0.05,
+      "isOP": false,
+      "isMeta": true,
+      "releaseYear": 2020,
+      "image": "heroes/94.webp",
+      "portrait": "heroes/94.webp",
+      "skills": [
+        {
+          "name": "We Are Friends",
+          "type": "Passive",
+          "description": "Kupa fights alongside Popol. When Kupa falls, Popol can revive him."
+        },
+        {
+          "name": "Bite 'Em, Kupa!",
+          "type": "Skill 1",
+          "description": "Commands Kupa to bite and slow an enemy."
+        },
+        {
+          "name": "Kupa, Help!",
+          "type": "Skill 2",
+          "description": "Throws a trap that stuns and reveals enemies."
+        },
+        {
+          "name": "Popol's Surprise",
+          "type": "Ultimate",
+          "description": "Popol rides Kupa, gaining movement speed and enhanced attacks."
+        }
+      ],
+      "recommendedSpells": [
+        "Flicker",
+        "Sprint"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Marksman",
+        "talents": [
+          "Swift",
+          "Weapon Master",
+          "Weakness Finder"
+        ]
+      },
+      "coreItems": [
+        1002,
+        1011,
+        1010
+      ],
+      "coreBuild": [
+        {
+          "itemId": 1002,
+          "priority": 1
+        },
+        {
+          "itemId": 1011,
+          "priority": 2
+        },
+        {
+          "itemId": 1010,
+          "priority": 3
+        }
+      ],
+      "counters": [
+        15,
+        25,
+        61
+      ],
+      "counteredBy": [
+        78,
+        6,
+        104
+      ],
+      "synergies": [
+        48,
+        55,
+        102
+      ],
+      "countersReason": "Revamped in 2.2.23 — ride mechanic gives chase/escape. Still weak to hard CC.",
+      "bestPartners": [
+        "Diggie",
+        "Angela",
+        "Mathilda"
+      ],
+      "lore": "Popol and his wolf Kupa, inseparable partners. In Patch 2.2.23 Popol can now ride Kupa to chase or escape.",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 130,
+        "attack": 116,
+        "attackGrowth": 10,
+        "defense": 16,
+        "magicDefense": 14,
+        "attackSpeed": 0.86,
+        "movementSpeed": 265
+      },
+      "tags": [
+        "marksman",
+        "gold-lane"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 95,
+      "name": "Yu Zhong",
+      "slug": "yu-zhong",
+      "title": "",
+      "role": "Fighter",
+      "secondaryRole": null,
+      "lane": "EXP Lane",
+      "lanes": [
+        "EXP Lane"
+      ],
+      "tier": "S",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/95.webp",
+      "portrait": "heroes/95.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Fighter",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "fighter",
+        "exp-lane"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 96,
+      "name": "Luo Yi",
+      "slug": "luo-yi",
+      "title": "",
+      "role": "Mage",
+      "secondaryRole": null,
+      "lane": "Mid Lane",
+      "lanes": [
+        "Mid Lane"
+      ],
+      "tier": "A",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/96.webp",
+      "portrait": "heroes/96.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Mage",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "mage",
+        "mid-lane"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 97,
+      "name": "Benedetta",
+      "slug": "benedetta",
+      "title": "",
+      "role": "Assassin",
+      "secondaryRole": null,
+      "lane": "EXP Lane",
+      "lanes": [
+        "EXP Lane"
+      ],
+      "tier": "S",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/97.webp",
+      "portrait": "heroes/97.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Assassin",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "assassin",
+        "exp-lane"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 98,
+      "name": "Khaleed",
+      "slug": "khaleed",
+      "title": "",
+      "role": "Fighter",
+      "secondaryRole": null,
+      "lane": "EXP Lane",
+      "lanes": [
+        "EXP Lane"
+      ],
+      "tier": "A",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/98.webp",
+      "portrait": "heroes/98.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Fighter",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "fighter",
+        "exp-lane"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 99,
+      "name": "Barats",
+      "slug": "barats",
+      "title": "",
+      "role": "Tank",
+      "secondaryRole": "Fighter",
+      "lane": "Jungle",
+      "lanes": [
+        "Jungle"
+      ],
+      "tier": "B",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/99.webp",
+      "portrait": "heroes/99.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Tank",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "tank",
+        "jungle"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 100,
+      "name": "Brody",
+      "slug": "brody",
+      "title": "",
+      "role": "Marksman",
+      "secondaryRole": null,
+      "lane": "Gold Lane",
+      "lanes": [
+        "Gold Lane"
+      ],
+      "tier": "A",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/100.webp",
+      "portrait": "heroes/100.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Marksman",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "marksman",
+        "gold-lane"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 101,
+      "name": "Yve",
+      "slug": "yve",
+      "title": "",
+      "role": "Mage",
+      "secondaryRole": null,
+      "lane": "Mid Lane",
+      "lanes": [
+        "Mid Lane"
+      ],
+      "tier": "A",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/101.webp",
+      "portrait": "heroes/101.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Mage",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "mage",
+        "mid-lane"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 102,
+      "name": "Mathilda",
+      "slug": "mathilda",
+      "title": "",
+      "role": "Support",
+      "secondaryRole": "Assassin",
+      "lane": "Roam",
+      "lanes": [
+        "Roam"
+      ],
+      "tier": "S",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/102.webp",
+      "portrait": "heroes/102.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Support",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "support",
+        "roam"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 103,
+      "name": "Paquito",
+      "slug": "paquito",
+      "title": "",
+      "role": "Fighter",
+      "secondaryRole": null,
+      "lane": "EXP Lane",
+      "lanes": [
+        "EXP Lane"
+      ],
+      "tier": "A",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/103.webp",
+      "portrait": "heroes/103.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Fighter",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "fighter",
+        "exp-lane"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 104,
+      "name": "Gloo",
+      "slug": "gloo",
+      "title": "",
+      "role": "Tank",
+      "secondaryRole": null,
+      "lane": "Roam",
+      "lanes": [
+        "Roam"
+      ],
+      "tier": "S",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/104.webp",
+      "portrait": "heroes/104.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Tank",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "tank",
+        "roam"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 105,
+      "name": "Beatrix",
+      "slug": "beatrix",
+      "title": "",
+      "role": "Marksman",
+      "secondaryRole": null,
+      "lane": "Gold Lane",
+      "lanes": [
+        "Gold Lane"
+      ],
+      "tier": "S",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/105.webp",
+      "portrait": "heroes/105.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Marksman",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "marksman",
+        "gold-lane"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 106,
+      "name": "Phoveus",
+      "slug": "phoveus",
+      "title": "",
+      "role": "Fighter",
+      "secondaryRole": null,
+      "lane": "EXP Lane",
+      "lanes": [
+        "EXP Lane"
+      ],
+      "tier": "A",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/106.webp",
+      "portrait": "heroes/106.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Fighter",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "fighter",
+        "exp-lane"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 107,
+      "name": "Natan",
+      "slug": "natan",
+      "title": "",
+      "role": "Marksman",
+      "secondaryRole": "Mage",
+      "lane": "Gold Lane",
+      "lanes": [
+        "Gold Lane"
+      ],
+      "tier": "A",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/107.webp",
+      "portrait": "heroes/107.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Marksman",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "marksman",
+        "gold-lane"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 108,
+      "name": "Aulus",
+      "slug": "aulus",
+      "title": "",
+      "role": "Fighter",
+      "secondaryRole": null,
+      "lane": "Jungle",
+      "lanes": [
+        "Jungle"
+      ],
+      "tier": "B",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/108.webp",
+      "portrait": "heroes/108.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Fighter",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "fighter",
+        "jungle"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 109,
+      "name": "Aamon",
+      "slug": "aamon",
+      "title": "",
+      "role": "Assassin",
+      "secondaryRole": null,
+      "lane": "Jungle",
+      "lanes": [
+        "Jungle"
+      ],
+      "tier": "A",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/109.webp",
+      "portrait": "heroes/109.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Assassin",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "assassin",
+        "jungle"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 110,
+      "name": "Valentina",
+      "slug": "valentina",
+      "title": "",
+      "role": "Mage",
+      "secondaryRole": null,
+      "lane": "Mid Lane",
+      "lanes": [
+        "Mid Lane"
+      ],
+      "tier": "S",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/110.webp",
+      "portrait": "heroes/110.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Mage",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "mage",
+        "mid-lane"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 111,
+      "name": "Edith",
+      "slug": "edith",
+      "title": "",
+      "role": "Tank",
+      "secondaryRole": "Marksman",
+      "lane": "Roam",
+      "lanes": [
+        "Roam"
+      ],
+      "tier": "A",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/111.webp",
+      "portrait": "heroes/111.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Tank",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "tank",
+        "roam"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 112,
+      "name": "Floryn",
+      "slug": "floryn",
+      "title": "",
+      "role": "Support",
+      "secondaryRole": "Mage",
+      "lane": "Roam",
+      "lanes": [
+        "Roam"
+      ],
+      "tier": "A",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/112.webp",
+      "portrait": "heroes/112.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Support",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "support",
+        "roam"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 113,
+      "name": "Yin",
+      "slug": "yin",
+      "title": "",
+      "role": "Fighter",
+      "secondaryRole": "Assassin",
+      "lane": "EXP Lane",
+      "lanes": [
+        "EXP Lane"
+      ],
+      "tier": "A",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/113.webp",
+      "portrait": "heroes/113.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Fighter",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "fighter",
+        "exp-lane"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 114,
+      "name": "Melissa",
+      "slug": "melissa",
+      "title": "",
+      "role": "Marksman",
+      "secondaryRole": null,
+      "lane": "Gold Lane",
+      "lanes": [
+        "Gold Lane"
+      ],
+      "tier": "A",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/114.webp",
+      "portrait": "heroes/114.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Marksman",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "marksman",
+        "gold-lane"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 115,
+      "name": "Xavier",
+      "slug": "xavier",
+      "title": "",
+      "role": "Mage",
+      "secondaryRole": null,
+      "lane": "Mid Lane",
+      "lanes": [
+        "Mid Lane"
+      ],
+      "tier": "S",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/115.webp",
+      "portrait": "heroes/115.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Mage",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "mage",
+        "mid-lane"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 116,
+      "name": "Julian",
+      "slug": "julian",
+      "title": "",
+      "role": "Fighter",
+      "secondaryRole": "Mage",
+      "lane": "Jungle",
+      "lanes": [
+        "Jungle"
+      ],
+      "tier": "A",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/116.webp",
+      "portrait": "heroes/116.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Fighter",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "fighter",
+        "jungle"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 117,
+      "name": "Fredrinn",
+      "slug": "fredrinn",
+      "title": "",
+      "role": "Tank",
+      "secondaryRole": "Fighter",
+      "lane": "Jungle",
+      "lanes": [
+        "Jungle"
+      ],
+      "tier": "A",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/117.webp",
+      "portrait": "heroes/117.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Tank",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "tank",
+        "jungle"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 118,
+      "name": "Joy",
+      "slug": "joy",
+      "title": "",
+      "role": "Assassin",
+      "secondaryRole": null,
+      "lane": "Jungle",
+      "lanes": [
+        "Jungle"
+      ],
+      "tier": "A",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/118.webp",
+      "portrait": "heroes/118.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Assassin",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "assassin",
+        "jungle"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 119,
+      "name": "Arlott",
+      "slug": "arlott",
+      "title": "",
+      "role": "Fighter",
+      "secondaryRole": null,
+      "lane": "EXP Lane",
+      "lanes": [
+        "EXP Lane"
+      ],
+      "tier": "A",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/119.webp",
+      "portrait": "heroes/119.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Fighter",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "fighter",
+        "exp-lane"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 120,
+      "name": "Novaria",
+      "slug": "novaria",
+      "title": "",
+      "role": "Mage",
+      "secondaryRole": null,
+      "lane": "Mid Lane",
+      "lanes": [
+        "Mid Lane"
+      ],
+      "tier": "A",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/120.webp",
+      "portrait": "heroes/120.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Mage",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "mage",
+        "mid-lane"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 121,
+      "name": "Ixia",
+      "slug": "ixia",
+      "title": "",
+      "role": "Marksman",
+      "secondaryRole": null,
+      "lane": "Gold Lane",
+      "lanes": [
+        "Gold Lane"
+      ],
+      "tier": "A",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/121.webp",
+      "portrait": "heroes/121.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Marksman",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "marksman",
+        "gold-lane"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 122,
+      "name": "Cici",
+      "slug": "cici",
+      "title": "",
+      "role": "Fighter",
+      "secondaryRole": null,
+      "lane": "EXP Lane",
+      "lanes": [
+        "EXP Lane"
+      ],
+      "tier": "A",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/122.webp",
+      "portrait": "heroes/122.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Fighter",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "fighter",
+        "exp-lane"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 123,
+      "name": "Chip",
+      "slug": "chip",
+      "title": "",
+      "role": "Tank",
+      "secondaryRole": "Support",
+      "lane": "Roam",
+      "lanes": [
+        "Roam"
+      ],
+      "tier": "A",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/123.webp",
+      "portrait": "heroes/123.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Tank",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "tank",
+        "roam"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 124,
+      "name": "Zhuxin",
+      "slug": "zhuxin",
+      "title": "",
+      "role": "Mage",
+      "secondaryRole": null,
+      "lane": "Mid Lane",
+      "lanes": [
+        "Mid Lane"
+      ],
+      "tier": "A",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/124.webp",
+      "portrait": "heroes/124.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Mage",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "mage",
+        "mid-lane"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 125,
+      "name": "Suyou",
+      "slug": "suyou",
+      "title": "",
+      "role": "Assassin",
+      "secondaryRole": "Fighter",
+      "lane": "Jungle",
+      "lanes": [
+        "Jungle"
+      ],
+      "tier": "A",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/125.webp",
+      "portrait": "heroes/125.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Assassin",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "assassin",
+        "jungle"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 126,
+      "name": "Lukas",
+      "slug": "lukas",
+      "title": "",
+      "role": "Fighter",
+      "secondaryRole": null,
+      "lane": "EXP Lane",
+      "lanes": [
+        "EXP Lane"
+      ],
+      "tier": "A",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/126.webp",
+      "portrait": "heroes/126.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Fighter",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "fighter",
+        "exp-lane"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 127,
+      "name": "Kalea",
+      "slug": "kalea",
+      "title": "",
+      "role": "Support",
+      "secondaryRole": "Fighter",
+      "lane": "Roam",
+      "lanes": [
+        "Roam"
+      ],
+      "tier": "A",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/127.webp",
+      "portrait": "heroes/127.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Support",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "support",
+        "roam"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 128,
+      "name": "Hirara",
+      "slug": "hirara",
+      "title": "",
+      "role": "Mage",
+      "secondaryRole": null,
+      "lane": "Mid Lane",
+      "lanes": [
+        "Mid Lane"
+      ],
+      "tier": "A",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/128.webp",
+      "portrait": "heroes/128.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Mage",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "mage",
+        "mid-lane"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 129,
+      "name": "Dori",
+      "slug": "dori",
+      "title": "",
+      "role": "Fighter",
+      "secondaryRole": null,
+      "lane": "EXP Lane",
+      "lanes": [
+        "EXP Lane"
+      ],
+      "tier": "A",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/129.webp",
+      "portrait": "heroes/129.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Fighter",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "fighter",
+        "exp-lane"
+      ],
+      "patchVersion": "2.2.23"
+    },
+    {
+      "id": 130,
+      "name": "Zetian",
+      "slug": "zetian",
+      "title": "",
+      "role": "Mage",
+      "secondaryRole": null,
+      "lane": "Mid Lane",
+      "lanes": [
+        "Mid Lane"
+      ],
+      "tier": "A",
+      "difficulty": 5,
+      "specialty": [],
+      "winRate": 0.5,
+      "pickRate": 0.03,
+      "banRate": 0.03,
+      "patchTrend": 0.0,
+      "isOP": false,
+      "isMeta": false,
+      "releaseYear": 2016,
+      "image": "heroes/130.webp",
+      "portrait": "heroes/130.webp",
+      "skills": [],
+      "recommendedSpells": [
+        "Flicker"
+      ],
+      "recommendedEmblem": {
+        "emblem": "Mage",
+        "talents": []
+      },
+      "coreItems": [],
+      "coreBuild": [],
+      "counters": [],
+      "counteredBy": [],
+      "synergies": [],
+      "countersReason": "",
+      "bestPartners": [],
+      "lore": "",
+      "stats": {
+        "hp": 2500,
+        "hpGrowth": 150,
+        "attack": 110,
+        "attackGrowth": 9,
+        "defense": 18,
+        "magicDefense": 15,
+        "attackSpeed": 0.82,
+        "movementSpeed": 260
+      },
+      "tags": [
+        "mage",
+        "mid-lane"
+      ],
+      "patchVersion": "2.2.23"
+    }
+  ]
+}
