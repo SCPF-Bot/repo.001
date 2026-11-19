@@ -16,7 +16,7 @@ class WidgetOverlayService : Service() {
         super.onCreate()
         createChannel()
         val notification = Notification.Builder(this, CHANNEL_ID)
-            .setContentTitle("Roam Guide running")
+            .setContentTitle("MLBB Plus running")
             .setContentText("Tap Stop in the app to hide it")
             .setSmallIcon(android.R.drawable.ic_dialog_info)
             .build()
@@ -44,7 +44,7 @@ class WidgetOverlayService : Service() {
     private fun createChannel() {
         val channel = NotificationChannel(
             CHANNEL_ID,
-            "Roam Guide",
+            "MLBB Plus",
             NotificationManager.IMPORTANCE_LOW
         )
         val manager = getSystemService(NotificationManager::class.java)
@@ -52,6 +52,6 @@ class WidgetOverlayService : Service() {
     }
 
     companion object {
-        private const val CHANNEL_ID = "roam_guide"
+        private const val CHANNEL_ID = "mlbb_plus"
     }
 }

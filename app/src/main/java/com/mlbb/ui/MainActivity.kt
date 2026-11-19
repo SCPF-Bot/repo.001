@@ -34,7 +34,8 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize().padding(20.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    Text("MLBB Roam Guide", style = MaterialTheme.typography.headlineSmall)
+                    Text("MLBB Plus", style = MaterialTheme.typography.headlineSmall)
+                    Text("Roam Guide")
                     Text(
                         if (canDrawOverlay) "Overlay permission: granted"
                         else "Overlay permission: needed"
