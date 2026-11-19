@@ -36,6 +36,7 @@ import androidx.savedstate.SavedStateRegistryController
 import androidx.savedstate.SavedStateRegistryOwner
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import com.mlbb.plus.ui.model.GameData
+import com.mlbb.plus.ui.model.Hero
 import com.mlbb.plus.ui.screens.HeroImage
 import com.mlbb.plus.ui.theme.MLBBPlusColors
 
@@ -228,7 +229,7 @@ fun RoamGuideWidget(
             .filter { h ->
                 roleType.isBlank() || h.role == roleType || h.secondaryRole == roleType
             }
-            .sortedWith(compareByDescending { it.isMeta }.thenByDescending { it.winRate })
+            .sortedWith(compareByDescending<Hero> { it.isMeta }.thenByDescending { it.winRate })
             .take(12)
     }
     // FIX [7] + new batch: single fallback via displayVersion.
