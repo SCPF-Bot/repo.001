@@ -89,10 +89,10 @@ class MainActivity : ComponentActivity() {
             requestOverlayPermission()
             return
         }
-        startForegroundService(Intent(this, RoamOverlayService::class.java))
+        startForegroundService(Intent(this, WidgetOverlayService::class.java))
     }
 
     private fun stopRoam() {
-        stopService(Intent(this, RoamOverlayService::class.java))
+        stopService(Intent(this, WidgetOverlayService::class.java))
     }
 }
