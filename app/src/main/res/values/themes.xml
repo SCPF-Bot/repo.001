@@ -4,7 +4,7 @@
         <item name="android:windowBackground">@color/github_bg</item>
         <item name="android:textColor">@color/github_text</item>
         <item name="android:statusBarColor">@color/github_bg</item>
-        <item name="android:navigationBarColor">@color/github_bg</item>
+        <item name="android:navigationBarColor">@color/nav_header</item>
         <item name="android:windowLightStatusBar">false</item>
         <item name="android:windowLightNavigationBar">false</item>
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>

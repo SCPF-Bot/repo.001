@@ -20,6 +20,8 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.mlbb.plus.ui.components.AppIcons
+import com.mlbb.plus.ui.components.ScreenTitleBar
 import com.mlbb.plus.ui.model.GameData
 import com.mlbb.plus.ui.model.PatchData
 import com.mlbb.plus.ui.theme.MLBBPlusColors
@@ -85,6 +87,14 @@ private fun patchBadgeColor(type: String): Color {
 
 @Composable
 fun PatchNotesScreen() {
+    Column(Modifier.fillMaxSize().background(MLBBPlusColors.GithubBg)) {
+        ScreenTitleBar("PATCH NOTES", AppIcons.History)
+        Box(Modifier.weight(1f)) { PatchNotesContent() }
+    }
+}
+
+@Composable
+private fun PatchNotesContent() {
     // FIX [1]: enum, not strings.
     var tab by remember { mutableStateOf(PatchTab.CURRENT) }
     val notes = GameData.patchNotes
@@ -94,7 +104,6 @@ fun PatchNotesScreen() {
         PatchTab.CURRENT -> notes.originalServer
     }
     Column(Modifier.fillMaxSize().background(MLBBPlusColors.GithubBg).verticalScroll(rememberScrollState()).padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        Text("PATCH NOTES", color = MLBBPlusColors.Gold, fontWeight = FontWeight.Bold, fontSize = 16.sp, letterSpacing = 1.sp)
         // FIX [2]: no hardcoded date, no dangling bullet.
         val header = buildString {
             if (notes.updated.isNotBlank()) append("Updated ${notes.updated} \u2022 ")

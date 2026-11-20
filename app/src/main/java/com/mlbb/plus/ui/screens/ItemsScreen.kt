@@ -11,6 +11,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
@@ -25,6 +26,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.mlbb.plus.ui.components.AppIcons
+import com.mlbb.plus.ui.components.FilterPill
+import com.mlbb.plus.ui.components.ScreenTitleBar
+import com.mlbb.plus.ui.components.SearchField
 import com.mlbb.plus.ui.model.GameData
 import com.mlbb.plus.ui.model.Hero
 import com.mlbb.plus.ui.model.Item
@@ -74,37 +79,35 @@ fun ItemsScreen(onItemClick: (Item) -> Unit) {
         }.sortedWith(compareBy<Item> { tierRank(it.tier) }.thenBy { it.price })
     }
     Column(Modifier.fillMaxSize().background(MLBBPlusColors.GithubBg)) {
-        Box(Modifier.fillMaxWidth().padding(vertical = 12.dp), contentAlignment = Alignment.Center) {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                Text("\uD83C\uDF92", fontSize = 16.sp)
-                Text("ITEM EXPLORER", color = MLBBPlusColors.Gold, fontWeight = FontWeight.Bold, fontSize = 16.sp, letterSpacing = 1.sp)
-            }
-        }
-        Text("${filtered.size} items \u2022 Patch ${GameData.patchNotes.displayVersion} \u2022 IDs 1000-6000", color = MLBBPlusColors.GithubSecondary, fontSize = 11.sp, modifier = Modifier.padding(horizontal = 12.dp))
-        OutlinedTextField(
-            value = query, onValueChange = { query = it },
-            placeholder = { Text("Search items... (e.g. Demon Hunter Sword)", color = MLBBPlusColors.GithubSecondary) },
-            leadingIcon = { Text("\uD83D\uDD0D", fontSize = 16.sp, modifier = Modifier.padding(start = 12.dp)) },
-            trailingIcon = { if (query.isNotEmpty()) IconButton(onClick = { query = "" }) { Text("\u2715", color = MLBBPlusColors.GithubSecondary, fontSize = 14.sp) } },
-            singleLine = true,
-            colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = MLBBPlusColors.Gold.copy(alpha = 0.7f), unfocusedBorderColor = MLBBPlusColors.GithubBorder, focusedTextColor = MLBBPlusColors.GithubText, unfocusedTextColor = MLBBPlusColors.GithubText, cursorColor = MLBBPlusColors.Gold),
-            shape = RoundedCornerShape(12.dp),
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp)
-        )
-        LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp), contentPadding = PaddingValues(horizontal = 12.dp), modifier = Modifier.fillMaxWidth().padding(bottom = 6.dp)) {
+        ScreenTitleBar("ITEM EXPLORER", AppIcons.Apps)
+        Text("${filtered.size} items \u2022 Patch ${GameData.patchNotes.displayVersion} \u2022 IDs 1000-6000", color = MLBBPlusColors.GithubSecondary, fontSize = 12.sp, modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp))
+        SearchField(query = query, onQueryChange = { query = it }, placeholder = "Search items\u2026")
+        LazyRow(horizontalArrangement = Arrangement.spacedBy(10.dp), contentPadding = PaddingValues(horizontal = 16.dp), modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp)) {
             items(cats) { cat ->
-                FilterChip(selected = selectedCat == cat, onClick = { selectedCat = cat }, label = { Text(cat ?: "All", fontWeight = if (selectedCat == cat) FontWeight.Bold else FontWeight.Normal) }, colors = FilterChipDefaults.filterChipColors(selectedContainerColor = MLBBPlusColors.Gold, selectedLabelColor = Color.Black), border = FilterChipDefaults.filterChipBorder(true, selectedCat == cat, borderColor = MLBBPlusColors.GithubBorder, selectedBorderColor = MLBBPlusColors.Gold))
+                FilterPill(label = cat ?: "All", selected = selectedCat == cat, onClick = { selectedCat = cat })
             }
         }
         if (filtered.isEmpty()) {
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { Text("No items found \u2014 check items.json", color = MLBBPlusColors.GithubSecondary) }
         } else {
-            LazyVerticalGrid(columns = GridCells.Fixed(3), verticalArrangement = Arrangement.spacedBy(8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp), contentPadding = PaddingValues(12.dp), modifier = Modifier.fillMaxSize()) {
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(3),
+                verticalArrangement = Arrangement.spacedBy(10.dp),
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 16.dp),
+                modifier = Modifier.fillMaxSize()
+            ) {
                 items(filtered, key = { it.id }) { item ->
-                    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.clip(RoundedCornerShape(10.dp)).background(MLBBPlusColors.GithubCard).clickable { onItemClick(item) }.padding(4.dp)) {
-                        ItemImage(item = item, modifier = Modifier.aspectRatio(1f).clip(RoundedCornerShape(8.dp)).background(MLBBPlusColors.GithubSurface))
-                        Text(item.name, maxLines = 1, overflow = TextOverflow.Ellipsis, color = MLBBPlusColors.GithubSecondary, fontSize = 9.sp, fontWeight = FontWeight.Medium, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth().padding(top = 3.dp))
-                        Text("#${item.id} \u2022 ${item.price} Gold", color = MLBBPlusColors.GithubSecondary, fontSize = 8.sp)
+                    val cardShape = RoundedCornerShape(16.dp)
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier.clip(cardShape).background(MLBBPlusColors.GithubCard)
+                            .border(1.dp, MLBBPlusColors.GithubBorder.copy(alpha = 0.7f), cardShape)
+                            .clickable { onItemClick(item) }.padding(8.dp)
+                    ) {
+                        ItemImage(item = item, modifier = Modifier.fillMaxWidth().aspectRatio(1f).clip(RoundedCornerShape(12.dp)).background(MLBBPlusColors.GithubSurface))
+                        Text(item.name, maxLines = 1, overflow = TextOverflow.Ellipsis, color = MLBBPlusColors.GithubText.copy(alpha = 0.85f), fontSize = 11.sp, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth().padding(top = 8.dp))
+                        Text("${item.price} Gold", color = MLBBPlusColors.Gold.copy(alpha = 0.85f), fontSize = 10.sp, modifier = Modifier.padding(bottom = 2.dp))
                     }
                 }
             }
@@ -122,7 +125,11 @@ fun ItemDetailScreen(item: Item, onBack: () -> Unit, onItemClick: (Item) -> Unit
         Box(Modifier.fillMaxWidth().height(180.dp)) {
             ItemImage(item = item, modifier = Modifier.fillMaxSize())
             Box(Modifier.fillMaxSize().background(Brush.verticalGradient(listOf(Color.Transparent, MLBBPlusColors.GithubBg.copy(alpha = 0.3f), MLBBPlusColors.GithubBg))))
-            Box(Modifier.align(Alignment.TopStart).padding(12.dp).clickable { onBack() }.clip(RoundedCornerShape(100.dp)).background(MLBBPlusColors.GithubCard.copy(alpha = 0.9f)).padding(horizontal = 12.dp, vertical = 6.dp)) { Text("\u2190 Back", color = MLBBPlusColors.GithubText, fontSize = 12.sp, fontWeight = FontWeight.Bold) }
+            Box(
+                Modifier.align(Alignment.TopStart).statusBarsPadding().padding(8.dp).size(44.dp).clip(CircleShape)
+                    .background(Color.Black.copy(alpha = 0.35f)).clickable { onBack() },
+                contentAlignment = Alignment.Center
+            ) { Icon(AppIcons.ArrowBack, contentDescription = "Back", tint = MLBBPlusColors.Gold) }
             Column(Modifier.align(Alignment.BottomStart).padding(16.dp)) {
                 Text(item.name, color = MLBBPlusColors.GithubText, fontWeight = FontWeight.Bold, fontSize = 22.sp)
                 Text("${item.category} \u2022 Tier ${item.tier} \u2022 #${item.id} \u2022 ${item.price} Gold", color = MLBBPlusColors.GithubSecondary, fontSize = 12.sp)

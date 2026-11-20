@@ -2,10 +2,11 @@
 <resources>
     <color name="white">#FFFFFF</color>
     <color name="black">#000000</color>
-    <color name="github_bg">#0D1117</color>
-    <color name="github_card">#161B22</color>
-    <color name="github_border">#30363D</color>
-    <color name="github_text">#E6EDF3</color>
-    <color name="github_secondary">#7D8590</color>
-    <color name="github_blue">#2F81F7</color>
+    <color name="github_bg">#0B0C10</color>
+    <color name="github_card">#1A1B2E</color>
+    <color name="github_border">#2E3049</color>
+    <color name="github_text">#EDEDF7</color>
+    <color name="github_secondary">#8B8EAA</color>
+    <color name="github_blue">#4C9AFF</color>
+    <color name="nav_header">#181A2D</color>
 </resources>

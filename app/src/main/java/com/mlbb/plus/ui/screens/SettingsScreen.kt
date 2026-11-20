@@ -18,6 +18,8 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.mlbb.plus.ui.components.AppIcons
+import com.mlbb.plus.ui.components.ScreenTitleBar
 import com.mlbb.plus.ui.model.GameData
 import com.mlbb.plus.ui.theme.MLBBPlusColors
 
@@ -51,8 +53,17 @@ import com.mlbb.plus.ui.theme.MLBBPlusColors
 
 @Composable
 fun SettingsScreen(overlayGranted: Boolean, onOverlayGrantedChange: (Boolean) -> Unit, autoStartLastRole: Boolean, onAutoStartChange: (Boolean) -> Unit) {
+    Column(Modifier.fillMaxSize().background(MLBBPlusColors.GithubBg)) {
+        ScreenTitleBar("SETTINGS", AppIcons.Settings)
+        Box(Modifier.weight(1f)) {
+            SettingsContent(overlayGranted, onOverlayGrantedChange, autoStartLastRole, onAutoStartChange)
+        }
+    }
+}
+
+@Composable
+private fun SettingsContent(overlayGranted: Boolean, onOverlayGrantedChange: (Boolean) -> Unit, autoStartLastRole: Boolean, onAutoStartChange: (Boolean) -> Unit) {
     Column(Modifier.fillMaxSize().background(MLBBPlusColors.GithubBg).verticalScroll(rememberScrollState()).padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        Text("SETTINGS", color = MLBBPlusColors.Gold, fontWeight = FontWeight.Bold, fontSize = 16.sp, letterSpacing = 1.sp)
         // FIX [1]: OFF is ignored - system permission cannot be
         // revoked from a Switch. ON is a request to open settings.
         SettingsRow(
@@ -64,7 +75,7 @@ fun SettingsScreen(overlayGranted: Boolean, onOverlayGrantedChange: (Boolean) ->
         SettingsRow(title = "Auto-start last role", subtitle = "Launch widget automatically on app open", checked = autoStartLastRole, onChecked = onAutoStartChange)
         // FIX [2]: single fallback via Models.kt.
         Text("Data: heroes.json ${GameData.liveHeroes.size} live + ${GameData.advancedHeroes.size} Advanced \u2022 items.json ${GameData.items.size} \u2022 patch ${GameData.patchNotes.displayVersion} / Advanced ${GameData.patchNotes.advancedDisplayVersion}", color = MLBBPlusColors.GithubSecondary, fontSize = 11.sp)
-        Text("MLBB Plus v1.0 \u2014 GitHub Dark + Gold", color = MLBBPlusColors.GithubSecondary, fontSize = 12.sp)
+        Text("MLBB Plus v1.0", color = MLBBPlusColors.GithubSecondary, fontSize = 12.sp)
     }
 }
 

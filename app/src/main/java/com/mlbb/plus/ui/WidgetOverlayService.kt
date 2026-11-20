@@ -15,6 +15,7 @@ import androidx.compose.runtime.setValue
 import androidx.core.app.NotificationCompat
 import androidx.core.app.ServiceCompat
 import com.mlbb.plus.ui.model.GameData
+import com.mlbb.plus.ui.theme.MLBBPlusTheme
 import com.mlbb.plus.ui.widgets.JetOverlay
 import com.mlbb.plus.ui.widgets.RoamGuideWidget
 
@@ -102,11 +103,13 @@ class WidgetOverlayService : Service() {
         if (!overlayInitialized) {
             JetOverlay.initialize(application) {
                 overlayContent {
-                    RoamGuideWidget(
-                        role = currentRole,
-                        roleType = currentRoleType,
-                        onBack = { JetOverlay.hide() }
-                    )
+                    MLBBPlusTheme {
+                        RoamGuideWidget(
+                            role = currentRole,
+                            roleType = currentRoleType,
+                            onBack = { JetOverlay.hide() }
+                        )
+                    }
                 }
             }
             overlayInitialized = true

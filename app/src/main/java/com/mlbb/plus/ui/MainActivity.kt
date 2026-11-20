@@ -12,12 +12,16 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import com.mlbb.plus.ui.components.AppIcons
 import com.mlbb.plus.ui.model.GameData
 import com.mlbb.plus.ui.model.RoleTypes
 import com.mlbb.plus.ui.model.Hero
@@ -62,12 +66,12 @@ import com.mlbb.plus.ui.theme.MLBBPlusTheme
 //      grants). ON_RESUME observer re-reads the real permission.
 // ============================================================
 
-private enum class Tab(val label: String, val emoji: String) {
-    HOME("Home", "\uD83C\uDFE0"),
-    HEROES("Heroes", "\uD83D\uDC64"),
-    ITEMS("Items", "\uD83C\uDF92"),
-    PATCH("Patch Notes", "\uD83D\uDCC4"),
-    SETTINGS("Settings", "\u2699\uFE0F")
+private enum class Tab(val label: String, val icon: ImageVector) {
+    HOME("Home", AppIcons.Home),
+    HEROES("Heroes", AppIcons.Person),
+    ITEMS("Items", AppIcons.Apps),
+    PATCH("Patch", AppIcons.History),
+    SETTINGS("Settings", AppIcons.Settings)
 }
 
 class MainActivity : ComponentActivity() {
@@ -148,7 +152,11 @@ private fun MLBBPlusApp(onLaunchWidget: (String, String) -> Unit) {
         Scaffold(
             containerColor = MLBBPlusColors.GithubBg,
             bottomBar = {
-                NavigationBar(containerColor = MLBBPlusColors.GithubCard, contentColor = MLBBPlusColors.Gold) {
+                NavigationBar(
+                    containerColor = MLBBPlusColors.Header,
+                    contentColor = MLBBPlusColors.Gold,
+                    tonalElevation = 0.dp
+                ) {
                     Tab.entries.forEach { t ->
                         NavigationBarItem(
                             selected = tab == t,
@@ -163,14 +171,15 @@ private fun MLBBPlusApp(onLaunchWidget: (String, String) -> Unit) {
                                 }
                                 if (t != Tab.ITEMS) selectedItem = null
                             },
-                            icon = { Text(t.emoji, fontSize = 20.sp) },
-                            label = { Text(t.label) },
+                            icon = { Icon(t.icon, contentDescription = null) },
+                            label = { Text(t.label, fontSize = 12.sp, maxLines = 1) },
+                            alwaysShowLabel = true,
                             colors = NavigationBarItemDefaults.colors(
-                                selectedIconColor = MLBBPlusColors.Gold,
+                                selectedIconColor = Color.Black,
                                 selectedTextColor = MLBBPlusColors.Gold,
                                 unselectedIconColor = MLBBPlusColors.GithubSecondary,
                                 unselectedTextColor = MLBBPlusColors.GithubSecondary,
-                                indicatorColor = MLBBPlusColors.Gold.copy(alpha = 0.15f)
+                                indicatorColor = MLBBPlusColors.Gold
                             )
                         )
                     }
