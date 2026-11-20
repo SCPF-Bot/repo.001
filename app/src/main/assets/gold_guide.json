@@ -1,0 +1,1613 @@
+{
+  "meta": {
+    "game": "Mobile Legends: Bang Bang",
+    "title": "Gold Timeframe Table — Enhanced",
+    "version": "1.0 - Enemy spell tracker (EXP/JG/MID/GOLD/ROAM) + battle spells CD",
+    "patch": "2.2.23",
+    "season": "Season 42 — Starward Decade",
+    "updated": "2026-11-20",
+    "based_on": "Same timeframe structure as Roam guide (0:00-18:00, 11 steps) + online verification for Season 42 Patch 2.2.23 live 11 Nov 2026. Patch 2.2.23 supersedes 2.2.16a: Popol and Kupa revamp, Gloo/Masha/Atlas nerfed, Xavier/Lunox/Freya/Aldous/Kaja/Melissa buffed, Sprint 100s->75s, Chastise Pauldron weaker, Antique Cuirass stronger, Concussive Blast 50% less damage to minions.",
+    "how_to_use": "Each role has steps aligned to real objective spawns. Use startSeconds/endSeconds for your in-game timer UI. Check checklist for what to do, decision for fight vs run, dont for most common throw. In solo queue, prioritize checklist over forcing a fight.",
+    "objective_timers": {
+      "turtle": {
+        "first_spawn_seconds": 120,
+        "respawn_seconds": 120,
+        "max_per_game": 3,
+        "no_new_turtle_if_last_slain_after_seconds": 360,
+        "auto_convert_to_lord_at_seconds": 480,
+        "auto_convert_delay_if_no_damage_seconds": 5,
+        "auto_convert_latest_seconds": 540,
+        "reward": "Gold + large EXP for team. Last-hit: instant heal + self-repairing shield + adaptive damage.",
+        "note": "First Turtle always spawns next to EXP lane. Season 42 Healing Turtle: killing it summons a Turtle that pushes strongest lane + heals instead of shield."
+      },
+      "lord": {
+        "first_spawn_rule": "Exactly 120s after last Turtle slain. Example: Turtle slain 7:45 -> Lord 9:45. If Turtle not slain by 8:00 and no damage for 5s, Lord replaces Turtle after 5s, delayed up to 9:00.",
+        "first_spawn_fallback_seconds": 480,
+        "respawn_seconds_before_18min": 180,
+        "respawn_seconds_after_18min": 120,
+        "evolves_at_seconds": 1080,
+        "reward": "Lord pushes weakest lane, buffs waves, charges turret for 30% Max HP True damage (8-18min).",
+        "note": "Lord is NOT fixed at 8:00 if you tap slain. Widget counts 2 min after last Turtle if you tap."
+      },
+      "lithowanderer": {
+        "first_spawn_seconds": 45,
+        "respawn_seconds": 120,
+        "note": "River crab. Small team reward + short river benefit."
+      },
+      "outer_turret_shield": {
+        "ends_seconds": 300,
+        "note": "Outer turret shields drop at 5:00."
+      }
+    },
+    "global_rules": [
+      "Arrive 20-30s BEFORE Turtle/Lord spawns.",
+      "Never start Lord with enemy jungler + Retribution alive nearby.",
+      "Trade your life only for objective or carry's life.",
+      "After won fight, convert to tower/objective immediately.",
+      "If you lose lanes, give up Turtle and take opposite side.",
+      "Clear wave before rotating - always."
+    ],
+    "compact_mode": {
+      "goal": "Widget must stay 2 rows tall in landscape. Collapsed shows callout only. Expanded shows full description, checklist, vision, decision, dont.",
+      "collapsed_height_target_dp": 48,
+      "heroes_note": "Heroes are pre-game only. Hide heroes in live view, show only when timer is 0 and expanded.",
+      "width_rule": "Portrait 98% width, landscape 62% width so it does not cover the fight."
+    },
+    "beginner_friendly": "Merged objective + description into one instruction per step. Tuned for Grandmaster to Epic.",
+    "adaptive_height": "Collapsed has no maxLines limit, height wraps to fit full description. No truncation.",
+    "sources": [
+      "timesaver.gg Patch Notes 2.2.23 (11 Nov 2026)",
+      "timesaver.gg Best Jungle / EXP Lane heroes Season 42 Patch 2.2.23",
+      "mlbbhub / mlbb.io ranked trackers via timesaver.gg summaries",
+      "mlbbdex Weekly Meta Report 19 Nov 2026 Patch 2.2.23"
+    ],
+    "gold_mechanics": {
+      "gold_bonus": "Gold lane gives extra gold per minion + siege minion bonus. Patch 2.2.23 raised Gold Lane siege minion extra gold 40% -> 60%. Do not miss siege minion.",
+      "last_hit": "Last-hit every minion. Missing cannon is biggest loss.",
+      "freeze_vs_push": "Freeze near tower by last-hitting only if pressured - forces enemy to overextend for gank.",
+      "gank_timing": "Enemy jungler finishes first clear around 1:15-1:30. Do not push with no vision then.",
+      "rotate_rule": "Farm first, fight later. First 5 min: clear every wave, leave lane only for first Turtle (if wave cleared + winnable) or turret under threat. After 2 core items (around 7-10 min), join Turtle/Lord/mid fights from behind frontline.",
+      "turret_shield": "Outer turret shields drop at 5:00.",
+      "golden_turret": "Patch 2.2.23: Golden Turret base HP 1000 -> 2000, team gold from outer/inner turret 100/140 -> 90/120.",
+      "positioning": "Gold laner is main late damage. Stay behind frontline, save Flicker. One death late can end game.",
+      "solo_queue_note": "Solo queue: Obsidia / Bruno / Hanabi are top Gold, but Obsidia is heavily banned. Have low-ban backup (Karrie / Claude / Melissa)."
+    },
+    "gold_types_verified": {
+      "note": "Gold archetypes use verified Specialty tags + Gold lane filter Nov 2026 Patch 2.2.23.",
+      "mapping": {
+        "crit": "Crit - Late hypercarry crit.",
+        "dps": "DPS - Sustained shred vs tanks.",
+        "burst": "Burst - Skill burst.",
+        "utility": "Utility - AoE zone.",
+        "early_fighter": "Early Fighter - Win lane early, snowball."
+      }
+    },
+    "hero_pool_rule": {
+      "rule": "Marksman / Fighter only AND in current Gold heroes list (Lane contains Gold, Nov 2026, Patch 2.2.23)."
+    }
+  },
+  "emblem_guide": [
+    {
+      "id": "marksman_crit",
+      "name": "Marksman - Crit",
+      "effect": "Attack Speed + Adaptive Attack + Adaptive Pen. Swift + Weapon Master + Weakness Finder / Quantum Charge.",
+      "best_for": [
+        "crit",
+        "utility"
+      ]
+    },
+    {
+      "id": "marksman_dps",
+      "name": "Marksman - DPS",
+      "effect": "Attack Speed + Adaptive Attack + Pen. Swift + Bargain Hunter + Weakness Finder.",
+      "best_for": [
+        "dps"
+      ]
+    },
+    {
+      "id": "assassin_burst",
+      "name": "Assassin - Burst Gold",
+      "effect": "Adaptive Pen + Adaptive Attack + Movement Speed. Fatal + Bargain Hunter + Quantum Charge.",
+      "best_for": [
+        "burst_gold",
+        "early_fighter_gold"
+      ]
+    }
+  ],
+  "roles": [
+    {
+      "id": "crit",
+      "label": "Crit - Hypercarry",
+      "playstyle": "Crit hypercarry. Scale to late, crit kills in seconds.",
+      "heroes": [
+        {
+          "name": "Obsidia",
+          "archetype": "",
+          "note": "Top Gold in November - most-picked marksman in high rank, high ban"
+        },
+        {
+          "name": "Bruno",
+          "archetype": "",
+          "note": "Revamped crit + range, strong Gold"
+        },
+        {
+          "name": "Hanabi",
+          "archetype": "",
+          "note": "AoE crit, late hypercarry"
+        },
+        {
+          "name": "Miya",
+          "archetype": "",
+          "note": "Late hypercarry, simple"
+        },
+        {
+          "name": "Layla",
+          "archetype": "",
+          "note": "Longest range, beginner-friendly"
+        }
+      ],
+      "battle_spells": [
+        "Flicker (escape)",
+        "Inspire (burst)",
+        "Aegis (vs dive)"
+      ],
+      "emblem": "Marksman Emblem — Swift + Weapon Master / Bargain Hunter + Weakness Finder / Quantum Charge.",
+      "core_items": [
+        "Windtalker",
+        "Haas' Claws",
+        "Berserker's Fury",
+        "Malefic Gun"
+      ],
+      "strengths": [
+        "Best late damage"
+      ],
+      "weaknesses": [
+        "Weak early - needs farm"
+      ],
+      "win_condition": "Win by farm + late teamfight",
+      "lose_condition": "Lose if dove / no farm",
+      "steps": [
+        {
+          "startSeconds": 0,
+          "endSeconds": 40,
+          "timeLabel": "0:00-0:40",
+          "phase": "Setup",
+          "description": "Last-hit every minion. Gold lane gives extra gold - do not miss cannon. Freeze near tower if pressured. As Crit, farm, do not die, scale to late.",
+          "checklist": [
+            "Last-hit, freeze safe",
+            "Check minimap before moving",
+            "Ping objective timer"
+          ],
+          "vision": "Gold bush + river",
+          "decision": "Fight if numbers + Ultimate/Retribution ready, else trade opposite side.",
+          "dont": "Don't miss cannon minion.",
+          "callout": "Last-hit, freeze safe",
+          "compact": "Setup - Last-hit, freeze safe",
+          "instruction": "Last-hit every minion. Gold lane gives extra gold - do not miss cannon. Freeze near tower if pressured. As Crit, farm, do not die, scale to late.",
+          "objective_contest": "Contest: join only if wave cleared, play behind frontline, save Flicker.",
+          "objective_trade": "Trade: give objective, push Gold tower + farm, do not walk dark river alone."
+        },
+        {
+          "startSeconds": 40,
+          "endSeconds": 80,
+          "timeLabel": "0:40-1:20",
+          "phase": "Early",
+          "description": "Farm, avoid showing for gank 1:15-1:30 when enemy jungler finishes clear. As Crit, farm, do not die, scale to late.",
+          "checklist": [
+            "Farm, hide from gank",
+            "Check minimap before moving",
+            "Ping objective timer"
+          ],
+          "vision": "Gold river bush",
+          "decision": "Fight if numbers + Ultimate/Retribution ready, else trade opposite side.",
+          "dont": "Don't push with no vision.",
+          "callout": "Farm, hide from gank",
+          "compact": "Early - Farm, hide from gank",
+          "instruction": "Farm, avoid showing for gank 1:15-1:30 when enemy jungler finishes clear. As Crit, farm, do not die, scale to late.",
+          "objective_contest": "Contest: join only if wave cleared, play behind frontline, save Flicker.",
+          "objective_trade": "Trade: give objective, push Gold tower + farm, do not walk dark river alone."
+        },
+        {
+          "startSeconds": 80,
+          "endSeconds": 120,
+          "timeLabel": "1:20-2:00",
+          "phase": "Turtle Setup",
+          "description": "Clear wave, only rotate to Turtle if wave is cleared and Turtle is winnable. Else stay and take tower gold. As Crit, farm, do not die, scale to late.",
+          "checklist": [
+            "Clear, then decide",
+            "Check minimap before moving",
+            "Ping objective timer"
+          ],
+          "vision": "Gold lane + Turtle pit",
+          "decision": "Fight if numbers + Ultimate/Retribution ready, else trade opposite side.",
+          "dont": "Don't rotate with wave pushing to you.",
+          "callout": "Clear, then decide",
+          "compact": "Turtle Setup - Clear, then decide",
+          "instruction": "Clear wave, only rotate to Turtle if wave is cleared and Turtle is winnable. Else stay and take tower gold. As Crit, farm, do not die, scale to late.",
+          "objective_contest": "Contest: join only if wave cleared, play behind frontline, save Flicker.",
+          "objective_trade": "Trade: give objective, push Gold tower + farm, do not walk dark river alone."
+        },
+        {
+          "startSeconds": 120,
+          "endSeconds": 150,
+          "timeLabel": "2:00-2:30",
+          "phase": "First Turtle",
+          "description": "First Turtle - join only if you cleared wave and team needs damage. Else push Gold tower. As Crit, farm, do not die, scale to late.",
+          "checklist": [
+            "Push or join - decide",
+            "Check minimap before moving",
+            "Ping objective timer"
+          ],
+          "vision": "Gold tower / Turtle pit",
+          "decision": "Fight if numbers + Ultimate/Retribution ready, else trade opposite side.",
+          "dont": "Don't join Turtle and lose tower for nothing.",
+          "callout": "Push or join - decide",
+          "compact": "First Turtle - Push or join - decide",
+          "instruction": "First Turtle - join only if you cleared wave and team needs damage. Else push Gold tower. As Crit, farm, do not die, scale to late.",
+          "objective_contest": "Contest: join only if wave cleared, play behind frontline, save Flicker.",
+          "objective_trade": "Trade: give objective, push Gold tower + farm, do not walk dark river alone."
+        },
+        {
+          "startSeconds": 150,
+          "endSeconds": 240,
+          "timeLabel": "2:30-4:00",
+          "phase": "Post-Turtle",
+          "description": "Farm to first core item. Rotate to mid to clear if team fights Turtle, then back to Gold.",
+          "checklist": [
+            "Farm to first item",
+            "Check minimap before moving",
+            "Ping objective timer"
+          ],
+          "vision": "Gold + mid",
+          "decision": "Fight if numbers + Ultimate/Retribution ready, else trade opposite side.",
+          "dont": "Don't fight with no items.",
+          "callout": "Farm to first item",
+          "compact": "Post-Turtle - Farm to first item",
+          "instruction": "Farm to first core item. Rotate to mid to clear if team fights Turtle, then back to Gold.",
+          "objective_contest": "Contest: join only if wave cleared, play behind frontline, save Flicker.",
+          "objective_trade": "Trade: give objective, push Gold tower + farm, do not walk dark river alone."
+        },
+        {
+          "startSeconds": 240,
+          "endSeconds": 300,
+          "timeLabel": "4:00-5:00",
+          "phase": "Second Turtle",
+          "description": "After 5:00 turret shield drops - push or defend. Join 2nd Turtle if 2 items ready.",
+          "checklist": [
+            "Push after 5:00",
+            "Check minimap before moving",
+            "Ping objective timer"
+          ],
+          "vision": "Turtle pit + Gold",
+          "decision": "Fight if numbers + Ultimate/Retribution ready, else trade opposite side.",
+          "dont": "Don't stay in Gold lane all game.",
+          "callout": "Push after 5:00",
+          "compact": "Second Turtle - Push after 5:00",
+          "instruction": "After 5:00 turret shield drops - push or defend. Join 2nd Turtle if 2 items ready.",
+          "objective_contest": "Contest: join only if wave cleared, play behind frontline, save Flicker.",
+          "objective_trade": "Trade: give objective, push Gold tower + farm, do not walk dark river alone."
+        },
+        {
+          "startSeconds": 300,
+          "endSeconds": 480,
+          "timeLabel": "5:00-8:00",
+          "phase": "Mid Game / Third Turtle",
+          "description": "Farm map-wide: take waves + safe jungle camps. Join fights from behind frontline.",
+          "checklist": [
+            "Farm map, join behind",
+            "Check minimap before moving",
+            "Ping objective timer"
+          ],
+          "vision": "Mid + Lord pit",
+          "decision": "Fight if numbers + Ultimate/Retribution ready, else trade opposite side.",
+          "dont": "Don't walk alone to side wave.",
+          "callout": "Farm map, join behind",
+          "compact": "Mid Game / Third Turtle - Farm map, join behind",
+          "instruction": "Farm map-wide: take waves + safe jungle camps. Join fights from behind frontline.",
+          "objective_contest": "Contest: join only if wave cleared, play behind frontline, save Flicker.",
+          "objective_trade": "Trade: give objective, push Gold tower + farm, do not walk dark river alone."
+        },
+        {
+          "startSeconds": 480,
+          "endSeconds": 600,
+          "timeLabel": "8:00-10:00",
+          "phase": "First Lord",
+          "description": "First Lord - group from behind frontline, stay with tank/roam. Do not face-check.",
+          "checklist": [
+            "Group behind frontline",
+            "Check minimap before moving",
+            "Ping objective timer"
+          ],
+          "vision": "Lord pit",
+          "decision": "Fight if numbers + Ultimate/Retribution ready, else trade opposite side.",
+          "dont": "Don't face-check Lord pit.",
+          "callout": "Group behind frontline",
+          "compact": "First Lord - Group behind frontline",
+          "instruction": "First Lord - group from behind frontline, stay with tank/roam. Do not face-check.",
+          "objective_contest": "Contest: join only if wave cleared, play behind frontline, save Flicker.",
+          "objective_trade": "Trade: give objective, push Gold tower + farm, do not walk dark river alone."
+        },
+        {
+          "startSeconds": 600,
+          "endSeconds": 720,
+          "timeLabel": "10:00-12:00",
+          "phase": "Lord Push",
+          "description": "Push with Lord, take towers, do not chase.",
+          "checklist": [
+            "Push with Lord",
+            "Check minimap before moving",
+            "Ping objective timer"
+          ],
+          "vision": "Lord lane",
+          "decision": "Fight if numbers + Ultimate/Retribution ready, else trade opposite side.",
+          "dont": "Don't chase kills.",
+          "callout": "Push with Lord",
+          "compact": "Lord Push - Push with Lord",
+          "instruction": "Push with Lord, take towers, do not chase.",
+          "objective_contest": "Contest: join only if wave cleared, play behind frontline, save Flicker.",
+          "objective_trade": "Trade: give objective, push Gold tower + farm, do not walk dark river alone."
+        },
+        {
+          "startSeconds": 720,
+          "endSeconds": 900,
+          "timeLabel": "12:00-15:00",
+          "phase": "Mid-Late",
+          "description": "Late - you are main damage. Position behind frontline, save Flicker.",
+          "checklist": [
+            "Stay behind frontline",
+            "Check minimap before moving",
+            "Ping objective timer"
+          ],
+          "vision": "Lord pit",
+          "decision": "Fight if numbers + Ultimate/Retribution ready, else trade opposite side.",
+          "dont": "Don't walk in front of tank.",
+          "callout": "Stay behind frontline",
+          "compact": "Mid-Late - Stay behind frontline",
+          "instruction": "Late - you are main damage. Position behind frontline, save Flicker.",
+          "objective_contest": "Contest: join only if wave cleared, play behind frontline, save Flicker.",
+          "objective_trade": "Trade: give objective, push Gold tower + farm, do not walk dark river alone."
+        },
+        {
+          "startSeconds": 900,
+          "endSeconds": 1080,
+          "timeLabel": "15:00-18:00",
+          "phase": "Late / Evolved Lord",
+          "description": "Evolved Lord - stay grouped, save Flicker + defensive item. One death can end game.",
+          "checklist": [
+            "Save Flicker, stay grouped",
+            "Check minimap before moving",
+            "Ping objective timer"
+          ],
+          "vision": "Evolved Lord pit",
+          "decision": "Fight if numbers + Ultimate/Retribution ready, else trade opposite side.",
+          "dont": "Don't fight without Flicker.",
+          "callout": "Save Flicker, stay grouped",
+          "compact": "Late / Evolved Lord - Save Flicker, stay grouped",
+          "instruction": "Evolved Lord - stay grouped, save Flicker + defensive item. One death can end game.",
+          "objective_contest": "Contest: join only if wave cleared, play behind frontline, save Flicker.",
+          "objective_trade": "Trade: give objective, push Gold tower + farm, do not walk dark river alone."
+        }
+      ],
+      "objective_templates": {
+        "turtle_contest": "Join only if wave cleared, play behind frontline.",
+        "turtle_trade": "Give Turtle, farm + push tower.",
+        "lord_contest": "Stay behind frontline, crit Lord fight.",
+        "lord_trade": "Give Lord, farm + defend."
+      }
+    },
+    {
+      "id": "dps",
+      "label": "Sustained DPS - Tank Shred",
+      "playstyle": "Sustained DPS. Shred tanks, kite, constant damage.",
+      "heroes": [
+        {
+          "name": "Karrie",
+          "archetype": "",
+          "note": "Adjusted in 2.2.23 - less Skill 1, stronger ult + dash tracking"
+        },
+        {
+          "name": "Claude",
+          "archetype": "",
+          "note": "AoE + dash, kite"
+        },
+        {
+          "name": "Moskov",
+          "archetype": "",
+          "note": "Stun + push"
+        },
+        {
+          "name": "Granger",
+          "archetype": "",
+          "note": "Skill + burst - Gold-only in trackers"
+        },
+        {
+          "name": "Irithel",
+          "archetype": "",
+          "note": "AoE + kite"
+        }
+      ],
+      "battle_spells": [
+        "Flicker (escape)",
+        "Sprint (75s - kite)",
+        "Purify (vs CC)"
+      ],
+      "emblem": "Marksman Emblem — Swift + Bargain Hunter + Weakness Finder.",
+      "core_items": [
+        "Corrosion Scythe",
+        "Demon Hunter Sword",
+        "Golden Staff",
+        "Malefic Gun"
+      ],
+      "strengths": [
+        "Best vs tanks"
+      ],
+      "weaknesses": [
+        "Needs peel vs dive"
+      ],
+      "win_condition": "Win by kite + shred",
+      "lose_condition": "Lose if dove with no peel",
+      "steps": [
+        {
+          "startSeconds": 0,
+          "endSeconds": 40,
+          "timeLabel": "0:00-0:40",
+          "phase": "Setup",
+          "description": "Last-hit every minion. Gold lane gives extra gold - do not miss cannon. Freeze near tower if pressured. As DPS, kite, shred tank, do not stand still.",
+          "checklist": [
+            "Last-hit, freeze safe",
+            "Check minimap before moving",
+            "Ping objective timer"
+          ],
+          "vision": "Gold bush + river",
+          "decision": "Fight if numbers + Ultimate/Retribution ready, else trade opposite side.",
+          "dont": "Don't miss cannon minion.",
+          "callout": "Last-hit, freeze safe",
+          "compact": "Setup - Last-hit, freeze safe",
+          "instruction": "Last-hit every minion. Gold lane gives extra gold - do not miss cannon. Freeze near tower if pressured. As DPS, kite, shred tank, do not stand still.",
+          "objective_contest": "Contest: join only if wave cleared, play behind frontline, save Flicker.",
+          "objective_trade": "Trade: give objective, push Gold tower + farm, do not walk dark river alone."
+        },
+        {
+          "startSeconds": 40,
+          "endSeconds": 80,
+          "timeLabel": "0:40-1:20",
+          "phase": "Early",
+          "description": "Farm, avoid showing for gank 1:15-1:30 when enemy jungler finishes clear. As DPS, kite, shred tank, do not stand still.",
+          "checklist": [
+            "Farm, hide from gank",
+            "Check minimap before moving",
+            "Ping objective timer"
+          ],
+          "vision": "Gold river bush",
+          "decision": "Fight if numbers + Ultimate/Retribution ready, else trade opposite side.",
+          "dont": "Don't push with no vision.",
+          "callout": "Farm, hide from gank",
+          "compact": "Early - Farm, hide from gank",
+          "instruction": "Farm, avoid showing for gank 1:15-1:30 when enemy jungler finishes clear. As DPS, kite, shred tank, do not stand still.",
+          "objective_contest": "Contest: join only if wave cleared, play behind frontline, save Flicker.",
+          "objective_trade": "Trade: give objective, push Gold tower + farm, do not walk dark river alone."
+        },
+        {
+          "startSeconds": 80,
+          "endSeconds": 120,
+          "timeLabel": "1:20-2:00",
+          "phase": "Turtle Setup",
+          "description": "Clear wave, only rotate to Turtle if wave is cleared and Turtle is winnable. Else stay and take tower gold. As DPS, kite, shred tank, do not stand still.",
+          "checklist": [
+            "Clear, then decide",
+            "Check minimap before moving",
+            "Ping objective timer"
+          ],
+          "vision": "Gold lane + Turtle pit",
+          "decision": "Fight if numbers + Ultimate/Retribution ready, else trade opposite side.",
+          "dont": "Don't rotate with wave pushing to you.",
+          "callout": "Clear, then decide",
+          "compact": "Turtle Setup - Clear, then decide",
+          "instruction": "Clear wave, only rotate to Turtle if wave is cleared and Turtle is winnable. Else stay and take tower gold. As DPS, kite, shred tank, do not stand still.",
+          "objective_contest": "Contest: join only if wave cleared, play behind frontline, save Flicker.",
+          "objective_trade": "Trade: give objective, push Gold tower + farm, do not walk dark river alone."
+        },
+        {
+          "startSeconds": 120,
+          "endSeconds": 150,
+          "timeLabel": "2:00-2:30",
+          "phase": "First Turtle",
+          "description": "First Turtle - join only if you cleared wave and team needs damage. Else push Gold tower. As DPS, kite, shred tank, do not stand still.",
+          "checklist": [
+            "Push or join - decide",
+            "Check minimap before moving",
+            "Ping objective timer"
+          ],
+          "vision": "Gold tower / Turtle pit",
+          "decision": "Fight if numbers + Ultimate/Retribution ready, else trade opposite side.",
+          "dont": "Don't join Turtle and lose tower for nothing.",
+          "callout": "Push or join - decide",
+          "compact": "First Turtle - Push or join - decide",
+          "instruction": "First Turtle - join only if you cleared wave and team needs damage. Else push Gold tower. As DPS, kite, shred tank, do not stand still.",
+          "objective_contest": "Contest: join only if wave cleared, play behind frontline, save Flicker.",
+          "objective_trade": "Trade: give objective, push Gold tower + farm, do not walk dark river alone."
+        },
+        {
+          "startSeconds": 150,
+          "endSeconds": 240,
+          "timeLabel": "2:30-4:00",
+          "phase": "Post-Turtle",
+          "description": "Farm to first core item. Rotate to mid to clear if team fights Turtle, then back to Gold.",
+          "checklist": [
+            "Farm to first item",
+            "Check minimap before moving",
+            "Ping objective timer"
+          ],
+          "vision": "Gold + mid",
+          "decision": "Fight if numbers + Ultimate/Retribution ready, else trade opposite side.",
+          "dont": "Don't fight with no items.",
+          "callout": "Farm to first item",
+          "compact": "Post-Turtle - Farm to first item",
+          "instruction": "Farm to first core item. Rotate to mid to clear if team fights Turtle, then back to Gold.",
+          "objective_contest": "Contest: join only if wave cleared, play behind frontline, save Flicker.",
+          "objective_trade": "Trade: give objective, push Gold tower + farm, do not walk dark river alone."
+        },
+        {
+          "startSeconds": 240,
+          "endSeconds": 300,
+          "timeLabel": "4:00-5:00",
+          "phase": "Second Turtle",
+          "description": "After 5:00 turret shield drops - push or defend. Join 2nd Turtle if 2 items ready.",
+          "checklist": [
+            "Push after 5:00",
+            "Check minimap before moving",
+            "Ping objective timer"
+          ],
+          "vision": "Turtle pit + Gold",
+          "decision": "Fight if numbers + Ultimate/Retribution ready, else trade opposite side.",
+          "dont": "Don't stay in Gold lane all game.",
+          "callout": "Push after 5:00",
+          "compact": "Second Turtle - Push after 5:00",
+          "instruction": "After 5:00 turret shield drops - push or defend. Join 2nd Turtle if 2 items ready.",
+          "objective_contest": "Contest: join only if wave cleared, play behind frontline, save Flicker.",
+          "objective_trade": "Trade: give objective, push Gold tower + farm, do not walk dark river alone."
+        },
+        {
+          "startSeconds": 300,
+          "endSeconds": 480,
+          "timeLabel": "5:00-8:00",
+          "phase": "Mid Game / Third Turtle",
+          "description": "Farm map-wide: take waves + safe jungle camps. Join fights from behind frontline.",
+          "checklist": [
+            "Farm map, join behind",
+            "Check minimap before moving",
+            "Ping objective timer"
+          ],
+          "vision": "Mid + Lord pit",
+          "decision": "Fight if numbers + Ultimate/Retribution ready, else trade opposite side.",
+          "dont": "Don't walk alone to side wave.",
+          "callout": "Farm map, join behind",
+          "compact": "Mid Game / Third Turtle - Farm map, join behind",
+          "instruction": "Farm map-wide: take waves + safe jungle camps. Join fights from behind frontline.",
+          "objective_contest": "Contest: join only if wave cleared, play behind frontline, save Flicker.",
+          "objective_trade": "Trade: give objective, push Gold tower + farm, do not walk dark river alone."
+        },
+        {
+          "startSeconds": 480,
+          "endSeconds": 600,
+          "timeLabel": "8:00-10:00",
+          "phase": "First Lord",
+          "description": "First Lord - group from behind frontline, stay with tank/roam. Do not face-check.",
+          "checklist": [
+            "Group behind frontline",
+            "Check minimap before moving",
+            "Ping objective timer"
+          ],
+          "vision": "Lord pit",
+          "decision": "Fight if numbers + Ultimate/Retribution ready, else trade opposite side.",
+          "dont": "Don't face-check Lord pit.",
+          "callout": "Group behind frontline",
+          "compact": "First Lord - Group behind frontline",
+          "instruction": "First Lord - group from behind frontline, stay with tank/roam. Do not face-check.",
+          "objective_contest": "Contest: join only if wave cleared, play behind frontline, save Flicker.",
+          "objective_trade": "Trade: give objective, push Gold tower + farm, do not walk dark river alone."
+        },
+        {
+          "startSeconds": 600,
+          "endSeconds": 720,
+          "timeLabel": "10:00-12:00",
+          "phase": "Lord Push",
+          "description": "Push with Lord, take towers, do not chase.",
+          "checklist": [
+            "Push with Lord",
+            "Check minimap before moving",
+            "Ping objective timer"
+          ],
+          "vision": "Lord lane",
+          "decision": "Fight if numbers + Ultimate/Retribution ready, else trade opposite side.",
+          "dont": "Don't chase kills.",
+          "callout": "Push with Lord",
+          "compact": "Lord Push - Push with Lord",
+          "instruction": "Push with Lord, take towers, do not chase.",
+          "objective_contest": "Contest: join only if wave cleared, play behind frontline, save Flicker.",
+          "objective_trade": "Trade: give objective, push Gold tower + farm, do not walk dark river alone."
+        },
+        {
+          "startSeconds": 720,
+          "endSeconds": 900,
+          "timeLabel": "12:00-15:00",
+          "phase": "Mid-Late",
+          "description": "Late - you are main damage. Position behind frontline, save Flicker.",
+          "checklist": [
+            "Stay behind frontline",
+            "Check minimap before moving",
+            "Ping objective timer"
+          ],
+          "vision": "Lord pit",
+          "decision": "Fight if numbers + Ultimate/Retribution ready, else trade opposite side.",
+          "dont": "Don't walk in front of tank.",
+          "callout": "Stay behind frontline",
+          "compact": "Mid-Late - Stay behind frontline",
+          "instruction": "Late - you are main damage. Position behind frontline, save Flicker.",
+          "objective_contest": "Contest: join only if wave cleared, play behind frontline, save Flicker.",
+          "objective_trade": "Trade: give objective, push Gold tower + farm, do not walk dark river alone."
+        },
+        {
+          "startSeconds": 900,
+          "endSeconds": 1080,
+          "timeLabel": "15:00-18:00",
+          "phase": "Late / Evolved Lord",
+          "description": "Evolved Lord - stay grouped, save Flicker + defensive item. One death can end game.",
+          "checklist": [
+            "Save Flicker, stay grouped",
+            "Check minimap before moving",
+            "Ping objective timer"
+          ],
+          "vision": "Evolved Lord pit",
+          "decision": "Fight if numbers + Ultimate/Retribution ready, else trade opposite side.",
+          "dont": "Don't fight without Flicker.",
+          "callout": "Save Flicker, stay grouped",
+          "compact": "Late / Evolved Lord - Save Flicker, stay grouped",
+          "instruction": "Evolved Lord - stay grouped, save Flicker + defensive item. One death can end game.",
+          "objective_contest": "Contest: join only if wave cleared, play behind frontline, save Flicker.",
+          "objective_trade": "Trade: give objective, push Gold tower + farm, do not walk dark river alone."
+        }
+      ],
+      "objective_templates": {
+        "turtle_contest": "Kite Turtle fight, shred frontline.",
+        "turtle_trade": "Give Turtle, farm + push.",
+        "lord_contest": "Kite Lord fight, shred.",
+        "lord_trade": "Give Lord, kite + defend."
+      }
+    },
+    {
+      "id": "burst_gold",
+      "label": "Burst - Skill Marksman",
+      "playstyle": "Burst marksman. Skills kill, not just basic attacks.",
+      "heroes": [
+        {
+          "name": "Lesley",
+          "archetype": "",
+          "note": "Crit + burst, long range"
+        },
+        {
+          "name": "Clint",
+          "archetype": "",
+          "note": "Skill burst + poke"
+        },
+        {
+          "name": "Brody",
+          "archetype": "",
+          "note": "Burst + stun"
+        },
+        {
+          "name": "Beatrix",
+          "archetype": "",
+          "note": "Weapon swap burst"
+        },
+        {
+          "name": "Natan",
+          "archetype": "",
+          "note": "Skill + AoE burst"
+        }
+      ],
+      "battle_spells": [
+        "Flicker (escape)",
+        "Purify (vs dive)"
+      ],
+      "emblem": "Assassin / Marksman Emblem — Fatal + Bargain Hunter + Quantum Charge.",
+      "core_items": [
+        "Blade of Despair",
+        "Malefic Roar",
+        "Berserker's Fury",
+        "Wind of Nature"
+      ],
+      "strengths": [
+        "Burst kills carry fast"
+      ],
+      "weaknesses": [
+        "Long cooldowns"
+      ],
+      "win_condition": "Win by burst pick",
+      "lose_condition": "Lose if skills wasted",
+      "steps": [
+        {
+          "startSeconds": 0,
+          "endSeconds": 40,
+          "timeLabel": "0:00-0:40",
+          "phase": "Setup",
+          "description": "Last-hit every minion. Gold lane gives extra gold - do not miss cannon. Freeze near tower if pressured. As Burst, poke, burst one target, reset.",
+          "checklist": [
+            "Last-hit, freeze safe",
+            "Check minimap before moving",
+            "Ping objective timer"
+          ],
+          "vision": "Gold bush + river",
+          "decision": "Fight if numbers + Ultimate/Retribution ready, else trade opposite side.",
+          "dont": "Don't miss cannon minion.",
+          "callout": "Last-hit, freeze safe",
+          "compact": "Setup - Last-hit, freeze safe",
+          "instruction": "Last-hit every minion. Gold lane gives extra gold - do not miss cannon. Freeze near tower if pressured. As Burst, poke, burst one target, reset.",
+          "objective_contest": "Contest: join only if wave cleared, play behind frontline, save Flicker.",
+          "objective_trade": "Trade: give objective, push Gold tower + farm, do not walk dark river alone."
+        },
+        {
+          "startSeconds": 40,
+          "endSeconds": 80,
+          "timeLabel": "0:40-1:20",
+          "phase": "Early",
+          "description": "Farm, avoid showing for gank 1:15-1:30 when enemy jungler finishes clear. As Burst, poke, burst one target, reset.",
+          "checklist": [
+            "Farm, hide from gank",
+            "Check minimap before moving",
+            "Ping objective timer"
+          ],
+          "vision": "Gold river bush",
+          "decision": "Fight if numbers + Ultimate/Retribution ready, else trade opposite side.",
+          "dont": "Don't push with no vision.",
+          "callout": "Farm, hide from gank",
+          "compact": "Early - Farm, hide from gank",
+          "instruction": "Farm, avoid showing for gank 1:15-1:30 when enemy jungler finishes clear. As Burst, poke, burst one target, reset.",
+          "objective_contest": "Contest: join only if wave cleared, play behind frontline, save Flicker.",
+          "objective_trade": "Trade: give objective, push Gold tower + farm, do not walk dark river alone."
+        },
+        {
+          "startSeconds": 80,
+          "endSeconds": 120,
+          "timeLabel": "1:20-2:00",
+          "phase": "Turtle Setup",
+          "description": "Clear wave, only rotate to Turtle if wave is cleared and Turtle is winnable. Else stay and take tower gold. As Burst, poke, burst one target, reset.",
+          "checklist": [
+            "Clear, then decide",
+            "Check minimap before moving",
+            "Ping objective timer"
+          ],
+          "vision": "Gold lane + Turtle pit",
+          "decision": "Fight if numbers + Ultimate/Retribution ready, else trade opposite side.",
+          "dont": "Don't rotate with wave pushing to you.",
+          "callout": "Clear, then decide",
+          "compact": "Turtle Setup - Clear, then decide",
+          "instruction": "Clear wave, only rotate to Turtle if wave is cleared and Turtle is winnable. Else stay and take tower gold. As Burst, poke, burst one target, reset.",
+          "objective_contest": "Contest: join only if wave cleared, play behind frontline, save Flicker.",
+          "objective_trade": "Trade: give objective, push Gold tower + farm, do not walk dark river alone."
+        },
+        {
+          "startSeconds": 120,
+          "endSeconds": 150,
+          "timeLabel": "2:00-2:30",
+          "phase": "First Turtle",
+          "description": "First Turtle - join only if you cleared wave and team needs damage. Else push Gold tower. As Burst, poke, burst one target, reset.",
+          "checklist": [
+            "Push or join - decide",
+            "Check minimap before moving",
+            "Ping objective timer"
+          ],
+          "vision": "Gold tower / Turtle pit",
+          "decision": "Fight if numbers + Ultimate/Retribution ready, else trade opposite side.",
+          "dont": "Don't join Turtle and lose tower for nothing.",
+          "callout": "Push or join - decide",
+          "compact": "First Turtle - Push or join - decide",
+          "instruction": "First Turtle - join only if you cleared wave and team needs damage. Else push Gold tower. As Burst, poke, burst one target, reset.",
+          "objective_contest": "Contest: join only if wave cleared, play behind frontline, save Flicker.",
+          "objective_trade": "Trade: give objective, push Gold tower + farm, do not walk dark river alone."
+        },
+        {
+          "startSeconds": 150,
+          "endSeconds": 240,
+          "timeLabel": "2:30-4:00",
+          "phase": "Post-Turtle",
+          "description": "Farm to first core item. Rotate to mid to clear if team fights Turtle, then back to Gold.",
+          "checklist": [
+            "Farm to first item",
+            "Check minimap before moving",
+            "Ping objective timer"
+          ],
+          "vision": "Gold + mid",
+          "decision": "Fight if numbers + Ultimate/Retribution ready, else trade opposite side.",
+          "dont": "Don't fight with no items.",
+          "callout": "Farm to first item",
+          "compact": "Post-Turtle - Farm to first item",
+          "instruction": "Farm to first core item. Rotate to mid to clear if team fights Turtle, then back to Gold.",
+          "objective_contest": "Contest: join only if wave cleared, play behind frontline, save Flicker.",
+          "objective_trade": "Trade: give objective, push Gold tower + farm, do not walk dark river alone."
+        },
+        {
+          "startSeconds": 240,
+          "endSeconds": 300,
+          "timeLabel": "4:00-5:00",
+          "phase": "Second Turtle",
+          "description": "After 5:00 turret shield drops - push or defend. Join 2nd Turtle if 2 items ready.",
+          "checklist": [
+            "Push after 5:00",
+            "Check minimap before moving",
+            "Ping objective timer"
+          ],
+          "vision": "Turtle pit + Gold",
+          "decision": "Fight if numbers + Ultimate/Retribution ready, else trade opposite side.",
+          "dont": "Don't stay in Gold lane all game.",
+          "callout": "Push after 5:00",
+          "compact": "Second Turtle - Push after 5:00",
+          "instruction": "After 5:00 turret shield drops - push or defend. Join 2nd Turtle if 2 items ready.",
+          "objective_contest": "Contest: join only if wave cleared, play behind frontline, save Flicker.",
+          "objective_trade": "Trade: give objective, push Gold tower + farm, do not walk dark river alone."
+        },
+        {
+          "startSeconds": 300,
+          "endSeconds": 480,
+          "timeLabel": "5:00-8:00",
+          "phase": "Mid Game / Third Turtle",
+          "description": "Farm map-wide: take waves + safe jungle camps. Join fights from behind frontline.",
+          "checklist": [
+            "Farm map, join behind",
+            "Check minimap before moving",
+            "Ping objective timer"
+          ],
+          "vision": "Mid + Lord pit",
+          "decision": "Fight if numbers + Ultimate/Retribution ready, else trade opposite side.",
+          "dont": "Don't walk alone to side wave.",
+          "callout": "Farm map, join behind",
+          "compact": "Mid Game / Third Turtle - Farm map, join behind",
+          "instruction": "Farm map-wide: take waves + safe jungle camps. Join fights from behind frontline.",
+          "objective_contest": "Contest: join only if wave cleared, play behind frontline, save Flicker.",
+          "objective_trade": "Trade: give objective, push Gold tower + farm, do not walk dark river alone."
+        },
+        {
+          "startSeconds": 480,
+          "endSeconds": 600,
+          "timeLabel": "8:00-10:00",
+          "phase": "First Lord",
+          "description": "First Lord - group from behind frontline, stay with tank/roam. Do not face-check.",
+          "checklist": [
+            "Group behind frontline",
+            "Check minimap before moving",
+            "Ping objective timer"
+          ],
+          "vision": "Lord pit",
+          "decision": "Fight if numbers + Ultimate/Retribution ready, else trade opposite side.",
+          "dont": "Don't face-check Lord pit.",
+          "callout": "Group behind frontline",
+          "compact": "First Lord - Group behind frontline",
+          "instruction": "First Lord - group from behind frontline, stay with tank/roam. Do not face-check.",
+          "objective_contest": "Contest: join only if wave cleared, play behind frontline, save Flicker.",
+          "objective_trade": "Trade: give objective, push Gold tower + farm, do not walk dark river alone."
+        },
+        {
+          "startSeconds": 600,
+          "endSeconds": 720,
+          "timeLabel": "10:00-12:00",
+          "phase": "Lord Push",
+          "description": "Push with Lord, take towers, do not chase.",
+          "checklist": [
+            "Push with Lord",
+            "Check minimap before moving",
+            "Ping objective timer"
+          ],
+          "vision": "Lord lane",
+          "decision": "Fight if numbers + Ultimate/Retribution ready, else trade opposite side.",
+          "dont": "Don't chase kills.",
+          "callout": "Push with Lord",
+          "compact": "Lord Push - Push with Lord",
+          "instruction": "Push with Lord, take towers, do not chase.",
+          "objective_contest": "Contest: join only if wave cleared, play behind frontline, save Flicker.",
+          "objective_trade": "Trade: give objective, push Gold tower + farm, do not walk dark river alone."
+        },
+        {
+          "startSeconds": 720,
+          "endSeconds": 900,
+          "timeLabel": "12:00-15:00",
+          "phase": "Mid-Late",
+          "description": "Late - you are main damage. Position behind frontline, save Flicker.",
+          "checklist": [
+            "Stay behind frontline",
+            "Check minimap before moving",
+            "Ping objective timer"
+          ],
+          "vision": "Lord pit",
+          "decision": "Fight if numbers + Ultimate/Retribution ready, else trade opposite side.",
+          "dont": "Don't walk in front of tank.",
+          "callout": "Stay behind frontline",
+          "compact": "Mid-Late - Stay behind frontline",
+          "instruction": "Late - you are main damage. Position behind frontline, save Flicker.",
+          "objective_contest": "Contest: join only if wave cleared, play behind frontline, save Flicker.",
+          "objective_trade": "Trade: give objective, push Gold tower + farm, do not walk dark river alone."
+        },
+        {
+          "startSeconds": 900,
+          "endSeconds": 1080,
+          "timeLabel": "15:00-18:00",
+          "phase": "Late / Evolved Lord",
+          "description": "Evolved Lord - stay grouped, save Flicker + defensive item. One death can end game.",
+          "checklist": [
+            "Save Flicker, stay grouped",
+            "Check minimap before moving",
+            "Ping objective timer"
+          ],
+          "vision": "Evolved Lord pit",
+          "decision": "Fight if numbers + Ultimate/Retribution ready, else trade opposite side.",
+          "dont": "Don't fight without Flicker.",
+          "callout": "Save Flicker, stay grouped",
+          "compact": "Late / Evolved Lord - Save Flicker, stay grouped",
+          "instruction": "Evolved Lord - stay grouped, save Flicker + defensive item. One death can end game.",
+          "objective_contest": "Contest: join only if wave cleared, play behind frontline, save Flicker.",
+          "objective_trade": "Trade: give objective, push Gold tower + farm, do not walk dark river alone."
+        }
+      ],
+      "objective_templates": {
+        "turtle_contest": "Burst carry at Turtle.",
+        "turtle_trade": "Give Turtle, poke + farm.",
+        "lord_contest": "Burst carry at Lord.",
+        "lord_trade": "Give Lord, poke + defend."
+      }
+    },
+    {
+      "id": "utility_gold",
+      "label": "Utility / AoE - Zone",
+      "playstyle": "Utility marksman. AoE zone, control teamfight.",
+      "heroes": [
+        {
+          "name": "Melissa",
+          "archetype": "",
+          "note": "Buffed in 2.2.23 - Muddles transfer up"
+        },
+        {
+          "name": "Ixia",
+          "archetype": "",
+          "note": "AoE ult zone"
+        },
+        {
+          "name": "Beatrix",
+          "archetype": "",
+          "note": "Zone + burst"
+        },
+        {
+          "name": "Wanwan",
+          "archetype": "",
+          "note": "Ult + mobility"
+        },
+        {
+          "name": "Natan",
+          "archetype": "",
+          "note": "AoE + zone"
+        }
+      ],
+      "battle_spells": [
+        "Flicker (reposition)",
+        "Purify (vs CC)"
+      ],
+      "emblem": "Marksman Emblem — Swift + Weapon Master + Weakness Finder.",
+      "core_items": [
+        "Windtalker",
+        "Haas' Claws",
+        "Golden Staff",
+        "Malefic Gun"
+      ],
+      "strengths": [
+        "AoE zone wins teamfight"
+      ],
+      "weaknesses": [
+        "Needs frontline"
+      ],
+      "win_condition": "Win by AoE zone",
+      "lose_condition": "Lose if dove alone",
+      "steps": [
+        {
+          "startSeconds": 0,
+          "endSeconds": 40,
+          "timeLabel": "0:00-0:40",
+          "phase": "Setup",
+          "description": "Last-hit every minion. Gold lane gives extra gold - do not miss cannon. Freeze near tower if pressured. As Utility, zone with AoE, stay behind frontline.",
+          "checklist": [
+            "Last-hit, freeze safe",
+            "Check minimap before moving",
+            "Ping objective timer"
+          ],
+          "vision": "Gold bush + river",
+          "decision": "Fight if numbers + Ultimate/Retribution ready, else trade opposite side.",
+          "dont": "Don't miss cannon minion.",
+          "callout": "Last-hit, freeze safe",
+          "compact": "Setup - Last-hit, freeze safe",
+          "instruction": "Last-hit every minion. Gold lane gives extra gold - do not miss cannon. Freeze near tower if pressured. As Utility, zone with AoE, stay behind frontline.",
+          "objective_contest": "Contest: join only if wave cleared, play behind frontline, save Flicker.",
+          "objective_trade": "Trade: give objective, push Gold tower + farm, do not walk dark river alone."
+        },
+        {
+          "startSeconds": 40,
+          "endSeconds": 80,
+          "timeLabel": "0:40-1:20",
+          "phase": "Early",
+          "description": "Farm, avoid showing for gank 1:15-1:30 when enemy jungler finishes clear. As Utility, zone with AoE, stay behind frontline.",
+          "checklist": [
+            "Farm, hide from gank",
+            "Check minimap before moving",
+            "Ping objective timer"
+          ],
+          "vision": "Gold river bush",
+          "decision": "Fight if numbers + Ultimate/Retribution ready, else trade opposite side.",
+          "dont": "Don't push with no vision.",
+          "callout": "Farm, hide from gank",
+          "compact": "Early - Farm, hide from gank",
+          "instruction": "Farm, avoid showing for gank 1:15-1:30 when enemy jungler finishes clear. As Utility, zone with AoE, stay behind frontline.",
+          "objective_contest": "Contest: join only if wave cleared, play behind frontline, save Flicker.",
+          "objective_trade": "Trade: give objective, push Gold tower + farm, do not walk dark river alone."
+        },
+        {
+          "startSeconds": 80,
+          "endSeconds": 120,
+          "timeLabel": "1:20-2:00",
+          "phase": "Turtle Setup",
+          "description": "Clear wave, only rotate to Turtle if wave is cleared and Turtle is winnable. Else stay and take tower gold. As Utility, zone with AoE, stay behind frontline.",
+          "checklist": [
+            "Clear, then decide",
+            "Check minimap before moving",
+            "Ping objective timer"
+          ],
+          "vision": "Gold lane + Turtle pit",
+          "decision": "Fight if numbers + Ultimate/Retribution ready, else trade opposite side.",
+          "dont": "Don't rotate with wave pushing to you.",
+          "callout": "Clear, then decide",
+          "compact": "Turtle Setup - Clear, then decide",
+          "instruction": "Clear wave, only rotate to Turtle if wave is cleared and Turtle is winnable. Else stay and take tower gold. As Utility, zone with AoE, stay behind frontline.",
+          "objective_contest": "Contest: join only if wave cleared, play behind frontline, save Flicker.",
+          "objective_trade": "Trade: give objective, push Gold tower + farm, do not walk dark river alone."
+        },
+        {
+          "startSeconds": 120,
+          "endSeconds": 150,
+          "timeLabel": "2:00-2:30",
+          "phase": "First Turtle",
+          "description": "First Turtle - join only if you cleared wave and team needs damage. Else push Gold tower. As Utility, zone with AoE, stay behind frontline.",
+          "checklist": [
+            "Push or join - decide",
+            "Check minimap before moving",
+            "Ping objective timer"
+          ],
+          "vision": "Gold tower / Turtle pit",
+          "decision": "Fight if numbers + Ultimate/Retribution ready, else trade opposite side.",
+          "dont": "Don't join Turtle and lose tower for nothing.",
+          "callout": "Push or join - decide",
+          "compact": "First Turtle - Push or join - decide",
+          "instruction": "First Turtle - join only if you cleared wave and team needs damage. Else push Gold tower. As Utility, zone with AoE, stay behind frontline.",
+          "objective_contest": "Contest: join only if wave cleared, play behind frontline, save Flicker.",
+          "objective_trade": "Trade: give objective, push Gold tower + farm, do not walk dark river alone."
+        },
+        {
+          "startSeconds": 150,
+          "endSeconds": 240,
+          "timeLabel": "2:30-4:00",
+          "phase": "Post-Turtle",
+          "description": "Farm to first core item. Rotate to mid to clear if team fights Turtle, then back to Gold.",
+          "checklist": [
+            "Farm to first item",
+            "Check minimap before moving",
+            "Ping objective timer"
+          ],
+          "vision": "Gold + mid",
+          "decision": "Fight if numbers + Ultimate/Retribution ready, else trade opposite side.",
+          "dont": "Don't fight with no items.",
+          "callout": "Farm to first item",
+          "compact": "Post-Turtle - Farm to first item",
+          "instruction": "Farm to first core item. Rotate to mid to clear if team fights Turtle, then back to Gold.",
+          "objective_contest": "Contest: join only if wave cleared, play behind frontline, save Flicker.",
+          "objective_trade": "Trade: give objective, push Gold tower + farm, do not walk dark river alone."
+        },
+        {
+          "startSeconds": 240,
+          "endSeconds": 300,
+          "timeLabel": "4:00-5:00",
+          "phase": "Second Turtle",
+          "description": "After 5:00 turret shield drops - push or defend. Join 2nd Turtle if 2 items ready.",
+          "checklist": [
+            "Push after 5:00",
+            "Check minimap before moving",
+            "Ping objective timer"
+          ],
+          "vision": "Turtle pit + Gold",
+          "decision": "Fight if numbers + Ultimate/Retribution ready, else trade opposite side.",
+          "dont": "Don't stay in Gold lane all game.",
+          "callout": "Push after 5:00",
+          "compact": "Second Turtle - Push after 5:00",
+          "instruction": "After 5:00 turret shield drops - push or defend. Join 2nd Turtle if 2 items ready.",
+          "objective_contest": "Contest: join only if wave cleared, play behind frontline, save Flicker.",
+          "objective_trade": "Trade: give objective, push Gold tower + farm, do not walk dark river alone."
+        },
+        {
+          "startSeconds": 300,
+          "endSeconds": 480,
+          "timeLabel": "5:00-8:00",
+          "phase": "Mid Game / Third Turtle",
+          "description": "Farm map-wide: take waves + safe jungle camps. Join fights from behind frontline.",
+          "checklist": [
+            "Farm map, join behind",
+            "Check minimap before moving",
+            "Ping objective timer"
+          ],
+          "vision": "Mid + Lord pit",
+          "decision": "Fight if numbers + Ultimate/Retribution ready, else trade opposite side.",
+          "dont": "Don't walk alone to side wave.",
+          "callout": "Farm map, join behind",
+          "compact": "Mid Game / Third Turtle - Farm map, join behind",
+          "instruction": "Farm map-wide: take waves + safe jungle camps. Join fights from behind frontline.",
+          "objective_contest": "Contest: join only if wave cleared, play behind frontline, save Flicker.",
+          "objective_trade": "Trade: give objective, push Gold tower + farm, do not walk dark river alone."
+        },
+        {
+          "startSeconds": 480,
+          "endSeconds": 600,
+          "timeLabel": "8:00-10:00",
+          "phase": "First Lord",
+          "description": "First Lord - group from behind frontline, stay with tank/roam. Do not face-check.",
+          "checklist": [
+            "Group behind frontline",
+            "Check minimap before moving",
+            "Ping objective timer"
+          ],
+          "vision": "Lord pit",
+          "decision": "Fight if numbers + Ultimate/Retribution ready, else trade opposite side.",
+          "dont": "Don't face-check Lord pit.",
+          "callout": "Group behind frontline",
+          "compact": "First Lord - Group behind frontline",
+          "instruction": "First Lord - group from behind frontline, stay with tank/roam. Do not face-check.",
+          "objective_contest": "Contest: join only if wave cleared, play behind frontline, save Flicker.",
+          "objective_trade": "Trade: give objective, push Gold tower + farm, do not walk dark river alone."
+        },
+        {
+          "startSeconds": 600,
+          "endSeconds": 720,
+          "timeLabel": "10:00-12:00",
+          "phase": "Lord Push",
+          "description": "Push with Lord, take towers, do not chase.",
+          "checklist": [
+            "Push with Lord",
+            "Check minimap before moving",
+            "Ping objective timer"
+          ],
+          "vision": "Lord lane",
+          "decision": "Fight if numbers + Ultimate/Retribution ready, else trade opposite side.",
+          "dont": "Don't chase kills.",
+          "callout": "Push with Lord",
+          "compact": "Lord Push - Push with Lord",
+          "instruction": "Push with Lord, take towers, do not chase.",
+          "objective_contest": "Contest: join only if wave cleared, play behind frontline, save Flicker.",
+          "objective_trade": "Trade: give objective, push Gold tower + farm, do not walk dark river alone."
+        },
+        {
+          "startSeconds": 720,
+          "endSeconds": 900,
+          "timeLabel": "12:00-15:00",
+          "phase": "Mid-Late",
+          "description": "Late - you are main damage. Position behind frontline, save Flicker.",
+          "checklist": [
+            "Stay behind frontline",
+            "Check minimap before moving",
+            "Ping objective timer"
+          ],
+          "vision": "Lord pit",
+          "decision": "Fight if numbers + Ultimate/Retribution ready, else trade opposite side.",
+          "dont": "Don't walk in front of tank.",
+          "callout": "Stay behind frontline",
+          "compact": "Mid-Late - Stay behind frontline",
+          "instruction": "Late - you are main damage. Position behind frontline, save Flicker.",
+          "objective_contest": "Contest: join only if wave cleared, play behind frontline, save Flicker.",
+          "objective_trade": "Trade: give objective, push Gold tower + farm, do not walk dark river alone."
+        },
+        {
+          "startSeconds": 900,
+          "endSeconds": 1080,
+          "timeLabel": "15:00-18:00",
+          "phase": "Late / Evolved Lord",
+          "description": "Evolved Lord - stay grouped, save Flicker + defensive item. One death can end game.",
+          "checklist": [
+            "Save Flicker, stay grouped",
+            "Check minimap before moving",
+            "Ping objective timer"
+          ],
+          "vision": "Evolved Lord pit",
+          "decision": "Fight if numbers + Ultimate/Retribution ready, else trade opposite side.",
+          "dont": "Don't fight without Flicker.",
+          "callout": "Save Flicker, stay grouped",
+          "compact": "Late / Evolved Lord - Save Flicker, stay grouped",
+          "instruction": "Evolved Lord - stay grouped, save Flicker + defensive item. One death can end game.",
+          "objective_contest": "Contest: join only if wave cleared, play behind frontline, save Flicker.",
+          "objective_trade": "Trade: give objective, push Gold tower + farm, do not walk dark river alone."
+        }
+      ],
+      "objective_templates": {
+        "turtle_contest": "Zone Turtle pit with AoE.",
+        "turtle_trade": "Give Turtle, zone + push.",
+        "lord_contest": "Zone Lord pit.",
+        "lord_trade": "Give Lord, zone + defend."
+      }
+    },
+    {
+      "id": "early_fighter_gold",
+      "label": "Early Pressure - Fighter Gold",
+      "playstyle": "Early fighter Gold. Win lane early, pressure tower, snowball.",
+      "heroes": [
+        {
+          "name": "Popol and Kupa",
+          "archetype": "",
+          "note": "Revamped - ride Kupa for chase/escape, Gold flex"
+        },
+        {
+          "name": "Roger",
+          "archetype": "",
+          "note": "Early pressure + transform"
+        },
+        {
+          "name": "Edith",
+          "archetype": "",
+          "note": "Tank/Marksman hybrid, early + late"
+        },
+        {
+          "name": "Freya",
+          "archetype": "",
+          "note": "Sustain + burst, longer ult CD in 2.2.23"
+        },
+        {
+          "name": "Karrie",
+          "archetype": "",
+          "note": "Early + late flex"
+        }
+      ],
+      "battle_spells": [
+        "Flicker (engage)",
+        "Sprint (75s - chase)",
+        "Vengeance (soak)"
+      ],
+      "emblem": "Fighter / Marksman Emblem — Fatal + Bargain Hunter + Quantum Charge.",
+      "core_items": [
+        "War Axe",
+        "Corrosion Scythe",
+        "Thunder Belt",
+        "Immortality"
+      ],
+      "strengths": [
+        "Wins lane early"
+      ],
+      "weaknesses": [
+        "Falls off vs hypercarry late"
+      ],
+      "win_condition": "Win by early tower + snowball",
+      "lose_condition": "Lose if lane lost and enemy hypercarry scales",
+      "steps": [
+        {
+          "startSeconds": 0,
+          "endSeconds": 40,
+          "timeLabel": "0:00-0:40",
+          "phase": "Setup",
+          "description": "Last-hit every minion. Gold lane gives extra gold - do not miss cannon. Freeze near tower if pressured. As Early Fighter, win lane, push tower, snowball.",
+          "checklist": [
+            "Last-hit, freeze safe",
+            "Check minimap before moving",
+            "Ping objective timer"
+          ],
+          "vision": "Gold bush + river",
+          "decision": "Fight if numbers + Ultimate/Retribution ready, else trade opposite side.",
+          "dont": "Don't miss cannon minion.",
+          "callout": "Last-hit, freeze safe",
+          "compact": "Setup - Last-hit, freeze safe",
+          "instruction": "Last-hit every minion. Gold lane gives extra gold - do not miss cannon. Freeze near tower if pressured. As Early Fighter, win lane, push tower, snowball.",
+          "objective_contest": "Contest: join only if wave cleared, play behind frontline, save Flicker.",
+          "objective_trade": "Trade: give objective, push Gold tower + farm, do not walk dark river alone."
+        },
+        {
+          "startSeconds": 40,
+          "endSeconds": 80,
+          "timeLabel": "0:40-1:20",
+          "phase": "Early",
+          "description": "Farm, avoid showing for gank 1:15-1:30 when enemy jungler finishes clear. As Early Fighter, win lane, push tower, snowball.",
+          "checklist": [
+            "Farm, hide from gank",
+            "Check minimap before moving",
+            "Ping objective timer"
+          ],
+          "vision": "Gold river bush",
+          "decision": "Fight if numbers + Ultimate/Retribution ready, else trade opposite side.",
+          "dont": "Don't push with no vision.",
+          "callout": "Farm, hide from gank",
+          "compact": "Early - Farm, hide from gank",
+          "instruction": "Farm, avoid showing for gank 1:15-1:30 when enemy jungler finishes clear. As Early Fighter, win lane, push tower, snowball.",
+          "objective_contest": "Contest: join only if wave cleared, play behind frontline, save Flicker.",
+          "objective_trade": "Trade: give objective, push Gold tower + farm, do not walk dark river alone."
+        },
+        {
+          "startSeconds": 80,
+          "endSeconds": 120,
+          "timeLabel": "1:20-2:00",
+          "phase": "Turtle Setup",
+          "description": "Clear wave, only rotate to Turtle if wave is cleared and Turtle is winnable. Else stay and take tower gold. As Early Fighter, win lane, push tower, snowball.",
+          "checklist": [
+            "Clear, then decide",
+            "Check minimap before moving",
+            "Ping objective timer"
+          ],
+          "vision": "Gold lane + Turtle pit",
+          "decision": "Fight if numbers + Ultimate/Retribution ready, else trade opposite side.",
+          "dont": "Don't rotate with wave pushing to you.",
+          "callout": "Clear, then decide",
+          "compact": "Turtle Setup - Clear, then decide",
+          "instruction": "Clear wave, only rotate to Turtle if wave is cleared and Turtle is winnable. Else stay and take tower gold. As Early Fighter, win lane, push tower, snowball.",
+          "objective_contest": "Contest: join only if wave cleared, play behind frontline, save Flicker.",
+          "objective_trade": "Trade: give objective, push Gold tower + farm, do not walk dark river alone."
+        },
+        {
+          "startSeconds": 120,
+          "endSeconds": 150,
+          "timeLabel": "2:00-2:30",
+          "phase": "First Turtle",
+          "description": "First Turtle - join only if you cleared wave and team needs damage. Else push Gold tower. As Early Fighter, win lane, push tower, snowball.",
+          "checklist": [
+            "Push or join - decide",
+            "Check minimap before moving",
+            "Ping objective timer"
+          ],
+          "vision": "Gold tower / Turtle pit",
+          "decision": "Fight if numbers + Ultimate/Retribution ready, else trade opposite side.",
+          "dont": "Don't join Turtle and lose tower for nothing.",
+          "callout": "Push or join - decide",
+          "compact": "First Turtle - Push or join - decide",
+          "instruction": "First Turtle - join only if you cleared wave and team needs damage. Else push Gold tower. As Early Fighter, win lane, push tower, snowball.",
+          "objective_contest": "Contest: join only if wave cleared, play behind frontline, save Flicker.",
+          "objective_trade": "Trade: give objective, push Gold tower + farm, do not walk dark river alone."
+        },
+        {
+          "startSeconds": 150,
+          "endSeconds": 240,
+          "timeLabel": "2:30-4:00",
+          "phase": "Post-Turtle",
+          "description": "Farm to first core item. Rotate to mid to clear if team fights Turtle, then back to Gold.",
+          "checklist": [
+            "Farm to first item",
+            "Check minimap before moving",
+            "Ping objective timer"
+          ],
+          "vision": "Gold + mid",
+          "decision": "Fight if numbers + Ultimate/Retribution ready, else trade opposite side.",
+          "dont": "Don't fight with no items.",
+          "callout": "Farm to first item",
+          "compact": "Post-Turtle - Farm to first item",
+          "instruction": "Farm to first core item. Rotate to mid to clear if team fights Turtle, then back to Gold.",
+          "objective_contest": "Contest: join only if wave cleared, play behind frontline, save Flicker.",
+          "objective_trade": "Trade: give objective, push Gold tower + farm, do not walk dark river alone."
+        },
+        {
+          "startSeconds": 240,
+          "endSeconds": 300,
+          "timeLabel": "4:00-5:00",
+          "phase": "Second Turtle",
+          "description": "After 5:00 turret shield drops - push or defend. Join 2nd Turtle if 2 items ready.",
+          "checklist": [
+            "Push after 5:00",
+            "Check minimap before moving",
+            "Ping objective timer"
+          ],
+          "vision": "Turtle pit + Gold",
+          "decision": "Fight if numbers + Ultimate/Retribution ready, else trade opposite side.",
+          "dont": "Don't stay in Gold lane all game.",
+          "callout": "Push after 5:00",
+          "compact": "Second Turtle - Push after 5:00",
+          "instruction": "After 5:00 turret shield drops - push or defend. Join 2nd Turtle if 2 items ready.",
+          "objective_contest": "Contest: join only if wave cleared, play behind frontline, save Flicker.",
+          "objective_trade": "Trade: give objective, push Gold tower + farm, do not walk dark river alone."
+        },
+        {
+          "startSeconds": 300,
+          "endSeconds": 480,
+          "timeLabel": "5:00-8:00",
+          "phase": "Mid Game / Third Turtle",
+          "description": "Farm map-wide: take waves + safe jungle camps. Join fights from behind frontline.",
+          "checklist": [
+            "Farm map, join behind",
+            "Check minimap before moving",
+            "Ping objective timer"
+          ],
+          "vision": "Mid + Lord pit",
+          "decision": "Fight if numbers + Ultimate/Retribution ready, else trade opposite side.",
+          "dont": "Don't walk alone to side wave.",
+          "callout": "Farm map, join behind",
+          "compact": "Mid Game / Third Turtle - Farm map, join behind",
+          "instruction": "Farm map-wide: take waves + safe jungle camps. Join fights from behind frontline.",
+          "objective_contest": "Contest: join only if wave cleared, play behind frontline, save Flicker.",
+          "objective_trade": "Trade: give objective, push Gold tower + farm, do not walk dark river alone."
+        },
+        {
+          "startSeconds": 480,
+          "endSeconds": 600,
+          "timeLabel": "8:00-10:00",
+          "phase": "First Lord",
+          "description": "First Lord - group from behind frontline, stay with tank/roam. Do not face-check.",
+          "checklist": [
+            "Group behind frontline",
+            "Check minimap before moving",
+            "Ping objective timer"
+          ],
+          "vision": "Lord pit",
+          "decision": "Fight if numbers + Ultimate/Retribution ready, else trade opposite side.",
+          "dont": "Don't face-check Lord pit.",
+          "callout": "Group behind frontline",
+          "compact": "First Lord - Group behind frontline",
+          "instruction": "First Lord - group from behind frontline, stay with tank/roam. Do not face-check.",
+          "objective_contest": "Contest: join only if wave cleared, play behind frontline, save Flicker.",
+          "objective_trade": "Trade: give objective, push Gold tower + farm, do not walk dark river alone."
+        },
+        {
+          "startSeconds": 600,
+          "endSeconds": 720,
+          "timeLabel": "10:00-12:00",
+          "phase": "Lord Push",
+          "description": "Push with Lord, take towers, do not chase.",
+          "checklist": [
+            "Push with Lord",
+            "Check minimap before moving",
+            "Ping objective timer"
+          ],
+          "vision": "Lord lane",
+          "decision": "Fight if numbers + Ultimate/Retribution ready, else trade opposite side.",
+          "dont": "Don't chase kills.",
+          "callout": "Push with Lord",
+          "compact": "Lord Push - Push with Lord",
+          "instruction": "Push with Lord, take towers, do not chase.",
+          "objective_contest": "Contest: join only if wave cleared, play behind frontline, save Flicker.",
+          "objective_trade": "Trade: give objective, push Gold tower + farm, do not walk dark river alone."
+        },
+        {
+          "startSeconds": 720,
+          "endSeconds": 900,
+          "timeLabel": "12:00-15:00",
+          "phase": "Mid-Late",
+          "description": "Late - you are main damage. Position behind frontline, save Flicker.",
+          "checklist": [
+            "Stay behind frontline",
+            "Check minimap before moving",
+            "Ping objective timer"
+          ],
+          "vision": "Lord pit",
+          "decision": "Fight if numbers + Ultimate/Retribution ready, else trade opposite side.",
+          "dont": "Don't walk in front of tank.",
+          "callout": "Stay behind frontline",
+          "compact": "Mid-Late - Stay behind frontline",
+          "instruction": "Late - you are main damage. Position behind frontline, save Flicker.",
+          "objective_contest": "Contest: join only if wave cleared, play behind frontline, save Flicker.",
+          "objective_trade": "Trade: give objective, push Gold tower + farm, do not walk dark river alone."
+        },
+        {
+          "startSeconds": 900,
+          "endSeconds": 1080,
+          "timeLabel": "15:00-18:00",
+          "phase": "Late / Evolved Lord",
+          "description": "Evolved Lord - stay grouped, save Flicker + defensive item. One death can end game.",
+          "checklist": [
+            "Save Flicker, stay grouped",
+            "Check minimap before moving",
+            "Ping objective timer"
+          ],
+          "vision": "Evolved Lord pit",
+          "decision": "Fight if numbers + Ultimate/Retribution ready, else trade opposite side.",
+          "dont": "Don't fight without Flicker.",
+          "callout": "Save Flicker, stay grouped",
+          "compact": "Late / Evolved Lord - Save Flicker, stay grouped",
+          "instruction": "Evolved Lord - stay grouped, save Flicker + defensive item. One death can end game.",
+          "objective_contest": "Contest: join only if wave cleared, play behind frontline, save Flicker.",
+          "objective_trade": "Trade: give objective, push Gold tower + farm, do not walk dark river alone."
+        }
+      ],
+      "objective_templates": {
+        "turtle_contest": "Win lane, rotate to Turtle with lead.",
+        "turtle_trade": "Give Turtle, push tower.",
+        "lord_contest": "Group with lead, fight.",
+        "lord_trade": "Give Lord, split + defend."
+      }
+    }
+  ],
+  "changelog": {
+    "from_roam_to_lane": [
+      "Kept 11-step timeframe 0:00-18:00 and Turtle/Lord timers from Roam guide",
+      "Updated patch 2.2.16a -> 2.2.23 (11 Nov 2026) and Sprint CD 100->75",
+      "Replaced Roam blessings with lane mechanics + lane archetypes",
+      "Hero pools updated for November 2026 rotation"
+    ]
+  },
+  "objectives": {
+    "turtle": {
+      "first_spawn": 120,
+      "respawn_after_slain": 120,
+      "max_count": 3,
+      "no_new_after_last_slain": 360,
+      "auto_convert_at": 480
+    },
+    "lord": {
+      "delay_after_last_turtle": 120,
+      "respawn_before_18min": 180,
+      "respawn_after_18min": 120,
+      "evolves_at": 1080
+    }
+  },
+  "battle_spells": {
+    "source": "Liquipedia Battle Spells ledger, Season 42 Patch 2.2.23 - 12 spells. Sprint updated 100s -> 75s in 2.2.23.",
+    "note": "Defaults: JG = Retribution, EXP/MID/GOLD/ROAM = Flicker. Tap = enemy used spell, bar fills over CD.",
+    "spells": [
+      {
+        "name": "Flicker",
+        "cooldown_seconds": 120,
+        "note": "Blink, longest CD"
+      },
+      {
+        "name": "Retribution",
+        "cooldown_seconds": 35,
+        "note": "Jungle, secures Turtle/Lord"
+      },
+      {
+        "name": "Purify",
+        "cooldown_seconds": 90,
+        "note": "Cleanse"
+      },
+      {
+        "name": "Sprint",
+        "cooldown_seconds": 75,
+        "note": "+50% MS, slow immune. CD cut 100->75 in 2.2.23"
+      },
+      {
+        "name": "Execute",
+        "cooldown_seconds": 90,
+        "note": "Finisher true damage"
+      },
+      {
+        "name": "Petrify",
+        "cooldown_seconds": 75,
+        "note": "AoE stun 0.8s"
+      },
+      {
+        "name": "Inspire",
+        "cooldown_seconds": 75,
+        "note": "Attack speed burst"
+      },
+      {
+        "name": "Aegis",
+        "cooldown_seconds": 75,
+        "note": "Shield"
+      },
+      {
+        "name": "Vengeance",
+        "cooldown_seconds": 75,
+        "note": "Reflect + damage reduction"
+      },
+      {
+        "name": "Flameshot",
+        "cooldown_seconds": 50,
+        "note": "Shortest non-Retri CD, knockback"
+      },
+      {
+        "name": "Arrival",
+        "cooldown_seconds": 75,
+        "note": "Teleport to turret/minion"
+      },
+      {
+        "name": "Revitalize",
+        "cooldown_seconds": 75,
+        "note": "AoE heal zone"
+      }
+    ],
+    "defaults": {
+      "EXP": "Flicker",
+      "JG": "Retribution",
+      "MID": "Flicker",
+      "GOLD": "Flicker",
+      "ROAM": "Flicker"
+    }
+  }
+}

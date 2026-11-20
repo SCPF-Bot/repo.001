@@ -1,0 +1,1614 @@
+{
+  "meta": {
+    "game": "Mobile Legends: Bang Bang",
+    "title": "Jungle Timeframe Table — Enhanced",
+    "version": "1.0 - Enemy spell tracker (EXP/JG/MID/GOLD/ROAM) + battle spells CD",
+    "patch": "2.2.23",
+    "season": "Season 42 — Starward Decade",
+    "updated": "2026-11-20",
+    "based_on": "Same timeframe structure as Roam guide (0:00-18:00, 11 steps) + online verification for Season 42 Patch 2.2.23 live 11 Nov 2026. Patch 2.2.23 supersedes 2.2.16a: Popol and Kupa revamp, Gloo/Masha/Atlas nerfed, Xavier/Lunox/Freya/Aldous/Kaja/Melissa buffed, Sprint 100s->75s, Chastise Pauldron weaker, Antique Cuirass stronger, Concussive Blast 50% less damage to minions.",
+    "how_to_use": "Each role has steps aligned to real objective spawns. Use startSeconds/endSeconds for your in-game timer UI. Check checklist for what to do, decision for fight vs run, dont for most common throw. In solo queue, prioritize checklist over forcing a fight.",
+    "objective_timers": {
+      "turtle": {
+        "first_spawn_seconds": 120,
+        "respawn_seconds": 120,
+        "max_per_game": 3,
+        "no_new_turtle_if_last_slain_after_seconds": 360,
+        "auto_convert_to_lord_at_seconds": 480,
+        "auto_convert_delay_if_no_damage_seconds": 5,
+        "auto_convert_latest_seconds": 540,
+        "reward": "Gold + large EXP for team. Last-hit: instant heal + self-repairing shield + adaptive damage.",
+        "note": "First Turtle always spawns next to EXP lane. Season 42 Healing Turtle: killing it summons a Turtle that pushes strongest lane + heals instead of shield."
+      },
+      "lord": {
+        "first_spawn_rule": "Exactly 120s after last Turtle slain. Example: Turtle slain 7:45 -> Lord 9:45. If Turtle not slain by 8:00 and no damage for 5s, Lord replaces Turtle after 5s, delayed up to 9:00.",
+        "first_spawn_fallback_seconds": 480,
+        "respawn_seconds_before_18min": 180,
+        "respawn_seconds_after_18min": 120,
+        "evolves_at_seconds": 1080,
+        "reward": "Lord pushes weakest lane, buffs waves, charges turret for 30% Max HP True damage (8-18min).",
+        "note": "Lord is NOT fixed at 8:00 if you tap slain. Widget counts 2 min after last Turtle if you tap."
+      },
+      "lithowanderer": {
+        "first_spawn_seconds": 45,
+        "respawn_seconds": 120,
+        "note": "River crab. Small team reward + short river benefit."
+      },
+      "outer_turret_shield": {
+        "ends_seconds": 300,
+        "note": "Outer turret shields drop at 5:00."
+      }
+    },
+    "global_rules": [
+      "Arrive 20-30s BEFORE Turtle/Lord spawns.",
+      "Never start Lord with enemy jungler + Retribution alive nearby.",
+      "Trade your life only for objective or carry's life.",
+      "After won fight, convert to tower/objective immediately.",
+      "If you lose lanes, give up Turtle and take opposite side.",
+      "Do not show on map before a gank - walk through jungle, not lane."
+    ],
+    "compact_mode": {
+      "goal": "Widget must stay 2 rows tall in landscape. Collapsed shows callout only. Expanded shows full description, checklist, vision, decision, dont.",
+      "collapsed_height_target_dp": 48,
+      "heroes_note": "Heroes are pre-game only. Hide heroes in live view, show only when timer is 0 and expanded.",
+      "width_rule": "Portrait 98% width, landscape 62% width so it does not cover the fight."
+    },
+    "beginner_friendly": "Merged objective + description into one instruction per step. Tuned for Grandmaster to Epic.",
+    "adaptive_height": "Collapsed has no maxLines limit, height wraps to fit full description. No truncation.",
+    "sources": [
+      "timesaver.gg Patch Notes 2.2.23 (11 Nov 2026)",
+      "timesaver.gg Best Jungle / EXP Lane heroes Season 42 Patch 2.2.23",
+      "mlbbhub / mlbb.io ranked trackers via timesaver.gg summaries",
+      "mlbbdex Weekly Meta Report 19 Nov 2026 Patch 2.2.23"
+    ],
+    "jungle_mechanics": {
+      "buy_first": "Buy jungle boots + Retribution at 0:00. Choose type by hero job: Ice = stick/chase, Flame = duel burst, Bloody = sustain tank.",
+      "buffs": "Purple Buff = mana + cooldown. Orange Buff = true damage + slow. Take buff on Turtle side last so it is fresh for Turtle.",
+      "level_4": "Hit Lv4 around 1:35-1:45. No Lv4 = do not force Turtle fight.",
+      "retribution_damage": "Retribution scales with level. Do not waste it on small camp right before Turtle/Lord. Track enemy Retribution CD 35s.",
+      "gold_change": "Patch 2.2.16 cut jungle camp base gold -13%. Comeback bounty kicks in sooner (gap 2000 -> 1500).",
+      "dont_tax": "Do not take laner waves when laner needs them. Your farm is camps + objectives + picks.",
+      "vision_rule": "MLBB has no wards. You are the ward for Turtle/Lord pit.",
+      "solo_queue_note": "Solo queue: pick rarely-banned jungler if you want to actually play it. Ling / Fredrinn / Barats are low-ban value picks."
+    },
+    "jungle_types_verified": {
+      "note": "Jungle archetypes use verified in-game Specialty tags + Jungle lane filter Nov 2026 Patch 2.2.23.",
+      "mapping": {
+        "assassin": "Assassin / Burst - Kill one target fast.",
+        "fighter": "Fighter / Bruiser - Sustain brawl.",
+        "tank": "Tank / Control - Frontline + CC.",
+        "marksman": "Marksman / Push - Objective damage + tower.",
+        "mage": "Mage / Burst - Poke + burst."
+      }
+    },
+    "hero_pool_rule": {
+      "rule": "Fighter / Assassin / Tank / Marksman / Mage only AND in current Jungle heroes list (Lane contains Jungle, Nov 2026, Patch 2.2.23)."
+    }
+  },
+  "retribution_types": [
+    {
+      "id": "ice",
+      "name": "Ice Retribution",
+      "type": "Active",
+      "effect": "Steals target movement speed, gives you speed boost ~4s. Best to chase or escape.",
+      "cooldown": "Retribution CD 35s",
+      "best_for": [
+        "assassin",
+        "marksman"
+      ]
+    },
+    {
+      "id": "flame",
+      "name": "Flame Retribution",
+      "type": "Active",
+      "effect": "Steals Physical Attack + Magic Power. Best for duel burst.",
+      "cooldown": "Retribution CD 35s",
+      "best_for": [
+        "fighter",
+        "mage"
+      ]
+    },
+    {
+      "id": "bloody",
+      "name": "Bloody Retribution",
+      "type": "Active",
+      "effect": "Drains HP over time, heals you based on Max HP. Best for tank / long brawl.",
+      "cooldown": "Retribution CD 35s",
+      "best_for": [
+        "tank",
+        "fighter"
+      ]
+    }
+  ],
+  "roles": [
+    {
+      "id": "assassin",
+      "label": "Assassin - Burst / Pickoff",
+      "playstyle": "Burst assassin. Kill backline, secure Turtle/Lord.",
+      "heroes": [
+        {
+          "name": "Ling",
+          "archetype": "",
+          "note": "Wall mobility, rarely banned, strong solo-queue value"
+        },
+        {
+          "name": "Saber",
+          "archetype": "",
+          "note": "Ultimate locks one target, strong vs carries"
+        },
+        {
+          "name": "Hirara",
+          "archetype": "",
+          "note": "High ban rate even after nerf"
+        },
+        {
+          "name": "Hayabusa",
+          "archetype": "",
+          "note": "High skill, split + pickoff"
+        },
+        {
+          "name": "Lancelot",
+          "archetype": "",
+          "note": "High skill, main-only pick"
+        },
+        {
+          "name": "Aamon",
+          "archetype": "",
+          "note": "Burst mage-assassin"
+        }
+      ],
+      "battle_spells": [
+        "Retribution (Ice default - stick)",
+        "Retribution (Flame - duel)"
+      ],
+      "emblem": "Assassin Emblem — Rupture / Fatal + Killing Spree / Lethal Ignition.",
+      "core_items": [
+        "War Axe",
+        "Blade of Despair",
+        "Malefic Roar",
+        "Immortality"
+      ],
+      "strengths": [
+        "Best pickoff + Retribution secure"
+      ],
+      "weaknesses": [
+        "Squishy - dies if caught"
+      ],
+      "win_condition": "Win by picks + objectives",
+      "lose_condition": "Lose if behind - no frontline",
+      "steps": [
+        {
+          "startSeconds": 0,
+          "endSeconds": 40,
+          "timeLabel": "0:00-0:40",
+          "phase": "Setup",
+          "description": "Buy jungle boots + Retribution. Start on buff side that leads to Turtle. As Assassin, hide, wait for carry, burst then leave. Do not show on map early.",
+          "checklist": [
+            "Guard buff, hit Lv4",
+            "Check minimap before moving",
+            "Ping objective timer"
+          ],
+          "vision": "Bush at first buff + river",
+          "decision": "Fight if numbers + Ultimate/Retribution ready, else trade opposite side.",
+          "dont": "Don't invade alone at Lv1.",
+          "callout": "Guard buff, hit Lv4",
+          "compact": "Setup - Guard buff, hit Lv4",
+          "instruction": "Buy jungle boots + Retribution. Start on buff side that leads to Turtle. As Assassin, hide, wait for carry, burst then leave. Do not show on map early.",
+          "objective_contest": "Contest: arrive early, zone front, save Retribution for last-hit.",
+          "objective_trade": "Trade: give objective, take opposite buff/tower/pick. Do not die 1v4."
+        },
+        {
+          "startSeconds": 40,
+          "endSeconds": 80,
+          "timeLabel": "0:40-1:20",
+          "phase": "Early",
+          "description": "Clear camps fast, take Lithowanderer if safe. Hit Lv4 around 1:35-1:45. As Assassin, hide, wait for carry, burst then leave.",
+          "checklist": [
+            "Clear fast, Lv4 soon",
+            "Check minimap before moving",
+            "Ping objective timer"
+          ],
+          "vision": "River + Lithowanderer",
+          "decision": "Fight if numbers + Ultimate/Retribution ready, else trade opposite side.",
+          "dont": "Don't miss Lv4 before Turtle.",
+          "callout": "Clear fast, Lv4 soon",
+          "compact": "Early - Clear fast, Lv4 soon",
+          "instruction": "Clear camps fast, take Lithowanderer if safe. Hit Lv4 around 1:35-1:45. As Assassin, hide, wait for carry, burst then leave.",
+          "objective_contest": "Contest: arrive early, zone front, save Retribution for last-hit.",
+          "objective_trade": "Trade: give objective, take opposite buff/tower/pick. Do not die 1v4."
+        },
+        {
+          "startSeconds": 80,
+          "endSeconds": 120,
+          "timeLabel": "1:20-2:00",
+          "phase": "Turtle Setup",
+          "description": "Clear toward Turtle side, get vision 20-30s early. Save Retribution. As Assassin, hide, wait for carry, burst then leave.",
+          "checklist": [
+            "Go Turtle early",
+            "Check minimap before moving",
+            "Ping objective timer"
+          ],
+          "vision": "Turtle pit + EXP river",
+          "decision": "Fight if numbers + Ultimate/Retribution ready, else trade opposite side.",
+          "dont": "Don't arrive at Turtle at spawn time - be early.",
+          "callout": "Go Turtle early",
+          "compact": "Turtle Setup - Go Turtle early",
+          "instruction": "Clear toward Turtle side, get vision 20-30s early. Save Retribution. As Assassin, hide, wait for carry, burst then leave.",
+          "objective_contest": "Contest: arrive early, zone front, save Retribution for last-hit.",
+          "objective_trade": "Trade: give objective, take opposite buff/tower/pick. Do not die 1v4."
+        },
+        {
+          "startSeconds": 120,
+          "endSeconds": 150,
+          "timeLabel": "2:00-2:30",
+          "phase": "First Turtle",
+          "description": "Secure Turtle with Retribution. Fight only if team is in position. As Assassin, hide, wait for carry, burst then leave.",
+          "checklist": [
+            "Secure Turtle, save Retri",
+            "Check minimap before moving",
+            "Ping objective timer"
+          ],
+          "vision": "Turtle pit",
+          "decision": "Fight if numbers + Ultimate/Retribution ready, else trade opposite side.",
+          "dont": "Don't use Retribution on a small camp before Turtle.",
+          "callout": "Secure Turtle, save Retri",
+          "compact": "First Turtle - Secure Turtle, save Retri",
+          "instruction": "Secure Turtle with Retribution. Fight only if team is in position. As Assassin, hide, wait for carry, burst then leave.",
+          "objective_contest": "Contest: arrive early, zone front, save Retribution for last-hit.",
+          "objective_trade": "Trade: give objective, take opposite buff/tower/pick. Do not die 1v4."
+        },
+        {
+          "startSeconds": 150,
+          "endSeconds": 240,
+          "timeLabel": "2:30-4:00",
+          "phase": "Post-Turtle",
+          "description": "Reset, buy first item, gank lane that is pushed. Do not force fight with no Ultimate.",
+          "checklist": [
+            "Reset, gank pushed lane",
+            "Check minimap before moving",
+            "Ping objective timer"
+          ],
+          "vision": "Lane you will gank",
+          "decision": "Fight if numbers + Ultimate/Retribution ready, else trade opposite side.",
+          "dont": "Don't chase into dark bush after Turtle.",
+          "callout": "Reset, gank pushed lane",
+          "compact": "Post-Turtle - Reset, gank pushed lane",
+          "instruction": "Reset, buy first item, gank lane that is pushed. Do not force fight with no Ultimate.",
+          "objective_contest": "Contest: arrive early, zone front, save Retribution for last-hit.",
+          "objective_trade": "Trade: give objective, take opposite buff/tower/pick. Do not die 1v4."
+        },
+        {
+          "startSeconds": 240,
+          "endSeconds": 300,
+          "timeLabel": "4:00-5:00",
+          "phase": "Second Turtle",
+          "description": "Push wave after gank, set up 2nd Turtle early. Keep Retribution ready.",
+          "checklist": [
+            "2nd Turtle, push after",
+            "Check minimap before moving",
+            "Ping objective timer"
+          ],
+          "vision": "Turtle pit",
+          "decision": "Fight if numbers + Ultimate/Retribution ready, else trade opposite side.",
+          "dont": "Don't start 2nd Turtle with no team.",
+          "callout": "2nd Turtle, push after",
+          "compact": "Second Turtle - 2nd Turtle, push after",
+          "instruction": "Push wave after gank, set up 2nd Turtle early. Keep Retribution ready.",
+          "objective_contest": "Contest: arrive early, zone front, save Retribution for last-hit.",
+          "objective_trade": "Trade: give objective, take opposite buff/tower/pick. Do not die 1v4."
+        },
+        {
+          "startSeconds": 300,
+          "endSeconds": 480,
+          "timeLabel": "5:00-8:00",
+          "phase": "Mid Game / Third Turtle",
+          "description": "Farm + gank 60/40. Take towers after won fights. Trade Turtle if fight is lost.",
+          "checklist": [
+            "Farm + gank, trade if behind",
+            "Check minimap before moving",
+            "Ping objective timer"
+          ],
+          "vision": "River + Lord pit",
+          "decision": "Fight if numbers + Ultimate/Retribution ready, else trade opposite side.",
+          "dont": "Don't show on map for no reason.",
+          "callout": "Farm + gank, trade if behind",
+          "compact": "Mid Game / Third Turtle - Farm + gank, trade if behind",
+          "instruction": "Farm + gank 60/40. Take towers after won fights. Trade Turtle if fight is lost.",
+          "objective_contest": "Contest: arrive early, zone front, save Retribution for last-hit.",
+          "objective_trade": "Trade: give objective, take opposite buff/tower/pick. Do not die 1v4."
+        },
+        {
+          "startSeconds": 480,
+          "endSeconds": 600,
+          "timeLabel": "8:00-10:00",
+          "phase": "First Lord",
+          "description": "First Lord. Do not start Lord with enemy jungler + Retribution alive nearby. Get vision first.",
+          "checklist": [
+            "Vision at Lord first",
+            "Check minimap before moving",
+            "Ping objective timer"
+          ],
+          "vision": "Lord pit",
+          "decision": "Fight if numbers + Ultimate/Retribution ready, else trade opposite side.",
+          "dont": "Don't start Lord with enemy jungler alive.",
+          "callout": "Vision at Lord first",
+          "compact": "First Lord - Vision at Lord first",
+          "instruction": "First Lord. Do not start Lord with enemy jungler + Retribution alive nearby. Get vision first.",
+          "objective_contest": "Contest: arrive early, zone front, save Retribution for last-hit.",
+          "objective_trade": "Trade: give objective, take opposite buff/tower/pick. Do not die 1v4."
+        },
+        {
+          "startSeconds": 600,
+          "endSeconds": 720,
+          "timeLabel": "10:00-12:00",
+          "phase": "Lord Push",
+          "description": "Push with Lord in weakest lane. Group, do not split alone.",
+          "checklist": [
+            "Push with Lord",
+            "Check minimap before moving",
+            "Ping objective timer"
+          ],
+          "vision": "Weakest lane + Lord pit",
+          "decision": "Fight if numbers + Ultimate/Retribution ready, else trade opposite side.",
+          "dont": "Don't split push alone with Lord up.",
+          "callout": "Push with Lord",
+          "compact": "Lord Push - Push with Lord",
+          "instruction": "Push with Lord in weakest lane. Group, do not split alone.",
+          "objective_contest": "Contest: arrive early, zone front, save Retribution for last-hit.",
+          "objective_trade": "Trade: give objective, take opposite buff/tower/pick. Do not die 1v4."
+        },
+        {
+          "startSeconds": 720,
+          "endSeconds": 900,
+          "timeLabel": "12:00-15:00",
+          "phase": "Mid-Late",
+          "description": "Play around Lord + picks. Save Retribution for Lord, not for a small camp.",
+          "checklist": [
+            "Save Retri for Lord",
+            "Check minimap before moving",
+            "Ping objective timer"
+          ],
+          "vision": "Lord pit",
+          "decision": "Fight if numbers + Ultimate/Retribution ready, else trade opposite side.",
+          "dont": "Don't use Retribution to steal a camp before Lord.",
+          "callout": "Save Retri for Lord",
+          "compact": "Mid-Late - Save Retri for Lord",
+          "instruction": "Play around Lord + picks. Save Retribution for Lord, not for a small camp.",
+          "objective_contest": "Contest: arrive early, zone front, save Retribution for last-hit.",
+          "objective_trade": "Trade: give objective, take opposite buff/tower/pick. Do not die 1v4."
+        },
+        {
+          "startSeconds": 900,
+          "endSeconds": 1080,
+          "timeLabel": "15:00-18:00",
+          "phase": "Late / Evolved Lord",
+          "description": "Late / Evolved Lord decides game. Group, wait for pick, then Lord or end.",
+          "checklist": [
+            "Group for Evolved Lord",
+            "Check minimap before moving",
+            "Ping objective timer"
+          ],
+          "vision": "Evolved Lord pit",
+          "decision": "Fight if numbers + Ultimate/Retribution ready, else trade opposite side.",
+          "dont": "Don't fight without Retribution / Ultimate.",
+          "callout": "Group for Evolved Lord",
+          "compact": "Late / Evolved Lord - Group for Evolved Lord",
+          "instruction": "Late / Evolved Lord decides game. Group, wait for pick, then Lord or end.",
+          "objective_contest": "Contest: arrive early, zone front, save Retribution for last-hit.",
+          "objective_trade": "Trade: give objective, take opposite buff/tower/pick. Do not die 1v4."
+        }
+      ],
+      "objective_templates": {
+        "turtle_contest": "Arrive early, hide, burst enemy jungler/carry, secure with Retribution.",
+        "turtle_trade": "Give Turtle, take opposite buff + gank pushed lane.",
+        "lord_contest": "Hide, burst + secure Lord.",
+        "lord_trade": "Give Lord, split + take tower."
+      }
+    },
+    {
+      "id": "fighter",
+      "label": "Fighter - Bruiser / Sustain",
+      "playstyle": "Bruiser fighter. Clear fast, win early Turtle fights.",
+      "heroes": [
+        {
+          "name": "Aulus",
+          "archetype": "",
+          "note": "Top jungle fighter, high ban"
+        },
+        {
+          "name": "Sun",
+          "archetype": "",
+          "note": "Split-push + clones, high ban"
+        },
+        {
+          "name": "Lukas",
+          "archetype": "",
+          "note": "Fighter scaling in 2.2.23 - tank-leaning builds win"
+        },
+        {
+          "name": "Barats",
+          "archetype": "",
+          "note": "Tank-fighter, good when team lacks frontline"
+        },
+        {
+          "name": "Fredrinn",
+          "archetype": "",
+          "note": "Safest beginner jungler"
+        },
+        {
+          "name": "Bane",
+          "archetype": "",
+          "note": "Fast clear, niche but rarely banned"
+        }
+      ],
+      "battle_spells": [
+        "Retribution (Bloody - sustain)",
+        "Retribution (Flame - duel)"
+      ],
+      "emblem": "Fighter Emblem — Festival of Blood + Brave Smite / War Cry.",
+      "core_items": [
+        "War Axe",
+        "Brute Force Breastplate",
+        "Queen's Wings",
+        "Immortality"
+      ],
+      "strengths": [
+        "Fast clear + early Turtle power"
+      ],
+      "weaknesses": [
+        "Kited by poke / control"
+      ],
+      "win_condition": "Win by early objectives + brawl",
+      "lose_condition": "Lose if kited and poked",
+      "steps": [
+        {
+          "startSeconds": 0,
+          "endSeconds": 40,
+          "timeLabel": "0:00-0:40",
+          "phase": "Setup",
+          "description": "Buy jungle boots + Retribution. Start on buff side that leads to Turtle. As Fighter, start fight, soak damage, stay in brawl. Do not show on map early.",
+          "checklist": [
+            "Guard buff, hit Lv4",
+            "Check minimap before moving",
+            "Ping objective timer"
+          ],
+          "vision": "Bush at first buff + river",
+          "decision": "Fight if numbers + Ultimate/Retribution ready, else trade opposite side.",
+          "dont": "Don't invade alone at Lv1.",
+          "callout": "Guard buff, hit Lv4",
+          "compact": "Setup - Guard buff, hit Lv4",
+          "instruction": "Buy jungle boots + Retribution. Start on buff side that leads to Turtle. As Fighter, start fight, soak damage, stay in brawl. Do not show on map early.",
+          "objective_contest": "Contest: arrive early, zone front, save Retribution for last-hit.",
+          "objective_trade": "Trade: give objective, take opposite buff/tower/pick. Do not die 1v4."
+        },
+        {
+          "startSeconds": 40,
+          "endSeconds": 80,
+          "timeLabel": "0:40-1:20",
+          "phase": "Early",
+          "description": "Clear camps fast, take Lithowanderer if safe. Hit Lv4 around 1:35-1:45. As Fighter, start fight, soak damage, stay in brawl.",
+          "checklist": [
+            "Clear fast, Lv4 soon",
+            "Check minimap before moving",
+            "Ping objective timer"
+          ],
+          "vision": "River + Lithowanderer",
+          "decision": "Fight if numbers + Ultimate/Retribution ready, else trade opposite side.",
+          "dont": "Don't miss Lv4 before Turtle.",
+          "callout": "Clear fast, Lv4 soon",
+          "compact": "Early - Clear fast, Lv4 soon",
+          "instruction": "Clear camps fast, take Lithowanderer if safe. Hit Lv4 around 1:35-1:45. As Fighter, start fight, soak damage, stay in brawl.",
+          "objective_contest": "Contest: arrive early, zone front, save Retribution for last-hit.",
+          "objective_trade": "Trade: give objective, take opposite buff/tower/pick. Do not die 1v4."
+        },
+        {
+          "startSeconds": 80,
+          "endSeconds": 120,
+          "timeLabel": "1:20-2:00",
+          "phase": "Turtle Setup",
+          "description": "Clear toward Turtle side, get vision 20-30s early. Save Retribution. As Fighter, start fight, soak damage, stay in brawl.",
+          "checklist": [
+            "Go Turtle early",
+            "Check minimap before moving",
+            "Ping objective timer"
+          ],
+          "vision": "Turtle pit + EXP river",
+          "decision": "Fight if numbers + Ultimate/Retribution ready, else trade opposite side.",
+          "dont": "Don't arrive at Turtle at spawn time - be early.",
+          "callout": "Go Turtle early",
+          "compact": "Turtle Setup - Go Turtle early",
+          "instruction": "Clear toward Turtle side, get vision 20-30s early. Save Retribution. As Fighter, start fight, soak damage, stay in brawl.",
+          "objective_contest": "Contest: arrive early, zone front, save Retribution for last-hit.",
+          "objective_trade": "Trade: give objective, take opposite buff/tower/pick. Do not die 1v4."
+        },
+        {
+          "startSeconds": 120,
+          "endSeconds": 150,
+          "timeLabel": "2:00-2:30",
+          "phase": "First Turtle",
+          "description": "Secure Turtle with Retribution. Fight only if team is in position. As Fighter, start fight, soak damage, stay in brawl.",
+          "checklist": [
+            "Secure Turtle, save Retri",
+            "Check minimap before moving",
+            "Ping objective timer"
+          ],
+          "vision": "Turtle pit",
+          "decision": "Fight if numbers + Ultimate/Retribution ready, else trade opposite side.",
+          "dont": "Don't use Retribution on a small camp before Turtle.",
+          "callout": "Secure Turtle, save Retri",
+          "compact": "First Turtle - Secure Turtle, save Retri",
+          "instruction": "Secure Turtle with Retribution. Fight only if team is in position. As Fighter, start fight, soak damage, stay in brawl.",
+          "objective_contest": "Contest: arrive early, zone front, save Retribution for last-hit.",
+          "objective_trade": "Trade: give objective, take opposite buff/tower/pick. Do not die 1v4."
+        },
+        {
+          "startSeconds": 150,
+          "endSeconds": 240,
+          "timeLabel": "2:30-4:00",
+          "phase": "Post-Turtle",
+          "description": "Reset, buy first item, gank lane that is pushed. Do not force fight with no Ultimate.",
+          "checklist": [
+            "Reset, gank pushed lane",
+            "Check minimap before moving",
+            "Ping objective timer"
+          ],
+          "vision": "Lane you will gank",
+          "decision": "Fight if numbers + Ultimate/Retribution ready, else trade opposite side.",
+          "dont": "Don't chase into dark bush after Turtle.",
+          "callout": "Reset, gank pushed lane",
+          "compact": "Post-Turtle - Reset, gank pushed lane",
+          "instruction": "Reset, buy first item, gank lane that is pushed. Do not force fight with no Ultimate.",
+          "objective_contest": "Contest: arrive early, zone front, save Retribution for last-hit.",
+          "objective_trade": "Trade: give objective, take opposite buff/tower/pick. Do not die 1v4."
+        },
+        {
+          "startSeconds": 240,
+          "endSeconds": 300,
+          "timeLabel": "4:00-5:00",
+          "phase": "Second Turtle",
+          "description": "Push wave after gank, set up 2nd Turtle early. Keep Retribution ready.",
+          "checklist": [
+            "2nd Turtle, push after",
+            "Check minimap before moving",
+            "Ping objective timer"
+          ],
+          "vision": "Turtle pit",
+          "decision": "Fight if numbers + Ultimate/Retribution ready, else trade opposite side.",
+          "dont": "Don't start 2nd Turtle with no team.",
+          "callout": "2nd Turtle, push after",
+          "compact": "Second Turtle - 2nd Turtle, push after",
+          "instruction": "Push wave after gank, set up 2nd Turtle early. Keep Retribution ready.",
+          "objective_contest": "Contest: arrive early, zone front, save Retribution for last-hit.",
+          "objective_trade": "Trade: give objective, take opposite buff/tower/pick. Do not die 1v4."
+        },
+        {
+          "startSeconds": 300,
+          "endSeconds": 480,
+          "timeLabel": "5:00-8:00",
+          "phase": "Mid Game / Third Turtle",
+          "description": "Farm + gank 60/40. Take towers after won fights. Trade Turtle if fight is lost.",
+          "checklist": [
+            "Farm + gank, trade if behind",
+            "Check minimap before moving",
+            "Ping objective timer"
+          ],
+          "vision": "River + Lord pit",
+          "decision": "Fight if numbers + Ultimate/Retribution ready, else trade opposite side.",
+          "dont": "Don't show on map for no reason.",
+          "callout": "Farm + gank, trade if behind",
+          "compact": "Mid Game / Third Turtle - Farm + gank, trade if behind",
+          "instruction": "Farm + gank 60/40. Take towers after won fights. Trade Turtle if fight is lost.",
+          "objective_contest": "Contest: arrive early, zone front, save Retribution for last-hit.",
+          "objective_trade": "Trade: give objective, take opposite buff/tower/pick. Do not die 1v4."
+        },
+        {
+          "startSeconds": 480,
+          "endSeconds": 600,
+          "timeLabel": "8:00-10:00",
+          "phase": "First Lord",
+          "description": "First Lord. Do not start Lord with enemy jungler + Retribution alive nearby. Get vision first.",
+          "checklist": [
+            "Vision at Lord first",
+            "Check minimap before moving",
+            "Ping objective timer"
+          ],
+          "vision": "Lord pit",
+          "decision": "Fight if numbers + Ultimate/Retribution ready, else trade opposite side.",
+          "dont": "Don't start Lord with enemy jungler alive.",
+          "callout": "Vision at Lord first",
+          "compact": "First Lord - Vision at Lord first",
+          "instruction": "First Lord. Do not start Lord with enemy jungler + Retribution alive nearby. Get vision first.",
+          "objective_contest": "Contest: arrive early, zone front, save Retribution for last-hit.",
+          "objective_trade": "Trade: give objective, take opposite buff/tower/pick. Do not die 1v4."
+        },
+        {
+          "startSeconds": 600,
+          "endSeconds": 720,
+          "timeLabel": "10:00-12:00",
+          "phase": "Lord Push",
+          "description": "Push with Lord in weakest lane. Group, do not split alone.",
+          "checklist": [
+            "Push with Lord",
+            "Check minimap before moving",
+            "Ping objective timer"
+          ],
+          "vision": "Weakest lane + Lord pit",
+          "decision": "Fight if numbers + Ultimate/Retribution ready, else trade opposite side.",
+          "dont": "Don't split push alone with Lord up.",
+          "callout": "Push with Lord",
+          "compact": "Lord Push - Push with Lord",
+          "instruction": "Push with Lord in weakest lane. Group, do not split alone.",
+          "objective_contest": "Contest: arrive early, zone front, save Retribution for last-hit.",
+          "objective_trade": "Trade: give objective, take opposite buff/tower/pick. Do not die 1v4."
+        },
+        {
+          "startSeconds": 720,
+          "endSeconds": 900,
+          "timeLabel": "12:00-15:00",
+          "phase": "Mid-Late",
+          "description": "Play around Lord + picks. Save Retribution for Lord, not for a small camp.",
+          "checklist": [
+            "Save Retri for Lord",
+            "Check minimap before moving",
+            "Ping objective timer"
+          ],
+          "vision": "Lord pit",
+          "decision": "Fight if numbers + Ultimate/Retribution ready, else trade opposite side.",
+          "dont": "Don't use Retribution to steal a camp before Lord.",
+          "callout": "Save Retri for Lord",
+          "compact": "Mid-Late - Save Retri for Lord",
+          "instruction": "Play around Lord + picks. Save Retribution for Lord, not for a small camp.",
+          "objective_contest": "Contest: arrive early, zone front, save Retribution for last-hit.",
+          "objective_trade": "Trade: give objective, take opposite buff/tower/pick. Do not die 1v4."
+        },
+        {
+          "startSeconds": 900,
+          "endSeconds": 1080,
+          "timeLabel": "15:00-18:00",
+          "phase": "Late / Evolved Lord",
+          "description": "Late / Evolved Lord decides game. Group, wait for pick, then Lord or end.",
+          "checklist": [
+            "Group for Evolved Lord",
+            "Check minimap before moving",
+            "Ping objective timer"
+          ],
+          "vision": "Evolved Lord pit",
+          "decision": "Fight if numbers + Ultimate/Retribution ready, else trade opposite side.",
+          "dont": "Don't fight without Retribution / Ultimate.",
+          "callout": "Group for Evolved Lord",
+          "compact": "Late / Evolved Lord - Group for Evolved Lord",
+          "instruction": "Late / Evolved Lord decides game. Group, wait for pick, then Lord or end.",
+          "objective_contest": "Contest: arrive early, zone front, save Retribution for last-hit.",
+          "objective_trade": "Trade: give objective, take opposite buff/tower/pick. Do not die 1v4."
+        }
+      ],
+      "objective_templates": {
+        "turtle_contest": "Start Turtle fight, soak, secure with Retribution.",
+        "turtle_trade": "Give Turtle, take opposite side + push.",
+        "lord_contest": "Start Lord fight, zone front, secure.",
+        "lord_trade": "Give Lord, defend + split."
+      }
+    },
+    {
+      "id": "tank",
+      "label": "Tank - Frontline / Control",
+      "playstyle": "Tank jungler. Frontline, CC, protect carry.",
+      "heroes": [
+        {
+          "name": "Fredrinn",
+          "archetype": "",
+          "note": "Fighter/Tank flex"
+        },
+        {
+          "name": "Barats",
+          "archetype": "",
+          "note": "Tank-fighter, CC + grow"
+        },
+        {
+          "name": "Balmond",
+          "archetype": "",
+          "note": "Simple, spin + execute"
+        },
+        {
+          "name": "Akai",
+          "archetype": "",
+          "note": "Wall + pin, strong Lord control"
+        },
+        {
+          "name": "Hylos",
+          "archetype": "",
+          "note": "HP + zone, slows"
+        }
+      ],
+      "battle_spells": [
+        "Retribution (Bloody - HP sustain)"
+      ],
+      "emblem": "Tank Emblem — Concussive Blast + Tenacity. Note: Concussive Blast 50% less damage to minions in 2.2.23.",
+      "core_items": [
+        "Cursed Helmet",
+        "Antique Cuirass",
+        "Dominance Ice",
+        "Immortality"
+      ],
+      "strengths": [
+        "Best Lord/Turtle zone + vision"
+      ],
+      "weaknesses": [
+        "Low damage - needs carry to follow"
+      ],
+      "win_condition": "Win by frontline + objective control",
+      "lose_condition": "Lose if team does not follow engage",
+      "steps": [
+        {
+          "startSeconds": 0,
+          "endSeconds": 40,
+          "timeLabel": "0:00-0:40",
+          "phase": "Setup",
+          "description": "Buy jungle boots + Retribution. Start on buff side that leads to Turtle. As Tank, zone pit, CC enemy jungler, protect Retribution. Do not show on map early.",
+          "checklist": [
+            "Guard buff, hit Lv4",
+            "Check minimap before moving",
+            "Ping objective timer"
+          ],
+          "vision": "Bush at first buff + river",
+          "decision": "Fight if numbers + Ultimate/Retribution ready, else trade opposite side.",
+          "dont": "Don't invade alone at Lv1.",
+          "callout": "Guard buff, hit Lv4",
+          "compact": "Setup - Guard buff, hit Lv4",
+          "instruction": "Buy jungle boots + Retribution. Start on buff side that leads to Turtle. As Tank, zone pit, CC enemy jungler, protect Retribution. Do not show on map early.",
+          "objective_contest": "Contest: arrive early, zone front, save Retribution for last-hit.",
+          "objective_trade": "Trade: give objective, take opposite buff/tower/pick. Do not die 1v4."
+        },
+        {
+          "startSeconds": 40,
+          "endSeconds": 80,
+          "timeLabel": "0:40-1:20",
+          "phase": "Early",
+          "description": "Clear camps fast, take Lithowanderer if safe. Hit Lv4 around 1:35-1:45. As Tank, zone pit, CC enemy jungler, protect Retribution.",
+          "checklist": [
+            "Clear fast, Lv4 soon",
+            "Check minimap before moving",
+            "Ping objective timer"
+          ],
+          "vision": "River + Lithowanderer",
+          "decision": "Fight if numbers + Ultimate/Retribution ready, else trade opposite side.",
+          "dont": "Don't miss Lv4 before Turtle.",
+          "callout": "Clear fast, Lv4 soon",
+          "compact": "Early - Clear fast, Lv4 soon",
+          "instruction": "Clear camps fast, take Lithowanderer if safe. Hit Lv4 around 1:35-1:45. As Tank, zone pit, CC enemy jungler, protect Retribution.",
+          "objective_contest": "Contest: arrive early, zone front, save Retribution for last-hit.",
+          "objective_trade": "Trade: give objective, take opposite buff/tower/pick. Do not die 1v4."
+        },
+        {
+          "startSeconds": 80,
+          "endSeconds": 120,
+          "timeLabel": "1:20-2:00",
+          "phase": "Turtle Setup",
+          "description": "Clear toward Turtle side, get vision 20-30s early. Save Retribution. As Tank, zone pit, CC enemy jungler, protect Retribution.",
+          "checklist": [
+            "Go Turtle early",
+            "Check minimap before moving",
+            "Ping objective timer"
+          ],
+          "vision": "Turtle pit + EXP river",
+          "decision": "Fight if numbers + Ultimate/Retribution ready, else trade opposite side.",
+          "dont": "Don't arrive at Turtle at spawn time - be early.",
+          "callout": "Go Turtle early",
+          "compact": "Turtle Setup - Go Turtle early",
+          "instruction": "Clear toward Turtle side, get vision 20-30s early. Save Retribution. As Tank, zone pit, CC enemy jungler, protect Retribution.",
+          "objective_contest": "Contest: arrive early, zone front, save Retribution for last-hit.",
+          "objective_trade": "Trade: give objective, take opposite buff/tower/pick. Do not die 1v4."
+        },
+        {
+          "startSeconds": 120,
+          "endSeconds": 150,
+          "timeLabel": "2:00-2:30",
+          "phase": "First Turtle",
+          "description": "Secure Turtle with Retribution. Fight only if team is in position. As Tank, zone pit, CC enemy jungler, protect Retribution.",
+          "checklist": [
+            "Secure Turtle, save Retri",
+            "Check minimap before moving",
+            "Ping objective timer"
+          ],
+          "vision": "Turtle pit",
+          "decision": "Fight if numbers + Ultimate/Retribution ready, else trade opposite side.",
+          "dont": "Don't use Retribution on a small camp before Turtle.",
+          "callout": "Secure Turtle, save Retri",
+          "compact": "First Turtle - Secure Turtle, save Retri",
+          "instruction": "Secure Turtle with Retribution. Fight only if team is in position. As Tank, zone pit, CC enemy jungler, protect Retribution.",
+          "objective_contest": "Contest: arrive early, zone front, save Retribution for last-hit.",
+          "objective_trade": "Trade: give objective, take opposite buff/tower/pick. Do not die 1v4."
+        },
+        {
+          "startSeconds": 150,
+          "endSeconds": 240,
+          "timeLabel": "2:30-4:00",
+          "phase": "Post-Turtle",
+          "description": "Reset, buy first item, gank lane that is pushed. Do not force fight with no Ultimate.",
+          "checklist": [
+            "Reset, gank pushed lane",
+            "Check minimap before moving",
+            "Ping objective timer"
+          ],
+          "vision": "Lane you will gank",
+          "decision": "Fight if numbers + Ultimate/Retribution ready, else trade opposite side.",
+          "dont": "Don't chase into dark bush after Turtle.",
+          "callout": "Reset, gank pushed lane",
+          "compact": "Post-Turtle - Reset, gank pushed lane",
+          "instruction": "Reset, buy first item, gank lane that is pushed. Do not force fight with no Ultimate.",
+          "objective_contest": "Contest: arrive early, zone front, save Retribution for last-hit.",
+          "objective_trade": "Trade: give objective, take opposite buff/tower/pick. Do not die 1v4."
+        },
+        {
+          "startSeconds": 240,
+          "endSeconds": 300,
+          "timeLabel": "4:00-5:00",
+          "phase": "Second Turtle",
+          "description": "Push wave after gank, set up 2nd Turtle early. Keep Retribution ready.",
+          "checklist": [
+            "2nd Turtle, push after",
+            "Check minimap before moving",
+            "Ping objective timer"
+          ],
+          "vision": "Turtle pit",
+          "decision": "Fight if numbers + Ultimate/Retribution ready, else trade opposite side.",
+          "dont": "Don't start 2nd Turtle with no team.",
+          "callout": "2nd Turtle, push after",
+          "compact": "Second Turtle - 2nd Turtle, push after",
+          "instruction": "Push wave after gank, set up 2nd Turtle early. Keep Retribution ready.",
+          "objective_contest": "Contest: arrive early, zone front, save Retribution for last-hit.",
+          "objective_trade": "Trade: give objective, take opposite buff/tower/pick. Do not die 1v4."
+        },
+        {
+          "startSeconds": 300,
+          "endSeconds": 480,
+          "timeLabel": "5:00-8:00",
+          "phase": "Mid Game / Third Turtle",
+          "description": "Farm + gank 60/40. Take towers after won fights. Trade Turtle if fight is lost.",
+          "checklist": [
+            "Farm + gank, trade if behind",
+            "Check minimap before moving",
+            "Ping objective timer"
+          ],
+          "vision": "River + Lord pit",
+          "decision": "Fight if numbers + Ultimate/Retribution ready, else trade opposite side.",
+          "dont": "Don't show on map for no reason.",
+          "callout": "Farm + gank, trade if behind",
+          "compact": "Mid Game / Third Turtle - Farm + gank, trade if behind",
+          "instruction": "Farm + gank 60/40. Take towers after won fights. Trade Turtle if fight is lost.",
+          "objective_contest": "Contest: arrive early, zone front, save Retribution for last-hit.",
+          "objective_trade": "Trade: give objective, take opposite buff/tower/pick. Do not die 1v4."
+        },
+        {
+          "startSeconds": 480,
+          "endSeconds": 600,
+          "timeLabel": "8:00-10:00",
+          "phase": "First Lord",
+          "description": "First Lord. Do not start Lord with enemy jungler + Retribution alive nearby. Get vision first.",
+          "checklist": [
+            "Vision at Lord first",
+            "Check minimap before moving",
+            "Ping objective timer"
+          ],
+          "vision": "Lord pit",
+          "decision": "Fight if numbers + Ultimate/Retribution ready, else trade opposite side.",
+          "dont": "Don't start Lord with enemy jungler alive.",
+          "callout": "Vision at Lord first",
+          "compact": "First Lord - Vision at Lord first",
+          "instruction": "First Lord. Do not start Lord with enemy jungler + Retribution alive nearby. Get vision first.",
+          "objective_contest": "Contest: arrive early, zone front, save Retribution for last-hit.",
+          "objective_trade": "Trade: give objective, take opposite buff/tower/pick. Do not die 1v4."
+        },
+        {
+          "startSeconds": 600,
+          "endSeconds": 720,
+          "timeLabel": "10:00-12:00",
+          "phase": "Lord Push",
+          "description": "Push with Lord in weakest lane. Group, do not split alone.",
+          "checklist": [
+            "Push with Lord",
+            "Check minimap before moving",
+            "Ping objective timer"
+          ],
+          "vision": "Weakest lane + Lord pit",
+          "decision": "Fight if numbers + Ultimate/Retribution ready, else trade opposite side.",
+          "dont": "Don't split push alone with Lord up.",
+          "callout": "Push with Lord",
+          "compact": "Lord Push - Push with Lord",
+          "instruction": "Push with Lord in weakest lane. Group, do not split alone.",
+          "objective_contest": "Contest: arrive early, zone front, save Retribution for last-hit.",
+          "objective_trade": "Trade: give objective, take opposite buff/tower/pick. Do not die 1v4."
+        },
+        {
+          "startSeconds": 720,
+          "endSeconds": 900,
+          "timeLabel": "12:00-15:00",
+          "phase": "Mid-Late",
+          "description": "Play around Lord + picks. Save Retribution for Lord, not for a small camp.",
+          "checklist": [
+            "Save Retri for Lord",
+            "Check minimap before moving",
+            "Ping objective timer"
+          ],
+          "vision": "Lord pit",
+          "decision": "Fight if numbers + Ultimate/Retribution ready, else trade opposite side.",
+          "dont": "Don't use Retribution to steal a camp before Lord.",
+          "callout": "Save Retri for Lord",
+          "compact": "Mid-Late - Save Retri for Lord",
+          "instruction": "Play around Lord + picks. Save Retribution for Lord, not for a small camp.",
+          "objective_contest": "Contest: arrive early, zone front, save Retribution for last-hit.",
+          "objective_trade": "Trade: give objective, take opposite buff/tower/pick. Do not die 1v4."
+        },
+        {
+          "startSeconds": 900,
+          "endSeconds": 1080,
+          "timeLabel": "15:00-18:00",
+          "phase": "Late / Evolved Lord",
+          "description": "Late / Evolved Lord decides game. Group, wait for pick, then Lord or end.",
+          "checklist": [
+            "Group for Evolved Lord",
+            "Check minimap before moving",
+            "Ping objective timer"
+          ],
+          "vision": "Evolved Lord pit",
+          "decision": "Fight if numbers + Ultimate/Retribution ready, else trade opposite side.",
+          "dont": "Don't fight without Retribution / Ultimate.",
+          "callout": "Group for Evolved Lord",
+          "compact": "Late / Evolved Lord - Group for Evolved Lord",
+          "instruction": "Late / Evolved Lord decides game. Group, wait for pick, then Lord or end.",
+          "objective_contest": "Contest: arrive early, zone front, save Retribution for last-hit.",
+          "objective_trade": "Trade: give objective, take opposite buff/tower/pick. Do not die 1v4."
+        }
+      ],
+      "objective_templates": {
+        "turtle_contest": "Zone Turtle pit, CC enemy jungler, secure.",
+        "turtle_trade": "Give Turtle, take opposite buff + tower.",
+        "lord_contest": "Zone Lord pit, do not start with enemy jungler alive.",
+        "lord_trade": "Give Lord, defend base together."
+      }
+    },
+    {
+      "id": "marksman",
+      "label": "Marksman - Objective / Push",
+      "playstyle": "Marksman jungler. Fast objective damage, push towers.",
+      "heroes": [
+        {
+          "name": "Popol and Kupa",
+          "archetype": "",
+          "note": "Revamped in 2.2.23 - Popol can now ride Kupa, mount = chase/escape. Learning curve."
+        },
+        {
+          "name": "Yi Sun-shin",
+          "archetype": "",
+          "note": "Nerfed in 2.2.16, still objective + vision"
+        },
+        {
+          "name": "Roger",
+          "archetype": "",
+          "note": "Fighter/Marksman flex, early pressure"
+        }
+      ],
+      "battle_spells": [
+        "Retribution (Ice - stick + kite)"
+      ],
+      "emblem": "Marksman / Assassin Emblem — Swift / Fatal + Weakness Finder / Quantum Charge.",
+      "core_items": [
+        "Corrosion Scythe",
+        "Demon Hunter Sword",
+        "Golden Staff",
+        "Wind of Nature"
+      ],
+      "strengths": [
+        "Fast Turtle/Lord shred"
+      ],
+      "weaknesses": [
+        "Squishy + needs peel"
+      ],
+      "win_condition": "Win by objective damage + push",
+      "lose_condition": "Lose if dove with no peel",
+      "steps": [
+        {
+          "startSeconds": 0,
+          "endSeconds": 40,
+          "timeLabel": "0:00-0:40",
+          "phase": "Setup",
+          "description": "Buy jungle boots + Retribution. Start on buff side that leads to Turtle. As Marksman jungle, play behind frontline, shred objective from safe range. Do not show on map early.",
+          "checklist": [
+            "Guard buff, hit Lv4",
+            "Check minimap before moving",
+            "Ping objective timer"
+          ],
+          "vision": "Bush at first buff + river",
+          "decision": "Fight if numbers + Ultimate/Retribution ready, else trade opposite side.",
+          "dont": "Don't invade alone at Lv1.",
+          "callout": "Guard buff, hit Lv4",
+          "compact": "Setup - Guard buff, hit Lv4",
+          "instruction": "Buy jungle boots + Retribution. Start on buff side that leads to Turtle. As Marksman jungle, play behind frontline, shred objective from safe range. Do not show on map early.",
+          "objective_contest": "Contest: arrive early, zone front, save Retribution for last-hit.",
+          "objective_trade": "Trade: give objective, take opposite buff/tower/pick. Do not die 1v4."
+        },
+        {
+          "startSeconds": 40,
+          "endSeconds": 80,
+          "timeLabel": "0:40-1:20",
+          "phase": "Early",
+          "description": "Clear camps fast, take Lithowanderer if safe. Hit Lv4 around 1:35-1:45. As Marksman jungle, play behind frontline, shred objective from safe range.",
+          "checklist": [
+            "Clear fast, Lv4 soon",
+            "Check minimap before moving",
+            "Ping objective timer"
+          ],
+          "vision": "River + Lithowanderer",
+          "decision": "Fight if numbers + Ultimate/Retribution ready, else trade opposite side.",
+          "dont": "Don't miss Lv4 before Turtle.",
+          "callout": "Clear fast, Lv4 soon",
+          "compact": "Early - Clear fast, Lv4 soon",
+          "instruction": "Clear camps fast, take Lithowanderer if safe. Hit Lv4 around 1:35-1:45. As Marksman jungle, play behind frontline, shred objective from safe range.",
+          "objective_contest": "Contest: arrive early, zone front, save Retribution for last-hit.",
+          "objective_trade": "Trade: give objective, take opposite buff/tower/pick. Do not die 1v4."
+        },
+        {
+          "startSeconds": 80,
+          "endSeconds": 120,
+          "timeLabel": "1:20-2:00",
+          "phase": "Turtle Setup",
+          "description": "Clear toward Turtle side, get vision 20-30s early. Save Retribution. As Marksman jungle, play behind frontline, shred objective from safe range.",
+          "checklist": [
+            "Go Turtle early",
+            "Check minimap before moving",
+            "Ping objective timer"
+          ],
+          "vision": "Turtle pit + EXP river",
+          "decision": "Fight if numbers + Ultimate/Retribution ready, else trade opposite side.",
+          "dont": "Don't arrive at Turtle at spawn time - be early.",
+          "callout": "Go Turtle early",
+          "compact": "Turtle Setup - Go Turtle early",
+          "instruction": "Clear toward Turtle side, get vision 20-30s early. Save Retribution. As Marksman jungle, play behind frontline, shred objective from safe range.",
+          "objective_contest": "Contest: arrive early, zone front, save Retribution for last-hit.",
+          "objective_trade": "Trade: give objective, take opposite buff/tower/pick. Do not die 1v4."
+        },
+        {
+          "startSeconds": 120,
+          "endSeconds": 150,
+          "timeLabel": "2:00-2:30",
+          "phase": "First Turtle",
+          "description": "Secure Turtle with Retribution. Fight only if team is in position. As Marksman jungle, play behind frontline, shred objective from safe range.",
+          "checklist": [
+            "Secure Turtle, save Retri",
+            "Check minimap before moving",
+            "Ping objective timer"
+          ],
+          "vision": "Turtle pit",
+          "decision": "Fight if numbers + Ultimate/Retribution ready, else trade opposite side.",
+          "dont": "Don't use Retribution on a small camp before Turtle.",
+          "callout": "Secure Turtle, save Retri",
+          "compact": "First Turtle - Secure Turtle, save Retri",
+          "instruction": "Secure Turtle with Retribution. Fight only if team is in position. As Marksman jungle, play behind frontline, shred objective from safe range.",
+          "objective_contest": "Contest: arrive early, zone front, save Retribution for last-hit.",
+          "objective_trade": "Trade: give objective, take opposite buff/tower/pick. Do not die 1v4."
+        },
+        {
+          "startSeconds": 150,
+          "endSeconds": 240,
+          "timeLabel": "2:30-4:00",
+          "phase": "Post-Turtle",
+          "description": "Reset, buy first item, gank lane that is pushed. Do not force fight with no Ultimate.",
+          "checklist": [
+            "Reset, gank pushed lane",
+            "Check minimap before moving",
+            "Ping objective timer"
+          ],
+          "vision": "Lane you will gank",
+          "decision": "Fight if numbers + Ultimate/Retribution ready, else trade opposite side.",
+          "dont": "Don't chase into dark bush after Turtle.",
+          "callout": "Reset, gank pushed lane",
+          "compact": "Post-Turtle - Reset, gank pushed lane",
+          "instruction": "Reset, buy first item, gank lane that is pushed. Do not force fight with no Ultimate.",
+          "objective_contest": "Contest: arrive early, zone front, save Retribution for last-hit.",
+          "objective_trade": "Trade: give objective, take opposite buff/tower/pick. Do not die 1v4."
+        },
+        {
+          "startSeconds": 240,
+          "endSeconds": 300,
+          "timeLabel": "4:00-5:00",
+          "phase": "Second Turtle",
+          "description": "Push wave after gank, set up 2nd Turtle early. Keep Retribution ready.",
+          "checklist": [
+            "2nd Turtle, push after",
+            "Check minimap before moving",
+            "Ping objective timer"
+          ],
+          "vision": "Turtle pit",
+          "decision": "Fight if numbers + Ultimate/Retribution ready, else trade opposite side.",
+          "dont": "Don't start 2nd Turtle with no team.",
+          "callout": "2nd Turtle, push after",
+          "compact": "Second Turtle - 2nd Turtle, push after",
+          "instruction": "Push wave after gank, set up 2nd Turtle early. Keep Retribution ready.",
+          "objective_contest": "Contest: arrive early, zone front, save Retribution for last-hit.",
+          "objective_trade": "Trade: give objective, take opposite buff/tower/pick. Do not die 1v4."
+        },
+        {
+          "startSeconds": 300,
+          "endSeconds": 480,
+          "timeLabel": "5:00-8:00",
+          "phase": "Mid Game / Third Turtle",
+          "description": "Farm + gank 60/40. Take towers after won fights. Trade Turtle if fight is lost.",
+          "checklist": [
+            "Farm + gank, trade if behind",
+            "Check minimap before moving",
+            "Ping objective timer"
+          ],
+          "vision": "River + Lord pit",
+          "decision": "Fight if numbers + Ultimate/Retribution ready, else trade opposite side.",
+          "dont": "Don't show on map for no reason.",
+          "callout": "Farm + gank, trade if behind",
+          "compact": "Mid Game / Third Turtle - Farm + gank, trade if behind",
+          "instruction": "Farm + gank 60/40. Take towers after won fights. Trade Turtle if fight is lost.",
+          "objective_contest": "Contest: arrive early, zone front, save Retribution for last-hit.",
+          "objective_trade": "Trade: give objective, take opposite buff/tower/pick. Do not die 1v4."
+        },
+        {
+          "startSeconds": 480,
+          "endSeconds": 600,
+          "timeLabel": "8:00-10:00",
+          "phase": "First Lord",
+          "description": "First Lord. Do not start Lord with enemy jungler + Retribution alive nearby. Get vision first.",
+          "checklist": [
+            "Vision at Lord first",
+            "Check minimap before moving",
+            "Ping objective timer"
+          ],
+          "vision": "Lord pit",
+          "decision": "Fight if numbers + Ultimate/Retribution ready, else trade opposite side.",
+          "dont": "Don't start Lord with enemy jungler alive.",
+          "callout": "Vision at Lord first",
+          "compact": "First Lord - Vision at Lord first",
+          "instruction": "First Lord. Do not start Lord with enemy jungler + Retribution alive nearby. Get vision first.",
+          "objective_contest": "Contest: arrive early, zone front, save Retribution for last-hit.",
+          "objective_trade": "Trade: give objective, take opposite buff/tower/pick. Do not die 1v4."
+        },
+        {
+          "startSeconds": 600,
+          "endSeconds": 720,
+          "timeLabel": "10:00-12:00",
+          "phase": "Lord Push",
+          "description": "Push with Lord in weakest lane. Group, do not split alone.",
+          "checklist": [
+            "Push with Lord",
+            "Check minimap before moving",
+            "Ping objective timer"
+          ],
+          "vision": "Weakest lane + Lord pit",
+          "decision": "Fight if numbers + Ultimate/Retribution ready, else trade opposite side.",
+          "dont": "Don't split push alone with Lord up.",
+          "callout": "Push with Lord",
+          "compact": "Lord Push - Push with Lord",
+          "instruction": "Push with Lord in weakest lane. Group, do not split alone.",
+          "objective_contest": "Contest: arrive early, zone front, save Retribution for last-hit.",
+          "objective_trade": "Trade: give objective, take opposite buff/tower/pick. Do not die 1v4."
+        },
+        {
+          "startSeconds": 720,
+          "endSeconds": 900,
+          "timeLabel": "12:00-15:00",
+          "phase": "Mid-Late",
+          "description": "Play around Lord + picks. Save Retribution for Lord, not for a small camp.",
+          "checklist": [
+            "Save Retri for Lord",
+            "Check minimap before moving",
+            "Ping objective timer"
+          ],
+          "vision": "Lord pit",
+          "decision": "Fight if numbers + Ultimate/Retribution ready, else trade opposite side.",
+          "dont": "Don't use Retribution to steal a camp before Lord.",
+          "callout": "Save Retri for Lord",
+          "compact": "Mid-Late - Save Retri for Lord",
+          "instruction": "Play around Lord + picks. Save Retribution for Lord, not for a small camp.",
+          "objective_contest": "Contest: arrive early, zone front, save Retribution for last-hit.",
+          "objective_trade": "Trade: give objective, take opposite buff/tower/pick. Do not die 1v4."
+        },
+        {
+          "startSeconds": 900,
+          "endSeconds": 1080,
+          "timeLabel": "15:00-18:00",
+          "phase": "Late / Evolved Lord",
+          "description": "Late / Evolved Lord decides game. Group, wait for pick, then Lord or end.",
+          "checklist": [
+            "Group for Evolved Lord",
+            "Check minimap before moving",
+            "Ping objective timer"
+          ],
+          "vision": "Evolved Lord pit",
+          "decision": "Fight if numbers + Ultimate/Retribution ready, else trade opposite side.",
+          "dont": "Don't fight without Retribution / Ultimate.",
+          "callout": "Group for Evolved Lord",
+          "compact": "Late / Evolved Lord - Group for Evolved Lord",
+          "instruction": "Late / Evolved Lord decides game. Group, wait for pick, then Lord or end.",
+          "objective_contest": "Contest: arrive early, zone front, save Retribution for last-hit.",
+          "objective_trade": "Trade: give objective, take opposite buff/tower/pick. Do not die 1v4."
+        }
+      ],
+      "objective_templates": {
+        "turtle_contest": "Shred Turtle from safe range, secure.",
+        "turtle_trade": "Give Turtle, push opposite tower.",
+        "lord_contest": "Shred Lord from safe range, do not face-check.",
+        "lord_trade": "Give Lord, defend + farm."
+      }
+    },
+    {
+      "id": "mage_burst",
+      "label": "Mage - Burst / Poke Jungle",
+      "playstyle": "Mage jungle flex. Burst + poke, fast clear.",
+      "heroes": [
+        {
+          "name": "Julian",
+          "archetype": "",
+          "note": "Fighter/Mage, combo burst"
+        },
+        {
+          "name": "Aamon",
+          "archetype": "",
+          "note": "Mage-assassin, burst"
+        },
+        {
+          "name": "Karina",
+          "archetype": "",
+          "note": "Buffed in 2.2.16, situational"
+        },
+        {
+          "name": "Selena",
+          "archetype": "",
+          "note": "Stun + burst, vision"
+        },
+        {
+          "name": "Harith",
+          "archetype": "",
+          "note": "Mage flex, dash + burst"
+        }
+      ],
+      "battle_spells": [
+        "Retribution (Flame - burst duel)",
+        "Retribution (Ice - stick)"
+      ],
+      "emblem": "Mage Emblem — Inspire / Rupture + Impure Rage / Lethal Ignition.",
+      "core_items": [
+        "Clock of Destiny",
+        "Lightning Truncheon",
+        "Holy Crystal",
+        "Divine Glaive"
+      ],
+      "strengths": [
+        "Burst + poke from range"
+      ],
+      "weaknesses": [
+        "Squishy, needs blue buff"
+      ],
+      "win_condition": "Win by poke + burst pick",
+      "lose_condition": "Lose if dove / CC chained",
+      "steps": [
+        {
+          "startSeconds": 0,
+          "endSeconds": 40,
+          "timeLabel": "0:00-0:40",
+          "phase": "Setup",
+          "description": "Buy jungle boots + Retribution. Start on buff side that leads to Turtle. As Mage jungle, poke before fight, burst one target, then reset. Do not show on map early.",
+          "checklist": [
+            "Guard buff, hit Lv4",
+            "Check minimap before moving",
+            "Ping objective timer"
+          ],
+          "vision": "Bush at first buff + river",
+          "decision": "Fight if numbers + Ultimate/Retribution ready, else trade opposite side.",
+          "dont": "Don't invade alone at Lv1.",
+          "callout": "Guard buff, hit Lv4",
+          "compact": "Setup - Guard buff, hit Lv4",
+          "instruction": "Buy jungle boots + Retribution. Start on buff side that leads to Turtle. As Mage jungle, poke before fight, burst one target, then reset. Do not show on map early.",
+          "objective_contest": "Contest: arrive early, zone front, save Retribution for last-hit.",
+          "objective_trade": "Trade: give objective, take opposite buff/tower/pick. Do not die 1v4."
+        },
+        {
+          "startSeconds": 40,
+          "endSeconds": 80,
+          "timeLabel": "0:40-1:20",
+          "phase": "Early",
+          "description": "Clear camps fast, take Lithowanderer if safe. Hit Lv4 around 1:35-1:45. As Mage jungle, poke before fight, burst one target, then reset.",
+          "checklist": [
+            "Clear fast, Lv4 soon",
+            "Check minimap before moving",
+            "Ping objective timer"
+          ],
+          "vision": "River + Lithowanderer",
+          "decision": "Fight if numbers + Ultimate/Retribution ready, else trade opposite side.",
+          "dont": "Don't miss Lv4 before Turtle.",
+          "callout": "Clear fast, Lv4 soon",
+          "compact": "Early - Clear fast, Lv4 soon",
+          "instruction": "Clear camps fast, take Lithowanderer if safe. Hit Lv4 around 1:35-1:45. As Mage jungle, poke before fight, burst one target, then reset.",
+          "objective_contest": "Contest: arrive early, zone front, save Retribution for last-hit.",
+          "objective_trade": "Trade: give objective, take opposite buff/tower/pick. Do not die 1v4."
+        },
+        {
+          "startSeconds": 80,
+          "endSeconds": 120,
+          "timeLabel": "1:20-2:00",
+          "phase": "Turtle Setup",
+          "description": "Clear toward Turtle side, get vision 20-30s early. Save Retribution. As Mage jungle, poke before fight, burst one target, then reset.",
+          "checklist": [
+            "Go Turtle early",
+            "Check minimap before moving",
+            "Ping objective timer"
+          ],
+          "vision": "Turtle pit + EXP river",
+          "decision": "Fight if numbers + Ultimate/Retribution ready, else trade opposite side.",
+          "dont": "Don't arrive at Turtle at spawn time - be early.",
+          "callout": "Go Turtle early",
+          "compact": "Turtle Setup - Go Turtle early",
+          "instruction": "Clear toward Turtle side, get vision 20-30s early. Save Retribution. As Mage jungle, poke before fight, burst one target, then reset.",
+          "objective_contest": "Contest: arrive early, zone front, save Retribution for last-hit.",
+          "objective_trade": "Trade: give objective, take opposite buff/tower/pick. Do not die 1v4."
+        },
+        {
+          "startSeconds": 120,
+          "endSeconds": 150,
+          "timeLabel": "2:00-2:30",
+          "phase": "First Turtle",
+          "description": "Secure Turtle with Retribution. Fight only if team is in position. As Mage jungle, poke before fight, burst one target, then reset.",
+          "checklist": [
+            "Secure Turtle, save Retri",
+            "Check minimap before moving",
+            "Ping objective timer"
+          ],
+          "vision": "Turtle pit",
+          "decision": "Fight if numbers + Ultimate/Retribution ready, else trade opposite side.",
+          "dont": "Don't use Retribution on a small camp before Turtle.",
+          "callout": "Secure Turtle, save Retri",
+          "compact": "First Turtle - Secure Turtle, save Retri",
+          "instruction": "Secure Turtle with Retribution. Fight only if team is in position. As Mage jungle, poke before fight, burst one target, then reset.",
+          "objective_contest": "Contest: arrive early, zone front, save Retribution for last-hit.",
+          "objective_trade": "Trade: give objective, take opposite buff/tower/pick. Do not die 1v4."
+        },
+        {
+          "startSeconds": 150,
+          "endSeconds": 240,
+          "timeLabel": "2:30-4:00",
+          "phase": "Post-Turtle",
+          "description": "Reset, buy first item, gank lane that is pushed. Do not force fight with no Ultimate.",
+          "checklist": [
+            "Reset, gank pushed lane",
+            "Check minimap before moving",
+            "Ping objective timer"
+          ],
+          "vision": "Lane you will gank",
+          "decision": "Fight if numbers + Ultimate/Retribution ready, else trade opposite side.",
+          "dont": "Don't chase into dark bush after Turtle.",
+          "callout": "Reset, gank pushed lane",
+          "compact": "Post-Turtle - Reset, gank pushed lane",
+          "instruction": "Reset, buy first item, gank lane that is pushed. Do not force fight with no Ultimate.",
+          "objective_contest": "Contest: arrive early, zone front, save Retribution for last-hit.",
+          "objective_trade": "Trade: give objective, take opposite buff/tower/pick. Do not die 1v4."
+        },
+        {
+          "startSeconds": 240,
+          "endSeconds": 300,
+          "timeLabel": "4:00-5:00",
+          "phase": "Second Turtle",
+          "description": "Push wave after gank, set up 2nd Turtle early. Keep Retribution ready.",
+          "checklist": [
+            "2nd Turtle, push after",
+            "Check minimap before moving",
+            "Ping objective timer"
+          ],
+          "vision": "Turtle pit",
+          "decision": "Fight if numbers + Ultimate/Retribution ready, else trade opposite side.",
+          "dont": "Don't start 2nd Turtle with no team.",
+          "callout": "2nd Turtle, push after",
+          "compact": "Second Turtle - 2nd Turtle, push after",
+          "instruction": "Push wave after gank, set up 2nd Turtle early. Keep Retribution ready.",
+          "objective_contest": "Contest: arrive early, zone front, save Retribution for last-hit.",
+          "objective_trade": "Trade: give objective, take opposite buff/tower/pick. Do not die 1v4."
+        },
+        {
+          "startSeconds": 300,
+          "endSeconds": 480,
+          "timeLabel": "5:00-8:00",
+          "phase": "Mid Game / Third Turtle",
+          "description": "Farm + gank 60/40. Take towers after won fights. Trade Turtle if fight is lost.",
+          "checklist": [
+            "Farm + gank, trade if behind",
+            "Check minimap before moving",
+            "Ping objective timer"
+          ],
+          "vision": "River + Lord pit",
+          "decision": "Fight if numbers + Ultimate/Retribution ready, else trade opposite side.",
+          "dont": "Don't show on map for no reason.",
+          "callout": "Farm + gank, trade if behind",
+          "compact": "Mid Game / Third Turtle - Farm + gank, trade if behind",
+          "instruction": "Farm + gank 60/40. Take towers after won fights. Trade Turtle if fight is lost.",
+          "objective_contest": "Contest: arrive early, zone front, save Retribution for last-hit.",
+          "objective_trade": "Trade: give objective, take opposite buff/tower/pick. Do not die 1v4."
+        },
+        {
+          "startSeconds": 480,
+          "endSeconds": 600,
+          "timeLabel": "8:00-10:00",
+          "phase": "First Lord",
+          "description": "First Lord. Do not start Lord with enemy jungler + Retribution alive nearby. Get vision first.",
+          "checklist": [
+            "Vision at Lord first",
+            "Check minimap before moving",
+            "Ping objective timer"
+          ],
+          "vision": "Lord pit",
+          "decision": "Fight if numbers + Ultimate/Retribution ready, else trade opposite side.",
+          "dont": "Don't start Lord with enemy jungler alive.",
+          "callout": "Vision at Lord first",
+          "compact": "First Lord - Vision at Lord first",
+          "instruction": "First Lord. Do not start Lord with enemy jungler + Retribution alive nearby. Get vision first.",
+          "objective_contest": "Contest: arrive early, zone front, save Retribution for last-hit.",
+          "objective_trade": "Trade: give objective, take opposite buff/tower/pick. Do not die 1v4."
+        },
+        {
+          "startSeconds": 600,
+          "endSeconds": 720,
+          "timeLabel": "10:00-12:00",
+          "phase": "Lord Push",
+          "description": "Push with Lord in weakest lane. Group, do not split alone.",
+          "checklist": [
+            "Push with Lord",
+            "Check minimap before moving",
+            "Ping objective timer"
+          ],
+          "vision": "Weakest lane + Lord pit",
+          "decision": "Fight if numbers + Ultimate/Retribution ready, else trade opposite side.",
+          "dont": "Don't split push alone with Lord up.",
+          "callout": "Push with Lord",
+          "compact": "Lord Push - Push with Lord",
+          "instruction": "Push with Lord in weakest lane. Group, do not split alone.",
+          "objective_contest": "Contest: arrive early, zone front, save Retribution for last-hit.",
+          "objective_trade": "Trade: give objective, take opposite buff/tower/pick. Do not die 1v4."
+        },
+        {
+          "startSeconds": 720,
+          "endSeconds": 900,
+          "timeLabel": "12:00-15:00",
+          "phase": "Mid-Late",
+          "description": "Play around Lord + picks. Save Retribution for Lord, not for a small camp.",
+          "checklist": [
+            "Save Retri for Lord",
+            "Check minimap before moving",
+            "Ping objective timer"
+          ],
+          "vision": "Lord pit",
+          "decision": "Fight if numbers + Ultimate/Retribution ready, else trade opposite side.",
+          "dont": "Don't use Retribution to steal a camp before Lord.",
+          "callout": "Save Retri for Lord",
+          "compact": "Mid-Late - Save Retri for Lord",
+          "instruction": "Play around Lord + picks. Save Retribution for Lord, not for a small camp.",
+          "objective_contest": "Contest: arrive early, zone front, save Retribution for last-hit.",
+          "objective_trade": "Trade: give objective, take opposite buff/tower/pick. Do not die 1v4."
+        },
+        {
+          "startSeconds": 900,
+          "endSeconds": 1080,
+          "timeLabel": "15:00-18:00",
+          "phase": "Late / Evolved Lord",
+          "description": "Late / Evolved Lord decides game. Group, wait for pick, then Lord or end.",
+          "checklist": [
+            "Group for Evolved Lord",
+            "Check minimap before moving",
+            "Ping objective timer"
+          ],
+          "vision": "Evolved Lord pit",
+          "decision": "Fight if numbers + Ultimate/Retribution ready, else trade opposite side.",
+          "dont": "Don't fight without Retribution / Ultimate.",
+          "callout": "Group for Evolved Lord",
+          "compact": "Late / Evolved Lord - Group for Evolved Lord",
+          "instruction": "Late / Evolved Lord decides game. Group, wait for pick, then Lord or end.",
+          "objective_contest": "Contest: arrive early, zone front, save Retribution for last-hit.",
+          "objective_trade": "Trade: give objective, take opposite buff/tower/pick. Do not die 1v4."
+        }
+      ],
+      "objective_templates": {
+        "turtle_contest": "Poke Turtle pit, burst jungler, secure.",
+        "turtle_trade": "Give Turtle, poke + take tower.",
+        "lord_contest": "Poke Lord pit, burst, secure.",
+        "lord_trade": "Give Lord, defend + poke."
+      }
+    }
+  ],
+  "changelog": {
+    "from_roam_to_lane": [
+      "Kept 11-step timeframe 0:00-18:00 and Turtle/Lord timers from Roam guide",
+      "Updated patch 2.2.16a -> 2.2.23 (11 Nov 2026) and Sprint CD 100->75",
+      "Replaced Roam blessings with lane mechanics + lane archetypes",
+      "Hero pools updated for November 2026 rotation"
+    ]
+  },
+  "objectives": {
+    "turtle": {
+      "first_spawn": 120,
+      "respawn_after_slain": 120,
+      "max_count": 3,
+      "no_new_after_last_slain": 360,
+      "auto_convert_at": 480
+    },
+    "lord": {
+      "delay_after_last_turtle": 120,
+      "respawn_before_18min": 180,
+      "respawn_after_18min": 120,
+      "evolves_at": 1080
+    }
+  },
+  "battle_spells": {
+    "source": "Liquipedia Battle Spells ledger, Season 42 Patch 2.2.23 - 12 spells. Sprint updated 100s -> 75s in 2.2.23.",
+    "note": "Defaults: JG = Retribution, EXP/MID/GOLD/ROAM = Flicker. Tap = enemy used spell, bar fills over CD.",
+    "spells": [
+      {
+        "name": "Flicker",
+        "cooldown_seconds": 120,
+        "note": "Blink, longest CD"
+      },
+      {
+        "name": "Retribution",
+        "cooldown_seconds": 35,
+        "note": "Jungle, secures Turtle/Lord"
+      },
+      {
+        "name": "Purify",
+        "cooldown_seconds": 90,
+        "note": "Cleanse"
+      },
+      {
+        "name": "Sprint",
+        "cooldown_seconds": 75,
+        "note": "+50% MS, slow immune. CD cut 100->75 in 2.2.23"
+      },
+      {
+        "name": "Execute",
+        "cooldown_seconds": 90,
+        "note": "Finisher true damage"
+      },
+      {
+        "name": "Petrify",
+        "cooldown_seconds": 75,
+        "note": "AoE stun 0.8s"
+      },
+      {
+        "name": "Inspire",
+        "cooldown_seconds": 75,
+        "note": "Attack speed burst"
+      },
+      {
+        "name": "Aegis",
+        "cooldown_seconds": 75,
+        "note": "Shield"
+      },
+      {
+        "name": "Vengeance",
+        "cooldown_seconds": 75,
+        "note": "Reflect + damage reduction"
+      },
+      {
+        "name": "Flameshot",
+        "cooldown_seconds": 50,
+        "note": "Shortest non-Retri CD, knockback"
+      },
+      {
+        "name": "Arrival",
+        "cooldown_seconds": 75,
+        "note": "Teleport to turret/minion"
+      },
+      {
+        "name": "Revitalize",
+        "cooldown_seconds": 75,
+        "note": "AoE heal zone"
+      }
+    ],
+    "defaults": {
+      "EXP": "Flicker",
+      "JG": "Retribution",
+      "MID": "Flicker",
+      "GOLD": "Flicker",
+      "ROAM": "Flicker"
+    }
+  }
+}
