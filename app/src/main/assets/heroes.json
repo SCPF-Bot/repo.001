@@ -1,7 +1,7 @@
 {
   "version": "2.2.23",
   "updated": "2026-11-21",
-  "source": "MLBB Plus local data. Hero IDs are official Moonton hero IDs (Miya=1, Hanabi=60, Popol and Kupa=94, Hirara=133). Image files on disk: src/main/assets/heroes/{id}.webp. Runtime AssetManager path in image/portrait: heroes/{id}.webp. Dori (Advance Server #134) is NOT in this file.",
+  "source": "MLBB Plus local data. Hero IDs official (Miya=1 ... Hirara=133). Image files use YOUR naming: lowercase, no spaces/dashes/apostrophe/dot. Example: Sora -> heroes/sora.webp, Popol and Kupa -> heroes/popolandkupa.webp, Chang'e -> heroes/change.webp, Luo Yi -> heroes/luoyi.webp, Yu Zhong -> heroes/yuzhong.webp. AssetManager path: heroes/{clean}.webp, load as file:///android_asset/heroes/{clean}.webp",
   "totalHeroes": 133,
   "schema": {
     "id": "Official Moonton hero ID, stable across patches. Use this as primary key, NOT name.",
@@ -12,7 +12,7 @@
     "tier": "S / A / B — current meta tier in patch 2.2.23",
     "coreItems": "List of item IDs from items.json",
     "counters/counteredBy/synergies": "Lists of hero IDs from this file",
-    "image": "AssetManager path, relative to src/main/assets/. Load as file:///android_asset/heroes/{id}.webp. Do NOT prepend assets/ again."
+    "image": "AssetManager path, relative to src/main/assets/. Your webp filenames: lowercase, remove spaces, -, ', . — e.g. popolandkupa.webp, luoyi.webp, yuzhong.webp, change.webp. Load as file:///android_asset/heroes/{clean}.webp"
   },
   "heroes": [
     {
@@ -36,8 +36,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2016,
-      "image": "heroes/1.webp",
-      "portrait": "heroes/1.webp",
+      "image": "heroes/miya.webp",
+      "portrait": "heroes/miya.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -68,7 +68,8 @@
         "marksman",
         "gold-lane"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "miya.webp"
     },
     {
       "id": 2,
@@ -91,8 +92,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2016,
-      "image": "heroes/2.webp",
-      "portrait": "heroes/2.webp",
+      "image": "heroes/balmond.webp",
+      "portrait": "heroes/balmond.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -123,7 +124,8 @@
         "fighter",
         "exp-lane"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "balmond.webp"
     },
     {
       "id": 3,
@@ -146,8 +148,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2016,
-      "image": "heroes/3.webp",
-      "portrait": "heroes/3.webp",
+      "image": "heroes/saber.webp",
+      "portrait": "heroes/saber.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -178,7 +180,8 @@
         "assassin",
         "jungle"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "saber.webp"
     },
     {
       "id": 4,
@@ -201,8 +204,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2016,
-      "image": "heroes/4.webp",
-      "portrait": "heroes/4.webp",
+      "image": "heroes/alice.webp",
+      "portrait": "heroes/alice.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -233,7 +236,8 @@
         "mage",
         "mid-lane"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "alice.webp"
     },
     {
       "id": 5,
@@ -256,8 +260,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2016,
-      "image": "heroes/5.webp",
-      "portrait": "heroes/5.webp",
+      "image": "heroes/nana.webp",
+      "portrait": "heroes/nana.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -288,7 +292,8 @@
         "mage",
         "mid-lane"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "nana.webp"
     },
     {
       "id": 6,
@@ -314,8 +319,8 @@
       "isOP": false,
       "isMeta": true,
       "releaseYear": 2016,
-      "image": "heroes/6.webp",
-      "portrait": "heroes/6.webp",
+      "image": "heroes/tigreal.webp",
+      "portrait": "heroes/tigreal.webp",
       "skills": [
         {
           "name": "Fearless",
@@ -405,7 +410,8 @@
         "tank",
         "roam"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "tigreal.webp"
     },
     {
       "id": 7,
@@ -428,8 +434,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2016,
-      "image": "heroes/7.webp",
-      "portrait": "heroes/7.webp",
+      "image": "heroes/alucard.webp",
+      "portrait": "heroes/alucard.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -460,7 +466,8 @@
         "fighter",
         "jungle"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "alucard.webp"
     },
     {
       "id": 8,
@@ -483,8 +490,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2016,
-      "image": "heroes/8.webp",
-      "portrait": "heroes/8.webp",
+      "image": "heroes/karina.webp",
+      "portrait": "heroes/karina.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -515,7 +522,8 @@
         "assassin",
         "jungle"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "karina.webp"
     },
     {
       "id": 9,
@@ -538,8 +546,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2016,
-      "image": "heroes/9.webp",
-      "portrait": "heroes/9.webp",
+      "image": "heroes/akai.webp",
+      "portrait": "heroes/akai.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -570,7 +578,8 @@
         "tank",
         "roam"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "akai.webp"
     },
     {
       "id": 10,
@@ -593,8 +602,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2016,
-      "image": "heroes/10.webp",
-      "portrait": "heroes/10.webp",
+      "image": "heroes/franco.webp",
+      "portrait": "heroes/franco.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -625,7 +634,8 @@
         "tank",
         "roam"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "franco.webp"
     },
     {
       "id": 11,
@@ -648,8 +658,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2016,
-      "image": "heroes/11.webp",
-      "portrait": "heroes/11.webp",
+      "image": "heroes/bane.webp",
+      "portrait": "heroes/bane.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -680,7 +690,8 @@
         "fighter",
         "exp-lane"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "bane.webp"
     },
     {
       "id": 12,
@@ -703,8 +714,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2016,
-      "image": "heroes/12.webp",
-      "portrait": "heroes/12.webp",
+      "image": "heroes/bruno.webp",
+      "portrait": "heroes/bruno.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -735,7 +746,8 @@
         "marksman",
         "gold-lane"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "bruno.webp"
     },
     {
       "id": 13,
@@ -758,8 +770,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2016,
-      "image": "heroes/13.webp",
-      "portrait": "heroes/13.webp",
+      "image": "heroes/clint.webp",
+      "portrait": "heroes/clint.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -790,7 +802,8 @@
         "marksman",
         "gold-lane"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "clint.webp"
     },
     {
       "id": 14,
@@ -813,8 +826,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2016,
-      "image": "heroes/14.webp",
-      "portrait": "heroes/14.webp",
+      "image": "heroes/rafaela.webp",
+      "portrait": "heroes/rafaela.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -845,7 +858,8 @@
         "support",
         "roam"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "rafaela.webp"
     },
     {
       "id": 15,
@@ -868,8 +882,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2016,
-      "image": "heroes/15.webp",
-      "portrait": "heroes/15.webp",
+      "image": "heroes/eudora.webp",
+      "portrait": "heroes/eudora.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -900,7 +914,8 @@
         "mage",
         "mid-lane"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "eudora.webp"
     },
     {
       "id": 16,
@@ -923,8 +938,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2016,
-      "image": "heroes/16.webp",
-      "portrait": "heroes/16.webp",
+      "image": "heroes/zilong.webp",
+      "portrait": "heroes/zilong.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -955,7 +970,8 @@
         "fighter",
         "exp-lane"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "zilong.webp"
     },
     {
       "id": 17,
@@ -978,8 +994,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2016,
-      "image": "heroes/17.webp",
-      "portrait": "heroes/17.webp",
+      "image": "heroes/fanny.webp",
+      "portrait": "heroes/fanny.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -1010,7 +1026,8 @@
         "assassin",
         "jungle"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "fanny.webp"
     },
     {
       "id": 18,
@@ -1033,8 +1050,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2016,
-      "image": "heroes/18.webp",
-      "portrait": "heroes/18.webp",
+      "image": "heroes/layla.webp",
+      "portrait": "heroes/layla.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -1065,7 +1082,8 @@
         "marksman",
         "gold-lane"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "layla.webp"
     },
     {
       "id": 19,
@@ -1088,8 +1106,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2016,
-      "image": "heroes/19.webp",
-      "portrait": "heroes/19.webp",
+      "image": "heroes/minotaur.webp",
+      "portrait": "heroes/minotaur.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -1120,7 +1138,8 @@
         "tank",
         "roam"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "minotaur.webp"
     },
     {
       "id": 20,
@@ -1143,8 +1162,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2016,
-      "image": "heroes/20.webp",
-      "portrait": "heroes/20.webp",
+      "image": "heroes/lolita.webp",
+      "portrait": "heroes/lolita.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -1175,7 +1194,8 @@
         "tank",
         "roam"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "lolita.webp"
     },
     {
       "id": 21,
@@ -1198,8 +1218,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2016,
-      "image": "heroes/21.webp",
-      "portrait": "heroes/21.webp",
+      "image": "heroes/hayabusa.webp",
+      "portrait": "heroes/hayabusa.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -1230,7 +1250,8 @@
         "assassin",
         "jungle"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "hayabusa.webp"
     },
     {
       "id": 22,
@@ -1253,8 +1274,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2016,
-      "image": "heroes/22.webp",
-      "portrait": "heroes/22.webp",
+      "image": "heroes/freya.webp",
+      "portrait": "heroes/freya.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -1285,7 +1306,8 @@
         "fighter",
         "exp-lane"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "freya.webp"
     },
     {
       "id": 23,
@@ -1308,8 +1330,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2016,
-      "image": "heroes/23.webp",
-      "portrait": "heroes/23.webp",
+      "image": "heroes/gord.webp",
+      "portrait": "heroes/gord.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -1340,7 +1362,8 @@
         "mage",
         "mid-lane"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "gord.webp"
     },
     {
       "id": 24,
@@ -1363,8 +1386,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2016,
-      "image": "heroes/24.webp",
-      "portrait": "heroes/24.webp",
+      "image": "heroes/natalia.webp",
+      "portrait": "heroes/natalia.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -1395,7 +1418,8 @@
         "assassin",
         "roam"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "natalia.webp"
     },
     {
       "id": 25,
@@ -1418,8 +1442,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2016,
-      "image": "heroes/25.webp",
-      "portrait": "heroes/25.webp",
+      "image": "heroes/kagura.webp",
+      "portrait": "heroes/kagura.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -1450,7 +1474,8 @@
         "mage",
         "mid-lane"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "kagura.webp"
     },
     {
       "id": 26,
@@ -1473,8 +1498,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2016,
-      "image": "heroes/26.webp",
-      "portrait": "heroes/26.webp",
+      "image": "heroes/chou.webp",
+      "portrait": "heroes/chou.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -1505,7 +1530,8 @@
         "fighter",
         "exp-lane"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "chou.webp"
     },
     {
       "id": 27,
@@ -1528,8 +1554,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2016,
-      "image": "heroes/27.webp",
-      "portrait": "heroes/27.webp",
+      "image": "heroes/sun.webp",
+      "portrait": "heroes/sun.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -1560,7 +1586,8 @@
         "fighter",
         "exp-lane"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "sun.webp"
     },
     {
       "id": 28,
@@ -1583,8 +1610,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2017,
-      "image": "heroes/28.webp",
-      "portrait": "heroes/28.webp",
+      "image": "heroes/alpha.webp",
+      "portrait": "heroes/alpha.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -1615,7 +1642,8 @@
         "fighter",
         "exp-lane"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "alpha.webp"
     },
     {
       "id": 29,
@@ -1638,8 +1666,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2017,
-      "image": "heroes/29.webp",
-      "portrait": "heroes/29.webp",
+      "image": "heroes/ruby.webp",
+      "portrait": "heroes/ruby.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -1670,7 +1698,8 @@
         "fighter",
         "exp-lane"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "ruby.webp"
     },
     {
       "id": 30,
@@ -1693,8 +1722,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2017,
-      "image": "heroes/30.webp",
-      "portrait": "heroes/30.webp",
+      "image": "heroes/yisunshin.webp",
+      "portrait": "heroes/yisunshin.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -1725,7 +1754,8 @@
         "marksman",
         "gold-lane"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "yisunshin.webp"
     },
     {
       "id": 31,
@@ -1748,8 +1778,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2017,
-      "image": "heroes/31.webp",
-      "portrait": "heroes/31.webp",
+      "image": "heroes/moskov.webp",
+      "portrait": "heroes/moskov.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -1780,7 +1810,8 @@
         "marksman",
         "gold-lane"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "moskov.webp"
     },
     {
       "id": 32,
@@ -1803,8 +1834,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2017,
-      "image": "heroes/32.webp",
-      "portrait": "heroes/32.webp",
+      "image": "heroes/johnson.webp",
+      "portrait": "heroes/johnson.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -1835,7 +1866,8 @@
         "tank",
         "roam"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "johnson.webp"
     },
     {
       "id": 33,
@@ -1858,8 +1890,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2017,
-      "image": "heroes/33.webp",
-      "portrait": "heroes/33.webp",
+      "image": "heroes/cyclops.webp",
+      "portrait": "heroes/cyclops.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -1890,7 +1922,8 @@
         "mage",
         "mid-lane"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "cyclops.webp"
     },
     {
       "id": 34,
@@ -1916,8 +1949,8 @@
       "isOP": false,
       "isMeta": true,
       "releaseYear": 2017,
-      "image": "heroes/34.webp",
-      "portrait": "heroes/34.webp",
+      "image": "heroes/estes.webp",
+      "portrait": "heroes/estes.webp",
       "skills": [
         {
           "name": "Moon Elf",
@@ -2007,7 +2040,8 @@
         "support",
         "roam"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "estes.webp"
     },
     {
       "id": 35,
@@ -2030,8 +2064,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2017,
-      "image": "heroes/35.webp",
-      "portrait": "heroes/35.webp",
+      "image": "heroes/hilda.webp",
+      "portrait": "heroes/hilda.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -2062,7 +2096,8 @@
         "fighter",
         "exp-lane"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "hilda.webp"
     },
     {
       "id": 36,
@@ -2085,8 +2120,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2017,
-      "image": "heroes/36.webp",
-      "portrait": "heroes/36.webp",
+      "image": "heroes/aurora.webp",
+      "portrait": "heroes/aurora.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -2117,7 +2152,8 @@
         "mage",
         "mid-lane"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "aurora.webp"
     },
     {
       "id": 37,
@@ -2140,8 +2176,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2017,
-      "image": "heroes/37.webp",
-      "portrait": "heroes/37.webp",
+      "image": "heroes/lapulapu.webp",
+      "portrait": "heroes/lapulapu.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -2172,7 +2208,8 @@
         "fighter",
         "exp-lane"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "lapulapu.webp"
     },
     {
       "id": 38,
@@ -2195,8 +2232,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2017,
-      "image": "heroes/38.webp",
-      "portrait": "heroes/38.webp",
+      "image": "heroes/vexana.webp",
+      "portrait": "heroes/vexana.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -2227,7 +2264,8 @@
         "mage",
         "mid-lane"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "vexana.webp"
     },
     {
       "id": 39,
@@ -2250,8 +2288,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2017,
-      "image": "heroes/39.webp",
-      "portrait": "heroes/39.webp",
+      "image": "heroes/roger.webp",
+      "portrait": "heroes/roger.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -2282,7 +2320,8 @@
         "fighter",
         "jungle"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "roger.webp"
     },
     {
       "id": 40,
@@ -2305,8 +2344,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2017,
-      "image": "heroes/40.webp",
-      "portrait": "heroes/40.webp",
+      "image": "heroes/karrie.webp",
+      "portrait": "heroes/karrie.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -2337,7 +2376,8 @@
         "marksman",
         "gold-lane"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "karrie.webp"
     },
     {
       "id": 41,
@@ -2360,8 +2400,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2017,
-      "image": "heroes/41.webp",
-      "portrait": "heroes/41.webp",
+      "image": "heroes/gatotkaca.webp",
+      "portrait": "heroes/gatotkaca.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -2392,7 +2432,8 @@
         "tank",
         "roam"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "gatotkaca.webp"
     },
     {
       "id": 42,
@@ -2415,8 +2456,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2017,
-      "image": "heroes/42.webp",
-      "portrait": "heroes/42.webp",
+      "image": "heroes/harley.webp",
+      "portrait": "heroes/harley.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -2447,7 +2488,8 @@
         "mage",
         "mid-lane"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "harley.webp"
     },
     {
       "id": 43,
@@ -2470,8 +2512,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2017,
-      "image": "heroes/43.webp",
-      "portrait": "heroes/43.webp",
+      "image": "heroes/irithel.webp",
+      "portrait": "heroes/irithel.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -2502,7 +2544,8 @@
         "marksman",
         "gold-lane"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "irithel.webp"
     },
     {
       "id": 44,
@@ -2525,8 +2568,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2017,
-      "image": "heroes/44.webp",
-      "portrait": "heroes/44.webp",
+      "image": "heroes/grock.webp",
+      "portrait": "heroes/grock.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -2557,7 +2600,8 @@
         "tank",
         "roam"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "grock.webp"
     },
     {
       "id": 45,
@@ -2580,8 +2624,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2017,
-      "image": "heroes/45.webp",
-      "portrait": "heroes/45.webp",
+      "image": "heroes/argus.webp",
+      "portrait": "heroes/argus.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -2612,7 +2656,8 @@
         "fighter",
         "exp-lane"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "argus.webp"
     },
     {
       "id": 46,
@@ -2635,8 +2680,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2017,
-      "image": "heroes/46.webp",
-      "portrait": "heroes/46.webp",
+      "image": "heroes/odette.webp",
+      "portrait": "heroes/odette.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -2667,7 +2712,8 @@
         "mage",
         "mid-lane"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "odette.webp"
     },
     {
       "id": 47,
@@ -2690,8 +2736,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2017,
-      "image": "heroes/47.webp",
-      "portrait": "heroes/47.webp",
+      "image": "heroes/lancelot.webp",
+      "portrait": "heroes/lancelot.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -2722,7 +2768,8 @@
         "assassin",
         "jungle"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "lancelot.webp"
     },
     {
       "id": 48,
@@ -2745,8 +2792,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2017,
-      "image": "heroes/48.webp",
-      "portrait": "heroes/48.webp",
+      "image": "heroes/diggie.webp",
+      "portrait": "heroes/diggie.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -2777,7 +2824,8 @@
         "support",
         "roam"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "diggie.webp"
     },
     {
       "id": 49,
@@ -2800,8 +2848,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2017,
-      "image": "heroes/49.webp",
-      "portrait": "heroes/49.webp",
+      "image": "heroes/hylos.webp",
+      "portrait": "heroes/hylos.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -2832,7 +2880,8 @@
         "tank",
         "roam"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "hylos.webp"
     },
     {
       "id": 50,
@@ -2855,8 +2904,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2017,
-      "image": "heroes/50.webp",
-      "portrait": "heroes/50.webp",
+      "image": "heroes/zhask.webp",
+      "portrait": "heroes/zhask.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -2887,7 +2936,8 @@
         "mage",
         "mid-lane"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "zhask.webp"
     },
     {
       "id": 51,
@@ -2910,8 +2960,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2017,
-      "image": "heroes/51.webp",
-      "portrait": "heroes/51.webp",
+      "image": "heroes/helcurt.webp",
+      "portrait": "heroes/helcurt.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -2942,7 +2992,8 @@
         "assassin",
         "jungle"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "helcurt.webp"
     },
     {
       "id": 52,
@@ -2965,8 +3016,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2017,
-      "image": "heroes/52.webp",
-      "portrait": "heroes/52.webp",
+      "image": "heroes/pharsa.webp",
+      "portrait": "heroes/pharsa.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -2997,7 +3048,8 @@
         "mage",
         "mid-lane"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "pharsa.webp"
     },
     {
       "id": 53,
@@ -3020,8 +3072,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2018,
-      "image": "heroes/53.webp",
-      "portrait": "heroes/53.webp",
+      "image": "heroes/lesley.webp",
+      "portrait": "heroes/lesley.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -3052,7 +3104,8 @@
         "marksman",
         "gold-lane"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "lesley.webp"
     },
     {
       "id": 54,
@@ -3075,8 +3128,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2018,
-      "image": "heroes/54.webp",
-      "portrait": "heroes/54.webp",
+      "image": "heroes/jawhead.webp",
+      "portrait": "heroes/jawhead.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -3107,7 +3160,8 @@
         "fighter",
         "exp-lane"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "jawhead.webp"
     },
     {
       "id": 55,
@@ -3130,8 +3184,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2018,
-      "image": "heroes/55.webp",
-      "portrait": "heroes/55.webp",
+      "image": "heroes/angela.webp",
+      "portrait": "heroes/angela.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -3162,7 +3216,8 @@
         "support",
         "roam"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "angela.webp"
     },
     {
       "id": 56,
@@ -3185,8 +3240,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2018,
-      "image": "heroes/56.webp",
-      "portrait": "heroes/56.webp",
+      "image": "heroes/gusion.webp",
+      "portrait": "heroes/gusion.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -3217,7 +3272,8 @@
         "assassin",
         "mid-lane"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "gusion.webp"
     },
     {
       "id": 57,
@@ -3240,8 +3296,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2018,
-      "image": "heroes/57.webp",
-      "portrait": "heroes/57.webp",
+      "image": "heroes/valir.webp",
+      "portrait": "heroes/valir.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -3272,7 +3328,8 @@
         "mage",
         "mid-lane"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "valir.webp"
     },
     {
       "id": 58,
@@ -3295,8 +3352,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2018,
-      "image": "heroes/58.webp",
-      "portrait": "heroes/58.webp",
+      "image": "heroes/martis.webp",
+      "portrait": "heroes/martis.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -3327,7 +3384,8 @@
         "fighter",
         "exp-lane"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "martis.webp"
     },
     {
       "id": 59,
@@ -3350,8 +3408,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2018,
-      "image": "heroes/59.webp",
-      "portrait": "heroes/59.webp",
+      "image": "heroes/uranus.webp",
+      "portrait": "heroes/uranus.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -3382,7 +3440,8 @@
         "tank",
         "exp-lane"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "uranus.webp"
     },
     {
       "id": 60,
@@ -3408,8 +3467,8 @@
       "isOP": true,
       "isMeta": true,
       "releaseYear": 2018,
-      "image": "heroes/60.webp",
-      "portrait": "heroes/60.webp",
+      "image": "heroes/hanabi.webp",
+      "portrait": "heroes/hanabi.webp",
       "skills": [
         {
           "name": "Ninjutsu: Petal Barrage",
@@ -3499,7 +3558,8 @@
         "marksman",
         "gold-lane"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "hanabi.webp"
     },
     {
       "id": 61,
@@ -3522,8 +3582,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2018,
-      "image": "heroes/61.webp",
-      "portrait": "heroes/61.webp",
+      "image": "heroes/change.webp",
+      "portrait": "heroes/change.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -3554,7 +3614,8 @@
         "mage",
         "mid-lane"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "change.webp"
     },
     {
       "id": 62,
@@ -3577,8 +3638,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2018,
-      "image": "heroes/62.webp",
-      "portrait": "heroes/62.webp",
+      "image": "heroes/kaja.webp",
+      "portrait": "heroes/kaja.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -3609,7 +3670,8 @@
         "fighter",
         "roam"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "kaja.webp"
     },
     {
       "id": 63,
@@ -3632,8 +3694,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2018,
-      "image": "heroes/63.webp",
-      "portrait": "heroes/63.webp",
+      "image": "heroes/selena.webp",
+      "portrait": "heroes/selena.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -3664,7 +3726,8 @@
         "assassin",
         "mid-lane"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "selena.webp"
     },
     {
       "id": 64,
@@ -3687,8 +3750,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2018,
-      "image": "heroes/64.webp",
-      "portrait": "heroes/64.webp",
+      "image": "heroes/aldous.webp",
+      "portrait": "heroes/aldous.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -3719,7 +3782,8 @@
         "fighter",
         "exp-lane"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "aldous.webp"
     },
     {
       "id": 65,
@@ -3742,8 +3806,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2018,
-      "image": "heroes/65.webp",
-      "portrait": "heroes/65.webp",
+      "image": "heroes/claude.webp",
+      "portrait": "heroes/claude.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -3774,7 +3838,8 @@
         "marksman",
         "gold-lane"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "claude.webp"
     },
     {
       "id": 66,
@@ -3797,8 +3862,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2019,
-      "image": "heroes/66.webp",
-      "portrait": "heroes/66.webp",
+      "image": "heroes/vale.webp",
+      "portrait": "heroes/vale.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -3829,7 +3894,8 @@
         "mage",
         "mid-lane"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "vale.webp"
     },
     {
       "id": 67,
@@ -3852,8 +3918,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2018,
-      "image": "heroes/67.webp",
-      "portrait": "heroes/67.webp",
+      "image": "heroes/leomord.webp",
+      "portrait": "heroes/leomord.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -3884,7 +3950,8 @@
         "fighter",
         "jungle"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "leomord.webp"
     },
     {
       "id": 68,
@@ -3907,8 +3974,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2018,
-      "image": "heroes/68.webp",
-      "portrait": "heroes/68.webp",
+      "image": "heroes/lunox.webp",
+      "portrait": "heroes/lunox.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -3939,7 +4006,8 @@
         "mage",
         "mid-lane"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "lunox.webp"
     },
     {
       "id": 69,
@@ -3962,8 +4030,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2018,
-      "image": "heroes/69.webp",
-      "portrait": "heroes/69.webp",
+      "image": "heroes/hanzo.webp",
+      "portrait": "heroes/hanzo.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -3994,7 +4062,8 @@
         "assassin",
         "jungle"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "hanzo.webp"
     },
     {
       "id": 70,
@@ -4017,8 +4086,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2018,
-      "image": "heroes/70.webp",
-      "portrait": "heroes/70.webp",
+      "image": "heroes/belerick.webp",
+      "portrait": "heroes/belerick.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -4049,7 +4118,8 @@
         "tank",
         "roam"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "belerick.webp"
     },
     {
       "id": 71,
@@ -4072,8 +4142,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2018,
-      "image": "heroes/71.webp",
-      "portrait": "heroes/71.webp",
+      "image": "heroes/kimmy.webp",
+      "portrait": "heroes/kimmy.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -4104,7 +4174,8 @@
         "marksman",
         "gold-lane"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "kimmy.webp"
     },
     {
       "id": 72,
@@ -4127,8 +4198,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2018,
-      "image": "heroes/72.webp",
-      "portrait": "heroes/72.webp",
+      "image": "heroes/thamuz.webp",
+      "portrait": "heroes/thamuz.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -4159,7 +4230,8 @@
         "fighter",
         "exp-lane"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "thamuz.webp"
     },
     {
       "id": 73,
@@ -4182,8 +4254,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2018,
-      "image": "heroes/73.webp",
-      "portrait": "heroes/73.webp",
+      "image": "heroes/harith.webp",
+      "portrait": "heroes/harith.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -4214,7 +4286,8 @@
         "mage",
         "mid-lane"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "harith.webp"
     },
     {
       "id": 74,
@@ -4237,8 +4310,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2018,
-      "image": "heroes/74.webp",
-      "portrait": "heroes/74.webp",
+      "image": "heroes/minsitthar.webp",
+      "portrait": "heroes/minsitthar.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -4269,7 +4342,8 @@
         "fighter",
         "exp-lane"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "minsitthar.webp"
     },
     {
       "id": 75,
@@ -4292,8 +4366,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2018,
-      "image": "heroes/75.webp",
-      "portrait": "heroes/75.webp",
+      "image": "heroes/kadita.webp",
+      "portrait": "heroes/kadita.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -4324,7 +4398,8 @@
         "mage",
         "mid-lane"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "kadita.webp"
     },
     {
       "id": 76,
@@ -4347,8 +4422,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2019,
-      "image": "heroes/76.webp",
-      "portrait": "heroes/76.webp",
+      "image": "heroes/faramis.webp",
+      "portrait": "heroes/faramis.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -4379,7 +4454,8 @@
         "mage",
         "mid-lane"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "faramis.webp"
     },
     {
       "id": 77,
@@ -4402,8 +4478,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2019,
-      "image": "heroes/77.webp",
-      "portrait": "heroes/77.webp",
+      "image": "heroes/badang.webp",
+      "portrait": "heroes/badang.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -4434,7 +4510,8 @@
         "fighter",
         "exp-lane"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "badang.webp"
     },
     {
       "id": 78,
@@ -4460,8 +4537,8 @@
       "isOP": false,
       "isMeta": true,
       "releaseYear": 2019,
-      "image": "heroes/78.webp",
-      "portrait": "heroes/78.webp",
+      "image": "heroes/khufra.webp",
+      "portrait": "heroes/khufra.webp",
       "skills": [
         {
           "name": "Spell Curse",
@@ -4551,7 +4628,8 @@
         "tank",
         "roam"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "khufra.webp"
     },
     {
       "id": 79,
@@ -4574,8 +4652,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2019,
-      "image": "heroes/79.webp",
-      "portrait": "heroes/79.webp",
+      "image": "heroes/granger.webp",
+      "portrait": "heroes/granger.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -4606,7 +4684,8 @@
         "marksman",
         "gold-lane"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "granger.webp"
     },
     {
       "id": 80,
@@ -4629,8 +4708,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2019,
-      "image": "heroes/80.webp",
-      "portrait": "heroes/80.webp",
+      "image": "heroes/guinevere.webp",
+      "portrait": "heroes/guinevere.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -4661,7 +4740,8 @@
         "fighter",
         "exp-lane"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "guinevere.webp"
     },
     {
       "id": 81,
@@ -4684,8 +4764,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2019,
-      "image": "heroes/81.webp",
-      "portrait": "heroes/81.webp",
+      "image": "heroes/esmeralda.webp",
+      "portrait": "heroes/esmeralda.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -4716,7 +4796,8 @@
         "mage",
         "exp-lane"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "esmeralda.webp"
     },
     {
       "id": 82,
@@ -4739,8 +4820,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2019,
-      "image": "heroes/82.webp",
-      "portrait": "heroes/82.webp",
+      "image": "heroes/terizla.webp",
+      "portrait": "heroes/terizla.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -4771,7 +4852,8 @@
         "fighter",
         "exp-lane"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "terizla.webp"
     },
     {
       "id": 83,
@@ -4794,8 +4876,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2019,
-      "image": "heroes/83.webp",
-      "portrait": "heroes/83.webp",
+      "image": "heroes/xborg.webp",
+      "portrait": "heroes/xborg.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -4826,7 +4908,8 @@
         "fighter",
         "exp-lane"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "xborg.webp"
     },
     {
       "id": 84,
@@ -4849,8 +4932,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2019,
-      "image": "heroes/84.webp",
-      "portrait": "heroes/84.webp",
+      "image": "heroes/ling.webp",
+      "portrait": "heroes/ling.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -4881,7 +4964,8 @@
         "assassin",
         "jungle"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "ling.webp"
     },
     {
       "id": 85,
@@ -4904,8 +4988,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2019,
-      "image": "heroes/85.webp",
-      "portrait": "heroes/85.webp",
+      "image": "heroes/dyrroth.webp",
+      "portrait": "heroes/dyrroth.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -4936,7 +5020,8 @@
         "fighter",
         "jungle"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "dyrroth.webp"
     },
     {
       "id": 86,
@@ -4959,8 +5044,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2019,
-      "image": "heroes/86.webp",
-      "portrait": "heroes/86.webp",
+      "image": "heroes/lylia.webp",
+      "portrait": "heroes/lylia.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -4991,7 +5076,8 @@
         "mage",
         "mid-lane"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "lylia.webp"
     },
     {
       "id": 87,
@@ -5014,8 +5100,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2019,
-      "image": "heroes/87.webp",
-      "portrait": "heroes/87.webp",
+      "image": "heroes/baxia.webp",
+      "portrait": "heroes/baxia.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -5046,7 +5132,8 @@
         "tank",
         "jungle"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "baxia.webp"
     },
     {
       "id": 88,
@@ -5069,8 +5156,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2019,
-      "image": "heroes/88.webp",
-      "portrait": "heroes/88.webp",
+      "image": "heroes/masha.webp",
+      "portrait": "heroes/masha.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -5101,7 +5188,8 @@
         "fighter",
         "exp-lane"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "masha.webp"
     },
     {
       "id": 89,
@@ -5124,8 +5212,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2019,
-      "image": "heroes/89.webp",
-      "portrait": "heroes/89.webp",
+      "image": "heroes/wanwan.webp",
+      "portrait": "heroes/wanwan.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -5156,7 +5244,8 @@
         "marksman",
         "gold-lane"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "wanwan.webp"
     },
     {
       "id": 90,
@@ -5179,8 +5268,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2019,
-      "image": "heroes/90.webp",
-      "portrait": "heroes/90.webp",
+      "image": "heroes/silvanna.webp",
+      "portrait": "heroes/silvanna.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -5211,7 +5300,8 @@
         "fighter",
         "exp-lane"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "silvanna.webp"
     },
     {
       "id": 91,
@@ -5234,8 +5324,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2020,
-      "image": "heroes/91.webp",
-      "portrait": "heroes/91.webp",
+      "image": "heroes/cecilion.webp",
+      "portrait": "heroes/cecilion.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -5266,7 +5356,8 @@
         "mage",
         "mid-lane"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "cecilion.webp"
     },
     {
       "id": 92,
@@ -5289,8 +5380,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2020,
-      "image": "heroes/92.webp",
-      "portrait": "heroes/92.webp",
+      "image": "heroes/carmilla.webp",
+      "portrait": "heroes/carmilla.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -5321,7 +5412,8 @@
         "support",
         "roam"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "carmilla.webp"
     },
     {
       "id": 93,
@@ -5344,8 +5436,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2020,
-      "image": "heroes/93.webp",
-      "portrait": "heroes/93.webp",
+      "image": "heroes/atlas.webp",
+      "portrait": "heroes/atlas.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -5376,7 +5468,8 @@
         "tank",
         "roam"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "atlas.webp"
     },
     {
       "id": 94,
@@ -5402,8 +5495,8 @@
       "isOP": false,
       "isMeta": true,
       "releaseYear": 2020,
-      "image": "heroes/94.webp",
-      "portrait": "heroes/94.webp",
+      "image": "heroes/popolandkupa.webp",
+      "portrait": "heroes/popolandkupa.webp",
       "skills": [
         {
           "name": "We Are Friends",
@@ -5493,7 +5586,8 @@
         "marksman",
         "gold-lane"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "popolandkupa.webp"
     },
     {
       "id": 95,
@@ -5516,8 +5610,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2020,
-      "image": "heroes/95.webp",
-      "portrait": "heroes/95.webp",
+      "image": "heroes/yuzhong.webp",
+      "portrait": "heroes/yuzhong.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -5548,7 +5642,8 @@
         "fighter",
         "exp-lane"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "yuzhong.webp"
     },
     {
       "id": 96,
@@ -5571,8 +5666,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2020,
-      "image": "heroes/96.webp",
-      "portrait": "heroes/96.webp",
+      "image": "heroes/luoyi.webp",
+      "portrait": "heroes/luoyi.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -5603,7 +5698,8 @@
         "mage",
         "mid-lane"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "luoyi.webp"
     },
     {
       "id": 97,
@@ -5626,8 +5722,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2020,
-      "image": "heroes/97.webp",
-      "portrait": "heroes/97.webp",
+      "image": "heroes/benedetta.webp",
+      "portrait": "heroes/benedetta.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -5658,7 +5754,8 @@
         "assassin",
         "exp-lane"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "benedetta.webp"
     },
     {
       "id": 98,
@@ -5681,8 +5778,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2020,
-      "image": "heroes/98.webp",
-      "portrait": "heroes/98.webp",
+      "image": "heroes/khaleed.webp",
+      "portrait": "heroes/khaleed.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -5713,7 +5810,8 @@
         "fighter",
         "exp-lane"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "khaleed.webp"
     },
     {
       "id": 99,
@@ -5736,8 +5834,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2020,
-      "image": "heroes/99.webp",
-      "portrait": "heroes/99.webp",
+      "image": "heroes/barats.webp",
+      "portrait": "heroes/barats.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -5768,7 +5866,8 @@
         "tank",
         "jungle"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "barats.webp"
     },
     {
       "id": 100,
@@ -5791,8 +5890,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2020,
-      "image": "heroes/100.webp",
-      "portrait": "heroes/100.webp",
+      "image": "heroes/brody.webp",
+      "portrait": "heroes/brody.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -5823,7 +5922,8 @@
         "marksman",
         "gold-lane"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "brody.webp"
     },
     {
       "id": 101,
@@ -5846,8 +5946,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2021,
-      "image": "heroes/101.webp",
-      "portrait": "heroes/101.webp",
+      "image": "heroes/yve.webp",
+      "portrait": "heroes/yve.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -5878,7 +5978,8 @@
         "mage",
         "mid-lane"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "yve.webp"
     },
     {
       "id": 102,
@@ -5901,8 +6002,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2020,
-      "image": "heroes/102.webp",
-      "portrait": "heroes/102.webp",
+      "image": "heroes/mathilda.webp",
+      "portrait": "heroes/mathilda.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -5933,7 +6034,8 @@
         "support",
         "roam"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "mathilda.webp"
     },
     {
       "id": 103,
@@ -5956,8 +6058,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2021,
-      "image": "heroes/103.webp",
-      "portrait": "heroes/103.webp",
+      "image": "heroes/paquito.webp",
+      "portrait": "heroes/paquito.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -5988,7 +6090,8 @@
         "fighter",
         "exp-lane"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "paquito.webp"
     },
     {
       "id": 104,
@@ -6011,8 +6114,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2021,
-      "image": "heroes/104.webp",
-      "portrait": "heroes/104.webp",
+      "image": "heroes/gloo.webp",
+      "portrait": "heroes/gloo.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -6043,7 +6146,8 @@
         "tank",
         "roam"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "gloo.webp"
     },
     {
       "id": 105,
@@ -6066,8 +6170,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2021,
-      "image": "heroes/105.webp",
-      "portrait": "heroes/105.webp",
+      "image": "heroes/beatrix.webp",
+      "portrait": "heroes/beatrix.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -6098,7 +6202,8 @@
         "marksman",
         "gold-lane"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "beatrix.webp"
     },
     {
       "id": 106,
@@ -6121,8 +6226,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2021,
-      "image": "heroes/106.webp",
-      "portrait": "heroes/106.webp",
+      "image": "heroes/phoveus.webp",
+      "portrait": "heroes/phoveus.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -6153,7 +6258,8 @@
         "fighter",
         "exp-lane"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "phoveus.webp"
     },
     {
       "id": 107,
@@ -6176,8 +6282,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2021,
-      "image": "heroes/107.webp",
-      "portrait": "heroes/107.webp",
+      "image": "heroes/natan.webp",
+      "portrait": "heroes/natan.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -6208,7 +6314,8 @@
         "marksman",
         "gold-lane"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "natan.webp"
     },
     {
       "id": 108,
@@ -6231,8 +6338,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2021,
-      "image": "heroes/108.webp",
-      "portrait": "heroes/108.webp",
+      "image": "heroes/aulus.webp",
+      "portrait": "heroes/aulus.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -6263,7 +6370,8 @@
         "fighter",
         "jungle"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "aulus.webp"
     },
     {
       "id": 109,
@@ -6286,8 +6394,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2021,
-      "image": "heroes/109.webp",
-      "portrait": "heroes/109.webp",
+      "image": "heroes/aamon.webp",
+      "portrait": "heroes/aamon.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -6318,7 +6426,8 @@
         "assassin",
         "jungle"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "aamon.webp"
     },
     {
       "id": 110,
@@ -6341,8 +6450,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2021,
-      "image": "heroes/110.webp",
-      "portrait": "heroes/110.webp",
+      "image": "heroes/valentina.webp",
+      "portrait": "heroes/valentina.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -6373,7 +6482,8 @@
         "mage",
         "mid-lane"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "valentina.webp"
     },
     {
       "id": 111,
@@ -6396,8 +6506,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2021,
-      "image": "heroes/111.webp",
-      "portrait": "heroes/111.webp",
+      "image": "heroes/edith.webp",
+      "portrait": "heroes/edith.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -6428,7 +6538,8 @@
         "tank",
         "roam"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "edith.webp"
     },
     {
       "id": 112,
@@ -6451,8 +6562,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2021,
-      "image": "heroes/112.webp",
-      "portrait": "heroes/112.webp",
+      "image": "heroes/floryn.webp",
+      "portrait": "heroes/floryn.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -6483,7 +6594,8 @@
         "support",
         "roam"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "floryn.webp"
     },
     {
       "id": 113,
@@ -6506,8 +6618,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2022,
-      "image": "heroes/113.webp",
-      "portrait": "heroes/113.webp",
+      "image": "heroes/yin.webp",
+      "portrait": "heroes/yin.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -6538,7 +6650,8 @@
         "fighter",
         "exp-lane"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "yin.webp"
     },
     {
       "id": 114,
@@ -6561,8 +6674,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2022,
-      "image": "heroes/114.webp",
-      "portrait": "heroes/114.webp",
+      "image": "heroes/melissa.webp",
+      "portrait": "heroes/melissa.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -6593,7 +6706,8 @@
         "marksman",
         "gold-lane"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "melissa.webp"
     },
     {
       "id": 115,
@@ -6616,8 +6730,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2022,
-      "image": "heroes/115.webp",
-      "portrait": "heroes/115.webp",
+      "image": "heroes/xavier.webp",
+      "portrait": "heroes/xavier.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -6648,7 +6762,8 @@
         "mage",
         "mid-lane"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "xavier.webp"
     },
     {
       "id": 116,
@@ -6671,8 +6786,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2022,
-      "image": "heroes/116.webp",
-      "portrait": "heroes/116.webp",
+      "image": "heroes/julian.webp",
+      "portrait": "heroes/julian.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -6703,7 +6818,8 @@
         "fighter",
         "jungle"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "julian.webp"
     },
     {
       "id": 117,
@@ -6726,8 +6842,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2022,
-      "image": "heroes/117.webp",
-      "portrait": "heroes/117.webp",
+      "image": "heroes/fredrinn.webp",
+      "portrait": "heroes/fredrinn.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -6758,7 +6874,8 @@
         "tank",
         "jungle"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "fredrinn.webp"
     },
     {
       "id": 118,
@@ -6781,8 +6898,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2022,
-      "image": "heroes/118.webp",
-      "portrait": "heroes/118.webp",
+      "image": "heroes/joy.webp",
+      "portrait": "heroes/joy.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -6813,7 +6930,8 @@
         "assassin",
         "jungle"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "joy.webp"
     },
     {
       "id": 119,
@@ -6836,8 +6954,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2023,
-      "image": "heroes/119.webp",
-      "portrait": "heroes/119.webp",
+      "image": "heroes/novaria.webp",
+      "portrait": "heroes/novaria.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -6868,7 +6986,8 @@
         "mage",
         "mid-lane"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "novaria.webp"
     },
     {
       "id": 120,
@@ -6891,8 +7010,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2023,
-      "image": "heroes/120.webp",
-      "portrait": "heroes/120.webp",
+      "image": "heroes/arlott.webp",
+      "portrait": "heroes/arlott.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -6923,7 +7042,8 @@
         "fighter",
         "exp-lane"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "arlott.webp"
     },
     {
       "id": 121,
@@ -6946,8 +7066,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2023,
-      "image": "heroes/121.webp",
-      "portrait": "heroes/121.webp",
+      "image": "heroes/ixia.webp",
+      "portrait": "heroes/ixia.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -6978,7 +7098,8 @@
         "marksman",
         "gold-lane"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "ixia.webp"
     },
     {
       "id": 122,
@@ -7001,8 +7122,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2023,
-      "image": "heroes/122.webp",
-      "portrait": "heroes/122.webp",
+      "image": "heroes/nolan.webp",
+      "portrait": "heroes/nolan.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -7033,7 +7154,8 @@
         "assassin",
         "jungle"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "nolan.webp"
     },
     {
       "id": 123,
@@ -7056,8 +7178,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2023,
-      "image": "heroes/123.webp",
-      "portrait": "heroes/123.webp",
+      "image": "heroes/cici.webp",
+      "portrait": "heroes/cici.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -7088,7 +7210,8 @@
         "fighter",
         "exp-lane"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "cici.webp"
     },
     {
       "id": 124,
@@ -7111,8 +7234,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2024,
-      "image": "heroes/124.webp",
-      "portrait": "heroes/124.webp",
+      "image": "heroes/chip.webp",
+      "portrait": "heroes/chip.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -7143,7 +7266,8 @@
         "tank",
         "roam"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "chip.webp"
     },
     {
       "id": 125,
@@ -7166,8 +7290,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2024,
-      "image": "heroes/125.webp",
-      "portrait": "heroes/125.webp",
+      "image": "heroes/zhuxin.webp",
+      "portrait": "heroes/zhuxin.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -7198,7 +7322,8 @@
         "mage",
         "mid-lane"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "zhuxin.webp"
     },
     {
       "id": 126,
@@ -7221,8 +7346,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2024,
-      "image": "heroes/126.webp",
-      "portrait": "heroes/126.webp",
+      "image": "heroes/suyou.webp",
+      "portrait": "heroes/suyou.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -7253,7 +7378,8 @@
         "assassin",
         "jungle"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "suyou.webp"
     },
     {
       "id": 127,
@@ -7276,8 +7402,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2024,
-      "image": "heroes/127.webp",
-      "portrait": "heroes/127.webp",
+      "image": "heroes/lukas.webp",
+      "portrait": "heroes/lukas.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -7308,7 +7434,8 @@
         "fighter",
         "exp-lane"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "lukas.webp"
     },
     {
       "id": 128,
@@ -7331,8 +7458,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2025,
-      "image": "heroes/128.webp",
-      "portrait": "heroes/128.webp",
+      "image": "heroes/kalea.webp",
+      "portrait": "heroes/kalea.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -7363,7 +7490,8 @@
         "support",
         "roam"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "kalea.webp"
     },
     {
       "id": 129,
@@ -7386,8 +7514,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2025,
-      "image": "heroes/129.webp",
-      "portrait": "heroes/129.webp",
+      "image": "heroes/zetian.webp",
+      "portrait": "heroes/zetian.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -7418,7 +7546,8 @@
         "mage",
         "mid-lane"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "zetian.webp"
     },
     {
       "id": 130,
@@ -7441,8 +7570,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2025,
-      "image": "heroes/130.webp",
-      "portrait": "heroes/130.webp",
+      "image": "heroes/obsidia.webp",
+      "portrait": "heroes/obsidia.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -7473,7 +7602,8 @@
         "marksman",
         "gold-lane"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "obsidia.webp"
     },
     {
       "id": 131,
@@ -7496,8 +7626,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2025,
-      "image": "heroes/131.webp",
-      "portrait": "heroes/131.webp",
+      "image": "heroes/sora.webp",
+      "portrait": "heroes/sora.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -7528,7 +7658,8 @@
         "fighter",
         "exp-lane"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "sora.webp"
     },
     {
       "id": 132,
@@ -7551,8 +7682,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2026,
-      "image": "heroes/132.webp",
-      "portrait": "heroes/132.webp",
+      "image": "heroes/marcel.webp",
+      "portrait": "heroes/marcel.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -7583,7 +7714,8 @@
         "support",
         "roam"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "marcel.webp"
     },
     {
       "id": 133,
@@ -7606,8 +7738,8 @@
       "isOP": false,
       "isMeta": false,
       "releaseYear": 2026,
-      "image": "heroes/133.webp",
-      "portrait": "heroes/133.webp",
+      "image": "heroes/hirara.webp",
+      "portrait": "heroes/hirara.webp",
       "skills": [],
       "recommendedSpells": [
         "Flicker"
@@ -7638,7 +7770,8 @@
         "assassin",
         "jungle"
       ],
-      "patchVersion": "2.2.23"
+      "patchVersion": "2.2.23",
+      "file": "hirara.webp"
     }
   ]
 }
