@@ -1,8 +1,18 @@
 {
   "version": "2.2.23",
-  "updated": "2026-11-11",
-  "source": "MLBB Plus local data. Item IDs are stable MLBB Plus IDs (1000 Attack, 2000 Magic, 3000 Defense, 4000 Roam, 5000 Movement, 6000 Jungle) because Moonton does not publish a public official numeric item ID like hero IDs. Use this ID as primary key.",
-  "totalItems": 40,
+  "updated": "2026-11-21",
+  "patchDate": "2026-11-11",
+  "patchName": "Patch 2.2.23 — Popol and Kupa Revamp (Original Server)",
+  "season": "Season 42 — Starward Decade",
+  "source": "MLBB Plus local data, updated to Patch 2.2.23 (Nov 11, 2026 Original Server). Item stats cross-checked vs MLBB in-game patch notes via Kazuki Official / mlbb.tools / timesaver.gg mirror, and MLBBGuides item DB (Nov 1, 2026) + MLBB Draft / Fandom. Item IDs are stable MLBB Plus IDs (1000 Attack, 2000 Magic, 3000 Defense, 4000 Roam, 5000 Movement, 6000 Jungle/Magic) because Moonton does not publish a public official numeric item ID like hero IDs. Use this ID as primary key.",
+  "totalItems": 41,
+  "totalActiveItems": 40,
+  "patchChanges": [
+    "Chastise Pauldron (3009) NERFED: Chastise 75% -> 80% (attackers keep more Attack Speed)",
+    "Antique Cuirass (3003) BUFFED: Deter 6% -> 8% per stack",
+    "Twilight Armor (3007) REMOVED — replaced by Chastise Pauldron",
+    "All other items: stats, prices, passives and descriptions corrected to Nov 2026 values (many were pre-2024 values in 2.2.23 file, e.g. Demon Hunter Sword, Endless Battle, Blade Armor, Guardian Helmet, Winter Crown, Starlium Scythe)"
+  ],
   "schema": {
     "id": "Stable MLBB Plus item ID. Heroes.json coreItems and coreBuild reference this ID.",
     "name": "Official in-game item name",
@@ -14,7 +24,9 @@
     "buildPath": "Component item names — shown as Build Path in Detail",
     "counters/counteredBy": "Item IDs that counter / are countered by this item",
     "synergiesHeroes/worksAgainstHeroes": "Hero IDs from heroes.json",
-    "image": "Relative path in assets/ — assets/items/{id}.webp"
+    "image": "Relative path in assets/ — assets/items/{id}.webp",
+    "patchVersion": "Patch version this entry reflects",
+    "status": "active / removed (legacy)"
   },
   "items": [
     {
@@ -26,20 +38,25 @@
       "price": 3010,
       "sellPrice": 1806,
       "stats": [
-        "+160 Physical Attack"
+        "+160 Physical Attack",
+        "+5% Movement Speed"
       ],
       "statsDetailed": [
         {
           "stat": "Physical Attack",
           "value": 160
+        },
+        {
+          "stat": "Movement Speed",
+          "value": "5%"
         }
       ],
       "passive": {
         "name": "Despair",
-        "description": "Dealing damage to enemies below 50% HP increases damage by 25%."
+        "description": "Dealing damage to non-Minion enemies below 50% HP increases Physical Attack by 25% for 2 seconds (takes effect before the damage is dealt)."
       },
       "active": null,
-      "description": "The highest Physical Attack item. Core for burst marksmen and assassins.",
+      "description": "The highest Physical Attack item in the game. Core finisher for burst marksmen and assassins who want to snowball low-HP targets. The +5% Movement Speed helps chase and reposition.",
       "lore": "A blade that thirsts for despair.",
       "buildPath": [
         "Legion Sword",
@@ -72,7 +89,9 @@
       "tags": [
         "attack",
         "burst"
-      ]
+      ],
+      "patchVersion": "2.2.23",
+      "status": "active"
     },
     {
       "id": 1002,
@@ -84,8 +103,7 @@
       "sellPrice": 1308,
       "stats": [
         "+35 Physical Attack",
-        "+25% Attack Speed",
-        "+10% Lifesteal"
+        "+20% Attack Speed"
       ],
       "statsDetailed": [
         {
@@ -94,19 +112,15 @@
         },
         {
           "stat": "Attack Speed",
-          "value": "25%"
-        },
-        {
-          "stat": "Lifesteal",
-          "value": "10%"
+          "value": "20%"
         }
       ],
       "passive": {
-        "name": "Devour",
-        "description": "Basic attacks deal extra Physical Damage equal to 9% of target's current HP and restore HP."
+        "name": "Engulf / Devour",
+        "description": "Engulf: Basic Attacks deal 8% of the target's current HP as extra Physical Damage (capped at 60 against minions). Devour: Each Basic Attack recovers 10 (+4*Hero Level) HP. This effect is halved against minions."
       },
       "active": null,
-      "description": "A feared blade forged from the bones of an ancient golem, designed to shred high-health foes. Its passive allows basic attacks to deal extra physical damage based on the target's current HP, while also granting lifesteal, making it essential for marksmen fighting tanky opponents.",
+      "description": "The premier anti-tank marksman item. Percentage current-HP damage shreds high-HP fighters and tanks, while Devour gives sustain in extended trades. Core vs Gloo, Masha, Belerick and other high-HP frontlines.",
       "lore": "\"A blade with its core carved from the bones of an Iceland Golem, the power that resides within almost seems to impart the fierce history of those giants in the time before they were slain.\"",
       "buildPath": [
         "Dagger",
@@ -140,7 +154,9 @@
       "tags": [
         "attack",
         "anti-tank"
-      ]
+      ],
+      "patchVersion": "2.2.23",
+      "status": "active"
     },
     {
       "id": 1003,
@@ -148,11 +164,12 @@
       "slug": "berserkers-fury",
       "category": "Attack",
       "tier": "S",
-      "price": 2350,
-      "sellPrice": 1410,
+      "price": 2390,
+      "sellPrice": 1434,
       "stats": [
         "+65 Physical Attack",
-        "+25% Critical Chance"
+        "+25% Crit Chance",
+        "+40% Crit Damage"
       ],
       "statsDetailed": [
         {
@@ -162,14 +179,18 @@
         {
           "stat": "Crit Chance",
           "value": "25%"
+        },
+        {
+          "stat": "Crit Damage",
+          "value": "40%"
         }
       ],
       "passive": {
         "name": "Doom",
-        "description": "Crits deal +40% extra damage."
+        "description": "Crits deal +40% extra damage. Critical strikes grant an extra 5% Physical Attack for 2 seconds."
       },
       "active": null,
-      "description": "Core crit item for marksmen. Big burst on crits.",
+      "description": "Core crit item for marksmen. The +40% Crit Damage makes every crit hit much harder, and the short Physical Attack buff on crit rewards aggressive trading. Best paired with Windtalker and Haas's Claws.",
       "lore": "Fury of a berserker.",
       "buildPath": [
         "Blade of Despair Fragment",
@@ -196,7 +217,9 @@
       "tags": [
         "attack",
         "crit"
-      ]
+      ],
+      "patchVersion": "2.2.23",
+      "status": "active"
     },
     {
       "id": 1004,
@@ -207,8 +230,7 @@
       "price": 2060,
       "sellPrice": 1236,
       "stats": [
-        "+60 Physical Attack",
-        "+30% Physical Penetration"
+        "+60 Physical Attack"
       ],
       "statsDetailed": [
         {
@@ -221,11 +243,11 @@
         }
       ],
       "passive": {
-        "name": "Armor Buster",
-        "description": "Physical Penetration increases against high-defense targets."
+        "name": "Armor Buster / Breaker",
+        "description": "Armor Buster: Increase Physical Penetration by 30%. Breaker: When attacking an enemy, gains 0.1% extra Physical Penetration for each point of the enemy's Physical Defense, capped at 30%."
       },
       "active": null,
-      "description": "Anti-tank penetration. Essential vs Defense-heavy teams.",
+      "description": "The anti-tank penetration item. Scales against high-Defense targets, so it gets stronger the tankier the enemy is. Essential vs Defense-heavy teams stacking Blade Armor, Antique Cuirass and Dominance Ice.",
       "lore": "Roar that shatters armor.",
       "buildPath": [
         "Legion Sword",
@@ -238,32 +260,38 @@
         3002,
         3003
       ],
-      "counteredBy": [],
+      "counteredBy": [
+        3006
+      ],
       "synergiesHeroes": [
-        60,
         79,
-        88
+        65,
+        3
       ],
       "worksAgainstHeroes": [
         70,
         104,
-        6
+        41
       ],
       "recommendedFor": [
         "Marksman",
+        "Assassin",
         "Fighter"
       ],
       "tags": [
         "attack",
-        "penetration"
-      ]
+        "penetration",
+        "anti-tank"
+      ],
+      "patchVersion": "2.2.23",
+      "status": "active"
     },
     {
       "id": 1005,
       "name": "Wind of Nature",
       "slug": "wind-of-nature",
       "category": "Attack",
-      "tier": "S",
+      "tier": "A",
       "price": 1910,
       "sellPrice": 1146,
       "stats": [
@@ -279,15 +307,19 @@
         {
           "stat": "Attack Speed",
           "value": "20%"
+        },
+        {
+          "stat": "Lifesteal",
+          "value": "10%"
         }
       ],
       "passive": null,
       "active": {
         "name": "Wind Chant",
-        "description": "Become immune to all Physical Damage for 2s. Cooldown 70s."
+        "description": "Become immune to all Physical Damage for 2 seconds (duration is halved if Main Role is not Marksman; 90 seconds cooldown)."
       },
-      "description": "Defensive active for marksmen vs burst physical damage.",
-      "lore": "Wind that protects.",
+      "description": "Defensive active for marksmen vs burst physical damage. Time it against Saber, Hayabusa, Lancelot or Moskov ultimates to survive the burst and turn the fight.",
+      "lore": "Ride the wind, dodge death.",
       "buildPath": [
         "Dagger",
         "Vampire Mallet"
@@ -295,26 +327,34 @@
       "buildsInto": [],
       "image": "items/1005.webp",
       "counters": [
-        1001
+        3,
+        21,
+        47
       ],
-      "counteredBy": [],
+      "counteredBy": [
+        2001,
+        2003
+      ],
       "synergiesHeroes": [
         60,
-        31,
-        88
+        65,
+        40
       ],
       "worksAgainstHeroes": [
+        3,
         21,
-        47,
-        17
+        47
       ],
       "recommendedFor": [
         "Marksman"
       ],
       "tags": [
         "attack",
-        "defensive"
-      ]
+        "defensive",
+        "active"
+      ],
+      "patchVersion": "2.2.23",
+      "status": "active"
     },
     {
       "id": 1006,
@@ -325,31 +365,48 @@
       "price": 1950,
       "sellPrice": 1170,
       "stats": [
-        "+65 Physical Attack",
+        "+70 Physical Attack",
         "+250 HP",
         "+15 Physical Penetration"
       ],
       "statsDetailed": [
         {
           "stat": "Physical Attack",
-          "value": 65
+          "value": 70
+        },
+        {
+          "stat": "HP",
+          "value": 250
+        },
+        {
+          "stat": "Physical Penetration",
+          "value": 15
         }
       ],
       "passive": {
         "name": "Ambush",
-        "description": "Next basic attack after 5s out of combat deals bonus damage and slows."
+        "description": "If no damage is taken or dealt within 5 seconds (excluding from Minions or Creeps), the next Basic Attack will deal an additional 160 (+40% Total Physical Attack) Physical Damage and slow the target by 40% for 1.5 seconds."
       },
       "active": null,
-      "description": "Burst for assassins and poke fighters.",
-      "lore": "",
-      "buildPath": [],
+      "description": "Burst for assassins and poke fighters. The Ambush proc rewards roaming and bush play — open from stealth or after rotating for a huge slow + burst.",
+      "lore": "Seven seas, one strike.",
+      "buildPath": [
+        "Legion Sword",
+        "Vitality Crystal"
+      ],
       "buildsInto": [],
       "image": "items/1006.webp",
-      "counters": [],
-      "counteredBy": [],
+      "counters": [
+        15,
+        25
+      ],
+      "counteredBy": [
+        3001,
+        3003
+      ],
       "synergiesHeroes": [
         3,
-        21,
+        24,
         47
       ],
       "worksAgainstHeroes": [
@@ -357,11 +414,16 @@
         25
       ],
       "recommendedFor": [
-        "Assassin"
+        "Assassin",
+        "Fighter"
       ],
       "tags": [
-        "attack"
-      ]
+        "attack",
+        "burst",
+        "poke"
+      ],
+      "patchVersion": "2.2.23",
+      "status": "active"
     },
     {
       "id": 1007,
@@ -373,85 +435,142 @@
       "sellPrice": 1206,
       "stats": [
         "+80 Physical Attack",
-        "+10% Cooldown Reduction"
+        "+10% Cooldown Reduction",
+        "+15 Physical Penetration"
       ],
       "statsDetailed": [
         {
           "stat": "Physical Attack",
           "value": 80
+        },
+        {
+          "stat": "Cooldown Reduction",
+          "value": "10%"
+        },
+        {
+          "stat": "Physical Penetration",
+          "value": 15
         }
       ],
       "passive": {
-        "name": "Predator",
-        "description": "Dealing damage 5 times grants movement speed."
+        "name": "Retribution",
+        "description": "Dealing damage to the same enemy hero or creep 5 times in a row grants 50% extra Movement Speed that decays over 3 seconds (8 seconds cooldown)."
       },
       "active": null,
-      "description": "Chase and CDR for fighters.",
-      "lore": "",
-      "buildPath": [],
+      "description": "Chase and CDR for fighters and assassins. The Movement Speed burst after 5 hits lets you stick to fleeing targets or disengage after a trade.",
+      "lore": "The hunter never stops.",
+      "buildPath": [
+        "Legion Sword",
+        "Pirate's Dagger"
+      ],
       "buildsInto": [],
       "image": "items/1007.webp",
-      "counters": [],
-      "counteredBy": [],
-      "synergiesHeroes": [
-        7,
-        58,
-        26
+      "counters": [
+        15,
+        25
       ],
-      "worksAgainstHeroes": [],
+      "counteredBy": [
+        3003
+      ],
+      "synergiesHeroes": [
+        28,
+        16,
+        3
+      ],
+      "worksAgainstHeroes": [
+        15,
+        25
+      ],
       "recommendedFor": [
-        "Fighter"
+        "Fighter",
+        "Assassin"
       ],
       "tags": [
-        "attack"
-      ]
+        "attack",
+        "cdr",
+        "chase"
+      ],
+      "patchVersion": "2.2.23",
+      "status": "active"
     },
     {
       "id": 1008,
       "name": "Endless Battle",
       "slug": "endless-battle",
       "category": "Attack",
-      "tier": "A",
-      "price": 2470,
-      "sellPrice": 1482,
+      "tier": "S",
+      "price": 2330,
+      "sellPrice": 1398,
       "stats": [
-        "+65 Physical Attack",
-        "+25% Attack Speed",
-        "+15% Lifesteal",
+        "+60 Physical Attack",
         "+250 HP",
-        "+5% Movement Speed"
+        "+10% Cooldown Reduction",
+        "+5% Movement Speed",
+        "+5 Mana Regen"
       ],
       "statsDetailed": [
         {
           "stat": "Physical Attack",
-          "value": 65
+          "value": 60
+        },
+        {
+          "stat": "HP",
+          "value": 250
+        },
+        {
+          "stat": "Cooldown Reduction",
+          "value": "10%"
+        },
+        {
+          "stat": "Movement Speed",
+          "value": "5%"
+        },
+        {
+          "stat": "Mana Regen",
+          "value": 5
         }
       ],
       "passive": {
         "name": "Divine Justice",
-        "description": "After using a skill, next basic attack deals true damage."
+        "description": "After casting a skill, the next Basic Attack within 3 seconds deals (60% Total Physical Attack) extra True Damage and recovers 80 (+40% of Total Physical Attack) HP (1.5 seconds cooldown)."
       },
       "active": null,
-      "description": "Hybrid sustain + true damage for skill-based fighters.",
-      "lore": "",
-      "buildPath": [],
+      "description": "Hybrid sustain + True Damage for skill-based fighters and assassins. Weave skill -> Basic Attack to proc Divine Justice for True Damage that ignores Defense, plus a heal. Core on Roger, Alucard, Bane and other skill-weaving fighters.",
+      "lore": "The battle never ends.",
+      "buildPath": [
+        "Legion Sword",
+        "Vitality Crystal",
+        "Magic Necklace"
+      ],
       "buildsInto": [],
       "image": "items/1008.webp",
-      "counters": [],
-      "counteredBy": [],
-      "synergiesHeroes": [
-        26,
-        7,
-        58
+      "counters": [
+        3001,
+        3003
       ],
-      "worksAgainstHeroes": [],
+      "counteredBy": [
+        3002
+      ],
+      "synergiesHeroes": [
+        39,
+        7,
+        11
+      ],
+      "worksAgainstHeroes": [
+        70,
+        41
+      ],
       "recommendedFor": [
         "Fighter",
         "Assassin"
       ],
       "tags": [
-        "attack"
-      ]
+        "attack",
+        "true-damage",
+        "sustain"
+      ],
+      "patchVersion": "2.2.23",
+      "status": "active"
     },
     {
       "id": 1009,
@@ -459,46 +578,67 @@
       "slug": "windtalker",
       "category": "Attack",
       "tier": "S",
-      "price": 1870,
-      "sellPrice": 1122,
+      "price": 1880,
+      "sellPrice": 1128,
       "stats": [
-        "+40% Attack Speed",
-        "+20 Movement Speed",
-        "+10% Critical Chance"
+        "+35% Attack Speed",
+        "+20% Crit Chance",
+        "+20 Movement Speed"
       ],
       "statsDetailed": [
         {
           "stat": "Attack Speed",
-          "value": "40%"
+          "value": "35%"
+        },
+        {
+          "stat": "Crit Chance",
+          "value": "20%"
+        },
+        {
+          "stat": "Movement Speed",
+          "value": 20
         }
       ],
       "passive": {
         "name": "Typhoon",
-        "description": "Every 3s, next basic attack deals magic damage to nearby enemies."
+        "description": "Every 5-2 seconds (reduced by 0.2 seconds for each Basic Attack), the next Basic Attack will hit up to 3 enemy units for 150-362 Magic Damage. This attack can Crit and the damage increases to 200% against Minions."
       },
       "active": null,
-      "description": "Attack speed + wave clear for marksmen.",
-      "lore": "",
+      "description": "Attack Speed + wave clear + splash for marksmen. Typhoon procs clear waves fast and poke in teamfights. Pairs with Berserker's Fury for crit splash damage.",
+      "lore": "The wind speaks in storms.",
       "buildPath": [
         "Dagger",
         "Javelin"
       ],
       "buildsInto": [],
       "image": "items/1009.webp",
-      "counters": [],
-      "counteredBy": [],
+      "counters": [
+        15,
+        25
+      ],
+      "counteredBy": [
+        3001
+      ],
       "synergiesHeroes": [
         60,
-        31,
-        100
+        65,
+        40,
+        1
       ],
-      "worksAgainstHeroes": [],
+      "worksAgainstHeroes": [
+        15,
+        25
+      ],
       "recommendedFor": [
         "Marksman"
       ],
       "tags": [
-        "attack"
-      ]
+        "attack",
+        "attack-speed",
+        "wave-clear"
+      ],
+      "patchVersion": "2.2.23",
+      "status": "active"
     },
     {
       "id": 1010,
@@ -506,43 +646,65 @@
       "slug": "malefic-gun",
       "category": "Attack",
       "tier": "S",
-      "price": 2100,
-      "sellPrice": 1260,
+      "price": 2120,
+      "sellPrice": 1272,
       "stats": [
-        "+55 Physical Attack",
-        "+25% Attack Speed",
-        "+15% Physical Penetration"
+        "+40 Physical Attack",
+        "+20% Attack Speed"
       ],
       "statsDetailed": [
         {
           "stat": "Physical Attack",
-          "value": 55
+          "value": 40
+        },
+        {
+          "stat": "Attack Speed",
+          "value": "20%"
+        },
+        {
+          "stat": "Physical Penetration",
+          "value": "30%"
         }
       ],
       "passive": {
-        "name": "Malefic Energy",
-        "description": "Increases range and penetration on basic attacks."
+        "name": "Armor Buster / Malefic Energy",
+        "description": "Armor Buster: Increase Physical Penetration by 30%. Malefic Energy: Increases Basic Attack range by 12%. When hitting a target, gains 10% Movement Speed for 0.5 seconds."
       },
       "active": null,
-      "description": "Range + penetration for marksmen.",
-      "lore": "",
-      "buildPath": [],
+      "description": "Range + penetration for marksmen. The +12% range lets you kite from outside enemy threat range, and the Move Speed on hit helps reposition. Core on Karrie, Moskov, Claude and other range-dependent marksmen in 2.2.23.",
+      "lore": "Shoot farther, hit harder.",
+      "buildPath": [
+        "Dagger",
+        "Pirate's Dagger"
+      ],
       "buildsInto": [],
       "image": "items/1010.webp",
-      "counters": [],
-      "counteredBy": [],
-      "synergiesHeroes": [
-        60,
-        88,
-        31
+      "counters": [
+        3003
       ],
-      "worksAgainstHeroes": [],
+      "counteredBy": [
+        3001
+      ],
+      "synergiesHeroes": [
+        40,
+        31,
+        65,
+        94
+      ],
+      "worksAgainstHeroes": [
+        70,
+        41
+      ],
       "recommendedFor": [
         "Marksman"
       ],
       "tags": [
-        "attack"
-      ]
+        "attack",
+        "range",
+        "penetration"
+      ],
+      "patchVersion": "2.2.23",
+      "status": "active"
     },
     {
       "id": 1011,
@@ -550,43 +712,68 @@
       "slug": "corrosion-scythe",
       "category": "Attack",
       "tier": "A",
-      "price": 2150,
-      "sellPrice": 1290,
+      "price": 2050,
+      "sellPrice": 1230,
       "stats": [
-        "+50 Physical Attack",
+        "+30 Physical Attack",
         "+30% Attack Speed",
-        "+10% Lifesteal"
+        "+5% Movement Speed"
       ],
       "statsDetailed": [
         {
           "stat": "Physical Attack",
-          "value": 50
+          "value": 30
+        },
+        {
+          "stat": "Attack Speed",
+          "value": "30%"
+        },
+        {
+          "stat": "Movement Speed",
+          "value": "5%"
         }
       ],
       "passive": {
-        "name": "Corrosion",
-        "description": "Basic attacks slow enemies and reduce their defense."
+        "name": "Corrosive / Impulse",
+        "description": "Corrosive: Basic Attacks gain 80 extra Physical Damage and slow the target by 8% (halved for ranged Basic Attacks) for 1.5 seconds. Stacks up to 5 times. Impulse: Basic Attacks grant 6% extra Attack Speed for 3 seconds, capped at 5 stacks."
       },
       "active": null,
-      "description": "Slow + shred for kiting marksmen.",
-      "lore": "",
-      "buildPath": [],
+      "description": "Slow + shred for kiting marksmen. Stacking slows and Attack Speed make it hard for enemies to escape. Great on Popol and Kupa, Karrie and Wanwan in 2.2.23.",
+      "lore": "Corrosion eats away at armor and hope.",
+      "buildPath": [
+        "Dagger",
+        "Vampire Mallet"
+      ],
       "buildsInto": [],
       "image": "items/1011.webp",
-      "counters": [],
-      "counteredBy": [],
+      "counters": [
+        16,
+        22
+      ],
+      "counteredBy": [
+        3001,
+        3002
+      ],
       "synergiesHeroes": [
         94,
-        88,
-        60
+        40,
+        89
       ],
-      "worksAgainstHeroes": [],
+      "worksAgainstHeroes": [
+        16,
+        22
+      ],
       "recommendedFor": [
-        "Marksman"
+        "Marksman",
+        "Fighter"
       ],
       "tags": [
-        "attack"
-      ]
+        "attack",
+        "slow",
+        "kiting"
+      ],
+      "patchVersion": "2.2.23",
+      "status": "active"
     },
     {
       "id": 1012,
@@ -594,127 +781,207 @@
       "slug": "golden-staff",
       "category": "Attack",
       "tier": "A",
-      "price": 2250,
-      "sellPrice": 1350,
+      "price": 2000,
+      "sellPrice": 1200,
       "stats": [
-        "+65 Physical Attack",
-        "+30% Attack Speed"
+        "+55 Physical Attack",
+        "+15% Attack Speed"
       ],
       "statsDetailed": [
         {
           "stat": "Physical Attack",
-          "value": 65
+          "value": 55
+        },
+        {
+          "stat": "Attack Speed",
+          "value": "15%"
         }
       ],
       "passive": {
-        "name": "Swift",
-        "description": "Attack speed increases with consecutive hits."
+        "name": "Swift / Endless Strike",
+        "description": "Swift: Every 1% extra Crit Chance gained is converted into 1% extra Attack Speed. Endless Strike: After every 2 non-Crit Basic Attacks, the Attack Speed of the next Basic Attack is increased by 80% (and Attack Speed cap is increased to 500%) and triggers Attack Effects an additional 2 time(s)."
       },
       "active": null,
-      "description": "Stacking attack speed for DPS marksmen.",
-      "lore": "",
-      "buildPath": [],
+      "description": "Stacking Attack Speed for DPS marksmen who rely on Attack Effects (Karrie, Claude, Moskov). Converts Crit Chance into Attack Speed, so build it with items that give Crit Chance but don't want to crit.",
+      "lore": "Gold that strikes endlessly.",
+      "buildPath": [
+        "Dagger",
+        "Legion Sword"
+      ],
       "buildsInto": [],
       "image": "items/1012.webp",
-      "counters": [],
-      "counteredBy": [],
-      "synergiesHeroes": [
-        60,
-        88
+      "counters": [
+        70,
+        41
       ],
-      "worksAgainstHeroes": [],
+      "counteredBy": [
+        3001
+      ],
+      "synergiesHeroes": [
+        40,
+        65,
+        31
+      ],
+      "worksAgainstHeroes": [
+        70,
+        41
+      ],
       "recommendedFor": [
         "Marksman"
       ],
       "tags": [
-        "attack"
-      ]
+        "attack",
+        "attack-speed",
+        "attack-effects"
+      ],
+      "patchVersion": "2.2.23",
+      "status": "active"
     },
     {
       "id": 1013,
       "name": "Haas's Claws",
-      "slug": "haas-claws",
+      "slug": "haass-claws",
       "category": "Attack",
       "tier": "A",
-      "price": 1810,
-      "sellPrice": 1086,
+      "price": 2020,
+      "sellPrice": 1212,
       "stats": [
-        "+70 Physical Attack",
+        "+40 Physical Attack",
+        "+15% Attack Speed",
+        "+20% Crit Chance",
         "+20% Lifesteal"
       ],
       "statsDetailed": [
         {
           "stat": "Physical Attack",
-          "value": 70
+          "value": 40
+        },
+        {
+          "stat": "Attack Speed",
+          "value": "15%"
+        },
+        {
+          "stat": "Crit Chance",
+          "value": "20%"
+        },
+        {
+          "stat": "Lifesteal",
+          "value": "20%"
         }
       ],
       "passive": {
-        "name": "Insanity",
-        "description": "When HP drops below 40%, gain extra lifesteal."
+        "name": "Frenzy",
+        "description": "Critical strikes grant 20% extra Attack Speed for 2 seconds."
       },
       "active": null,
-      "description": "Sustain for marksmen who need to stay in fight.",
-      "lore": "",
-      "buildPath": [],
+      "description": "The lifesteal + crit hybrid for marksmen. High Lifesteal keeps you in fights, Crit Chance + Frenzy Attack Speed spikes your DPS. Core on Bruno, Granger and other crit marksmen who need sustain.",
+      "lore": "Claws that drink life.",
+      "buildPath": [
+        "Vampire Mallet",
+        "Javelin"
+      ],
       "buildsInto": [],
       "image": "items/1013.webp",
-      "counters": [],
-      "counteredBy": [],
-      "synergiesHeroes": [
-        60,
-        12
+      "counters": [
+        15,
+        25
       ],
-      "worksAgainstHeroes": [],
+      "counteredBy": [
+        3002
+      ],
+      "synergiesHeroes": [
+        12,
+        79,
+        60
+      ],
+      "worksAgainstHeroes": [
+        15,
+        25
+      ],
       "recommendedFor": [
         "Marksman"
       ],
       "tags": [
-        "attack"
-      ]
+        "attack",
+        "lifesteal",
+        "crit"
+      ],
+      "patchVersion": "2.2.23",
+      "status": "active"
     },
     {
       "id": 1014,
       "name": "War Axe",
       "slug": "war-axe",
       "category": "Attack",
-      "tier": "A",
+      "tier": "S",
       "price": 2100,
       "sellPrice": 1260,
       "stats": [
-        "+55 Physical Attack",
-        "+550 HP",
-        "+10% Cooldown Reduction"
+        "+35 Physical Attack",
+        "+400 HP",
+        "+10% Cooldown Reduction",
+        "+8% Hybrid Lifesteal"
       ],
       "statsDetailed": [
         {
           "stat": "Physical Attack",
-          "value": 55
+          "value": 35
+        },
+        {
+          "stat": "HP",
+          "value": 400
+        },
+        {
+          "stat": "Cooldown Reduction",
+          "value": "10%"
+        },
+        {
+          "stat": "Hybrid Lifesteal",
+          "value": "8%"
         }
       ],
       "passive": {
         "name": "Fighting Spirit",
-        "description": "Dealing damage stacks Physical Attack and Spell Vamp."
+        "description": "Attacks grant 12 extra Physical Attack per second for 4 seconds, up to 6 stacks. Deals 10% extra True Damage based on the damage dealt (no damage reduction counted) at full stacks. (Marksmen, Mages, and Supports only receive 50% of these stacked effects.)"
       },
       "active": null,
-      "description": "Brawler sustain for fighters.",
-      "lore": "",
-      "buildPath": [],
+      "description": "Brawler sustain for fighters. Stacks Physical Attack in extended fights and converts damage to True Damage at full stacks. Best on fighters who stay in fights — Yu Zhong, Lukas, Paquito, Lapu-Lapu.",
+      "lore": "An axe forged for endless war.",
+      "buildPath": [
+        "Legion Sword",
+        "Vitality Crystal",
+        "Vampire Mallet"
+      ],
       "buildsInto": [],
       "image": "items/1014.webp",
-      "counters": [],
-      "counteredBy": [],
-      "synergiesHeroes": [
-        58,
-        26,
-        87
+      "counters": [
+        70,
+        41
       ],
-      "worksAgainstHeroes": [],
+      "counteredBy": [
+        3002,
+        3003
+      ],
+      "synergiesHeroes": [
+        95,
+        127,
+        103
+      ],
+      "worksAgainstHeroes": [
+        70,
+        41
+      ],
       "recommendedFor": [
         "Fighter"
       ],
       "tags": [
-        "attack"
-      ]
+        "attack",
+        "sustain",
+        "true-damage"
+      ],
+      "patchVersion": "2.2.23",
+      "status": "active"
     },
     {
       "id": 1015,
@@ -722,48 +989,63 @@
       "slug": "sea-halberd",
       "category": "Attack",
       "tier": "A",
-      "price": 1950,
-      "sellPrice": 1170,
+      "price": 2050,
+      "sellPrice": 1230,
       "stats": [
         "+80 Physical Attack",
-        "+25% Attack Speed"
+        "+20% Attack Speed"
       ],
       "statsDetailed": [
         {
           "stat": "Physical Attack",
           "value": 80
+        },
+        {
+          "stat": "Attack Speed",
+          "value": "20%"
         }
       ],
       "passive": {
-        "name": "Life Drain",
-        "description": "Basic attacks reduce target's HP regen and shield."
+        "name": "Lifebane / Punish",
+        "description": "Lifebane: Dealing damage to a target will reduce the Shield and HP Regen effects on them to 60% of normal for 3 seconds. Punish: Increase damage by 8% against enemy heroes with higher extra HP."
       },
       "active": null,
-      "description": "Anti-heal for marksmen vs Estes / Rafaela / heal comps.",
-      "lore": "",
-      "buildPath": [],
+      "description": "Anti-heal for marksmen vs Estes, Rafaela, Floryn, Yu Zhong and high-regen comps. Also punishes high-HP tanks. Build it when the enemy has 2+ healers or heavy HP Regen.",
+      "lore": "A halberd that stops the tide of healing.",
+      "buildPath": [
+        "Legion Sword",
+        "Dagger"
+      ],
       "buildsInto": [],
       "image": "items/1015.webp",
       "counters": [
-        4001
+        34,
+        14,
+        112
       ],
-      "counteredBy": [],
+      "counteredBy": [
+        3001
+      ],
       "synergiesHeroes": [
         60,
-        88
+        65,
+        40
       ],
       "worksAgainstHeroes": [
         34,
         14,
-        76
+        95
       ],
       "recommendedFor": [
-        "Marksman"
+        "Marksman",
+        "Fighter"
       ],
       "tags": [
         "attack",
         "anti-heal"
-      ]
+      ],
+      "patchVersion": "2.2.23",
+      "status": "active"
     },
     {
       "id": 1016,
@@ -771,42 +1053,61 @@
       "slug": "sky-piercer",
       "category": "Attack",
       "tier": "A",
-      "price": 1950,
-      "sellPrice": 1170,
+      "price": 1500,
+      "sellPrice": 900,
       "stats": [
-        "+60 Physical Attack",
-        "+15% Cooldown Reduction"
+        "+60 Adaptive Attack",
+        "+15 Movement Speed"
       ],
       "statsDetailed": [
         {
-          "stat": "Physical Attack",
+          "stat": "Adaptive Attack",
           "value": 60
+        },
+        {
+          "stat": "Movement Speed",
+          "value": 15
         }
       ],
       "passive": {
-        "name": "Pierce",
-        "description": "Execute enemies below threshold HP."
+        "name": "Lethality",
+        "description": "After dealing damage to an enemy hero, executes the hero if their HP is lower than 4%. Gains 10 stack(s) of Lethality for each kill and loses 30% current stack(s) for each death. Each stack of Lethality increases the HP threshold of the execute effect by 0.1%, stacking up 80 times."
       },
       "active": null,
-      "description": "Execute for assassins.",
-      "lore": "",
-      "buildPath": [],
+      "description": "Execute for assassins and finishers. The Lethality stacks snowball — the more kills you get, the higher the execute threshold. High risk, high reward: deaths lose stacks.",
+      "lore": "Pierce the sky, finish the hunt.",
+      "buildPath": [
+        "Blade of Despair Fragment",
+        "Boots"
+      ],
       "buildsInto": [],
       "image": "items/1016.webp",
-      "counters": [],
-      "counteredBy": [],
-      "synergiesHeroes": [
-        21,
-        47,
-        17
+      "counters": [
+        15,
+        25
       ],
-      "worksAgainstHeroes": [],
+      "counteredBy": [
+        3006
+      ],
+      "synergiesHeroes": [
+        3,
+        47,
+        21
+      ],
+      "worksAgainstHeroes": [
+        15,
+        25
+      ],
       "recommendedFor": [
-        "Assassin"
+        "Assassin",
+        "Marksman"
       ],
       "tags": [
-        "attack"
-      ]
+        "attack",
+        "execute"
+      ],
+      "patchVersion": "2.2.23",
+      "status": "active"
     },
     {
       "id": 2001,
@@ -818,41 +1119,61 @@
       "sellPrice": 1350,
       "stats": [
         "+75 Magic Power",
-        "+300 Mana",
+        "+400 Mana",
         "+10% Cooldown Reduction"
       ],
       "statsDetailed": [
         {
           "stat": "Magic Power",
           "value": 75
+        },
+        {
+          "stat": "Mana",
+          "value": 400
+        },
+        {
+          "stat": "Cooldown Reduction",
+          "value": "10%"
         }
       ],
       "passive": {
         "name": "Resonate",
-        "description": "Every 6s, next skill deals bonus magic damage to nearby enemies."
+        "description": "Every 6 seconds, the next skill echoes, dealing 255 (+85% Magic Power) extra Magic Damage to all enemies in range."
       },
       "active": null,
-      "description": "Core burst mage item.",
-      "lore": "",
-      "buildPath": [],
+      "description": "Core burst mage item. Resonate adds AoE burst to every rotation, especially strong in teamfights where enemies clump. Core on Xavier, Lunox, Kagura and most burst mages.",
+      "lore": "Lightning that echoes.",
+      "buildPath": [
+        "Magic Wand",
+        "Mana Necklace"
+      ],
       "buildsInto": [],
       "image": "items/2001.webp",
-      "counters": [],
-      "counteredBy": [
+      "counters": [
+        3004,
         3005
       ],
-      "synergiesHeroes": [
-        25,
-        68,
-        115
+      "counteredBy": [
+        3004
       ],
-      "worksAgainstHeroes": [],
+      "synergiesHeroes": [
+        115,
+        68,
+        25
+      ],
+      "worksAgainstHeroes": [
+        60,
+        65
+      ],
       "recommendedFor": [
         "Mage"
       ],
       "tags": [
-        "magic"
-      ]
+        "magic",
+        "burst"
+      ],
+      "patchVersion": "2.2.23",
+      "status": "active"
     },
     {
       "id": 2002,
@@ -873,72 +1194,110 @@
       ],
       "passive": {
         "name": "Mystery",
-        "description": "Increases Magic Power by 21-35%."
+        "description": "Increases Magic Power by 21%-35% (scales with hero level)."
       },
       "active": null,
-      "description": "Highest Magic Power. Late-game mage core.",
-      "lore": "",
-      "buildPath": [],
+      "description": "Highest Magic Power scaling. Late-game mage core — the percentage Magic Power boost gets stronger as you level and as you stack other Magic Power items. Build it 3rd-4th when you have a Magic Power base to multiply.",
+      "lore": "Crystal of holy mystery.",
+      "buildPath": [
+        "Magic Wand",
+        "Mystery Codex"
+      ],
       "buildsInto": [],
       "image": "items/2002.webp",
-      "counters": [],
-      "counteredBy": [],
+      "counters": [
+        3004
+      ],
+      "counteredBy": [
+        3004,
+        3005
+      ],
       "synergiesHeroes": [
-        68,
         115,
+        68,
+        61,
         25
       ],
-      "worksAgainstHeroes": [],
+      "worksAgainstHeroes": [
+        60,
+        65
+      ],
       "recommendedFor": [
         "Mage"
       ],
       "tags": [
-        "magic"
-      ]
+        "magic",
+        "late-game",
+        "burst"
+      ],
+      "patchVersion": "2.2.23",
+      "status": "active"
     },
     {
       "id": 2003,
       "name": "Genius Wand",
       "slug": "genius-wand",
       "category": "Magic",
-      "tier": "A",
+      "tier": "S",
       "price": 2000,
       "sellPrice": 1200,
       "stats": [
         "+75 Magic Power",
-        "+5% Movement Speed"
+        "+5% Movement Speed",
+        "+10 Magic Penetration"
       ],
       "statsDetailed": [
         {
           "stat": "Magic Power",
           "value": 75
+        },
+        {
+          "stat": "Movement Speed",
+          "value": "5%"
+        },
+        {
+          "stat": "Magic Penetration",
+          "value": 10
         }
       ],
       "passive": {
         "name": "Magic",
-        "description": "Dealing damage reduces enemy Magic Defense."
+        "description": "Dealing Magic Damage to enemy heroes will reduce their Magic Defense by 2.5+(0.5*Hero Level) for 2 seconds. Stacks up to 3 times."
       },
       "active": null,
-      "description": "Magic penetration for mages.",
-      "lore": "",
-      "buildPath": [],
+      "description": "Magic penetration + shred for mages. Stacking Magic Defense reduction makes your whole team’s magic damage hit harder. Core vs teams stacking Athena's Shield / Radiant Armor.",
+      "lore": "Genius sees through defense.",
+      "buildPath": [
+        "Magic Wand",
+        "Boots"
+      ],
       "buildsInto": [],
       "image": "items/2003.webp",
       "counters": [
+        3004,
         3005
       ],
-      "counteredBy": [],
-      "synergiesHeroes": [
-        68,
-        115
+      "counteredBy": [
+        3004
       ],
-      "worksAgainstHeroes": [],
+      "synergiesHeroes": [
+        115,
+        68,
+        61
+      ],
+      "worksAgainstHeroes": [
+        70,
+        41
+      ],
       "recommendedFor": [
         "Mage"
       ],
       "tags": [
-        "magic"
-      ]
+        "magic",
+        "penetration"
+      ],
+      "patchVersion": "2.2.23",
+      "status": "active"
     },
     {
       "id": 2004,
@@ -946,42 +1305,67 @@
       "slug": "glowing-wand",
       "category": "Magic",
       "tier": "A",
-      "price": 2120,
-      "sellPrice": 1272,
+      "price": 2150,
+      "sellPrice": 1290,
       "stats": [
-        "+75 Magic Power",
-        "+400 HP",
+        "+60 Magic Power",
+        "+300 HP",
         "+5% Movement Speed"
       ],
       "statsDetailed": [
         {
           "stat": "Magic Power",
-          "value": 75
+          "value": 60
+        },
+        {
+          "stat": "HP",
+          "value": 300
+        },
+        {
+          "stat": "Movement Speed",
+          "value": "5%"
         }
       ],
       "passive": {
-        "name": "Scorch",
-        "description": "Skills burn enemies over time."
+        "name": "Scorch / Lifebane",
+        "description": "Scorch: Dealing Magic Damage burns the targets for 3 seconds, also dealing extra Magic Damage equal to 1% of the target's Max HP per second. Lifebane: Dealing damage to the target will reduce the Shield and HP Regen effects on them to 60% of normal for 3 seconds."
       },
       "active": null,
-      "description": "Burn for poke mages.",
-      "lore": "",
-      "buildPath": [],
+      "description": "Burn + anti-heal for poke mages. Scorch shreds tanks with Max HP burn, Lifebane cuts healing from Estes, Rafaela and lifesteal heroes. Core on Valir, Lylia, Chang'e and other poke mages.",
+      "lore": "A wand that glows with burning spite.",
+      "buildPath": [
+        "Magic Wand",
+        "Vitality Crystal"
+      ],
       "buildsInto": [],
       "image": "items/2004.webp",
-      "counters": [],
-      "counteredBy": [],
-      "synergiesHeroes": [
-        61,
-        73
+      "counters": [
+        34,
+        14
       ],
-      "worksAgainstHeroes": [],
+      "counteredBy": [
+        3004,
+        3005
+      ],
+      "synergiesHeroes": [
+        57,
+        86,
+        61
+      ],
+      "worksAgainstHeroes": [
+        34,
+        95
+      ],
       "recommendedFor": [
         "Mage"
       ],
       "tags": [
-        "magic"
-      ]
+        "magic",
+        "burn",
+        "anti-heal"
+      ],
+      "patchVersion": "2.2.23",
+      "status": "active"
     },
     {
       "id": 2005,
@@ -989,41 +1373,56 @@
       "slug": "blood-wings",
       "category": "Magic",
       "tier": "A",
-      "price": 3000,
-      "sellPrice": 1800,
+      "price": 2100,
+      "sellPrice": 1260,
       "stats": [
-        "+150 Magic Power",
-        "+500 HP"
+        "+90 Magic Power"
       ],
       "statsDetailed": [
         {
           "stat": "Magic Power",
-          "value": 150
+          "value": 90
         }
       ],
       "passive": {
         "name": "Guard",
-        "description": "Grants shield based on Magic Power."
+        "description": "Gains a 800 (+100% Magic Power) Shield that will regenerate 20 seconds after being damaged. The Shield also grants 30 Movement Speed while it lasts and 150 Movement Speed for 1 second after it breaks."
       },
       "active": null,
-      "description": "Tanky mage late game.",
-      "lore": "",
-      "buildPath": [],
+      "description": "Tanky mage late game. The large shield + Move Speed lets squishy mages survive dives and reposition. Pair with Holy Crystal for the biggest late-game Magic Power + shield combo.",
+      "lore": "Wings of blood, shield of magic.",
+      "buildPath": [
+        "Magic Wand",
+        "Mystery Codex"
+      ],
       "buildsInto": [],
       "image": "items/2005.webp",
-      "counters": [],
-      "counteredBy": [],
-      "synergiesHeroes": [
-        68,
-        115
+      "counters": [
+        3,
+        21
       ],
-      "worksAgainstHeroes": [],
+      "counteredBy": [
+        2003
+      ],
+      "synergiesHeroes": [
+        115,
+        68,
+        91
+      ],
+      "worksAgainstHeroes": [
+        3,
+        21
+      ],
       "recommendedFor": [
         "Mage"
       ],
       "tags": [
-        "magic"
-      ]
+        "magic",
+        "shield",
+        "survivability"
+      ],
+      "patchVersion": "2.2.23",
+      "status": "active"
     },
     {
       "id": 2006,
@@ -1034,197 +1433,273 @@
       "price": 1910,
       "sellPrice": 1146,
       "stats": [
-        "+60 Magic Power",
-        "+25 Magic Defense",
-        "+400 HP"
+        "+45 Adaptive Attack",
+        "+400 HP",
+        "+5% Cooldown Reduction"
       ],
       "statsDetailed": [
         {
-          "stat": "Magic Power",
-          "value": 60
+          "stat": "Adaptive Attack",
+          "value": 45
+        },
+        {
+          "stat": "HP",
+          "value": 400
+        },
+        {
+          "stat": "Cooldown Reduction",
+          "value": "5%"
         }
       ],
       "passive": null,
       "active": {
         "name": "Frozen",
-        "description": "Become immune and untargetable for 2s. Cooldown 80s."
+        "description": "Becomes frozen, untargetable, and immune to damage for 2 seconds (100 seconds cooldown). Cannot move or cast skills while frozen, but skills already cast won't be interrupted."
       },
-      "description": "Mage defensive active — like Wind of Nature for mages.",
-      "lore": "",
-      "buildPath": [],
+      "description": "Mage defensive active — like Wind of Nature for mages. Freeze to dodge Saber/Lancelot/Hayabusa burst, wait for cooldowns, or stall while your ultimate ticks. Use it after casting your combo so damage keeps ticking while you're untargetable.",
+      "lore": "Frozen in winter, safe from harm.",
+      "buildPath": [
+        "Magic Wand",
+        "Vitality Crystal"
+      ],
       "buildsInto": [],
       "image": "items/2006.webp",
-      "counters": [],
+      "counters": [
+        3,
+        47,
+        21
+      ],
       "counteredBy": [],
       "synergiesHeroes": [
-        25,
+        115,
         68,
-        115
+        25,
+        91
       ],
       "worksAgainstHeroes": [
-        21,
+        3,
         47
       ],
       "recommendedFor": [
-        "Mage"
+        "Mage",
+        "Marksman"
       ],
       "tags": [
         "magic",
-        "defensive"
-      ]
+        "defensive",
+        "active"
+      ],
+      "patchVersion": "2.2.23",
+      "status": "active"
     },
     {
       "id": 3001,
       "name": "Blade Armor",
       "slug": "blade-armor",
       "category": "Defense",
-      "tier": "A",
-      "price": 2200,
-      "sellPrice": 1320,
+      "tier": "S",
+      "price": 1910,
+      "sellPrice": 1146,
       "stats": [
-        "+90 Physical Defense",
+        "+80 Physical Defense",
         "+20% Crit Damage Reduction"
       ],
       "statsDetailed": [
         {
           "stat": "Physical Defense",
-          "value": 90
+          "value": 80
+        },
+        {
+          "stat": "Crit Damage Reduction",
+          "value": "20%"
         }
       ],
       "passive": {
-        "name": "Blade",
-        "description": "Reflects Physical Damage back to attacker."
+        "name": "Bladed Armor",
+        "description": "When struck by a Basic Attack, deals Physical Damage equal to 30 (+2% Total Physical Defense)% of the incoming damage (calculated before Damage Reduction) to the attacker and slows them by 15% for 1 second."
       },
       "active": null,
-      "description": "Anti-crit / anti-marksman armor.",
-      "lore": "",
-      "buildPath": [],
+      "description": "Anti-crit / anti-marksman armor. Reflects Basic Attack damage back and slows the attacker. Core vs Bruno, Moskov, Miya, Claude and other Basic Attack marksmen. In 2.2.23 it remains the best answer to crit marksmen.",
+      "lore": "Armor with blades — hurt the attacker.",
+      "buildPath": [
+        "Steel Legplates",
+        "Leather Jerkin"
+      ],
       "buildsInto": [],
       "image": "items/3001.webp",
       "counters": [
-        1002,
-        1001
+        60,
+        65,
+        12
       ],
       "counteredBy": [
-        1004
+        1004,
+        1010
       ],
       "synergiesHeroes": [
         6,
         78,
-        104
+        41
       ],
       "worksAgainstHeroes": [
         60,
-        31,
-        88
+        65,
+        12
       ],
       "recommendedFor": [
-        "Tank"
+        "Tank",
+        "Fighter"
       ],
       "tags": [
-        "defense"
-      ]
+        "defense",
+        "anti-crit",
+        "reflect"
+      ],
+      "patchVersion": "2.2.23",
+      "status": "active"
     },
     {
       "id": 3002,
       "name": "Dominance Ice",
       "slug": "dominance-ice",
       "category": "Defense",
-      "tier": "A",
+      "tier": "S",
       "price": 2010,
       "sellPrice": 1206,
       "stats": [
-        "+70 Physical Defense",
-        "+10% Cooldown Reduction",
-        "+500 Mana"
+        "+40 Physical Defense",
+        "+40 Magic Defense",
+        "+5% Movement Speed"
       ],
       "statsDetailed": [
         {
           "stat": "Physical Defense",
-          "value": 70
+          "value": 40
+        },
+        {
+          "stat": "Magic Defense",
+          "value": 40
+        },
+        {
+          "stat": "Movement Speed",
+          "value": "5%"
         }
       ],
       "passive": {
-        "name": "Arctic Cold",
-        "description": "Reduces nearby enemies' Attack Speed and Lifesteal."
+        "name": "Fortress Shield / Lifebane",
+        "description": "Fortress Shield: For each enemy hero within 5 units, Hybrid Defense is increased by 8, up to 40. Lifebane: Reduces Shield and HP Regen effects of nearby enemies within 5 units to 60% of normal for 1 second."
       },
       "active": null,
-      "description": "Anti-attack-speed aura. Must-have vs marksmen.",
-      "lore": "",
-      "buildPath": [],
+      "description": "Anti-attack-speed + anti-heal aura. Must-have vs marksmen and high-heal comps. The Hybrid Defense aura scales in teamfights when multiple enemies are near you.",
+      "lore": "Ice that dominates the battlefield.",
+      "buildPath": [
+        "Steel Legplates",
+        "Magic Necklace"
+      ],
       "buildsInto": [],
       "image": "items/3002.webp",
       "counters": [
-        1002,
-        1001
-      ],
-      "counteredBy": [],
-      "synergiesHeroes": [
-        6,
-        78,
-        104
-      ],
-      "worksAgainstHeroes": [
         60,
-        88,
-        31
-      ],
-      "recommendedFor": [
-        "Tank"
-      ],
-      "tags": [
-        "defense"
-      ]
-    },
-    {
-      "id": 3003,
-      "name": "Antique Cuirass",
-      "slug": "antique-cuirass",
-      "category": "Defense",
-      "tier": "A",
-      "price": 2170,
-      "sellPrice": 1302,
-      "stats": [
-        "+92 Physical Defense",
-        "+4 HP Regen",
-        "+600 HP"
-      ],
-      "statsDetailed": [
-        {
-          "stat": "Physical Defense",
-          "value": 92
-        }
-      ],
-      "passive": {
-        "name": "Deter",
-        "description": "Reduces attacker's Physical Attack when hit."
-      },
-      "active": null,
-      "description": "Anti-burst physical armor.",
-      "lore": "",
-      "buildPath": [],
-      "buildsInto": [],
-      "image": "items/3003.webp",
-      "counters": [
-        1002
+        65,
+        34
       ],
       "counteredBy": [
         1004
       ],
       "synergiesHeroes": [
         6,
-        78
+        78,
+        41,
+        104
       ],
       "worksAgainstHeroes": [
         60,
-        79
+        65,
+        34
       ],
       "recommendedFor": [
-        "Tank"
+        "Tank",
+        "Fighter",
+        "Support"
       ],
       "tags": [
-        "defense"
-      ]
+        "defense",
+        "aura",
+        "anti-heal"
+      ],
+      "patchVersion": "2.2.23",
+      "status": "active"
+    },
+    {
+      "id": 3003,
+      "name": "Antique Cuirass",
+      "slug": "antique-cuirass",
+      "category": "Defense",
+      "tier": "S",
+      "price": 2170,
+      "sellPrice": 1302,
+      "stats": [
+        "+920 HP",
+        "+40 Physical Defense",
+        "+4 HP Regen"
+      ],
+      "statsDetailed": [
+        {
+          "stat": "HP",
+          "value": 920
+        },
+        {
+          "stat": "Physical Defense",
+          "value": 40
+        },
+        {
+          "stat": "HP Regen",
+          "value": 4
+        }
+      ],
+      "passive": {
+        "name": "Deter",
+        "description": "When hit by a skill, reduces the attacker's Physical Damage by 8% for 2 seconds (this effect stacks up to 3 times). [BUFFED in Patch 2.2.23: 6% -> 8%]"
+      },
+      "active": null,
+      "description": "Anti-burst physical armor. BUFFED in Patch 2.2.23 — Deter now reduces attacker's Physical Damage by 8% per stack (was 6%), up to 24% total. Now the best physical defense vs skill-burst heroes like Saber, Lancelot and Paquito, and it finally competes with Chastise Pauldron.",
+      "lore": "Ancient armor that deters attackers.",
+      "buildPath": [
+        "Vitality Crystal",
+        "Steel Legplates"
+      ],
+      "buildsInto": [],
+      "image": "items/3003.webp",
+      "counters": [
+        3,
+        47,
+        103
+      ],
+      "counteredBy": [
+        1004
+      ],
+      "synergiesHeroes": [
+        6,
+        78,
+        41
+      ],
+      "worksAgainstHeroes": [
+        3,
+        47,
+        103
+      ],
+      "recommendedFor": [
+        "Tank",
+        "Fighter"
+      ],
+      "tags": [
+        "defense",
+        "anti-burst",
+        "patch-2.2.23-buff"
+      ],
+      "patchVersion": "2.2.23",
+      "status": "active",
+      "patchChange": "BUFFED: Deter 6% -> 8% per stack"
     },
     {
       "id": 3004,
@@ -1235,29 +1710,41 @@
       "price": 2150,
       "sellPrice": 1290,
       "stats": [
-        "+62 Magic Defense",
-        "+1000 HP",
+        "+900 HP",
+        "+48 Magic Defense",
         "+2 HP Regen"
       ],
       "statsDetailed": [
         {
+          "stat": "HP",
+          "value": 900
+        },
+        {
           "stat": "Magic Defense",
-          "value": 62
+          "value": 48
+        },
+        {
+          "stat": "HP Regen",
+          "value": 2
         }
       ],
       "passive": {
         "name": "Shield",
-        "description": "Grants magic shield when taking magic damage."
+        "description": "Upon taking Magic Damage from enemy hero skills or Basic Attacks, reduces Magic Damage taken by 25% for 3 seconds (including the damage that triggers the effect). Regains this effect 5 seconds after leaving combat."
       },
       "active": null,
-      "description": "Core magic defense vs burst mages.",
-      "lore": "",
-      "buildPath": [],
+      "description": "Core magic defense vs burst mages. The 25% Magic Damage reduction on first hit blunts Eudora, Xavier, Lunox and Kagura burst. Build it when enemy mage is fed.",
+      "lore": "Shield of Athena, guardian against magic.",
+      "buildPath": [
+        "Vitality Crystal",
+        "Magic Necklace"
+      ],
       "buildsInto": [],
       "image": "items/3004.webp",
       "counters": [
-        2001,
-        2002
+        115,
+        68,
+        15
       ],
       "counteredBy": [
         2003
@@ -1265,19 +1752,25 @@
       "synergiesHeroes": [
         6,
         78,
-        104
+        41
       ],
       "worksAgainstHeroes": [
-        25,
+        115,
         68,
-        115
+        15
       ],
       "recommendedFor": [
-        "Tank"
+        "Tank",
+        "Fighter",
+        "Marksman"
       ],
       "tags": [
-        "defense"
-      ]
+        "defense",
+        "anti-magic",
+        "burst"
+      ],
+      "patchVersion": "2.2.23",
+      "status": "active"
     },
     {
       "id": 3005,
@@ -1288,45 +1781,66 @@
       "price": 1880,
       "sellPrice": 1128,
       "stats": [
-        "+52 Magic Defense",
         "+950 HP",
+        "+40 Magic Defense",
         "+12 HP Regen"
       ],
       "statsDetailed": [
         {
+          "stat": "HP",
+          "value": 950
+        },
+        {
           "stat": "Magic Defense",
-          "value": 52
+          "value": 40
+        },
+        {
+          "stat": "HP Regen",
+          "value": 12
         }
       ],
       "passive": {
         "name": "Holy Blessing",
-        "description": "Taking magic damage increases Magic Defense stacks."
+        "description": "Taking Magic Damage grants 5 (+1*Hero Level) Magic Defense for 5 seconds, up to 6 stacks (can only gain 1 stack(s) every 0.4 seconds)."
       },
       "active": null,
-      "description": "Anti-poke magic armor vs sustained magic damage.",
-      "lore": "",
-      "buildPath": [],
+      "description": "Anti-poke magic armor vs sustained magic damage. Stacks Magic Defense the longer you take magic damage — best vs Chang'e, Lylia, Valir, Yve and other poke mages. Use Radiant for poke, Athena's for burst.",
+      "lore": "Radiant light against magic.",
+      "buildPath": [
+        "Vitality Crystal",
+        "Magic Necklace"
+      ],
       "buildsInto": [],
       "image": "items/3005.webp",
       "counters": [
-        2001,
-        2004
+        61,
+        86,
+        57
       ],
-      "counteredBy": [],
+      "counteredBy": [
+        2003
+      ],
       "synergiesHeroes": [
         6,
-        78
+        78,
+        41
       ],
       "worksAgainstHeroes": [
         61,
-        73
+        86,
+        57
       ],
       "recommendedFor": [
-        "Tank"
+        "Tank",
+        "Fighter"
       ],
       "tags": [
-        "defense"
-      ]
+        "defense",
+        "anti-magic",
+        "poke"
+      ],
+      "patchVersion": "2.2.23",
+      "status": "active"
     },
     {
       "id": 3006,
@@ -1337,48 +1851,68 @@
       "price": 2120,
       "sellPrice": 1272,
       "stats": [
-        "+800 HP",
-        "+40 Physical Defense"
+        "+850 HP",
+        "+15 Physical Defense"
       ],
       "statsDetailed": [
         {
           "stat": "HP",
-          "value": 800
+          "value": 850
+        },
+        {
+          "stat": "Physical Defense",
+          "value": 15
         }
       ],
       "passive": {
         "name": "Immortal",
-        "description": "Revive after death with 16% HP and shield. Cooldown 210s."
+        "description": "Resurrect 2.5 seconds upon death and gets 16% Max HP and a shield that can absorb 150 (+70*Hero Level) damage. Shield lasts 3 seconds. This effect has a 210 seconds cooldown."
       },
       "active": null,
-      "description": "Second life. Core for Roam / initiators.",
-      "lore": "",
-      "buildPath": [],
+      "description": "Second life. Core for Roam / initiators and late-game carries. Revive to turn a lost teamfight, bait enemies into overcommitting, or survive to finish an objective.",
+      "lore": "Death is not the end.",
+      "buildPath": [
+        "Vitality Crystal",
+        "Steel Legplates"
+      ],
       "buildsInto": [],
       "image": "items/3006.webp",
-      "counters": [],
-      "counteredBy": [],
+      "counters": [
+        3,
+        47
+      ],
+      "counteredBy": [
+        1016
+      ],
       "synergiesHeroes": [
         6,
         78,
-        104,
+        41,
         26
       ],
-      "worksAgainstHeroes": [],
+      "worksAgainstHeroes": [
+        3,
+        47
+      ],
       "recommendedFor": [
         "Tank",
-        "Fighter"
+        "Fighter",
+        "Marksman",
+        "Assassin"
       ],
       "tags": [
-        "defense"
-      ]
+        "defense",
+        "revive"
+      ],
+      "patchVersion": "2.2.23",
+      "status": "active"
     },
     {
       "id": 3007,
       "name": "Twilight Armor",
       "slug": "twilight-armor",
       "category": "Defense",
-      "tier": "A",
+      "tier": "C",
       "price": 2100,
       "sellPrice": 1260,
       "stats": [
@@ -1389,38 +1923,37 @@
         {
           "stat": "HP",
           "value": 1200
+        },
+        {
+          "stat": "Physical Defense",
+          "value": 20
         }
       ],
       "passive": {
-        "name": "Twilight",
-        "description": "Caps damage from a single hit."
+        "name": "Twilight (Legacy)",
+        "description": "REMOVED in current patch. Previously: Capped damage from a single hit. This item no longer exists in the shop in Patch 2.2.23."
       },
       "active": null,
-      "description": "Anti-burst vs one-shot mages / assassins.",
-      "lore": "",
+      "description": "LEGACY / REMOVED — Twilight Armor was replaced by Chastise Pauldron (ID 3009) in the current item system. Kept in this file for backwards compatibility with old builds. Do not show in shop. Use Chastise Pauldron instead.",
+      "lore": "Twilight fades — replaced by Chastise.",
       "buildPath": [],
-      "buildsInto": [],
+      "buildsInto": [
+        3009
+      ],
       "image": "items/3007.webp",
-      "counters": [
-        1001,
-        2002
-      ],
+      "counters": [],
       "counteredBy": [],
-      "synergiesHeroes": [
-        6,
-        78
-      ],
-      "worksAgainstHeroes": [
-        68,
-        115,
-        21
-      ],
-      "recommendedFor": [
-        "Tank"
-      ],
+      "synergiesHeroes": [],
+      "worksAgainstHeroes": [],
+      "recommendedFor": [],
       "tags": [
-        "defense"
-      ]
+        "defense",
+        "removed",
+        "legacy"
+      ],
+      "patchVersion": "2.2.23",
+      "status": "removed",
+      "replacedBy": 3009
     },
     {
       "id": 3008,
@@ -1428,41 +1961,130 @@
       "slug": "guardian-helmet",
       "category": "Defense",
       "tier": "A",
-      "price": 2200,
-      "sellPrice": 1320,
+      "price": 2500,
+      "sellPrice": 1500,
       "stats": [
-        "+1550 HP",
+        "+1800 HP",
         "+20 HP Regen"
       ],
       "statsDetailed": [
         {
           "stat": "HP",
-          "value": 1550
+          "value": 1800
+        },
+        {
+          "stat": "HP Regen",
+          "value": 20
         }
       ],
       "passive": {
-        "name": "Recovery",
-        "description": "Regenerates HP rapidly out of combat."
+        "name": "Recovery / Defender",
+        "description": "Recovery: After 5 seconds out of combat, recover (2.5% Total HP) HP per second. Defender: Upon taking more than 500 damage in a single instance, recover 30 (+0.3% Total HP)% HP from the excess damage beyond that amount."
       },
       "active": null,
-      "description": "Sustain tank helmet.",
-      "lore": "",
-      "buildPath": [],
+      "description": "Sustain tank helmet. The highest HP item + out-of-combat regen lets tanks stay on the map without recalling. Best on high-HP tanks like Hylos, Belerick, Gloo and Baxia.",
+      "lore": "A helmet that guards and heals.",
+      "buildPath": [
+        "Vitality Crystal",
+        "Vitality Crystal"
+      ],
       "buildsInto": [],
       "image": "items/3008.webp",
-      "counters": [],
-      "counteredBy": [],
+      "counters": [
+        15,
+        25
+      ],
+      "counteredBy": [
+        1002,
+        1004
+      ],
       "synergiesHeroes": [
-        6,
+        49,
+        70,
         104
       ],
-      "worksAgainstHeroes": [],
+      "worksAgainstHeroes": [
+        15,
+        25
+      ],
       "recommendedFor": [
         "Tank"
       ],
       "tags": [
-        "defense"
-      ]
+        "defense",
+        "hp",
+        "sustain"
+      ],
+      "patchVersion": "2.2.23",
+      "status": "active"
+    },
+    {
+      "id": 3009,
+      "name": "Chastise Pauldron",
+      "slug": "chastise-pauldron",
+      "category": "Defense",
+      "tier": "A",
+      "price": 2100,
+      "sellPrice": 1260,
+      "stats": [
+        "+900 HP",
+        "+40 Physical Defense"
+      ],
+      "statsDetailed": [
+        {
+          "stat": "HP",
+          "value": 900
+        },
+        {
+          "stat": "Physical Defense",
+          "value": 40
+        }
+      ],
+      "passive": {
+        "name": "Chastise / Redemption",
+        "description": "Chastise: Taking damage will reduce the Attack Speed and Attack Speed cap of the attacker to 80% of normal for 2 seconds. [NERFED in Patch 2.2.23: 75% -> 80%]. Redemption: When incoming damage reduces HP below 30%, recover 20% Max HP over the next 2 seconds. This effect has a 60 seconds cooldown."
+      },
+      "active": null,
+      "description": "Anti-Attack Speed armor. NERFED in Patch 2.2.23 — attackers now keep 80% of their Attack Speed (was 75%), so it's less oppressive vs Attack Speed heroes. Still strong vs Moskov, Miya, Claude and other Attack Speed marksmen, but Antique Cuirass (buffed to 8%) now competes for the slot. Replaces Twilight Armor.",
+      "lore": "Chastise those who strike too fast.",
+      "buildPath": [
+        "Vitality Crystal",
+        "Steel Legplates"
+      ],
+      "buildsInto": [],
+      "image": "items/3009.webp",
+      "counters": [
+        60,
+        65,
+        1
+      ],
+      "counteredBy": [
+        1004,
+        3003
+      ],
+      "synergiesHeroes": [
+        6,
+        78,
+        41,
+        104
+      ],
+      "worksAgainstHeroes": [
+        60,
+        65,
+        1
+      ],
+      "recommendedFor": [
+        "Tank",
+        "Fighter"
+      ],
+      "tags": [
+        "defense",
+        "anti-attack-speed",
+        "patch-2.2.23-nerf"
+      ],
+      "patchVersion": "2.2.23",
+      "status": "active",
+      "patchChange": "NERFED: Chastise 75% -> 80% (attackers keep more Attack Speed)"
     },
     {
       "id": 4001,
@@ -1473,24 +2095,35 @@
       "price": 2010,
       "sellPrice": 1206,
       "stats": [
-        "+30 Magic Power",
+        "+30 Adaptive Attack",
         "+600 HP",
         "+15% Cooldown Reduction"
       ],
       "statsDetailed": [
         {
-          "stat": "Magic Power",
+          "stat": "Adaptive Attack",
           "value": 30
+        },
+        {
+          "stat": "HP",
+          "value": 600
+        },
+        {
+          "stat": "Cooldown Reduction",
+          "value": "15%"
         }
       ],
       "passive": {
         "name": "Timestream",
-        "description": "Assists reduce Ultimate cooldown."
+        "description": "After killing or assisting in killing an enemy hero, reduces the cooldown of your hero's Ultimate by 30%."
       },
       "active": null,
-      "description": "Ultimate spam for supports / Roam.",
-      "lore": "",
-      "buildPath": [],
+      "description": "Ultimate spam for supports, Roam and ultimate-dependent heroes. Every kill/assist refunds 30% of your Ultimate cooldown, so you can use game-changing ultimates much more often. Core on Estes, Angela, Mathilda, Tigreal and other Roam initiators.",
+      "lore": "Time flows faster for the swift.",
+      "buildPath": [
+        "Magic Wand",
+        "Vitality Crystal"
+      ],
       "buildsInto": [],
       "image": "items/4001.webp",
       "counters": [],
@@ -1498,16 +2131,22 @@
       "synergiesHeroes": [
         34,
         55,
-        102
+        102,
+        6
       ],
       "worksAgainstHeroes": [],
       "recommendedFor": [
         "Support",
-        "Roam"
+        "Tank",
+        "Mage"
       ],
       "tags": [
-        "roam"
-      ]
+        "roam",
+        "cdr",
+        "ultimate"
+      ],
+      "patchVersion": "2.2.23",
+      "status": "active"
     },
     {
       "id": 4002,
@@ -1515,38 +2154,56 @@
       "slug": "flask-of-the-oasis",
       "category": "Roam",
       "tier": "A",
-      "price": 1950,
-      "sellPrice": 1170,
+      "price": 1850,
+      "sellPrice": 1110,
       "stats": [
         "+60 Magic Power",
-        "+400 HP",
-        "+12% Cooldown Reduction"
+        "+300 HP",
+        "+10% Cooldown Reduction",
+        "+12% Healing Effect"
       ],
       "statsDetailed": [
         {
           "stat": "Magic Power",
           "value": 60
+        },
+        {
+          "stat": "HP",
+          "value": 300
+        },
+        {
+          "stat": "Cooldown Reduction",
+          "value": "10%"
+        },
+        {
+          "stat": "Healing Effect",
+          "value": "12%"
         }
       ],
       "passive": {
-        "name": "Oasis",
-        "description": "Heals and shields grant extra shield."
+        "name": "Blessing",
+        "description": "When casting a healing or shield skill, if the target's HP is below 35%, or falls below 35% within 3 seconds, they will get a (100*Hero Level) shield that lasts 3 seconds. When this effect triggers, it also reduces the cooldown of the caster's skills by 2 seconds. (This effect can only trigger once every 60 seconds on the same target, and will not trigger on self-only healing and shield skills.)"
       },
-      "active": {
-        "name": "Oasis Blessing",
-        "description": "Grants shield to nearby allies."
-      },
-      "description": "Healer support item.",
-      "lore": "",
-      "buildPath": [],
+      "active": null,
+      "description": "Healer support item. Amplifies healing/shielding and adds an emergency shield when allies drop low. Core on Estes, Floryn, Rafaela, Angela and other healers.",
+      "lore": "An oasis in the desert of battle.",
+      "buildPath": [
+        "Magic Wand",
+        "Vitality Crystal"
+      ],
       "buildsInto": [],
       "image": "items/4002.webp",
-      "counters": [],
+      "counters": [
+        15,
+        25
+      ],
       "counteredBy": [
-        1015
+        1015,
+        2004
       ],
       "synergiesHeroes": [
         34,
+        112,
         14,
         55
       ],
@@ -1555,8 +2212,12 @@
         "Support"
       ],
       "tags": [
-        "roam"
-      ]
+        "roam",
+        "heal",
+        "shield"
+      ],
+      "patchVersion": "2.2.23",
+      "status": "active"
     },
     {
       "id": 4003,
@@ -1567,26 +2228,34 @@
       "price": 1800,
       "sellPrice": 1080,
       "stats": [
-        "+700 HP",
+        "Roam Blessing — Encourage",
+        "+700 HP (via Roam item progression)",
         "+10% Cooldown Reduction"
       ],
       "statsDetailed": [
         {
           "stat": "HP",
           "value": 700
+        },
+        {
+          "stat": "Cooldown Reduction",
+          "value": "10%"
         }
       ],
       "passive": {
-        "name": "Courage",
-        "description": "Grants bonus damage to nearby allies."
+        "name": "Thriving / Devotion",
+        "description": "Roam Blessing item. Heroes with this Blessing gain EXP and Gold by dealing damage to enemy heroes or revealing enemies. Unlocks Encourage active after accumulating 1000 Gold from Thriving and Devotion."
       },
       "active": {
         "name": "Encourage",
-        "description": "Boosts nearby allies' attack."
+        "description": "Grants nearby allied heroes bonus Adaptive Attack and Movement Speed for a short duration. Use before engaging to boost your team's damage."
       },
-      "description": "Roam mask — team buff active.",
-      "lore": "",
-      "buildPath": [],
+      "description": "Roam Blessing — Encourage. Team buff active for Roamers who want to boost their team's damage on engage. Pick Encourage when your team has 2+ damage dealers who benefit from the Attack buff. In-game this is a Roam Blessing, not a standalone shop item — you pick it via the Roam boots path.",
+      "lore": "Courage for the whole team.",
+      "buildPath": [
+        "Roam Boots",
+        "Blessing: Encourage"
+      ],
       "buildsInto": [],
       "image": "items/4003.webp",
       "counters": [],
@@ -1594,15 +2263,22 @@
       "synergiesHeroes": [
         6,
         78,
-        104
+        41,
+        102
       ],
       "worksAgainstHeroes": [],
       "recommendedFor": [
-        "Roam"
+        "Tank",
+        "Support"
       ],
       "tags": [
-        "roam"
-      ]
+        "roam",
+        "blessing",
+        "encourage",
+        "team-buff"
+      ],
+      "patchVersion": "2.2.23",
+      "status": "active"
     },
     {
       "id": 4004,
@@ -1613,40 +2289,56 @@
       "price": 1800,
       "sellPrice": 1080,
       "stats": [
-        "+700 HP",
+        "Roam Blessing — Favor",
+        "+700 HP (via Roam item progression)",
         "+12% Cooldown Reduction"
       ],
       "statsDetailed": [
         {
           "stat": "HP",
           "value": 700
+        },
+        {
+          "stat": "Cooldown Reduction",
+          "value": "12%"
         }
       ],
       "passive": {
         "name": "Favor",
-        "description": "Heals lowest-HP ally periodically."
+        "description": "Every 15 seconds, the next healing or shield skill recovers an extra 400 HP for the allied hero with the lowest HP (including self) within 5 units. Skills that only take effect on self cannot trigger this effect. Heroes with this Blessing can gain 35% EXP and Gold from minions and creeps when allied heroes are nearby or by revealing enemy vision. Unlocks after accumulating 1000 Gold from Thriving and Devotion."
       },
       "active": null,
-      "description": "Passive heal Roam blessing.",
-      "lore": "",
-      "buildPath": [],
+      "description": "Passive heal Roam Blessing. Best for healers and shielders — Estes, Floryn, Rafaela, Angela, Mathilda. The periodic 400 HP heal adds up in lane and teamfights.",
+      "lore": "Favor of the team, healing for all.",
+      "buildPath": [
+        "Roam Boots",
+        "Blessing: Favor"
+      ],
       "buildsInto": [],
       "image": "items/4004.webp",
       "counters": [],
       "counteredBy": [
-        1015
+        1015,
+        2004
       ],
       "synergiesHeroes": [
         34,
+        112,
+        14,
         55
       ],
       "worksAgainstHeroes": [],
       "recommendedFor": [
-        "Roam"
+        "Support"
       ],
       "tags": [
-        "roam"
-      ]
+        "roam",
+        "blessing",
+        "favor",
+        "heal"
+      ],
+      "patchVersion": "2.2.23",
+      "status": "active"
     },
     {
       "id": 5001,
@@ -1664,29 +2356,40 @@
         {
           "stat": "Movement Speed",
           "value": 40
+        },
+        {
+          "stat": "Attack Speed",
+          "value": "15%"
         }
       ],
       "passive": null,
       "active": null,
-      "description": "Attack speed boots for marksmen.",
-      "lore": "",
-      "buildPath": [],
+      "description": "Attack Speed boots for marksmen and Basic Attack fighters. Best when you need Attack Speed early and the enemy has little CC or magic burst.",
+      "lore": "Swift as the wind.",
+      "buildPath": [
+        "Boots"
+      ],
       "buildsInto": [],
       "image": "items/5001.webp",
       "counters": [],
-      "counteredBy": [],
+      "counteredBy": [
+        3001
+      ],
       "synergiesHeroes": [
         60,
-        88,
-        31
+        65,
+        40
       ],
       "worksAgainstHeroes": [],
       "recommendedFor": [
         "Marksman"
       ],
       "tags": [
-        "movement"
-      ]
+        "movement",
+        "attack-speed"
+      ],
+      "patchVersion": "2.2.23",
+      "status": "active"
     },
     {
       "id": 5002,
@@ -1704,38 +2407,59 @@
         {
           "stat": "Movement Speed",
           "value": 40
+        },
+        {
+          "stat": "Physical Defense",
+          "value": 22
         }
       ],
-      "passive": null,
+      "passive": {
+        "name": "Valor",
+        "description": "Taking Physical Damage increases Physical Defense. Stacks up to 5 times."
+      },
       "active": null,
-      "description": "Physical defense boots.",
-      "lore": "",
-      "buildPath": [],
+      "description": "Physical Defense boots. Default vs physical-heavy enemy teams (marksman + assassin + fighter). The stacking Physical Defense makes you tankier the longer you are hit.",
+      "lore": "Boots of a warrior.",
+      "buildPath": [
+        "Boots"
+      ],
       "buildsInto": [],
       "image": "items/5002.webp",
-      "counters": [],
-      "counteredBy": [],
+      "counters": [
+        60,
+        65
+      ],
+      "counteredBy": [
+        2003
+      ],
       "synergiesHeroes": [
         6,
-        78
+        78,
+        41
       ],
-      "worksAgainstHeroes": [],
+      "worksAgainstHeroes": [
+        60,
+        65
+      ],
       "recommendedFor": [
         "Tank",
         "Fighter"
       ],
       "tags": [
-        "movement"
-      ]
+        "movement",
+        "physical-defense"
+      ],
+      "patchVersion": "2.2.23",
+      "status": "active"
     },
     {
       "id": 5003,
       "name": "Tough Boots",
       "slug": "tough-boots",
       "category": "Movement",
-      "tier": "A",
-      "price": 700,
-      "sellPrice": 420,
+      "tier": "S",
+      "price": 720,
+      "sellPrice": 432,
       "stats": [
         "+40 Movement Speed",
         "+22 Magic Defense"
@@ -1744,34 +2468,54 @@
         {
           "stat": "Movement Speed",
           "value": 40
+        },
+        {
+          "stat": "Magic Defense",
+          "value": 22
         }
       ],
       "passive": {
         "name": "Fortitude",
-        "description": "Reduces CC duration."
+        "description": "Reduces the duration of Crowd Control effects by 30%."
       },
       "active": null,
-      "description": "Anti-CC boots vs mages.",
-      "lore": "",
-      "buildPath": [],
+      "description": "Anti-CC boots vs mages and CC-heavy teams. The 30% CC reduction is huge vs Eudora, Aurora, Tigreal, Atlas and other CC chains. Default pick when enemy has 2+ CC heroes.",
+      "lore": "Tough against magic and control.",
+      "buildPath": [
+        "Boots"
+      ],
       "buildsInto": [],
       "image": "items/5003.webp",
-      "counters": [],
-      "counteredBy": [],
+      "counters": [
+        15,
+        25,
+        6
+      ],
+      "counteredBy": [
+        1004
+      ],
       "synergiesHeroes": [
         6,
-        78
+        78,
+        41,
+        26
       ],
       "worksAgainstHeroes": [
-        25,
-        68
+        15,
+        25
       ],
       "recommendedFor": [
-        "Tank"
+        "Tank",
+        "Fighter",
+        "Mage"
       ],
       "tags": [
-        "movement"
-      ]
+        "movement",
+        "magic-defense",
+        "anti-cc"
+      ],
+      "patchVersion": "2.2.23",
+      "status": "active"
     },
     {
       "id": 5004,
@@ -1789,20 +2533,27 @@
         {
           "stat": "Movement Speed",
           "value": 40
+        },
+        {
+          "stat": "Cooldown Reduction",
+          "value": "10%"
         }
       ],
       "passive": null,
       "active": null,
-      "description": "CDR boots for mages / supports.",
-      "lore": "",
-      "buildPath": [],
+      "description": "CDR boots for mages and supports. Best when you need your skills up more often and the enemy has low burst. Core on most mages and CDR supports.",
+      "lore": "Shoes that quicken magic.",
+      "buildPath": [
+        "Boots"
+      ],
       "buildsInto": [],
       "image": "items/5004.webp",
       "counters": [],
       "counteredBy": [],
       "synergiesHeroes": [
-        25,
+        115,
         68,
+        25,
         34
       ],
       "worksAgainstHeroes": [],
@@ -1811,8 +2562,11 @@
         "Support"
       ],
       "tags": [
-        "movement"
-      ]
+        "movement",
+        "cdr"
+      ],
+      "patchVersion": "2.2.23",
+      "status": "active"
     },
     {
       "id": 5005,
@@ -1820,25 +2574,37 @@
       "slug": "rapid-boots",
       "category": "Movement",
       "tier": "A",
-      "price": 750,
-      "sellPrice": 450,
+      "price": 720,
+      "sellPrice": 432,
       "stats": [
-        "+65 Movement Speed"
+        "+65 Movement Speed",
+        "+35% Slow Reduction",
+        "+12 HP Regen"
       ],
       "statsDetailed": [
         {
           "stat": "Movement Speed",
           "value": 65
+        },
+        {
+          "stat": "Slow Reduction",
+          "value": "35%"
+        },
+        {
+          "stat": "HP Regen",
+          "value": 12
         }
       ],
       "passive": {
-        "name": "Rapid",
-        "description": "Extra movement speed out of combat."
+        "name": "Side Effect",
+        "description": "Loses 20 Movement Speed for 5 seconds upon dealing or taking damage."
       },
       "active": null,
-      "description": "Roam speed boots for fast rotations.",
-      "lore": "",
-      "buildPath": [],
+      "description": "Roam speed boots for fast rotations. The +65 Movement Speed is the highest in the game, perfect for Roamers who need to gank and rotate. Loses speed in combat, so it's for map movement, not fighting.",
+      "lore": "Run fast, roam faster.",
+      "buildPath": [
+        "Boots"
+      ],
       "buildsInto": [],
       "image": "items/5005.webp",
       "counters": [],
@@ -1846,57 +2612,95 @@
       "synergiesHeroes": [
         6,
         78,
-        102
+        102,
+        10
       ],
       "worksAgainstHeroes": [],
       "recommendedFor": [
-        "Roam"
+        "Tank",
+        "Support"
       ],
       "tags": [
-        "movement"
-      ]
+        "movement",
+        "roam",
+        "rotation"
+      ],
+      "patchVersion": "2.2.23",
+      "status": "active"
     },
     {
       "id": 6001,
       "name": "Starlium Scythe",
       "slug": "starlium-scythe",
-      "category": "Jungle",
+      "category": "Magic",
       "tier": "A",
-      "price": 1950,
-      "sellPrice": 1170,
+      "price": 2120,
+      "sellPrice": 1272,
       "stats": [
-        "+70 Magic Power",
-        "+15% Cooldown Reduction"
+        "+75 Magic Power",
+        "+10% Cooldown Reduction",
+        "+8% Hybrid Lifesteal",
+        "+6 Mana Regen"
       ],
       "statsDetailed": [
         {
           "stat": "Magic Power",
-          "value": 70
+          "value": 75
+        },
+        {
+          "stat": "Cooldown Reduction",
+          "value": "10%"
+        },
+        {
+          "stat": "Hybrid Lifesteal",
+          "value": "8%"
+        },
+        {
+          "stat": "Mana Regen",
+          "value": 6
         }
       ],
       "passive": {
-        "name": "Starlium",
-        "description": "Skills grant stacking Magic Power."
+        "name": "Crisis",
+        "description": "After casting a skill, the next Basic Attack within 3 seconds deals 90 (+60% Total Magic Power) extra True Damage and reduces the target's Movement Speed by 15% for 1.5 seconds (1.5 seconds cooldown)."
       },
       "active": null,
-      "description": "Mage jungle item.",
-      "lore": "",
-      "buildPath": [],
+      "description": "Enhanced Basic Attacks for mage junglers and skill-weaving mages. The True Damage proc + slow rewards skill -> Basic Attack weaving. Core on Harith, Lunox, Julian, Guinevere and mage Junglers. In 2.2.23 it is a Magic item (not a Jungle-only item) — usable in Mid and Jungle.",
+      "lore": "A scythe that harvests stars.",
+      "buildPath": [
+        "Magic Wand",
+        "Magic Necklace"
+      ],
       "buildsInto": [],
       "image": "items/6001.webp",
-      "counters": [],
-      "counteredBy": [],
-      "synergiesHeroes": [
-        25,
-        68
+      "counters": [
+        3004
       ],
-      "worksAgainstHeroes": [],
+      "counteredBy": [
+        3004,
+        3005
+      ],
+      "synergiesHeroes": [
+        73,
+        68,
+        116,
+        80
+      ],
+      "worksAgainstHeroes": [
+        60,
+        65
+      ],
       "recommendedFor": [
-        "Jungle"
+        "Mage",
+        "Fighter"
       ],
       "tags": [
+        "magic",
+        "true-damage",
         "jungle"
-      ]
+      ],
+      "patchVersion": "2.2.23",
+      "status": "active"
     }
   ]
 }
