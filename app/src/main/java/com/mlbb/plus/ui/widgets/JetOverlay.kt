@@ -7,8 +7,10 @@ import android.os.Build
 import android.provider.Settings
 import android.view.Gravity
 import android.view.MotionEvent
+import android.view.View
 import android.view.ViewConfiguration
 import android.view.WindowManager
+import android.widget.FrameLayout
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.ui.platform.ComposeView
@@ -26,20 +28,19 @@ import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 
 // ============================================================
 // widgets/JetOverlay.kt — generic overlay engine (WindowManager + ComposeView)
-// Split out of OverlayWidgets.kt so the engine and the widget UI live in the
-// two files docs/overview.md already describes.
 //
-// Everything from the previous engine is kept (real LifecycleOwner, overlay-
-// permission check, idempotent hide(), failure teardown). Added for the
-// low-distraction widget:
-//  [1] Window is WRAP_CONTENT, TOP | CENTER_HORIZONTAL (the widget centres
-//      itself on screen and sets its own width), NOT_TOUCH_MODAL so touches
-//      outside the widget reach the game. (Was TOP | END, pinned, no drag.)
-//  [2] Drag-to-move with the system touch slop (ViewConfiguration), no fling.
-//      A tap stays a tap; only a real drag moves the window.
-//  [3] Dropped position is saved and restored (clamped to the screen).
-//  [4] touchTick / wake(): every touch bumps a Compose state so the widget can
-//      un-fade from its idle fade; the widget also calls wake() for alerts.
+//  [1] Window is WRAP_CONTENT, TOP | CENTER_HORIZONTAL (the widget centres itself and
+//      sets its own width), NOT_TOUCH_MODAL so touches outside it reach the game.
+//  [2] DRAG (fixed for good): the ComposeView sits inside a small FrameLayout that
+//      INTERCEPTS the gesture once the finger passes the system touch slop. The old
+//      approach (OnTouchListener on the ComposeView itself) never fires when Compose
+//      claims the touch — and Compose claims every touch over any clickable or
+//      pointerInput modifier, i.e. almost the whole widget. Intercepting from a parent
+//      works over buttons and spell cells too; a plain tap still reaches them, and a
+//      drag cancels the press so nothing fires by accident. No fling.
+//  [3] The dropped position is saved and restored (clamped to the screen).
+//  [4] touchTick / wake(): every touch bumps a Compose state so the widget can wake
+//      from its idle fade; the widget also calls wake() for alerts.
 // ============================================================
 
 // --- Service LifecycleOwner for ComposeView in a Service ---
@@ -85,7 +86,7 @@ object JetOverlay {
 
     private var app: Application? = null
     private var scopeContent: @Composable () -> Unit = {}
-    private var composeView: ComposeView? = null
+    private var overlayRoot: View? = null
     private var windowManager: WindowManager? = null
     private var lifecycleOwner: OverlayLifecycleOwner? = null
     private var isShowing = false
@@ -119,14 +120,9 @@ object JetOverlay {
         lifecycleOwner = owner
         owner.onCreate()
 
-        val view = ComposeView(context).apply {
-            setViewTreeLifecycleOwner(owner)
-            setViewTreeSavedStateRegistryOwner(owner)
-            setViewTreeViewModelStoreOwner(owner)
+        val composeView = ComposeView(context).apply {
             setContent { scopeContent() }
         }
-        owner.onStart()
-        owner.onResume()
 
         val type = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
             WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
@@ -152,58 +148,88 @@ object JetOverlay {
                 .coerceIn(0, dm.heightPixels / 2)
         }
 
-        // Drag with tap threshold, no fling. DOWN records the start; a MOVE past the
-        // system touch slop becomes a drag (window follows the finger, event consumed);
-        // a tap is NOT consumed so the Compose buttons still receive it.
+        // ── Drag: a parent FrameLayout that takes over the gesture past the touch slop ──
+        val touchSlop = ViewConfiguration.get(context).scaledTouchSlop.toFloat()
         var initialX = 0
         var initialY = 0
-        var initialTouchX = 0f
-        var initialTouchY = 0f
+        var downRawX = 0f
+        var downRawY = 0f
         var isDragging = false
-        val touchSlop = ViewConfiguration.get(context).scaledTouchSlop.toFloat()
-        view.setOnTouchListener { _, event ->
-            when (event.action) {
-                MotionEvent.ACTION_DOWN -> {
-                    touchTick.longValue += 1
-                    initialX = params.x
-                    initialY = params.y
-                    initialTouchX = event.rawX
-                    initialTouchY = event.rawY
-                    isDragging = false
-                    false
+
+        val root = object : FrameLayout(context) {
+            private fun beginTouch(ev: MotionEvent) {
+                touchTick.longValue += 1
+                initialX = params.x
+                initialY = params.y
+                downRawX = ev.rawX
+                downRawY = ev.rawY
+                isDragging = false
+            }
+
+            private fun passedSlop(ev: MotionEvent): Boolean =
+                kotlin.math.abs(ev.rawX - downRawX) > touchSlop ||
+                    kotlin.math.abs(ev.rawY - downRawY) > touchSlop
+
+            private fun endTouch() {
+                touchTick.longValue += 1
+                if (isDragging) {
+                    prefs.edit().putInt(KEY_X, params.x).putInt(KEY_Y, params.y).apply()
                 }
-                MotionEvent.ACTION_MOVE -> {
-                    val dx = event.rawX - initialTouchX
-                    val dy = event.rawY - initialTouchY
-                    if (!isDragging && (kotlin.math.abs(dx) > touchSlop || kotlin.math.abs(dy) > touchSlop)) {
-                        isDragging = true
-                    }
-                    if (isDragging) {
-                        touchTick.longValue += 1
-                        params.x = initialX + dx.toInt()
-                        params.y = initialY + dy.toInt()
-                        runCatching { wm.updateViewLayout(view, params) }
-                        true
-                    } else {
-                        false
-                    }
+                isDragging = false
+            }
+
+            private fun moveWindow(ev: MotionEvent) {
+                params.x = initialX + (ev.rawX - downRawX).toInt()
+                params.y = initialY + (ev.rawY - downRawY).toInt()
+                runCatching { wm.updateViewLayout(this, params) }
+            }
+
+            // Called for every event while a child (Compose) is handling the gesture.
+            override fun onInterceptTouchEvent(ev: MotionEvent): Boolean {
+                when (ev.actionMasked) {
+                    MotionEvent.ACTION_DOWN -> beginTouch(ev)
+                    MotionEvent.ACTION_MOVE -> if (!isDragging && passedSlop(ev)) isDragging = true
+                    MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> if (!isDragging) endTouch()
                 }
-                MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
-                    touchTick.longValue += 1
-                    val wasDragging = isDragging
-                    isDragging = false
-                    if (wasDragging) {
-                        prefs.edit().putInt(KEY_X, params.x).putInt(KEY_Y, params.y).apply()
+                // true = steal the gesture: the child gets ACTION_CANCEL (press is dropped,
+                // nothing fires) and the rest of the drag arrives in onTouchEvent.
+                return isDragging
+            }
+
+            // Receives the gesture after we intercepted it, or when nothing underneath
+            // (empty padding / background) wanted it.
+            override fun onTouchEvent(event: MotionEvent): Boolean {
+                when (event.actionMasked) {
+                    MotionEvent.ACTION_DOWN -> beginTouch(event)
+                    MotionEvent.ACTION_MOVE -> {
+                        if (!isDragging && passedSlop(event)) isDragging = true
+                        if (isDragging) moveWindow(event)
                     }
-                    wasDragging
+                    MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> endTouch()
                 }
-                else -> false
+                return true
             }
         }
+        root.addView(
+            composeView,
+            FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.WRAP_CONTENT,
+                FrameLayout.LayoutParams.WRAP_CONTENT
+            )
+        )
+
+        // Compose finds its owners from the ROOT view of the window, so set them on both.
+        listOf<View>(root, composeView).forEach { v ->
+            v.setViewTreeLifecycleOwner(owner)
+            v.setViewTreeSavedStateRegistryOwner(owner)
+            v.setViewTreeViewModelStoreOwner(owner)
+        }
+        owner.onStart()
+        owner.onResume()
 
         try {
-            wm.addView(view, params)
-            composeView = view
+            wm.addView(root, params)
+            overlayRoot = root
             isShowing = true
         } catch (e: Exception) {
             // Tear down owner on failure, don't leak it.
@@ -211,18 +237,18 @@ object JetOverlay {
             runCatching { owner.onStop() }
             runCatching { owner.onDestroy() }
             lifecycleOwner = null
-            composeView = null
+            overlayRoot = null
             windowManager = null
         }
     }
 
     fun hide() {
         // Idempotent - safe to call twice (onDestroy + Hide button).
-        if (!isShowing && composeView == null) return
+        if (!isShowing && overlayRoot == null) return
         try {
-            composeView?.let { windowManager?.removeView(it) }
+            overlayRoot?.let { windowManager?.removeView(it) }
         } catch (e: Exception) { }
-        composeView = null
+        overlayRoot = null
         windowManager = null
         isShowing = false
         lifecycleOwner?.let { owner ->

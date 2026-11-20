@@ -2,9 +2,16 @@ package com.mlbb.plus.ui.widgets
 
 // widgets/OverlayWidgets.kt — the compact in-game roam widget (timer + objective +
 // enemy spell tracker). The overlay engine lives in JetOverlay.kt.
-// Role handling: Roam gets the full roam plan/description from roam_guide.json;
-// other roles (Jungle/Mid/Gold/EXP) get the role-agnostic parts only (timer,
-// objective, spell tracker) until their own guides exist (see docs/overview.md).
+// DYNAMIC ROLES: the header selector opens Role -> Type menus. The role loads
+// assets/<role>_guide.json (roam_guide.json, jungle_guide.json, mid_guide.json,
+// gold_guide.json, exp_guide.json); the type is one entry of that file's "roles"
+// array. A role whose file is missing/invalid still gets the timer, objective
+// and spell tracker. Schema + how to add a role: docs/overview.md.
+// V10 — idle fade is now gentle (IDLE_ALPHA 0.6, was 0.15 = unreadable mid-game), the
+//   short guide text is visible by default, and the 'first tap only wakes' guard is OFF
+//   (FIRST_TAP_ONLY_WAKES) so spell taps always register. Also removed the root
+//   pointerInput from the widget while that guard is off: it made Compose claim EVERY touch
+//   inside the widget, which is what silently killed dragging (see JetOverlay.kt).
 // V9 — LOW-DISTRACTION PASS for in-game use:
 //   idle fade (whole widget -> IDLE_ALPHA after IDLE_FADE_MS, first tap only wakes it),
 //   fixed width/font (no layout jumps), description hidden by default and only
@@ -79,6 +86,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import org.json.JSONArray
 import org.json.JSONObject
+import com.mlbb.plus.ui.model.RoleTypes
 import com.mlbb.plus.ui.theme.MLBBPlusColors
 
 private val GuideBackground = MLBBPlusColors.GithubBg.copy(alpha = 0.25f)
@@ -99,16 +107,16 @@ private val GuideRed = MLBBPlusColors.Red
 private const val WIDGET_WIDTH_FRACTION_LANDSCAPE = 0.52f
 private const val WIDGET_WIDTH_FRACTION_PORTRAIT = 0.92f
 private const val WIDGET_MIN_WIDTH_DP = 300f
-private const val ROAM_GUIDE_ASSET = "roam_guide.json"
 
 // V9 low-distraction knobs — tweak these first.
 private const val IDLE_FADE_MS = 4_000L       // no touch for this long -> fade
 private const val EXPANDED_IDLE_MS = 10_000L  // longer grace when you expanded to read
-private const val IDLE_ALPHA = 0.15f          // whole-widget alpha while faded
+private const val IDLE_ALPHA = 0.6f           // whole-widget alpha while idle (spells + guide stay readable)
+private const val FIRST_TAP_ONLY_WAKES = false // true = while idle, the first tap only wakes the widget (use with a low IDLE_ALPHA)
 private const val PEEK_MS = 5_000L            // how long the hidden description shows on a change
 private const val URGENT_SECONDS = 10         // objective turns gold/red + wakes at <= this
 
-private data class RoamStep(
+private data class GuideStep(
     val startSeconds: Int,
     val endSeconds: Int,
     val description: String,
@@ -121,30 +129,30 @@ private data class RoamStep(
     val dont: String
 )
 
-private data class RoamBlessing(
+private data class GuideBlessing(
     val id: String,
     val name: String,
     val effect: String
 )
 
-private data class RoamPlan(
+private data class GuidePlan(
     val id: String,
     val label: String,
     val blessing: String,
     val blessingId: String,
     val heroes: List<String>,
     val emblem: String,
-    val steps: List<RoamStep>,
+    val steps: List<GuideStep>,
     val turtleContest: String,
     val turtleTrade: String,
     val lordContest: String,
     val lordTrade: String
 )
 
-private data class RoamGuideData(
+private data class GuideData(
     val patch: String = "",
-    val blessings: List<RoamBlessing> = emptyList(),
-    val plans: List<RoamPlan> = emptyList()
+    val blessings: List<GuideBlessing> = emptyList(),
+    val plans: List<GuidePlan> = emptyList()
 )
 
 private enum class ObjectiveType { TURTLE, LORD }
@@ -174,10 +182,10 @@ private fun JSONObject.stringList(key: String): List<String> {
     }
 }
 
-private fun parseStep(json: JSONObject): RoamStep {
+private fun parseStep(json: JSONObject): GuideStep {
     val description = json.optString("instruction").takeIf(String::isNotBlank)
         ?: json.optString("description")
-    return RoamStep(
+    return GuideStep(
         startSeconds = json.optInt("startSeconds").coerceAtLeast(0),
         endSeconds = json.optInt("endSeconds").coerceAtLeast(0),
         description = description,
@@ -191,14 +199,14 @@ private fun parseStep(json: JSONObject): RoamStep {
     )
 }
 
-private fun parsePlan(json: JSONObject): RoamPlan {
+private fun parsePlan(json: JSONObject): GuidePlan {
     val stepArray = json.optJSONArray("steps") ?: JSONArray()
     val steps = buildList {
         for (index in 0 until stepArray.length()) {
             val step = stepArray.optJSONObject(index) ?: continue
             add(parseStep(step))
         }
-    }.sortedBy(RoamStep::startSeconds)
+    }.sortedBy(GuideStep::startSeconds)
     val templates = json.optJSONObject("objective_templates")
     val heroesArray = json.optJSONArray("heroes")
     val heroes = if (heroesArray != null) {
@@ -213,7 +221,7 @@ private fun parsePlan(json: JSONObject): RoamPlan {
         json.optString("heroes").split(',').map(String::trim).filter(String::isNotEmpty)
     }
 
-    return RoamPlan(
+    return GuidePlan(
         id = json.optString("id"),
         label = json.optString("label").ifBlank { json.optString("id") },
         blessing = json.optString("blessing"),
@@ -228,15 +236,24 @@ private fun parsePlan(json: JSONObject): RoamPlan {
     )
 }
 
-private fun loadRoamGuide(context: Context): RoamGuideData = runCatching {
-    val source = context.assets.open(ROAM_GUIDE_ASSET).bufferedReader().use { it.readText() }
+// Role -> asset file: Roam -> roam_guide.json, Jungle -> jungle_guide.json, EXP -> exp_guide.json ...
+private fun guideAssetFor(role: String): String = "${role.lowercase()}_guide.json"
+
+// Starting type for a role. The launcher's Roam type "Support" starts on the "support"
+// type when that file has one; everything else starts on the first type.
+private fun defaultPlanId(guide: GuideData, roleType: String): String =
+    guide.plans.firstOrNull { roleType == "Support" && it.id == "support" }?.id
+        ?: guide.plans.firstOrNull()?.id.orEmpty()
+
+private fun loadGuide(context: Context, role: String): GuideData = runCatching {
+    val source = context.assets.open(guideAssetFor(role)).bufferedReader().use { it.readText() }
     val root = JSONObject(source)
     val blessingArray = root.optJSONArray("blessings") ?: JSONArray()
     val blessings = buildList {
         for (index in 0 until blessingArray.length()) {
             val blessing = blessingArray.optJSONObject(index) ?: continue
             add(
-                RoamBlessing(
+                GuideBlessing(
                     id = blessing.optString("id"),
                     name = blessing.optString("name"),
                     effect = blessing.optString("effect")
@@ -244,19 +261,22 @@ private fun loadRoamGuide(context: Context): RoamGuideData = runCatching {
             )
         }
     }
-    val roles = root.optJSONArray("roles") ?: JSONArray()
+    val roles = root.optJSONArray("roles") ?: root.optJSONArray("plans") ?: root.optJSONArray("types") ?: JSONArray()
     val plans = buildList {
         for (index in 0 until roles.length()) {
             val role = roles.optJSONObject(index) ?: continue
             parsePlan(role).takeIf { it.steps.isNotEmpty() }?.let(::add)
         }
     }
-    RoamGuideData(
+    GuideData(
         patch = root.optJSONObject("meta")?.optString("patch").orEmpty(),
         blessings = blessings,
         plans = plans
     )
-}.getOrDefault(RoamGuideData())
+}.getOrElse { e ->
+    android.util.Log.w("RoamGuideWidget", "Could not load ${guideAssetFor(role)}: ${e.message}")
+    GuideData()
+}
 
 private fun formatGameTime(seconds: Int): String {
     val safeSeconds = seconds.coerceAtLeast(0)
@@ -333,27 +353,40 @@ private fun computeObjective(
 @Composable
 fun RoamGuideWidget(role: String = "Roam", roleType: String = "Tank", onBack: () -> Unit) {
     val context = LocalContext.current
-    // Only Roam has a plan/description guide today; other roles get timer + objective + spells.
-    val isRoam = role == "Roam"
     // V8 FIX: Width from displayMetrics (true screen), NOT LocalConfiguration.
     // In a WRAP_CONTENT overlay window, LocalConfiguration returns the WINDOW size,
     // so widgetWidth fed back on itself and shrank to ~35% (your screenshot).
     // displayMetrics is the real screen, so 52% is really 52%.
-    val guide = remember(context) { loadRoamGuide(context) }
+    // Dynamic roles: each role's JSON is parsed once and cached for the overlay's lifetime.
+    val guideCache = remember { HashMap<String, GuideData>() }
+    val guideFor: (String) -> GuideData = { r -> guideCache.getOrPut(r) { loadGuide(context, r) } }
+    // Which <role>_guide.json files actually exist (menu marks the missing ones).
+    val assetNames = remember(context) { runCatching { context.assets.list("")?.toSet() }.getOrNull().orEmpty() }
+    // The launcher's role/type is only the START state; the in-widget selector changes it afterwards.
+    val startRole = if (role in RoleTypes.roles) role else "Roam"
+    var activeRole by remember { mutableStateOf(startRole) }
+    var selectedPlanId by rememberSaveable { mutableStateOf(defaultPlanId(guideFor(startRole), roleType)) }
+    LaunchedEffect(role, roleType) {
+        // Re-launching from the app with another role/type re-targets the widget.
+        activeRole = startRole
+        selectedPlanId = defaultPlanId(guideFor(startRole), roleType)
+    }
+    val guide = guideFor(activeRole)
     val plans = guide.plans
-    // The launcher's Roam type picks the starting plan (Support -> Support); the dropdown still changes it.
-    val defaultPlanId = plans.firstOrNull { roleType == "Support" && it.id == "support" }?.id
-        ?: plans.firstOrNull()?.id.orEmpty()
-    var selectedPlanId by rememberSaveable { mutableStateOf(defaultPlanId) }
     var elapsedSeconds by rememberSaveable { mutableIntStateOf(0) }
     var isRunning by rememberSaveable { mutableStateOf(false) }
-    var planMenuExpanded by remember { mutableStateOf(false) }
+    // Selector menu: 0 = closed, 1 = role list, 2 = type list for pendingRole.
+    var menuStage by remember { mutableIntStateOf(0) }
+    var pendingRole by remember { mutableStateOf(startRole) }
+    // True once the user picked something in the selector, so the description peeks
+    // even before the game timer has started.
+    var selectionTouched by remember { mutableStateOf(false) }
     // V11: 3-state cycle, replaces detailsExpanded (bool).
     // 0 = default: short description (2 lines)
     // 1 = expand: full description (6 lines) + details
     // 2 = full collapsed: even short description hidden, only header left
     // Loop: 0 -> 1 -> 2 -> 0. Key avoids restoring old Boolean (would crash).
-    var displayMode by rememberSaveable(key = "displayModeV13") { mutableIntStateOf(2) } // V9: default = header only
+    var displayMode by rememberSaveable(key = "displayModeV14") { mutableIntStateOf(0) } // V10: default = short guide text visible
     var helpExpanded by rememberSaveable { mutableStateOf(false) }
     // V8 FIX (4): Hide instructions DELETED. It hid the description with no way
     // back (button lived inside expanded section, so once hidden you couldn't
@@ -370,13 +403,17 @@ fun RoamGuideWidget(role: String = "Roam", roleType: String = "Tank", onBack: ()
     var awake by remember { mutableStateOf(true) }
     val awakeNow by rememberUpdatedState(awake)
     val displayModeNow by rememberUpdatedState(displayMode)
+    val menuOpenNow by rememberUpdatedState(menuStage != 0 || helpExpanded)
     LaunchedEffect(Unit) {
         snapshotFlow { JetOverlay.touchTick.longValue }.collectLatest {
             awake = true
             delay(if (displayModeNow == 1) EXPANDED_IDLE_MS else IDLE_FADE_MS)
-            awake = false
+            if (!menuOpenNow) awake = false
         }
     }
+    // Menus are separate windows (touches in them never reach the overlay), so wake on
+    // open and again on close to restart the idle timer.
+    LaunchedEffect(menuStage, helpExpanded) { JetOverlay.wake() }
     val fadeAlpha by animateFloatAsState(
         targetValue = if (awake) 1f else IDLE_ALPHA,
         animationSpec = tween(durationMillis = if (awake) 150 else 900),
@@ -385,6 +422,8 @@ fun RoamGuideWidget(role: String = "Roam", roleType: String = "Tank", onBack: ()
     var peek by remember { mutableStateOf(false) }
 
     val selectedPlan = plans.firstOrNull { it.id == selectedPlanId } ?: plans.firstOrNull()
+    val planShort = selectedPlan?.label?.substringBefore(" - ")?.trim().orEmpty()
+    val selectorLabel = (if (planShort.isNotBlank()) "$activeRole · $planShort" else activeRole) + " ▾"
     LaunchedEffect(isRunning) {
         while (isRunning) {
             delay(1_000L)
@@ -395,6 +434,7 @@ fun RoamGuideWidget(role: String = "Roam", roleType: String = "Tank", onBack: ()
     val currentStep = selectedPlan?.steps?.firstOrNull {
         elapsedSeconds >= it.startSeconds && elapsedSeconds < it.endSeconds
     } ?: selectedPlan?.steps?.lastOrNull()
+    val hasGuide = selectedPlan != null && currentStep != null
     val objective = computeObjective(elapsedSeconds, turtleSlain, lordSlain, lastSlainAt, lastSlainWasLord)
     val isTurtle = objective.type == ObjectiveType.TURTLE
     val objectiveText = if (objective.isAlive) {
@@ -414,15 +454,15 @@ fun RoamGuideWidget(role: String = "Roam", roleType: String = "Tank", onBack: ()
         if (urgent) JetOverlay.wake()
     }
     // Hidden description only 'peeks' when something actually changes.
-    LaunchedEffect(currentStep?.startSeconds, objective.type, objective.count, objective.isAlive, lastSlainAt, selectedPlanId) {
-        if (elapsedSeconds > 0 || lastSlainAt != null) {
+    LaunchedEffect(currentStep?.startSeconds, objective.type, objective.count, objective.isAlive, lastSlainAt, activeRole, selectedPlanId) {
+        if (elapsedSeconds > 0 || lastSlainAt != null || selectionTouched) {
             peek = true
             JetOverlay.wake()
             delay(PEEK_MS)
             peek = false
         }
     }
-    val objectiveDescription = if (!isRoam) "" else when {
+    val objectiveDescription = if (!hasGuide) "No guide data for $activeRole (${guideAssetFor(activeRole)} missing or invalid). Timer, objective and spells still work." else when {
         objective.isAlive && isTurtle -> selectedPlan?.turtleContest.orEmpty()
         objective.isAlive -> selectedPlan?.lordContest.orEmpty()
         // FIX V7: slain label = LAST slain, not NEXT. At 7:26 you killed Turtle,
@@ -468,7 +508,7 @@ fun RoamGuideWidget(role: String = "Roam", roleType: String = "Tank", onBack: ()
             .graphicsLayer { alpha = fadeAlpha }
             // V9: while faded, the first tap only WAKES the widget — the whole
             // gesture is swallowed so a teamfight tap can't hit a button.
-            .pointerInput(Unit) {
+            .then(if (FIRST_TAP_ONLY_WAKES) Modifier.pointerInput(Unit) {
                 awaitPointerEventScope {
                     var swallowing = false
                     while (true) {
@@ -482,16 +522,11 @@ fun RoamGuideWidget(role: String = "Roam", roleType: String = "Tank", onBack: ()
                         }
                     }
                 }
-            },
+            } else Modifier),
         // No outer horizontal padding: the card itself is widgetWidth,
         // so its visible edges line up exactly with the green line.
         verticalArrangement = Arrangement.spacedBy(onePx)
     ) {
-        if (selectedPlan == null || currentStep == null) {
-            GuideMessage("Roam guide unavailable — check roam_guide.json")
-            return@Column
-        }
-
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -534,36 +569,73 @@ fun RoamGuideWidget(role: String = "Roam", roleType: String = "Tank", onBack: ()
                         maxLines = 1
                     )
                 }
-                // V8 FIX (5): Plan box shows "Crowd Control ▾" so it's clear it's a dropdown.
+                // Selector: tap -> role list -> tap a role -> type list -> tap a type.
+                // The widget re-targets to <role>_guide.json + that type immediately.
                 Box(modifier = Modifier.weight(1f)) {
                     GuideControl(
-                        if (isRoam) selectedPlan.label.substringBefore(" - ").trim() + " ▾" else "$roleType $role",
-                        if (isRoam) GuideAccent else GuideMuted,
+                        selectorLabel,
+                        if (hasGuide) GuideAccent else GuideMuted,
                         Modifier.fillMaxWidth(),
                         maxLines = 1,
                         fontSize = 10.sp,
-                        contentDescription = if (isRoam) "Change roam plan: ${selectedPlan.label}" else "$roleType $role",
-                        onClick = { if (isRoam) planMenuExpanded = true }
+                        contentDescription = "Change role and type: $activeRole $planShort",
+                        onClick = { menuStage = 1 }
                     )
                     DropdownMenu(
-                        expanded = planMenuExpanded,
-                        onDismissRequest = { planMenuExpanded = false }
+                        expanded = menuStage != 0,
+                        onDismissRequest = { menuStage = 0 }
                     ) {
-                        plans.forEach { plan ->
+                        if (menuStage == 1) {
+                            RoleTypes.roles.forEach { r ->
+                                val hasFile = guideAssetFor(r) in assetNames
+                                DropdownMenuItem(
+                                    text = {
+                                        OutlinedText(
+                                            (if (r == activeRole) "✓ " else "") + r + (if (hasFile) "" else " · no guide"),
+                                            color = if (hasFile) GuideText else GuideMuted,
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis
+                                        )
+                                    },
+                                    onClick = {
+                                        if (guideFor(r).plans.isEmpty()) {
+                                            // Nothing to pick a type from: switch role right away
+                                            // (timer / objective / spells still work).
+                                            selectionTouched = true
+                                            activeRole = r
+                                            selectedPlanId = ""
+                                            menuStage = 0
+                                        } else {
+                                            pendingRole = r
+                                            menuStage = 2
+                                        }
+                                    }
+                                )
+                            }
+                        } else if (menuStage == 2) {
                             DropdownMenuItem(
-                                text = {
-                                    OutlinedText(
-                                        plan.label,
-                                        color = GuideText,
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis
-                                    )
-                                },
-                                onClick = {
-                                    selectedPlanId = plan.id
-                                    planMenuExpanded = false
-                                }
+                                text = { OutlinedText("‹ $pendingRole · pick type", color = GuideMuted, fontSize = 9.sp, maxLines = 1) },
+                                onClick = { menuStage = 1 }
                             )
+                            guideFor(pendingRole).plans.forEach { plan ->
+                                val isCurrent = pendingRole == activeRole && plan.id == selectedPlan?.id
+                                DropdownMenuItem(
+                                    text = {
+                                        OutlinedText(
+                                            (if (isCurrent) "✓ " else "") + plan.label,
+                                            color = GuideText,
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis
+                                        )
+                                    },
+                                    onClick = {
+                                        selectionTouched = true
+                                        activeRole = pendingRole
+                                        selectedPlanId = plan.id
+                                        menuStage = 0
+                                    }
+                                )
+                            }
                         }
                     }
                 }
@@ -633,7 +705,7 @@ fun RoamGuideWidget(role: String = "Roam", roleType: String = "Tank", onBack: ()
                             onClick = { helpExpanded = false }
                         )
                         DropdownMenuItem(
-                            text = { OutlinedText("Plan: Tap plan name to switch plan", color = GuideText, fontSize = 8.sp) },
+                            text = { OutlinedText("Role/Type: Tap selector, pick role, then type", color = GuideText, fontSize = 8.sp) },
                             onClick = { helpExpanded = false }
                         )
                         DropdownMenuItem(
@@ -672,7 +744,7 @@ fun RoamGuideWidget(role: String = "Roam", roleType: String = "Tank", onBack: ()
                     )
                 }
                 if (displayMode == 1) {
-                    if (isRoam) {
+                    if (selectedPlan != null && currentStep != null) {
                     OutlinedText(
                         "${currentStep.timeLabel.ifBlank { "${formatGameTime(currentStep.startSeconds)}–${formatGameTime(currentStep.endSeconds)}" }}${guide.patch.takeIf(String::isNotBlank)?.let { " · $it" }.orEmpty()}",
                         color = GuideMuted,
@@ -684,7 +756,7 @@ fun RoamGuideWidget(role: String = "Roam", roleType: String = "Tank", onBack: ()
                     if (currentStep.vision.isNotBlank()) GuideDetail("Vision", currentStep.vision)
                     if (currentStep.decision.isNotBlank()) GuideDetail("Decision", currentStep.decision)
                     if (currentStep.dont.isNotBlank()) GuideDetail("Avoid", currentStep.dont)
-                    if (blessing != null && blessing.effect.isNotBlank()) {
+                    if (blessing != null && blessing.effect.isNotBlank() && selectedPlan.blessing.isNotBlank()) {
                         GuideDetail(selectedPlan.blessing, blessing.effect)
                     }
                     if (elapsedSeconds == 0 && selectedPlan.heroes.isNotEmpty()) {

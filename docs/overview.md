@@ -180,15 +180,27 @@ MLBB-Plus/
 
 ---
 
-## Adding a New Role (Future)
+## Adding a New Role Guide
 
-To add Jungle Guide later, you do not need a new app:
+The widget is data-driven — no new Kotlin per role.
 
-1. Add `JungleGuideWidget` in `ui/widgets/` (own file, not inside `OverlayWidgets.kt`).
-2. Add a card + button for it in `MainActivity.kt`.
-3. Add `jungle_guide.json` in `assets/` if it needs data.
-4. Pass the picked role to `WidgetOverlayService` via Intent extra, or save it in preferences.
-5. Reuse `JetOverlay` and `WidgetOverlayService` — no new service needed.
+1. Add `<role>_guide.json` to `app/src/main/assets/`: `roam_guide.json`, `jungle_guide.json`, `mid_guide.json`, `gold_guide.json`, `exp_guide.json` (lowercase role name + `_guide.json`).
+2. Use the same shape as `roam_guide.json` (below).
+3. In the overlay, tap the selector in the widget header → pick the **role** → pick the **type**. The widget loads that file and adapts instantly.
+
+A role with no file still works (timer, objective, spell tracker); the role menu marks it `no guide`.
+
+### JSON shape the widget reads
+
+- `meta.patch` — shown in the expanded view (optional).
+- `blessings[]` — `{ id, name, effect }` (optional; shown when a type's `blessing_id` matches).
+- `roles[]` — one entry per **type** in the type menu (`plans` or `types` also accepted as the key):
+  - `id`, `label` (`"Initiator - Start Fight"` → menu shows the full label, header shows the part before ` - `)
+  - `blessing`, `blessing_id`, `heroes` (strings or `{ "name": ... }`), `emblem` (optional)
+  - `objective_templates` — `turtle_contest`, `turtle_trade`, `lord_contest`, `lord_trade` (optional)
+  - `steps[]` (required, at least one) — `startSeconds`, `endSeconds`, `instruction` (or `description`), and optional `timeLabel`, `phase`, `callout`, `checklist[]`, `vision`, `decision`, `dont`
+
+Types with no `steps` are skipped. A file that is missing or invalid is treated as "no guide" (see logcat tag `RoamGuideWidget`).
 
 That is why the app is called **MLBB Plus**, not just Roam Guide.
 
