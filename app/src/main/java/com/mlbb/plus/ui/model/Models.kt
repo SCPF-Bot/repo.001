@@ -59,18 +59,24 @@ import org.json.JSONObject
 const val FALLBACK_PATCH_VERSION = "2.2.23"
 const val FALLBACK_ADVANCED_PATCH_VERSION = "2.2.32"
 
-// Single source of truth for Role -> RoleType. Used by
-// MainActivity (auto-correct) and HomeScreen (dropdown).
+// Single source of truth for Role -> Type. The ROLES are fixed; the TYPES are whatever
+// the role's <role>_guide.json declares in its "roles" array (ids like "initiator",
+// "crit", "tank_exp"). Before this was a hardcoded list ("Tank"/"Support" for Roam,
+// "Marksman"/"Mage" for Gold, ...) that did not match the guide ids, so the launcher
+// could only ever start the widget on the first type of most roles.
+// The launcher stores / passes the type ID; use labelFor() to show it.
 object RoleTypes {
     val roles = listOf("Roam", "Jungle", "Mid", "Gold", "EXP")
-    val byRole = mapOf(
-        "Roam" to listOf("Tank", "Support"),
-        "Jungle" to listOf("Assassin", "Fighter", "Tank"),
-        "Mid" to listOf("Burst", "Poke", "Control"),
-        "Gold" to listOf("Marksman", "Mage"),
-        "EXP" to listOf("Fighter", "Tank", "Assassin")
-    )
-    fun typesFor(role: String): List<String> = byRole[role] ?: listOf("Tank")
+
+    /** Type ids for a role, in guide-file order. Empty when the role has no guide file. */
+    fun typesFor(role: String): List<String> =
+        GameData.guides[role]?.types?.map { it.id }.orEmpty()
+
+    /** Short display label ("Initiator") for a type id; falls back to the id itself. */
+    fun labelFor(role: String, typeId: String): String =
+        GameData.guides[role]?.type(typeId)?.shortLabel ?: typeId
+
+    fun defaultTypeFor(role: String): String = typesFor(role).firstOrNull().orEmpty()
 }
 
 // ---------- HERO ----------
@@ -135,6 +141,13 @@ data class Hero(
     val status: String = "live"
 ) {
     val isLive: Boolean get() = status != "advanced-server-only"
+    // heroes.json fills win/pick/ban with 0.50 / 0.03 / 0.03 / 0.0 for heroes that have no
+    // tracked data yet. Showing those as real stats is misleading, so the screens use this.
+    val hasLiveStats: Boolean get() =
+        kotlin.math.abs(winRate - 0.50f) > 0.0005f || kotlin.math.abs(pickRate - 0.03f) > 0.0005f ||
+            kotlin.math.abs(banRate - 0.03f) > 0.0005f || kotlin.math.abs(patchTrend) > 0.0005f
+    // True when the hero has the rich profile (skills / build / counters), not just a name + lane.
+    val hasFullProfile: Boolean get() = skills.isNotEmpty() && coreItems.isNotEmpty()
     // FIX [3]: secondaryRole blank is now null, so no trailing " / ".
     val displayRole: String get() = if (secondaryRole != null) "$role / $secondaryRole" else role
 }
@@ -210,8 +223,16 @@ data class PatchData(
     val battlefieldChanges: List<String> = emptyList(),
     val systemChanges: List<String> = emptyList(),
     val metaNotes: String = "",
-    val warning: String = ""
-)
+    val warning: String = "",
+    // patch_notes.json (flat 2.2.23 layout) also carries these:
+    val source: String = "",
+    val roamGuideLink: String = "",
+    val previousPatch: String = ""
+) {
+    /** True when this block has anything worth a tab (a version, a summary or changes). */
+    val hasContent: Boolean get() = version.isNotBlank() || summary.isNotBlank() || heroChanges.isNotEmpty() ||
+        itemChanges.isNotEmpty() || highlights.isNotEmpty()
+}
 
 data class PatchNotesFile(
     val version: String = "",
@@ -417,7 +438,8 @@ object JsonLoader {
             },
             battlefieldChanges = if (o.has("battlefieldChanges")) o.getJSONArray("battlefieldChanges").toStringList() else emptyList(),
             systemChanges = if (o.has("systemChanges")) o.getJSONArray("systemChanges").toStringList() else emptyList(),
-            metaNotes = o.optStr("metaNotes"), warning = o.optStr("warning")
+            metaNotes = o.optStr("metaNotes"), warning = o.optStr("warning"),
+            source = o.optStr("source"), roamGuideLink = o.optStr("roamGuideLink"), previousPatch = o.optStr("previousPatch")
         )
     }
 
@@ -426,13 +448,16 @@ object JsonLoader {
             val text = context.assets.open("patch_notes.json").bufferedReader().use { it.readText() }
             val root = JSONObject(text)
             val orig = if (root.has("originalServer")) parsePatchData(root.getJSONObject("originalServer"))
-                else PatchData(version = root.optStr("version"), date = root.optStr("date"), server = root.optStr("server"), title = root.optStr("title"), summary = root.optStr("summary"))
+                // Flat layout (the shipped patch_notes.json): the root IS the Original Server block.
+                // The old fallback copied only title/summary and silently dropped every hero change,
+                // item change, highlight, battlefield/system change and the meta notes.
+                else parsePatchData(root)
             val adv = if (root.has("advancedServer")) parsePatchData(root.getJSONObject("advancedServer")) else PatchData()
             val nov01 = if (root.has("nov01")) root.getJSONObject("nov01") else JSONObject()
             val nov01Orig = if (nov01.has("originalServer")) nov01.getJSONObject("originalServer") else JSONObject()
             val nov01Adv = if (nov01.has("advancedServer")) parsePatchData(nov01.getJSONObject("advancedServer")) else PatchData()
             PatchNotesFile(
-                version = root.optStr("version"), updated = root.optStr("updated"),
+                version = root.optStr("version"), updated = root.optStr("updated").ifBlank { root.optStr("date") },
                 originalServer = orig, advancedServer = adv,
                 nov01OriginalEvent = if (nov01Orig.has("details")) nov01Orig.getJSONArray("details").toStringList() else emptyList(),
                 nov01Advanced = nov01Adv, nov01LivePatch = nov01Orig.optStr("livePatchOnNov01")
@@ -450,6 +475,8 @@ object GameData {
         private set
     @Volatile var patchNotes: PatchNotesFile = PatchNotesFile()
         private set
+    @Volatile var guides: Map<String, GuideFile> = emptyMap()
+        private set
     @Volatile var isLoaded: Boolean = false
         private set
 
@@ -458,6 +485,35 @@ object GameData {
     @Volatile private var cachedItemsById: Map<Int, Item> = emptyMap()
     val heroesById: Map<Int, Hero> get() = cachedHeroesById
     val itemsById: Map<Int, Item> get() = cachedItemsById
+
+    // Indexes over the guide files, built once in load().
+    @Volatile private var heroGuideIndex: Map<Int, List<HeroGuideRef>> = emptyMap()
+    @Volatile private var itemGuideIndex: Map<String, List<ItemGuideRef>> = emptyMap()
+    @Volatile private var heroesByCoreItem: Map<Int, List<Hero>> = emptyMap()
+
+    /** Every guide type that lists this hero as a pick (heroes.json id). */
+    fun guideRefsForHero(heroId: Int): List<HeroGuideRef> = heroGuideIndex[heroId].orEmpty()
+
+    /** Every guide type that lists this item (by name, case-insensitive) as a core item. */
+    fun guideRefsForItem(itemName: String): List<ItemGuideRef> = itemGuideIndex[itemName.trim().lowercase()].orEmpty()
+
+    /** Heroes that have this item id in their core build. */
+    fun heroesUsingItem(itemId: Int): List<Hero> = heroesByCoreItem[itemId].orEmpty()
+
+    /** This patch's change entry for a hero / item (patch_notes.json), or null. */
+    fun patchChangeForHero(heroId: Int): PatchHeroChange? =
+        patchNotes.originalServer.heroChanges.firstOrNull { it.heroId == heroId }
+    fun patchChangeForItem(itemId: Int): PatchItemChange? =
+        patchNotes.originalServer.itemChanges.firstOrNull { it.itemId == itemId }
+
+    /** Guide picks whose name is not in heroes.json / core items not in items.json (data health). */
+    val unlinkedGuidePicks: List<String> get() = guides.values
+        .flatMap { g -> g.types.flatMap { t -> t.heroes.filter { it.heroId == null }.map { it.name } } }.distinct().sorted()
+    val unlinkedGuideItems: List<String> get() {
+        val known = items.map { it.name.trim().lowercase() }.toSet()
+        return guides.values.flatMap { g -> g.types.flatMap { it.coreItems } }
+            .filter { it.trim().lowercase() !in known }.distinct().sorted()
+    }
 
     val liveHeroes: List<Hero> get() = heroes.filter { it.isLive }
     val advancedHeroes: List<Hero> get() = heroes.filter { !it.isLive }
@@ -486,6 +542,26 @@ object GameData {
         patchNotes = p
         cachedHeroesById = heroes.associateBy { hero -> hero.id }
         cachedItemsById = items.associateBy { item -> item.id }
+        guides = GuideLoader.loadAll(appContext, heroes)
+
+        val heroRefs = HashMap<Int, MutableList<HeroGuideRef>>()
+        val itemRefs = HashMap<String, MutableList<ItemGuideRef>>()
+        for ((role, g) in guides) {
+            for (t in g.types) {
+                for (pick in t.heroes) {
+                    val id = pick.heroId ?: continue
+                    heroRefs.getOrPut(id) { mutableListOf() }.add(HeroGuideRef(role, t.id, t.shortLabel, pick.note))
+                }
+                for (itemName in t.coreItems) {
+                    itemRefs.getOrPut(itemName.trim().lowercase()) { mutableListOf() }.add(ItemGuideRef(role, t.id, t.shortLabel))
+                }
+            }
+        }
+        heroGuideIndex = heroRefs
+        itemGuideIndex = itemRefs
+        val byItem = HashMap<Int, MutableList<Hero>>()
+        for (hero in heroes) for (b in hero.coreItems) byItem.getOrPut(b.itemId) { mutableListOf() }.add(hero)
+        heroesByCoreItem = byItem
         isLoaded = heroes.isNotEmpty() || items.isNotEmpty()
     }
 }

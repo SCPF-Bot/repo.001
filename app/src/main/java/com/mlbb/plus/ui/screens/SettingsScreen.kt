@@ -18,6 +18,8 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.graphics.Color
+import com.mlbb.plus.ui.components.SectionLabel
 import com.mlbb.plus.ui.components.AppIcons
 import com.mlbb.plus.ui.components.ScreenTitleBar
 import com.mlbb.plus.ui.model.GameData
@@ -73,8 +75,7 @@ private fun SettingsContent(overlayGranted: Boolean, onOverlayGrantedChange: (Bo
             onChecked = { wanted -> if (wanted) onOverlayGrantedChange(true) }
         )
         SettingsRow(title = "Auto-start last role", subtitle = "Launch widget automatically on app open", checked = autoStartLastRole, onChecked = onAutoStartChange)
-        // FIX [2]: single fallback via Models.kt.
-        Text("Data: heroes.json ${GameData.liveHeroes.size} live + ${GameData.advancedHeroes.size} Advanced \u2022 items.json ${GameData.items.size} \u2022 patch ${GameData.patchNotes.displayVersion} / Advanced ${GameData.patchNotes.advancedDisplayVersion}", color = MLBBPlusColors.GithubSecondary, fontSize = 11.sp)
+        DataFilesSection()
         Text("MLBB Plus v1.0", color = MLBBPlusColors.GithubSecondary, fontSize = 12.sp)
     }
 }
@@ -90,5 +91,80 @@ private fun SettingsRow(title: String, subtitle: String, checked: Boolean, onChe
     ) {
         Column { Text(title, color = MLBBPlusColors.GithubText, fontWeight = FontWeight.SemiBold, fontSize = 14.sp); Text(subtitle, color = MLBBPlusColors.GithubSecondary, fontSize = 12.sp) }
         Switch(checked = checked, onCheckedChange = onChecked, colors = SwitchDefaults.colors(checkedThumbColor = MLBBPlusColors.Gold, checkedTrackColor = MLBBPlusColors.Gold.copy(alpha = 0.3f)))
+    }
+}
+
+/**
+ * What the app actually loaded from assets/, file by file. A guide that is older than the current
+ * patch, a pick that is missing from heroes.json, a bad JSON file - all visible without logcat.
+ */
+@Composable
+private fun DataFilesSection() {
+    val notes = GameData.patchNotes
+    val livePatch = notes.displayVersion
+    SectionLabel("DATA FILES")
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        val fullProfiles = GameData.heroes.count { it.hasFullProfile }
+        DataRow(
+            "heroes.json",
+            "${GameData.liveHeroes.size} live \u2022 ${GameData.advancedHeroes.size} advanced \u2022 $fullProfiles with full profile (skills + build)",
+            if (GameData.heroes.isEmpty()) "MISSING" else if (fullProfiles < GameData.heroes.size) "PARTIAL" else "OK",
+            if (GameData.heroes.isEmpty()) MLBBPlusColors.Red else if (fullProfiles < GameData.heroes.size) MLBBPlusColors.Orange else MLBBPlusColors.Green
+        )
+        DataRow(
+            "items.json",
+            "${GameData.items.size} items",
+            if (GameData.items.isEmpty()) "MISSING" else "OK",
+            if (GameData.items.isEmpty()) MLBBPlusColors.Red else MLBBPlusColors.Green
+        )
+        val adv = if (notes.advancedServer.hasContent) " \u2022 Advanced ${notes.advancedDisplayVersion}" else " \u2022 no Advanced / Nov 01 data in file"
+        DataRow(
+            "patch_notes.json",
+            "Patch $livePatch \u2022 ${notes.originalServer.heroChanges.size} hero / ${notes.originalServer.itemChanges.size} item changes$adv",
+            if (notes.originalServer.hasContent) "OK" else "MISSING",
+            if (notes.originalServer.hasContent) MLBBPlusColors.Green else MLBBPlusColors.Red
+        )
+        com.mlbb.plus.ui.model.RoleTypes.roles.forEach { role ->
+            val g = GameData.guides[role]
+            if (g == null) {
+                DataRow("${role.lowercase()}_guide.json", "Not found or invalid \u2014 overlay runs without a guide", "MISSING", MLBBPlusColors.Red)
+            } else {
+                val older = g.patch.isNotBlank() && g.patch != livePatch
+                DataRow(
+                    g.assetName,
+                    "${g.types.size} types \u2022 ${g.stepCount} steps \u2022 patch ${g.patch.ifBlank { "?" }}" +
+                        (if (g.updated.isNotBlank()) " \u2022 ${g.updated}" else "") +
+                        (if (older) " \u2022 older than $livePatch" else ""),
+                    if (older) "OLDER" else "OK",
+                    if (older) MLBBPlusColors.Orange else MLBBPlusColors.Green
+                )
+            }
+        }
+        val missingPicks = GameData.unlinkedGuidePicks
+        val missingItems = GameData.unlinkedGuideItems
+        if (missingPicks.isNotEmpty()) {
+            Text("Guide picks not in heroes.json: ${missingPicks.joinToString(", ")}", color = MLBBPlusColors.Orange, fontSize = 12.sp)
+        }
+        if (missingItems.isNotEmpty()) {
+            Text("Guide core items not in items.json: ${missingItems.joinToString(", ")}", color = MLBBPlusColors.Orange, fontSize = 12.sp)
+        }
+    }
+}
+
+@Composable
+private fun DataRow(name: String, detail: String, status: String, color: Color) {
+    Row(
+        Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).background(MLBBPlusColors.GithubCard)
+            .border(1.dp, MLBBPlusColors.GithubBorder, RoundedCornerShape(12.dp)).padding(12.dp),
+        horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+            Text(name, color = MLBBPlusColors.GithubText, fontWeight = FontWeight.SemiBold, fontSize = 13.sp)
+            Text(detail, color = MLBBPlusColors.GithubSecondary, fontSize = 11.sp, lineHeight = 15.sp)
+        }
+        Box(
+            Modifier.clip(RoundedCornerShape(8.dp)).background(color.copy(alpha = 0.16f))
+                .border(1.dp, color.copy(alpha = 0.45f), RoundedCornerShape(8.dp)).padding(horizontal = 8.dp, vertical = 3.dp)
+        ) { Text(status, color = color, fontSize = 10.sp, fontWeight = FontWeight.Bold) }
     }
 }

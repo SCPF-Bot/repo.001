@@ -206,6 +206,20 @@ That is why the app is called **MLBB Plus**, not just Roam Guide.
 
 ---
 
+### What the widget reads (V13)
+
+- `meta.objective_timers` -> Turtle / Lord spawn, respawn, 6:00 cutoff, 8:00 conversion (+5s), evolve time.
+- `battle_spells.spells` + `.defaults` -> enemy spell cooldowns and default spell per lane (Sprint is 75s in 2.2.23). A built-in table is only a fallback.
+- Per step: `instruction`/`description`, `compact` (hidden-mode peek), `phase`, `objective_contest`, `objective_trade`, `checklist`, `vision`, `decision`, `dont`.
+- Per type (shown pre-game, expanded): `win_condition`, `lose_condition`, `emblem`, `battle_spells`, `core_items`, `heroes`, blessing / `retribution_types`.
+- `meta.global_rules` -> one rule per step in expanded mode.
+- The launcher passes the guide **type id** (`initiator`, `crit`, `tank_exp`...). Types are read from the guide files (`RoleTypes` in `Models.kt`), never hardcoded.
+
+### What the screens read
+
+- `model/Guides.kt` parses every `*_guide.json` once (`GameData.guides`): Home shows type playstyle, win/avoid, picks (tap -> hero), loadout, mechanics; Hero Detail shows "In overlay guides"; Item Detail shows "Core in overlay guides" and "Core on heroes"; Settings lists every data file with its patch and health.
+- `patch_notes.json` (flat layout) feeds the Home banner and movers, hero/item badges and detail cards, and the Patch screen.
+
 ## Build
 
 - **Debug:** Run `.github/workflows/debug.yml` in Actions, or `./gradlew :app:assembleDebug`

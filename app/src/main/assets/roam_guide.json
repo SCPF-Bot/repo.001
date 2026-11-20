@@ -383,7 +383,7 @@
           "endSeconds": 600,
           "timeLabel": "8:00-10:00",
           "phase": "First Lord",
-          "description": "Lord appears at 8:00. Get vision around Lord early. Only start Lord if more of your team is alive than theirs.",
+          "description": "Lord spawns 2:00 after the last Turtle (8:00 if none was killed). Get vision around Lord early. Only start Lord if more of your team is alive than theirs.",
           "checklist": [
             "Vision Lord pit by 7:40",
             "Force a pick before Lord if possible",
@@ -394,7 +394,7 @@
           "dont": "Don't start Lord while your marksman is clearing bot alone.",
           "callout": "Get vision at Lord, need more players",
           "compact": "First Lord - Get vision at Lord, need more players",
-          "instruction": "Lord appears at 8:00. Get vision around Lord early. Only start Lord if more of your team is alive than theirs.",
+          "instruction": "Lord spawns 2:00 after the last Turtle (8:00 if none was killed). Get vision around Lord early. Only start Lord if more of your team is alive than theirs.",
           "objective_contest": "Go Lord pit early, zone front. Save Ultimate for Lord fight. Don't start Lord if enemy jungler + Retribution alive.",
           "objective_trade": "Give Lord. Defend base together, clear waves, push opposite lane while Lord pushes."
         },
@@ -667,7 +667,7 @@
           "endSeconds": 600,
           "timeLabel": "8:00-10:00",
           "phase": "First Lord",
-          "description": "Lord at 8:00. Get vision early. Only start Lord if more of your team alive. Start Lord fight after pick, not 50/50.",
+          "description": "Lord spawns 2:00 after the last Turtle (8:00 if none was killed). Get vision early. Only start Lord if more of your team alive. Start Lord fight after pick, not 50/50.",
           "checklist": [
             "Vision Lord pit by 7:40",
             "Force a pick before Lord if possible",
@@ -678,7 +678,7 @@
           "dont": "Don't start Lord while your marksman is clearing bot alone.",
           "callout": "First Lord, vision then start",
           "compact": "First Lord - Get vision at Lord, need more players",
-          "instruction": "Lord appears at 8:00. Get vision around Lord early. Only start Lord if more of your team is alive than theirs.",
+          "instruction": "Lord spawns 2:00 after the last Turtle (8:00 if none was killed). Get vision around Lord early. Only start Lord if more of your team is alive than theirs.",
           "objective_contest": "Go Lord pit early, zone front. Save Ultimate for Lord fight. Don't start Lord if enemy jungler + Retribution alive.",
           "objective_trade": "Give Lord. Defend base together, clear waves, push opposite lane while Lord pushes."
         },
@@ -945,7 +945,7 @@
           "endSeconds": 600,
           "timeLabel": "8:00-10:00",
           "phase": "First Lord",
-          "description": "Lord is at 8:00. Get vision and look for an enemy who checks alone. Don't start Lord while your team is split.",
+          "description": "Lord spawns 2:00 after the last Turtle (8:00 if none was killed). Get vision and look for an enemy who checks alone. Don't start Lord while your team is split.",
           "checklist": [
             "Vision Lord pit",
             "Pick lone checker",
@@ -956,7 +956,7 @@
           "dont": "Don't start Lord split.",
           "callout": "Catch lone checker, group up",
           "compact": "First Lord - Catch lone checker, group up",
-          "instruction": "Lord is at 8:00. Get vision and look for an enemy who checks alone. Don't start Lord while your team is split.",
+          "instruction": "Lord spawns 2:00 after the last Turtle (8:00 if none was killed). Get vision and look for an enemy who checks alone. Don't start Lord while your team is split.",
           "objective_contest": "Burst to remove vision, threaten backline. Keep escape. Dire Hit finishes low HP, not starts fight.",
           "objective_trade": "Give Lord. Wait for enemy split, then jump in. Don't start Lord alone."
         },
@@ -1219,7 +1219,7 @@
           "endSeconds": 600,
           "timeLabel": "8:00-10:00",
           "phase": "First Lord",
-          "description": "Lord is at 8:00. Hide on the side of Lord pit and try to catch an enemy who walks alone. Only start Lord if you have more players.",
+          "description": "Lord spawns 2:00 after the last Turtle (8:00 if none was killed). Hide on the side of Lord pit and try to catch an enemy who walks alone. Only start Lord if you have more players.",
           "checklist": [
             "Side bush at Lord pit",
             "Catch rotator",
@@ -1230,7 +1230,7 @@
           "dont": "Don't start Lord while enemy jungler alive.",
           "callout": "Catch someone alone, then Lord",
           "compact": "First Lord - Catch someone alone, then Lord",
-          "instruction": "Lord is at 8:00. Hide on the side of Lord pit and try to catch an enemy who walks alone. Only start Lord if you have more players.",
+          "instruction": "Lord spawns 2:00 after the last Turtle (8:00 if none was killed). Hide on the side of Lord pit and try to catch an enemy who walks alone. Only start Lord if you have more players.",
           "objective_contest": "Hide near Lord, threaten catch. Catch = free Lord. No catch = protect carry, don't start Lord 50/50.",
           "objective_trade": "Give Lord. Hide for pick on Lord defender, or split push while enemy groups for Lord."
         },
@@ -1502,7 +1502,7 @@
           "endSeconds": 600,
           "timeLabel": "8:00-10:00",
           "phase": "First Lord",
-          "description": "Lord is at 8:00. Get ready with safe routes around Lord. If the setup is bad, run away and reset, don't gamble on a 50/50 Lord.",
+          "description": "Lord spawns 2:00 after the last Turtle (8:00 if none was killed). Get ready with safe routes around Lord. If the setup is bad, run away and reset, don't gamble on a 50/50 Lord.",
           "checklist": [
             "Vision Lord pit",
             "Prepare reset route",
@@ -1513,7 +1513,7 @@
           "dont": "Don't force Lord 50/50.",
           "callout": "Get ready, run if setup bad",
           "compact": "First Lord - Get ready, run if setup bad",
-          "instruction": "Lord is at 8:00. Get ready with safe routes around Lord. If the setup is bad, run away and reset, don't gamble on a 50/50 Lord.",
+          "instruction": "Lord spawns 2:00 after the last Turtle (8:00 if none was killed). Get ready with safe routes around Lord. If the setup is bad, run away and reset, don't gamble on a 50/50 Lord.",
           "objective_contest": "At Lord, shields / speed when fight starts. Keep skill to stop enemy dive. Don't start Lord without team.",
           "objective_trade": "Give Lord. Stay grouped, stop dive on carry, clear waves. Trade opposite tower while Lord pushes."
         },
@@ -1785,7 +1785,7 @@
           "endSeconds": 600,
           "timeLabel": "8:00-10:00",
           "phase": "First Lord",
-          "description": "Group up before Lord at 8:00. Heal between small fights and stay behind your tank. Let the tank check bushes first.",
+          "description": "Group up before Lord spawns 2:00 after the last Turtle (8:00 if none was killed). Heal between small fights and stay behind your tank. Let the tank check bushes first.",
           "checklist": [
             "Group before Lord",
             "Heal between pokes",
@@ -1796,7 +1796,7 @@
           "dont": "Don't enter dark river first.",
           "callout": "Group, heal between fights",
           "compact": "First Lord - Group, heal between fights",
-          "instruction": "Group up before Lord at 8:00. Heal between small fights and stay behind your tank. Let the tank check bushes first.",
+          "instruction": "Group up before Lord spawns 2:00 after the last Turtle (8:00 if none was killed). Heal between small fights and stay behind your tank. Let the tank check bushes first.",
           "objective_contest": "Stay behind frontline, heal team to full before Lord. Save Ultimate for Lord fight, not poke.",
           "objective_trade": "Give Lord. Stay with carry, defend base, heal through Lord push. Don't fight without Ultimate."
         },
@@ -1898,7 +1898,7 @@
     }
   },
   "battle_spells": {
-    "source": "Liquipedia Battle Spells ledger, Season 42 Patch 2.2.16 - 12 spells",
+    "source": "Liquipedia Battle Spells ledger, Season 42 Patch 2.2.23 - 12 spells. Sprint updated 100s -> 75s in 2.2.23.",
     "note": "Defaults for enemy tracker: JG = Retribution, EXP/MID/GOLD/ROAM = Flicker. Tap = enemy used spell, bar fills empty->full over CD. Long-press = switch spell.",
     "spells": [
       {
@@ -1918,7 +1918,7 @@
       },
       {
         "name": "Sprint",
-        "cooldown_seconds": 100,
+        "cooldown_seconds": 75,
         "note": "+50% MS 6s, slow immune"
       },
       {

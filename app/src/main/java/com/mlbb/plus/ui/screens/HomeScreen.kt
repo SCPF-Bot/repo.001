@@ -46,7 +46,11 @@ import com.mlbb.plus.ui.components.AppIcons
 import com.mlbb.plus.ui.components.SectionLabel
 import com.mlbb.plus.ui.components.TierBadge
 import com.mlbb.plus.ui.model.GameData
+import com.mlbb.plus.ui.model.GuideFile
+import com.mlbb.plus.ui.model.GuideType
 import com.mlbb.plus.ui.model.Hero
+import com.mlbb.plus.ui.model.HeroPick
+import com.mlbb.plus.ui.model.PatchHeroChange
 import com.mlbb.plus.ui.model.RoleTypes
 import com.mlbb.plus.ui.theme.MLBBPlusColors
 
@@ -65,14 +69,16 @@ fun HomeScreen(
     onHeroClick: (Int) -> Unit,
 ) {
     val roles = remember { RoleTypes.roles }
-    val roleTypes = remember(selectedRole) { RoleTypes.typesFor(selectedRole) }
+    val typeIds = remember(selectedRole) { RoleTypes.typesFor(selectedRole) }
     val patch = GameData.patchNotes.displayVersion
+    val guide = GameData.guides[selectedRole]
+    val guideType = guide?.type(selectedRoleType) ?: guide?.types?.firstOrNull()
 
     Box(Modifier.fillMaxSize().background(MLBBPlusColors.GithubBg)) {
         Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
             AppHeader(
                 title = "MLBB PLUS",
-                subtitle = "Roam smarter. Win more.",
+                subtitle = "$selectedRole guide \u2022 patch ${guide?.patch?.ifBlank { null } ?: patch} \u2022 in-game overlay",
                 icon = AppIcons.Shield
             )
 
@@ -80,18 +86,42 @@ fun HomeScreen(
                 Modifier.padding(horizontal = 16.dp, vertical = 18.dp),
                 verticalArrangement = Arrangement.spacedBy(22.dp)
             ) {
-                PatchBanner(patch = patch, heroCount = GameData.liveHeroes.size, onClick = onOpenPatchNotes)
+                PatchBanner(onClick = onOpenPatchNotes)
 
-                RoamPanel(
+                RolePanel(
                     selectedRole = selectedRole,
                     selectedRoleType = selectedRoleType,
                     roles = roles,
-                    roleTypes = roleTypes,
+                    typeIds = typeIds,
+                    guide = guide,
+                    guideType = guideType,
                     onRoleChange = onRoleChange,
                     onRoleTypeChange = onRoleTypeChange,
                     overlayGranted = overlayGranted,
-                    overlayRunning = overlayRunning
+                    overlayRunning = overlayRunning,
+                    onHeroClick = onHeroClick
                 )
+
+                if (guide != null && guide.mechanics.isNotEmpty()) {
+                    SectionLabel("${selectedRole.uppercase()} MECHANICS \u2022 PATCH ${guide.patch.ifBlank { patch }}")
+                    MechanicsCard(guide)
+                }
+
+                val movers = remember(GameData.patchNotes) {
+                    GameData.patchNotes.originalServer.heroChanges.filter { GameData.heroesById[it.heroId] != null }
+                }
+                if (movers.isNotEmpty()) {
+                    SectionLabel("PATCH $patch MOVERS")
+                    Row(
+                        Modifier.horizontalScroll(rememberScrollState()),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        movers.forEach { change ->
+                            val hero = GameData.heroesById[change.heroId] ?: return@forEach
+                            MoverCard(hero = hero, change = change, onClick = { onHeroClick(hero.id) })
+                        }
+                    }
+                }
 
                 SectionLabel("QUICK ACTIONS")
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -123,8 +153,17 @@ fun HomeScreen(
 }
 
 @Composable
-private fun PatchBanner(patch: String, heroCount: Int, onClick: () -> Unit) {
+private fun PatchBanner(onClick: () -> Unit) {
+    val notes = GameData.patchNotes
+    val cur = notes.originalServer
     val shape = RoundedCornerShape(18.dp)
+    // Title + counts come from patch_notes.json (e.g. "Patch 2.2.23 \u2014 Popol and Kupa Revamp").
+    val headline = cur.title.ifBlank { "Patch ${notes.displayVersion}" }
+    val counts = buildString {
+        append("${GameData.liveHeroes.size} heroes")
+        if (cur.heroChanges.isNotEmpty()) append(" \u2022 ${cur.heroChanges.size} hero changes")
+        if (cur.date.isNotBlank()) append(" \u2022 ${cur.date}")
+    }
     Row(
         Modifier
             .fillMaxWidth()
@@ -146,32 +185,33 @@ private fun PatchBanner(patch: String, heroCount: Int, onClick: () -> Unit) {
         ) {
             Icon(AppIcons.Fire, contentDescription = null, tint = MLBBPlusColors.Gold, modifier = Modifier.size(28.dp))
         }
-        Column(Modifier.weight(1f)) {
+        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
             Text("CURRENT META", color = MLBBPlusColors.Gold, fontWeight = FontWeight.Bold, fontSize = 17.sp, letterSpacing = 1.sp)
-            Text(
-                "Patch $patch \u2022 $heroCount heroes",
-                color = MLBBPlusColors.GithubSecondary,
-                fontSize = 13.sp,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
+            Text(headline, color = MLBBPlusColors.GithubText, fontSize = 13.sp, fontWeight = FontWeight.SemiBold, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text(counts, color = MLBBPlusColors.GithubSecondary, fontSize = 12.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
         Icon(AppIcons.ChevronRight, contentDescription = null, tint = MLBBPlusColors.Gold)
     }
 }
 
 @Composable
-private fun RoamPanel(
+private fun RolePanel(
     selectedRole: String,
     selectedRoleType: String,
     roles: List<String>,
-    roleTypes: List<String>,
+    typeIds: List<String>,
+    guide: GuideFile?,
+    guideType: GuideType?,
     onRoleChange: (String) -> Unit,
     onRoleTypeChange: (String) -> Unit,
     overlayGranted: Boolean,
     overlayRunning: Boolean,
+    onHeroClick: (Int) -> Unit,
 ) {
     val shape = RoundedCornerShape(18.dp)
+    val livePatch = GameData.patchNotes.displayVersion
+    // Guide files are versioned independently of the patch notes: flag a guide that is older.
+    val guideStale = guide != null && guide.patch.isNotBlank() && guide.patch != livePatch
     Column(
         Modifier
             .fillMaxWidth()
@@ -198,22 +238,51 @@ private fun RoamPanel(
                     color = if (overlayGranted) MLBBPlusColors.Green else MLBBPlusColors.Orange
                 )
             }
-            Text(
-                "Optimized routes, vision control, and engage combos for $selectedRoleType heroes.",
-                color = MLBBPlusColors.GithubSecondary,
-                fontSize = 13.sp,
-                lineHeight = 19.sp
-            )
+
+            if (guide == null) {
+                Text(
+                    "No ${selectedRole.lowercase()}_guide.json found. The overlay still gives you the game timer, Turtle / Lord tracker and enemy spell cooldowns.",
+                    color = MLBBPlusColors.GithubSecondary, fontSize = 13.sp, lineHeight = 19.sp
+                )
+            } else {
+                Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    StatusChip(
+                        text = if (guideStale) "GUIDE ${guide.patch} \u2022 OLDER THAN $livePatch" else "PATCH ${guide.patch.ifBlank { livePatch }}",
+                        color = if (guideStale) MLBBPlusColors.Orange else MLBBPlusColors.Green
+                    )
+                    StatusChip("${guide.types.size} TYPES", MLBBPlusColors.Blue)
+                    StatusChip("${guide.stepCount} STEPS", MLBBPlusColors.Teal)
+                    if (guide.updated.isNotBlank()) StatusChip("UPDATED ${guide.updated}", MLBBPlusColors.GithubSecondary)
+                }
+            }
+
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     Text("ROLE", color = MLBBPlusColors.GithubSecondary, fontSize = 11.sp, letterSpacing = 1.sp)
-                    DropdownBox(value = selectedRole, options = roles, onSelect = onRoleChange)
+                    DropdownBox(value = selectedRole, options = roles, labels = { it }, onSelect = onRoleChange)
                 }
                 Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     Text("TYPE", color = MLBBPlusColors.GithubSecondary, fontSize = 11.sp, letterSpacing = 1.sp)
-                    DropdownBox(value = selectedRoleType, options = roleTypes, onSelect = onRoleTypeChange)
+                    // Options are guide type IDs; the labels come from <role>_guide.json.
+                    DropdownBox(
+                        value = selectedRoleType,
+                        options = typeIds,
+                        labels = { RoleTypes.labelFor(selectedRole, it) },
+                        onSelect = onRoleTypeChange
+                    )
                 }
             }
+
+            if (guideType != null) {
+                if (guideType.blurb.isNotBlank()) {
+                    Text(guideType.blurb, color = MLBBPlusColors.Gold, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
+                }
+                if (guideType.playstyle.isNotBlank()) {
+                    Text(guideType.playstyle, color = MLBBPlusColors.GithubSecondary, fontSize = 13.sp, lineHeight = 19.sp)
+                }
+                GuideTypeBriefing(guideType = guideType, onHeroClick = onHeroClick)
+            }
+
             Text(
                 if (overlayGranted) "\u2713 Overlay permission granted" else "\u25CB Overlay permission needed",
                 color = if (overlayGranted) MLBBPlusColors.Green else MLBBPlusColors.Orange,
@@ -224,6 +293,150 @@ private fun RoamPanel(
                 color = if (overlayRunning) MLBBPlusColors.Green else MLBBPlusColors.GithubSecondary,
                 fontSize = 12.sp
             )
+        }
+    }
+}
+
+/** Win/lose condition, picks, loadout - everything the overlay shows pre-game, readable here first. */
+@Composable
+private fun GuideTypeBriefing(guideType: GuideType, onHeroClick: (Int) -> Unit) {
+    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        if (guideType.winCondition.isNotBlank()) BriefLine("WIN", guideType.winCondition, MLBBPlusColors.Green)
+        if (guideType.loseCondition.isNotBlank()) BriefLine("AVOID", guideType.loseCondition, MLBBPlusColors.Red)
+
+        if (guideType.heroes.isNotEmpty()) {
+            Text("PICKS", color = MLBBPlusColors.GithubSecondary, fontSize = 11.sp, letterSpacing = 1.sp)
+            Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                guideType.heroes.forEach { pick -> PickChip(pick, onHeroClick) }
+            }
+        }
+
+        val loadout = buildList {
+            if (guideType.blessing.isNotBlank()) add("Blessing" to guideType.blessing)
+            if (guideType.emblem.isNotBlank()) add("Emblem" to guideType.emblem)
+            if (guideType.battleSpells.isNotEmpty()) add("Spells" to guideType.battleSpells.joinToString(" \u2022 "))
+            if (guideType.coreItems.isNotEmpty()) add("Core items" to guideType.coreItems.joinToString(" \u2022 "))
+        }
+        if (loadout.isNotEmpty()) {
+            Column(
+                Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(MLBBPlusColors.GithubSurface)
+                    .padding(12.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                loadout.forEach { (label, value) ->
+                    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                        Text(label.uppercase(), color = MLBBPlusColors.Gold, fontSize = 10.sp, fontWeight = FontWeight.Bold, letterSpacing = 0.8.sp)
+                        Text(value, color = MLBBPlusColors.GithubText, fontSize = 12.sp, lineHeight = 17.sp)
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun BriefLine(label: String, text: String, color: Color) {
+    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.Top) {
+        Box(
+            Modifier
+                .clip(RoundedCornerShape(6.dp))
+                .background(color.copy(alpha = 0.16f))
+                .padding(horizontal = 6.dp, vertical = 2.dp)
+        ) { Text(label, color = color, fontSize = 10.sp, fontWeight = FontWeight.Bold, letterSpacing = 0.5.sp) }
+        Text(text, color = MLBBPlusColors.GithubText, fontSize = 12.sp, lineHeight = 17.sp, modifier = Modifier.weight(1f))
+    }
+}
+
+/** A guide pick. Tappable (opens Hero Detail) when the name exists in heroes.json. */
+@Composable
+private fun PickChip(pick: HeroPick, onHeroClick: (Int) -> Unit) {
+    val hero = pick.heroId?.let { GameData.heroesById[it] }
+    val shape = RoundedCornerShape(12.dp)
+    Row(
+        Modifier
+            .width(if (pick.note.isBlank()) 120.dp else 176.dp)
+            .clip(shape)
+            .background(MLBBPlusColors.GithubSurface)
+            .border(1.dp, MLBBPlusColors.GithubBorder, shape)
+            .then(if (hero != null) Modifier.clickable(role = Role.Button) { onHeroClick(hero.id) } else Modifier)
+            .padding(8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        if (hero != null) {
+            HeroImage(hero = hero, modifier = Modifier.size(34.dp).clip(CircleShape))
+        }
+        Column(Modifier.weight(1f)) {
+            Text(pick.name, color = MLBBPlusColors.GithubText, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            if (pick.note.isNotBlank()) {
+                Text(pick.note, color = MLBBPlusColors.GithubSecondary, fontSize = 10.sp, lineHeight = 13.sp, maxLines = 2, overflow = TextOverflow.Ellipsis)
+            } else if (hero != null) {
+                Text("Tier ${hero.tier}", color = MLBBPlusColors.GithubSecondary, fontSize = 10.sp)
+            }
+        }
+    }
+}
+
+/** <role>_mechanics from the guide's meta: the 3 most useful notes, rest behind a toggle. */
+@Composable
+private fun MechanicsCard(guide: GuideFile) {
+    var showAll by remember(guide.role) { mutableStateOf(false) }
+    val shape = RoundedCornerShape(16.dp)
+    val notes = if (showAll) guide.mechanics else guide.mechanics.take(3)
+    Column(
+        Modifier
+            .fillMaxWidth()
+            .clip(shape)
+            .background(MLBBPlusColors.GithubCard)
+            .border(1.dp, MLBBPlusColors.GithubBorder, shape)
+            .padding(14.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
+        notes.forEach { note ->
+            Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                Text(note.title, color = MLBBPlusColors.Gold, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                Text(note.text, color = MLBBPlusColors.GithubSecondary, fontSize = 12.sp, lineHeight = 18.sp)
+            }
+        }
+        if (showAll && guide.globalRules.isNotEmpty()) {
+            Text("RULES OF THUMB", color = MLBBPlusColors.GithubSecondary, fontSize = 11.sp, letterSpacing = 1.sp)
+            guide.globalRules.forEach { Text("\u2022 $it", color = MLBBPlusColors.GithubText, fontSize = 12.sp, lineHeight = 18.sp) }
+        }
+        if (guide.mechanics.size > 3 || guide.globalRules.isNotEmpty()) {
+            Text(
+                if (showAll) "Show less" else "Show all ${guide.mechanics.size} notes + rules",
+                color = MLBBPlusColors.Gold,
+                fontSize = 12.sp,
+                fontWeight = FontWeight.SemiBold,
+                modifier = Modifier.clickable(role = Role.Button) { showAll = !showAll }.padding(vertical = 4.dp)
+            )
+        }
+    }
+}
+
+@Composable
+private fun MoverCard(hero: Hero, change: PatchHeroChange, onClick: () -> Unit) {
+    val color = patchBadgeColor(change.type)
+    val shape = RoundedCornerShape(16.dp)
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier
+            .width(96.dp)
+            .clip(shape)
+            .background(color.copy(alpha = 0.10f))
+            .border(1.dp, color.copy(alpha = 0.45f), shape)
+            .clickable(role = Role.Button, onClick = onClick)
+            .padding(horizontal = 8.dp, vertical = 12.dp)
+    ) {
+        HeroImage(hero = hero, modifier = Modifier.size(52.dp).clip(CircleShape).border(2.dp, color, CircleShape))
+        Spacer(Modifier.height(8.dp))
+        Text(hero.name, color = MLBBPlusColors.GithubText, fontSize = 12.sp, fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        Text(change.type.uppercase().ifBlank { "CHANGE" }, color = color, fontSize = 10.sp, fontWeight = FontWeight.Bold, letterSpacing = 0.5.sp)
+        if (change.tierChange.isNotBlank()) {
+            Text(change.tierChange.replace("->", "\u2192"), color = MLBBPlusColors.GithubSecondary, fontSize = 10.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
     }
 }
@@ -242,7 +455,7 @@ private fun StatusChip(text: String, color: Color) {
 }
 
 @Composable
-private fun DropdownBox(value: String, options: List<String>, onSelect: (String) -> Unit) {
+private fun DropdownBox(value: String, options: List<String>, labels: (String) -> String, onSelect: (String) -> Unit) {
     var expanded by remember { mutableStateOf(false) }
     Box(Modifier.fillMaxWidth()) {
         Row(
@@ -257,7 +470,7 @@ private fun DropdownBox(value: String, options: List<String>, onSelect: (String)
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Text(value, color = MLBBPlusColors.GithubText, fontWeight = FontWeight.SemiBold, fontSize = 14.sp, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
+            Text(labels(value), color = MLBBPlusColors.GithubText, fontWeight = FontWeight.SemiBold, fontSize = 14.sp, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
             Text("\u25BE", color = MLBBPlusColors.Gold, fontSize = 14.sp)
         }
         DropdownMenu(
@@ -267,7 +480,7 @@ private fun DropdownBox(value: String, options: List<String>, onSelect: (String)
         ) {
             options.forEach { opt ->
                 DropdownMenuItem(
-                    text = { Text(opt, color = MLBBPlusColors.GithubText) },
+                    text = { Text(labels(opt), color = MLBBPlusColors.GithubText) },
                     onClick = { onSelect(opt); expanded = false }
                 )
             }
@@ -323,7 +536,11 @@ private fun MetaHeroCard(hero: Hero, onClick: () -> Unit) {
         Spacer(Modifier.height(8.dp))
         Text(hero.name, color = MLBBPlusColors.GithubText, fontSize = 13.sp, fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis)
         // winRate is 0..1 (Models.kt) -> *100 is correct.
-        Text("%.0f%% win".format(hero.winRate * 100), color = MLBBPlusColors.GithubSecondary, fontSize = 12.sp)
+        Text(
+            if (hero.hasLiveStats) "%.0f%% win".format(hero.winRate * 100) else "Tier ${hero.tier}",
+            color = MLBBPlusColors.GithubSecondary,
+            fontSize = 12.sp
+        )
     }
 }
 

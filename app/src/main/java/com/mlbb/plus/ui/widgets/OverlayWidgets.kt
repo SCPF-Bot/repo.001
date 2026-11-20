@@ -7,6 +7,11 @@ package com.mlbb.plus.ui.widgets
 // gold_guide.json, exp_guide.json); the type is one entry of that file's "roles"
 // array. A role whose file is missing/invalid still gets the timer, objective
 // and spell tracker. Schema + how to add a role: docs/overview.md.
+// V13 — GUIDE-DRIVEN (see docs/overview.md "What the widget reads"): enemy-spell cooldowns +
+//   defaults now come from the guide's battle_spells (Sprint is 75s in 2.2.23, the hardcoded
+//   table said 100s), Turtle/Lord timers come from meta.objective_timers, per-step
+//   objective_contest / objective_trade / compact / phase are shown, the pre-game panel shows
+//   win condition + emblem + spells + core items, and the launcher passes the guide TYPE ID.
 // V10 — idle fade is now gentle (IDLE_ALPHA 0.6, was 0.15 = unreadable mid-game), the
 //   short guide text is visible by default, and the 'first tap only wakes' guard is OFF
 //   (FIRST_TAP_ONLY_WAKES) so spell taps always register. Also removed the root
@@ -86,6 +91,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import org.json.JSONArray
 import org.json.JSONObject
+import com.mlbb.plus.ui.model.GameData
 import com.mlbb.plus.ui.model.RoleTypes
 import com.mlbb.plus.ui.theme.MLBBPlusColors
 
@@ -126,13 +132,33 @@ private data class GuideStep(
     val checklist: List<String>,
     val vision: String,
     val decision: String,
-    val dont: String
+    val dont: String,
+    // V13: per-step text the widget used to ignore.
+    val compact: String = "",
+    val objectiveContest: String = "",
+    val objectiveTrade: String = ""
 )
 
 private data class GuideBlessing(
     val id: String,
     val name: String,
-    val effect: String
+    val effect: String,
+    val cooldown: String = "",
+    val unlock: String = ""
+)
+
+// Turtle / Lord rules. Defaults = patch 2.2.23 values; every guide's meta.objective_timers overrides them.
+private data class ObjectiveTimers(
+    val turtleFirst: Int = 120,
+    val turtleRespawn: Int = 120,
+    val turtleMax: Int = 3,
+    val noNewTurtleAfter: Int = 360,
+    val convertAt: Int = 480,
+    val convertDelay: Int = 5,
+    val lordAfterTurtle: Int = 120,
+    val lordRespawnEarly: Int = 180,
+    val lordRespawnLate: Int = 120,
+    val lordEvolveAt: Int = 1080
 )
 
 private data class GuidePlan(
@@ -146,13 +172,24 @@ private data class GuidePlan(
     val turtleContest: String,
     val turtleTrade: String,
     val lordContest: String,
-    val lordTrade: String
+    val lordTrade: String,
+    // V13: role-level fields the widget used to ignore.
+    val winCondition: String = "",
+    val loseCondition: String = "",
+    val battleSpells: List<String> = emptyList(),
+    val coreItems: List<String> = emptyList(),
+    val blessingAlt: String = ""
 )
 
 private data class GuideData(
     val patch: String = "",
     val blessings: List<GuideBlessing> = emptyList(),
-    val plans: List<GuidePlan> = emptyList()
+    val plans: List<GuidePlan> = emptyList(),
+    val retributions: List<GuideBlessing> = emptyList(),
+    val globalRules: List<String> = emptyList(),
+    val timers: ObjectiveTimers = ObjectiveTimers(),
+    val spells: List<TrackedSpell> = emptyList(),
+    val spellDefaults: Map<String, String> = emptyMap()
 )
 
 private enum class ObjectiveType { TURTLE, LORD }
@@ -195,7 +232,10 @@ private fun parseStep(json: JSONObject): GuideStep {
         checklist = json.stringList("checklist"),
         vision = json.optString("vision"),
         decision = json.optString("decision"),
-        dont = json.optString("dont")
+        dont = json.optString("dont"),
+        compact = json.optString("compact"),
+        objectiveContest = json.optString("objective_contest"),
+        objectiveTrade = json.optString("objective_trade")
     )
 }
 
@@ -232,46 +272,109 @@ private fun parsePlan(json: JSONObject): GuidePlan {
         turtleContest = templates?.optString("turtle_contest").orEmpty(),
         turtleTrade = templates?.optString("turtle_trade").orEmpty(),
         lordContest = templates?.optString("lord_contest").orEmpty(),
-        lordTrade = templates?.optString("lord_trade").orEmpty()
+        lordTrade = templates?.optString("lord_trade").orEmpty(),
+        winCondition = json.optString("win_condition"),
+        loseCondition = json.optString("lose_condition"),
+        battleSpells = json.stringList("battle_spells"),
+        coreItems = json.stringList("core_items"),
+        blessingAlt = json.optString("blessing_alt")
     )
 }
 
 // Role -> asset file: Roam -> roam_guide.json, Jungle -> jungle_guide.json, EXP -> exp_guide.json ...
 private fun guideAssetFor(role: String): String = "${role.lowercase()}_guide.json"
 
-// Starting type for a role. The launcher's Roam type "Support" starts on the "support"
-// type when that file has one; everything else starts on the first type.
+// Starting type for a role. The launcher passes the guide TYPE ID ("initiator", "crit", "tank_exp").
+// Older launches / saved state may still carry a label ("Support", "Tank"), so fall back to the
+// short label, then to the first type.
 private fun defaultPlanId(guide: GuideData, roleType: String): String =
-    guide.plans.firstOrNull { roleType == "Support" && it.id == "support" }?.id
+    guide.plans.firstOrNull { it.id.equals(roleType, ignoreCase = true) }?.id
+        ?: guide.plans.firstOrNull { it.label.substringBefore(" - ").trim().equals(roleType, ignoreCase = true) }?.id
         ?: guide.plans.firstOrNull()?.id.orEmpty()
 
-private fun loadGuide(context: Context, role: String): GuideData = runCatching {
-    val source = context.assets.open(guideAssetFor(role)).bufferedReader().use { it.readText() }
-    val root = JSONObject(source)
-    val blessingArray = root.optJSONArray("blessings") ?: JSONArray()
-    val blessings = buildList {
-        for (index in 0 until blessingArray.length()) {
-            val blessing = blessingArray.optJSONObject(index) ?: continue
+private fun parseTimers(meta: JSONObject?): ObjectiveTimers {
+    val d = ObjectiveTimers()
+    val t = meta?.optJSONObject("objective_timers") ?: return d
+    val turtle = t.optJSONObject("turtle")
+    val lord = t.optJSONObject("lord")
+    return ObjectiveTimers(
+        turtleFirst = turtle?.optInt("first_spawn_seconds", d.turtleFirst) ?: d.turtleFirst,
+        turtleRespawn = turtle?.optInt("respawn_seconds", d.turtleRespawn) ?: d.turtleRespawn,
+        turtleMax = turtle?.optInt("max_per_game", d.turtleMax) ?: d.turtleMax,
+        noNewTurtleAfter = turtle?.optInt("no_new_turtle_if_last_slain_after_seconds", d.noNewTurtleAfter) ?: d.noNewTurtleAfter,
+        convertAt = turtle?.optInt("auto_convert_to_lord_at_seconds", d.convertAt) ?: d.convertAt,
+        convertDelay = turtle?.optInt("auto_convert_delay_if_no_damage_seconds", d.convertDelay) ?: d.convertDelay,
+        // The "120s after the last Turtle" rule is prose in the JSON (lord.first_spawn_rule), so it stays a constant.
+        lordAfterTurtle = d.lordAfterTurtle,
+        lordRespawnEarly = lord?.optInt("respawn_seconds_before_18min", d.lordRespawnEarly) ?: d.lordRespawnEarly,
+        lordRespawnLate = lord?.optInt("respawn_seconds_after_18min", d.lordRespawnLate) ?: d.lordRespawnLate,
+        lordEvolveAt = lord?.optInt("evolves_at_seconds", d.lordEvolveAt) ?: d.lordEvolveAt
+    )
+}
+
+private fun parseBuffList(array: JSONArray?): List<GuideBlessing> {
+    if (array == null) return emptyList()
+    return buildList {
+        for (index in 0 until array.length()) {
+            val o = array.optJSONObject(index) ?: continue
             add(
                 GuideBlessing(
-                    id = blessing.optString("id"),
-                    name = blessing.optString("name"),
-                    effect = blessing.optString("effect")
+                    id = o.optString("id"),
+                    name = o.optString("name"),
+                    effect = o.optString("effect"),
+                    cooldown = o.optString("cooldown"),
+                    unlock = o.optString("unlock")
                 )
             )
         }
     }
+}
+
+private fun loadGuide(context: Context, role: String): GuideData = runCatching {
+    val source = context.assets.open(guideAssetFor(role)).bufferedReader().use { it.readText() }
+    val root = JSONObject(source)
     val roles = root.optJSONArray("roles") ?: root.optJSONArray("plans") ?: root.optJSONArray("types") ?: JSONArray()
     val plans = buildList {
         for (index in 0 until roles.length()) {
-            val role = roles.optJSONObject(index) ?: continue
-            parsePlan(role).takeIf { it.steps.isNotEmpty() }?.let(::add)
+            val entry = roles.optJSONObject(index) ?: continue
+            parsePlan(entry).takeIf { it.steps.isNotEmpty() }?.let(::add)
+        }
+    }
+    val meta = root.optJSONObject("meta")
+    val battleSpells = root.optJSONObject("battle_spells")
+    val spellArray = battleSpells?.optJSONArray("spells")
+    val spells = buildList {
+        if (spellArray != null) {
+            for (index in 0 until spellArray.length()) {
+                val o = spellArray.optJSONObject(index) ?: continue
+                val name = o.optString("name")
+                val cooldown = o.optInt("cooldown_seconds", 0)
+                if (name.isNotBlank() && cooldown > 0) add(TrackedSpell(name, cooldown))
+            }
+        }
+    }
+    val defaults = buildMap<String, String> {
+        val d = battleSpells?.optJSONObject("defaults")
+        if (d != null) {
+            val keys = d.keys()
+            while (keys.hasNext()) {
+                val k = keys.next()
+                put(k.uppercase(), d.optString(k))
+            }
         }
     }
     GuideData(
-        patch = root.optJSONObject("meta")?.optString("patch").orEmpty(),
-        blessings = blessings,
-        plans = plans
+        patch = meta?.optString("patch").orEmpty(),
+        blessings = parseBuffList(root.optJSONArray("blessings")),
+        plans = plans,
+        retributions = parseBuffList(root.optJSONArray("retribution_types")),
+        globalRules = meta?.let { m ->
+            val a = m.optJSONArray("global_rules")
+            if (a == null) emptyList() else buildList { for (i in 0 until a.length()) a.optString(i).takeIf(String::isNotBlank)?.let(::add) }
+        }.orEmpty(),
+        timers = parseTimers(meta),
+        spells = spells,
+        spellDefaults = defaults
     )
 }.getOrElse { e ->
     android.util.Log.w("RoamGuideWidget", "Could not load ${guideAssetFor(role)}: ${e.message}")
@@ -287,13 +390,15 @@ private fun formatGameTime(seconds: Int): String {
  * Computes the next objective using game time and manually recorded slain events.
  * Before the first Turtle kill, the known schedule is used; subsequent objective
  * respawns are based on the time the player marked the last objective slain.
+ * All numbers come from the guide's meta.objective_timers (see [ObjectiveTimers]).
  */
 private fun computeObjective(
     elapsedSeconds: Int,
     turtleSlain: Int,
     lordSlain: Int,
     lastSlainAt: Int?,
-    lastSlainWasLord: Boolean = false
+    lastSlainWasLord: Boolean = false,
+    timers: ObjectiveTimers = ObjectiveTimers()
 ): ObjectiveStatus {
     // V11 FIX: V8 was wrong ("first Lord ALWAYS at 8:00").
     // Wiki: "First Lord will appear exactly 2 min after last Turtle slain.
@@ -302,9 +407,9 @@ private fun computeObjective(
     // So: Turtle 7:30 -> Lord 9:30, NOT 8:00. Lord only at 8:00 if Turtle
     // was never killed / still alive at 8:00 (it converts).
     if (lordSlain > 0) {
-        // Lord already slain once: respawn 180s (8-18min), 120s after 18:00.
+        // Lord already slain once: respawn 180s before the evolve time (18:00), 120s after it.
         val slainAt = lastSlainAt ?: elapsedSeconds
-        val nextSpawn = slainAt + if (slainAt < 18 * 60) 180 else 120
+        val nextSpawn = slainAt + if (slainAt < timers.lordEvolveAt) timers.lordRespawnEarly else timers.lordRespawnLate
         return ObjectiveStatus(
             type = ObjectiveType.LORD,
             count = lordSlain + 1,
@@ -312,25 +417,27 @@ private fun computeObjective(
             secondsUntil = (nextSpawn - elapsedSeconds).coerceAtLeast(0)
         )
     }
-    if (elapsedSeconds < 2 * 60 && turtleSlain == 0) {
-        return ObjectiveStatus(ObjectiveType.TURTLE, 1, false, 2 * 60 - elapsedSeconds)
+    if (elapsedSeconds < timers.turtleFirst && turtleSlain == 0) {
+        return ObjectiveStatus(ObjectiveType.TURTLE, 1, false, timers.turtleFirst - elapsedSeconds)
     }
-    // 3 Turtles done -> Lord = last slain + 120 (6:00 -> 8:00, 6:30 -> 8:30).
-    if (turtleSlain >= 3) {
-        val lordSpawn = (lastSlainAt ?: 6 * 60) + 120
+    // All Turtles done -> Lord = last slain + 120 (6:00 -> 8:00, 6:30 -> 8:30).
+    if (turtleSlain >= timers.turtleMax) {
+        val lordSpawn = (lastSlainAt ?: timers.noNewTurtleAfter) + timers.lordAfterTurtle
         return ObjectiveStatus(ObjectiveType.LORD, 1, elapsedSeconds >= lordSpawn, (lordSpawn - elapsedSeconds).coerceAtLeast(0))
     }
     // Slain after 6:00 -> no more Turtle, next is Lord at slain + 120.
-    if (lastSlainAt != null && lastSlainAt > 6 * 60) {
-        val lordSpawn = lastSlainAt + 120
+    if (lastSlainAt != null && lastSlainAt > timers.noNewTurtleAfter) {
+        val lordSpawn = lastSlainAt + timers.lordAfterTurtle
         return ObjectiveStatus(ObjectiveType.LORD, 1, elapsedSeconds >= lordSpawn, (lordSpawn - elapsedSeconds).coerceAtLeast(0))
     }
-    // Turtle still alive / never slain and we hit 8:00 -> it converts to Lord.
-    if (elapsedSeconds >= 8 * 60) {
-        return ObjectiveStatus(ObjectiveType.LORD, 1, true, 0)
+    // Turtle still alive / never slain at 8:00 -> it converts to Lord once nobody damages it for
+    // 5s (guide: "delayed up to 9:00"). Count the 5s instead of showing Lord UP at exactly 8:00.
+    if (elapsedSeconds >= timers.convertAt) {
+        val lordSpawn = timers.convertAt + timers.convertDelay
+        return ObjectiveStatus(ObjectiveType.LORD, 1, elapsedSeconds >= lordSpawn, (lordSpawn - elapsedSeconds).coerceAtLeast(0))
     }
-    // Otherwise next Turtle = last slain + 120, or 2:00 if none.
-    val nextTurtle = lastSlainAt?.plus(120) ?: 2 * 60
+    // Otherwise next Turtle = last slain + respawn, or the first spawn if none.
+    val nextTurtle = lastSlainAt?.plus(timers.turtleRespawn) ?: timers.turtleFirst
     return ObjectiveStatus(
         type = ObjectiveType.TURTLE,
         count = turtleSlain + 1,
@@ -435,7 +542,7 @@ fun RoamGuideWidget(role: String = "Roam", roleType: String = "Tank", onBack: ()
         elapsedSeconds >= it.startSeconds && elapsedSeconds < it.endSeconds
     } ?: selectedPlan?.steps?.lastOrNull()
     val hasGuide = selectedPlan != null && currentStep != null
-    val objective = computeObjective(elapsedSeconds, turtleSlain, lordSlain, lastSlainAt, lastSlainWasLord)
+    val objective = computeObjective(elapsedSeconds, turtleSlain, lordSlain, lastSlainAt, lastSlainWasLord, guide.timers)
     val isTurtle = objective.type == ObjectiveType.TURTLE
     val objectiveText = if (objective.isAlive) {
         if (isTurtle) "Turtle ${objective.count} UP" else "Lord UP"
@@ -462,14 +569,24 @@ fun RoamGuideWidget(role: String = "Roam", roleType: String = "Tank", onBack: ()
             peek = false
         }
     }
+    // V13: the step's own objective_contest / objective_trade are written for that moment of the game
+    // ("Second Turtle", "First Lord"), so prefer them when the step is about the objective that is up;
+    // otherwise fall back to the role-level template. objective_trade was never shown before.
+    val stepAboutObjective = currentStep != null && currentStep.phase.contains(objective.label, ignoreCase = true)
+    val contestText = (if (stepAboutObjective) currentStep?.objectiveContest else null).takeUnless { it.isNullOrBlank() }
+        ?: if (isTurtle) selectedPlan?.turtleContest.orEmpty() else selectedPlan?.lordContest.orEmpty()
+    val tradeText = (if (stepAboutObjective) currentStep?.objectiveTrade else null).takeUnless { it.isNullOrBlank() }
+        ?: if (isTurtle) selectedPlan?.turtleTrade.orEmpty() else selectedPlan?.lordTrade.orEmpty()
     val objectiveDescription = if (!hasGuide) "No guide data for $activeRole (${guideAssetFor(activeRole)} missing or invalid). Timer, objective and spells still work." else when {
-        objective.isAlive && isTurtle -> selectedPlan?.turtleContest.orEmpty()
-        objective.isAlive -> selectedPlan?.lordContest.orEmpty()
+        objective.isAlive -> contestText
         // FIX V7: slain label = LAST slain, not NEXT. At 7:26 you killed Turtle,
         // next is Lord — old said "Lord slain".
         lastSlainAt != null -> "${if (lastSlainWasLord) "Lord" else "Turtle"} slain. Next: ${objective.label}. Push, farm, or reset." // V9: countdown lives in the pill; no per-second text churn
         else -> currentStep?.description.orEmpty()
     }
+    // V13: hidden mode (≡) peeks the guide's one-line `compact` text instead of the full instruction.
+    val peekText = if (objective.isAlive || lastSlainAt != null) objectiveDescription
+        else currentStep?.compact.takeUnless { it.isNullOrBlank() } ?: objectiveDescription
     val displayMetrics = context.resources.displayMetrics
     val screenWidthDp = displayMetrics.widthPixels / displayMetrics.density
     val screenHeightDp = displayMetrics.heightPixels / displayMetrics.density
@@ -729,12 +846,13 @@ fun RoamGuideWidget(role: String = "Roam", roleType: String = "Tank", onBack: ()
                 // key "Save AoE Ultimate..." part. V7 keeps full text + adaptive width.
                 // V11: Mode 2 hides even the short description.
                 // Mode 0 = short (2 lines), Mode 1 = full (6 lines) + details.
-                if ((displayMode != 2 || peek) && objectiveDescription.isNotBlank()) {
+                val shownDescription = if (displayMode == 2) peekText else objectiveDescription
+                if ((displayMode != 2 || peek) && shownDescription.isNotBlank()) {
                     // V9: one fixed size — no font that shrinks/grows with text length.
                     val descFontSize = 9.sp
                     val descLineHeight = 12.sp
                     OutlinedText(
-                        text = objectiveDescription,
+                        text = shownDescription,
                         color = GuideText,
                         fontSize = descFontSize,
                         lineHeight = descLineHeight,
@@ -745,8 +863,14 @@ fun RoamGuideWidget(role: String = "Roam", roleType: String = "Tank", onBack: ()
                 }
                 if (displayMode == 1) {
                     if (selectedPlan != null && currentStep != null) {
+                    // V13: phase ("First Turtle") was parsed but never shown; flag a guide older than the app's patch.
+                    val livePatch = GameData.patchNotes.displayVersion
+                    val patchLabel = guide.patch.takeIf(String::isNotBlank)?.let { p ->
+                        if (p != livePatch) " · $p (older than $livePatch)" else " · $p"
+                    }.orEmpty()
                     OutlinedText(
-                        "${currentStep.timeLabel.ifBlank { "${formatGameTime(currentStep.startSeconds)}–${formatGameTime(currentStep.endSeconds)}" }}${guide.patch.takeIf(String::isNotBlank)?.let { " · $it" }.orEmpty()}",
+                        "${currentStep.timeLabel.ifBlank { "${formatGameTime(currentStep.startSeconds)}–${formatGameTime(currentStep.endSeconds)}" }}" +
+                            "${currentStep.phase.takeIf(String::isNotBlank)?.let { " · $it" }.orEmpty()}$patchLabel",
                         color = GuideMuted,
                         fontSize = 9.sp
                     )
@@ -756,11 +880,26 @@ fun RoamGuideWidget(role: String = "Roam", roleType: String = "Tank", onBack: ()
                     if (currentStep.vision.isNotBlank()) GuideDetail("Vision", currentStep.vision)
                     if (currentStep.decision.isNotBlank()) GuideDetail("Decision", currentStep.decision)
                     if (currentStep.dont.isNotBlank()) GuideDetail("Avoid", currentStep.dont)
+                    if (objective.isAlive && tradeText.isNotBlank()) GuideDetail("If losing", tradeText)
                     if (blessing != null && blessing.effect.isNotBlank() && selectedPlan.blessing.isNotBlank()) {
                         GuideDetail(selectedPlan.blessing, blessing.effect)
                     }
-                    if (elapsedSeconds == 0 && selectedPlan.heroes.isNotEmpty()) {
-                        GuideDetail("Suggested heroes", selectedPlan.heroes.take(6).joinToString())
+                    if (elapsedSeconds == 0) {
+                        // Pre-game only (compact_mode.heroes_note): the loadout the guide recommends.
+                        if (selectedPlan.winCondition.isNotBlank()) GuideDetail("Win", selectedPlan.winCondition)
+                        if (selectedPlan.loseCondition.isNotBlank()) GuideDetail("Lose", selectedPlan.loseCondition)
+                        if (selectedPlan.emblem.isNotBlank()) GuideDetail("Emblem", selectedPlan.emblem)
+                        if (selectedPlan.battleSpells.isNotEmpty()) GuideDetail("Spells", selectedPlan.battleSpells.joinToString(" · "))
+                        if (selectedPlan.coreItems.isNotEmpty()) GuideDetail("Core items", selectedPlan.coreItems.joinToString(" · "))
+                        if (guide.retributions.isNotEmpty()) {
+                            GuideDetail("Retribution", guide.retributions.joinToString(" · ") { it.name })
+                        }
+                        if (blessing != null && blessing.unlock.isNotBlank()) GuideDetail("Unlock", blessing.unlock)
+                        if (selectedPlan.heroes.isNotEmpty()) GuideDetail("Suggested heroes", selectedPlan.heroes.take(6).joinToString())
+                    } else if (guide.globalRules.isNotEmpty()) {
+                        // One rule of thumb per step, rotating with the game phase.
+                        val ruleIndex = selectedPlan.steps.indexOf(currentStep).coerceAtLeast(0)
+                        GuideDetail("Rule", guide.globalRules[ruleIndex % guide.globalRules.size])
                     }
                     }
                     FlowRow(
@@ -800,6 +939,8 @@ fun RoamGuideWidget(role: String = "Roam", roleType: String = "Tank", onBack: ()
         // independently from the much larger guide UI.
         EnemySpellTrackerWidget(
             elapsedSeconds = elapsedSeconds,
+            spells = guide.spells,
+            spellDefaults = guide.spellDefaults,
             modifier = Modifier.fillMaxWidth()
         )
     }
@@ -831,7 +972,9 @@ private data class TrackedLaneSpell(
     val usedAtSeconds: Int? = null
 )
 
-private val availableSpells = listOf(
+// FALLBACK only: used when a guide file has no battle_spells block. The live values come from
+// <role>_guide.json -> battle_spells.spells (Sprint went 100s -> 75s in 2.2.23; this table said 100).
+private val fallbackSpells = listOf(
     TrackedSpell("Aegis", 75),
     TrackedSpell("Arrival", 75),
     TrackedSpell("Execute", 90),
@@ -842,7 +985,7 @@ private val availableSpells = listOf(
     TrackedSpell("Purify", 90),
     TrackedSpell("Retribution", 35),
     TrackedSpell("Revitalize", 75),
-    TrackedSpell("Sprint", 100),
+    TrackedSpell("Sprint", 75),
     TrackedSpell("Vengeance", 75)
 )
 
@@ -866,10 +1009,11 @@ private val spellAbbreviations = mapOf(
 private fun abbreviationFor(spellName: String): String =
     spellAbbreviations[spellName] ?: spellName.take(3).uppercase()
 
-private fun initialTrackedSpells() = listOf("EXP", "JG", "MID", "GOLD", "ROAM").map { lane ->
-    val initialSpell = if (lane == "JG") "Retribution" else "Flicker"
-    TrackedLaneSpell(lane, availableSpells.first { it.name == initialSpell })
-}
+private fun initialTrackedSpells(spells: List<TrackedSpell>, defaults: Map<String, String>) =
+    listOf("EXP", "JG", "MID", "GOLD", "ROAM").map { lane ->
+        val wanted = defaults[lane] ?: if (lane == "JG") "Retribution" else "Flicker"
+        TrackedLaneSpell(lane, spells.firstOrNull { it.name == wanted } ?: spells.first())
+    }
 
 private fun formatCooldown(seconds: Int): String = "%02d:%02d".format(seconds / 60, seconds % 60)
 
@@ -884,8 +1028,14 @@ private fun formatCooldown(seconds: Int): String = "%02d:%02d".format(seconds / 
  */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun EnemySpellTrackerWidget(elapsedSeconds: Int, modifier: Modifier = Modifier) {
-    var trackedSpells by rememberSaveable { mutableStateOf(initialTrackedSpells()) }
+private fun EnemySpellTrackerWidget(
+    elapsedSeconds: Int,
+    modifier: Modifier = Modifier,
+    spells: List<TrackedSpell> = emptyList(),
+    spellDefaults: Map<String, String> = emptyMap()
+) {
+    val availableSpells = if (spells.isEmpty()) fallbackSpells else spells
+    var trackedSpells by rememberSaveable { mutableStateOf(initialTrackedSpells(availableSpells, spellDefaults)) }
     var openPickerLane by rememberSaveable { mutableStateOf<String?>(null) }
 
     Column(
@@ -899,12 +1049,14 @@ fun EnemySpellTrackerWidget(elapsedSeconds: Int, modifier: Modifier = Modifier) 
             horizontalArrangement = Arrangement.spacedBy(2.dp)
         ) {
             trackedSpells.forEach { laneSpell ->
+                // Cooldown always from the CURRENT guide's table (saved state may hold an older value).
+                val spell = availableSpells.firstOrNull { it.name == laneSpell.spell.name } ?: laneSpell.spell
                 val elapsedSinceUse = laneSpell.usedAtSeconds?.let { (elapsedSeconds - it).coerceAtLeast(0) }
                 val remaining = if (elapsedSinceUse == null) 0
-                    else (laneSpell.spell.cooldownSeconds - elapsedSinceUse).coerceAtLeast(0)
+                    else (spell.cooldownSeconds - elapsedSinceUse).coerceAtLeast(0)
                 val isCoolingDown = elapsedSinceUse != null && remaining > 0
                 val progress = if (isCoolingDown) {
-                    (elapsedSinceUse!!.toFloat() / laneSpell.spell.cooldownSeconds).coerceIn(0f, 1f)
+                    (elapsedSinceUse!!.toFloat() / spell.cooldownSeconds).coerceIn(0f, 1f)
                 } else {
                     0f
                 }
@@ -952,7 +1104,7 @@ fun EnemySpellTrackerWidget(elapsedSeconds: Int, modifier: Modifier = Modifier) 
                             // readable over the game at 30% opacity.
                             OutlinedText(
                                 // V9: ready = ONE quiet line ("MID FLK"); cooling adds the countdown below.
-                                text = "${laneSpell.lane} ${abbreviationFor(laneSpell.spell.name)}",
+                                text = "${laneSpell.lane} ${abbreviationFor(spell.name)}",
                                 color = if (isCoolingDown) TrackerGold.copy(alpha = 0.8f) else TrackerMuted,
                                 fontSize = if (isCoolingDown) 7.sp else 8.sp,
                                 fontWeight = FontWeight.Bold,

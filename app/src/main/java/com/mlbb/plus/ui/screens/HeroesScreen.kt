@@ -82,12 +82,16 @@ fun HeroesScreen(onHeroClick: (Hero) -> Unit) {
     var selectedRole by remember { mutableStateOf<String?>(null) }
     var showAdvanced by remember { mutableStateOf(false) }
     var selectedTier by remember { mutableStateOf<String?>(null) }
+    var patchOnly by remember { mutableStateOf(false) }
+    val hasAdvanced = GameData.advancedHeroes.isNotEmpty()
+    val patchChangeIds = remember(GameData.patchNotes) { GameData.patchNotes.originalServer.heroChanges.map { it.heroId }.toSet() }
     val allHeroes = if (showAdvanced) GameData.heroes else GameData.liveHeroes
     val roles = listOf<String?>(null, "Tank", "Fighter", "Mage", "Marksman", "Assassin", "Support")
     val tiers = listOf<String?>(null, "S", "A", "B")
-    val filtered = remember(query, selectedRole, selectedTier, showAdvanced, allHeroes) {
+    val filtered = remember(query, selectedRole, selectedTier, showAdvanced, patchOnly, allHeroes) {
         allHeroes.filter {
-            (selectedRole == null || it.role == selectedRole || it.secondaryRole == selectedRole) &&
+            (!patchOnly || it.id in patchChangeIds) &&
+                (selectedRole == null || it.role == selectedRole || it.secondaryRole == selectedRole) &&
                 (selectedTier == null || it.tier.uppercase().trim() == selectedTier) &&
                 (query.isBlank() || it.name.contains(query, ignoreCase = true) || it.title.contains(query, ignoreCase = true))
         }.sortedWith(compareByDescending<Hero> { it.isMeta }.thenByDescending { it.winRate })
@@ -106,7 +110,8 @@ fun HeroesScreen(onHeroClick: (Hero) -> Unit) {
                 color = MLBBPlusColors.GithubSecondary,
                 fontSize = 12.sp
             )
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            // heroes.json has no Advanced-server-only heroes right now, so the switch would do nothing.
+            if (hasAdvanced) Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text("Advanced", color = MLBBPlusColors.GithubSecondary, fontSize = 12.sp)
                 Switch(
                     checked = showAdvanced,
@@ -141,11 +146,14 @@ fun HeroesScreen(onHeroClick: (Hero) -> Unit) {
             items(tiers) { t ->
                 FilterPill(label = if (t == null) "All Tiers" else "Tier $t", selected = selectedTier == t, onClick = { selectedTier = t })
             }
+            if (patchChangeIds.isNotEmpty()) item {
+                FilterPill(label = "Patch ${GameData.patchNotes.displayVersion} changes", selected = patchOnly, onClick = { patchOnly = !patchOnly })
+            }
         }
 
         if (filtered.isEmpty()) {
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text("No heroes found \u2014 check heroes.json", color = MLBBPlusColors.GithubSecondary)
+                Text("No heroes match these filters", color = MLBBPlusColors.GithubSecondary)
             }
         } else {
             LazyVerticalGrid(
@@ -188,6 +196,13 @@ private fun HeroGridCard(hero: Hero, onClick: () -> Unit) {
                     Modifier.align(Alignment.TopEnd).clip(RoundedCornerShape(6.dp)).background(MLBBPlusColors.Orange)
                         .padding(horizontal = 4.dp, vertical = 2.dp)
                 ) { Text("ADV", color = Color.Black, fontSize = 8.sp, fontWeight = FontWeight.Bold) }
+            }
+            GameData.patchChangeForHero(hero.id)?.let { change ->
+                val c = patchBadgeColor(change.type)
+                Box(
+                    Modifier.align(Alignment.BottomEnd).clip(RoundedCornerShape(6.dp)).background(c)
+                        .padding(horizontal = 4.dp, vertical = 2.dp)
+                ) { Text(when (change.type.trim().lowercase()) { "revamp" -> "REV"; "adjust" -> "ADJ"; "" -> "NEW"; else -> change.type.trim().take(4).uppercase() }, color = Color.Black, fontSize = 8.sp, fontWeight = FontWeight.Bold) }
             }
             if (hero.isOP) {
                 Box(
@@ -267,21 +282,24 @@ fun HeroDetailScreen(hero: Hero, onBack: () -> Unit, onHeroClick: (Hero) -> Unit
         }
 
         // ---- Stats ----
+        // heroes.json uses 50% / 3% / 3% / 0% as "no data yet" placeholders for most heroes;
+        // show a dash for those instead of passing them off as real numbers.
+        val tracked = hero.hasLiveStats
         Row(
             Modifier.fillMaxWidth().background(MLBBPlusColors.GithubCard).padding(vertical = 16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             // winRate / pickRate / banRate / patchTrend are 0..1 (Models.kt) -> *100 is correct.
-            HeroStatItem(Modifier.weight(1f), "Win Rate", "%.0f%%".format(hero.winRate * 100), MLBBPlusColors.Green)
+            HeroStatItem(Modifier.weight(1f), "Win Rate", if (tracked) "%.0f%%".format(hero.winRate * 100) else "\u2014", MLBBPlusColors.Green)
             StatDivider()
-            HeroStatItem(Modifier.weight(1f), "Pick Rate", "%.0f%%".format(hero.pickRate * 100), MLBBPlusColors.Blue)
+            HeroStatItem(Modifier.weight(1f), "Pick Rate", if (tracked) "%.0f%%".format(hero.pickRate * 100) else "\u2014", MLBBPlusColors.Blue)
             StatDivider()
-            HeroStatItem(Modifier.weight(1f), "Ban Rate", "%.0f%%".format(hero.banRate * 100), MLBBPlusColors.Red)
+            HeroStatItem(Modifier.weight(1f), "Ban Rate", if (tracked) "%.0f%%".format(hero.banRate * 100) else "\u2014", MLBBPlusColors.Red)
             StatDivider()
             HeroStatItem(
                 Modifier.weight(1f),
                 "Trend",
-                (if (hero.patchTrend >= 0) "+" else "") + "%.0f%%".format(hero.patchTrend * 100),
+                if (tracked) (if (hero.patchTrend >= 0) "+" else "") + "%.0f%%".format(hero.patchTrend * 100) else "\u2014",
                 if (hero.patchTrend >= 0) MLBBPlusColors.Green else MLBBPlusColors.Red
             )
         }
@@ -333,7 +351,7 @@ fun HeroDetailScreen(hero: Hero, onBack: () -> Unit, onHeroClick: (Hero) -> Unit
                                 hero.bestPartners.forEach { HeroChip(it) }
                             }
                         } else {
-                            NoData("No data \u2014 fill synergies in heroes.json")
+                            NoData("No synergy data for this hero yet")
                         }
                     }
                 }
@@ -358,6 +376,35 @@ private fun NoData(text: String) {
 @Composable
 private fun HeroOverviewTab(hero: Hero, itemsById: Map<Int, Item>) {
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        // ---- This patch (patch_notes.json) ----
+        GameData.patchChangeForHero(hero.id)?.let { change ->
+            val c = patchBadgeColor(change.type)
+            Column(
+                Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).background(c.copy(alpha = 0.10f))
+                    .border(1.dp, c.copy(alpha = 0.45f), RoundedCornerShape(12.dp)).padding(12.dp),
+                verticalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                Text(
+                    "PATCH ${GameData.patchNotes.displayVersion} \u2022 ${change.type.uppercase().ifBlank { "CHANGE" }}" +
+                        if (change.tierChange.isNotBlank()) " \u2022 ${change.tierChange.replace("->", "\u2192")}" else "",
+                    color = c, fontSize = 12.sp, fontWeight = FontWeight.Bold, letterSpacing = 0.5.sp
+                )
+                if (change.title.isNotBlank()) Text(change.title, color = MLBBPlusColors.GithubText, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+                change.changes.forEach { Text("\u2022 $it", color = MLBBPlusColors.GithubText, fontSize = 13.sp, lineHeight = 18.sp) }
+                if (change.impact.isNotBlank()) Text("Impact: ${change.impact}", color = MLBBPlusColors.GithubSecondary, fontSize = 12.sp)
+            }
+        }
+        // ---- Where the overlay guides use this hero ----
+        val guideRefs = GameData.guideRefsForHero(hero.id)
+        if (guideRefs.isNotEmpty()) {
+            SubHeading("IN OVERLAY GUIDES")
+            guideRefs.forEach { ref ->
+                Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                    Text("${ref.role} \u2014 ${ref.typeLabel}", color = MLBBPlusColors.GithubText, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+                    if (ref.note.isNotBlank()) Text(ref.note, color = MLBBPlusColors.GithubSecondary, fontSize = 12.sp, lineHeight = 17.sp)
+                }
+            }
+        }
         HeroInfoRow("Lane", hero.lane)
         HeroInfoRow("Role", hero.displayRole)
         HeroInfoRow("Tier", hero.tier)
@@ -392,11 +439,13 @@ private fun HeroOverviewTab(hero: Hero, itemsById: Map<Int, Item>) {
                 Text(hero.recommendedEmblem.talents.joinToString(" \u2022 "), color = MLBBPlusColors.GithubSecondary, fontSize = 13.sp)
             }
         }
-        SubHeading("RECOMMENDED SPELLS")
-        Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            hero.recommendedSpells.forEach { HeroChip(it) }
+        if (hero.recommendedSpells.isNotEmpty()) {
+            SubHeading("RECOMMENDED SPELLS")
+            Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                hero.recommendedSpells.forEach { HeroChip(it) }
+            }
         }
-        SubHeading("CORE BUILD ORDER")
+        if (hero.coreItems.any { it.itemId != 0 }) SubHeading("CORE BUILD ORDER")
         hero.coreItems.filter { it.itemId != 0 }.forEach { item ->
             val resolved = itemsById[item.itemId]
             Row(horizontalArrangement = Arrangement.spacedBy(14.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -424,6 +473,12 @@ private fun HeroOverviewTab(hero: Hero, itemsById: Map<Int, Item>) {
             SubHeading("BEST PARTNERS")
             Text(hero.bestPartners.joinToString(", "), color = MLBBPlusColors.GithubText, fontSize = 14.sp)
         }
+        if (!hero.hasFullProfile) {
+            Text(
+                "Skills, build and counters for ${hero.name} are not in heroes.json yet.",
+                color = MLBBPlusColors.GithubSecondary.copy(alpha = 0.8f), fontSize = 12.sp
+            )
+        }
         SubHeading("BASE STATS")
         HeroInfoRow("HP", "${hero.stats.hp} (+${hero.stats.hpGrowth}/lvl)")
         HeroInfoRow("Attack", "${hero.stats.attack} (+${hero.stats.attackGrowth}/lvl)")
@@ -446,7 +501,7 @@ private fun HeroRelationTab(
                 items(listA, key = { it.id }) { h -> HeroPortraitSmall(h, onHeroClick) }
             }
         } else {
-            NoData("No data \u2014 fill counters in heroes.json")
+            NoData("No counter data for this hero yet")
         }
         Box(Modifier.fillMaxWidth().height(1.dp).background(MLBBPlusColors.GithubBorder))
         SubHeading(sectionB)
@@ -456,7 +511,7 @@ private fun HeroRelationTab(
                 items(listB, key = { it.id }) { h -> HeroPortraitSmall(h, onHeroClick) }
             }
         } else {
-            NoData("No data \u2014 fill counters in heroes.json")
+            NoData("No counter data for this hero yet")
         }
     }
 }

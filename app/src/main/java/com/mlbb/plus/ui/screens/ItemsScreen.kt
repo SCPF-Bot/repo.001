@@ -71,11 +71,14 @@ private fun tierRank(tier: String): Int = when (tier.uppercase().trim()) {
 fun ItemsScreen(onItemClick: (Item) -> Unit) {
     var query by remember { mutableStateOf("") }
     var selectedCat by remember { mutableStateOf<String?>(null) }
+    var guideOnly by remember { mutableStateOf(false) }
+    val patchItemIds = remember(GameData.patchNotes) { GameData.patchNotes.originalServer.itemChanges.map { it.itemId }.toSet() }
     val cats = listOf<String?>(null, "Attack", "Magic", "Defense", "Movement", "Roam", "Jungle")
     // FIX [6]: recompute only when inputs change.
-    val filtered = remember(query, selectedCat, GameData.items) {
+    val filtered = remember(query, selectedCat, guideOnly, GameData.items) {
         GameData.items.filter {
-            (selectedCat == null || it.category == selectedCat) && (query.isBlank() || it.name.contains(query, ignoreCase = true))
+            (!guideOnly || GameData.guideRefsForItem(it.name).isNotEmpty()) &&
+                (selectedCat == null || it.category == selectedCat) && (query.isBlank() || it.name.contains(query, ignoreCase = true))
         }.sortedWith(compareBy<Item> { tierRank(it.tier) }.thenBy { it.price })
     }
     Column(Modifier.fillMaxSize().background(MLBBPlusColors.GithubBg)) {
@@ -86,9 +89,13 @@ fun ItemsScreen(onItemClick: (Item) -> Unit) {
             items(cats) { cat ->
                 FilterPill(label = cat ?: "All", selected = selectedCat == cat, onClick = { selectedCat = cat })
             }
+            // Items that the role guides (jungle / mid / gold / exp *_guide.json) list as core items.
+            if (GameData.guides.values.any { g -> g.types.any { it.coreItems.isNotEmpty() } }) item {
+                FilterPill(label = "In role guides", selected = guideOnly, onClick = { guideOnly = !guideOnly })
+            }
         }
         if (filtered.isEmpty()) {
-            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { Text("No items found \u2014 check items.json", color = MLBBPlusColors.GithubSecondary) }
+            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { Text("No items match these filters", color = MLBBPlusColors.GithubSecondary) }
         } else {
             LazyVerticalGrid(
                 columns = GridCells.Fixed(3),
@@ -105,7 +112,14 @@ fun ItemsScreen(onItemClick: (Item) -> Unit) {
                             .border(1.dp, MLBBPlusColors.GithubBorder.copy(alpha = 0.7f), cardShape)
                             .clickable { onItemClick(item) }.padding(8.dp)
                     ) {
-                        ItemImage(item = item, modifier = Modifier.fillMaxWidth().aspectRatio(1f).clip(RoundedCornerShape(12.dp)).background(MLBBPlusColors.GithubSurface))
+                        Box(Modifier.fillMaxWidth().aspectRatio(1f)) {
+                            ItemImage(item = item, modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(12.dp)).background(MLBBPlusColors.GithubSurface))
+                            if (item.id in patchItemIds) {
+                                Box(Modifier.align(Alignment.TopEnd).clip(RoundedCornerShape(6.dp)).background(MLBBPlusColors.Orange).padding(horizontal = 4.dp, vertical = 2.dp)) {
+                                    Text("PATCH", color = Color.Black, fontSize = 8.sp, fontWeight = FontWeight.Bold)
+                                }
+                            }
+                        }
                         Text(item.name, maxLines = 1, overflow = TextOverflow.Ellipsis, color = MLBBPlusColors.GithubText.copy(alpha = 0.85f), fontSize = 11.sp, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth().padding(top = 8.dp))
                         Text("${item.price} Gold", color = MLBBPlusColors.Gold.copy(alpha = 0.85f), fontSize = 10.sp, modifier = Modifier.padding(bottom = 2.dp))
                     }
@@ -145,7 +159,7 @@ fun ItemDetailScreen(item: Item, onBack: () -> Unit, onItemClick: (Item) -> Unit
         }
         Column(Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             when (activeTab) {
-                DetailTab.OVERVIEW -> ItemOverviewTab(item, onItemClick)
+                DetailTab.OVERVIEW -> ItemOverviewTab(item, onItemClick, onHeroClick)
                 DetailTab.COUNTERS -> ItemRelationTab("ITEMS THAT COUNTER ${item.name.uppercase()}", item.counteredBy.mapNotNull { itemsById[it] }, "${item.name.uppercase()} COUNTERS", item.counters.mapNotNull { itemsById[it] }, onItemClick)
                 DetailTab.SYNERGIES -> {
                     Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
@@ -154,7 +168,7 @@ fun ItemDetailScreen(item: Item, onBack: () -> Unit, onItemClick: (Item) -> Unit
                         if (partners.isNotEmpty()) {
                             LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) { items(partners, key = { it.id }) { h -> HeroPortraitSmall(h, onHeroClick) } }
                         } else if (item.synergiesHeroes.isEmpty()) {
-                            Text("No data \u2014 fill synergiesHeroes in items.json", color = MLBBPlusColors.GithubSecondary, fontSize = 12.sp)
+                            Text("No hero synergy data for this item yet", color = MLBBPlusColors.GithubSecondary, fontSize = 12.sp)
                         }
                         Box(Modifier.fillMaxWidth().height(1.dp).background(MLBBPlusColors.GithubBorder))
                         Text("WORKS BEST AGAINST", color = MLBBPlusColors.Gold, fontSize = 10.sp, fontWeight = FontWeight.Bold, letterSpacing = 0.8.sp)
@@ -162,7 +176,7 @@ fun ItemDetailScreen(item: Item, onBack: () -> Unit, onItemClick: (Item) -> Unit
                         if (against.isNotEmpty()) {
                             LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) { items(against, key = { it.id }) { h -> HeroPortraitSmall(h, onHeroClick) } }
                         } else if (item.worksAgainstHeroes.isEmpty()) {
-                            Text("No data \u2014 fill worksAgainstHeroes in items.json", color = MLBBPlusColors.GithubSecondary, fontSize = 12.sp)
+                            Text("No \"works against\" data for this item yet", color = MLBBPlusColors.GithubSecondary, fontSize = 12.sp)
                         }
                     }
                 }
@@ -172,8 +186,37 @@ fun ItemDetailScreen(item: Item, onBack: () -> Unit, onItemClick: (Item) -> Unit
 }
 
 @Composable
-private fun ItemOverviewTab(item: Item, onItemClick: (Item) -> Unit) {
+private fun ItemOverviewTab(item: Item, onItemClick: (Item) -> Unit, onHeroClick: (Hero) -> Unit) {
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        // ---- This patch (patch_notes.json itemChanges) ----
+        GameData.patchChangeForItem(item.id)?.let { change ->
+            Column(
+                Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).background(MLBBPlusColors.Orange.copy(alpha = 0.10f))
+                    .border(1.dp, MLBBPlusColors.Orange.copy(alpha = 0.45f), RoundedCornerShape(12.dp)).padding(12.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                Text("PATCH ${GameData.patchNotes.displayVersion} \u2022 ${change.type.uppercase().ifBlank { "CHANGE" }}", color = MLBBPlusColors.Orange, fontSize = 11.sp, fontWeight = FontWeight.Bold, letterSpacing = 0.8.sp)
+                change.changes.forEach { Text("\u2022 $it", color = MLBBPlusColors.GithubText, fontSize = 13.sp) }
+            }
+        }
+        // ---- Role guides that list this item as a core item ----
+        val guideRefs = GameData.guideRefsForItem(item.name)
+        if (guideRefs.isNotEmpty()) {
+            Text("CORE IN OVERLAY GUIDES", color = MLBBPlusColors.Gold, fontSize = 10.sp, fontWeight = FontWeight.Bold, letterSpacing = 0.8.sp)
+            Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                guideRefs.forEach { ref ->
+                    Box(Modifier.clip(RoundedCornerShape(20.dp)).background(MLBBPlusColors.Gold.copy(alpha = 0.12f)).border(1.dp, MLBBPlusColors.Gold.copy(alpha = 0.35f), RoundedCornerShape(20.dp)).padding(horizontal = 12.dp, vertical = 6.dp)) {
+                        Text("${ref.role} \u2022 ${ref.typeLabel}", color = MLBBPlusColors.Gold, fontSize = 12.sp)
+                    }
+                }
+            }
+        }
+        // ---- Heroes whose core build (heroes.json) includes it ----
+        val coreOn = GameData.heroesUsingItem(item.id)
+        if (coreOn.isNotEmpty()) {
+            Text("CORE ON HEROES", color = MLBBPlusColors.Gold, fontSize = 10.sp, fontWeight = FontWeight.Bold, letterSpacing = 0.8.sp)
+            LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) { items(coreOn, key = { it.id }) { h -> HeroPortraitSmall(h, onHeroClick) } }
+        }
         Text("FULL DESCRIPTION", color = MLBBPlusColors.Gold, fontSize = 10.sp, fontWeight = FontWeight.Bold, letterSpacing = 0.8.sp)
         Text(item.description.ifBlank { "No description" }, color = MLBBPlusColors.GithubText, fontSize = 13.sp)
         if (item.passiveName != null) { Text("PASSIVE \u2014 ${item.passiveName}", color = MLBBPlusColors.Gold, fontSize = 10.sp, fontWeight = FontWeight.Bold, letterSpacing = 0.8.sp); Text(item.passiveDescription ?: "", color = MLBBPlusColors.GithubText, fontSize = 13.sp) }
@@ -213,14 +256,14 @@ private fun ItemRelationTab(sectionA: String, itemsA: List<Item>, sectionB: Stri
         if (itemsA.isNotEmpty()) {
             LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) { items(itemsA, key = { it.id }) { it -> ItemPortraitSmall(it, onItemClick) } }
         } else {
-            Text("No data", color = MLBBPlusColors.GithubSecondary, fontSize = 12.sp)
+            Text("No counter data for this item yet", color = MLBBPlusColors.GithubSecondary, fontSize = 12.sp)
         }
         Box(Modifier.fillMaxWidth().height(1.dp).background(MLBBPlusColors.GithubBorder))
         Text(sectionB, color = MLBBPlusColors.Gold, fontSize = 10.sp, fontWeight = FontWeight.Bold, letterSpacing = 0.8.sp)
         if (itemsB.isNotEmpty()) {
             LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) { items(itemsB, key = { it.id }) { it -> ItemPortraitSmall(it, onItemClick) } }
         } else {
-            Text("No data", color = MLBBPlusColors.GithubSecondary, fontSize = 12.sp)
+            Text("No counter data for this item yet", color = MLBBPlusColors.GithubSecondary, fontSize = 12.sp)
         }
     }
 }

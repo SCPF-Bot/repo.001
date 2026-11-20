@@ -107,7 +107,8 @@ class MainActivity : ComponentActivity() {
 private fun MLBBPlusApp(onLaunchWidget: (String, String) -> Unit) {
     var tab by remember { mutableStateOf(Tab.HOME) }
     var selectedRole by remember { mutableStateOf("Roam") }
-    var selectedRoleType by remember { mutableStateOf("Tank") }
+    // The type is a guide type ID from <role>_guide.json ("initiator", "crit", ...), not a label.
+    var selectedRoleType by remember { mutableStateOf(RoleTypes.defaultTypeFor("Roam")) }
     var selectedHero by remember { mutableStateOf<Hero?>(null) }
     var selectedItem by remember { mutableStateOf<Item?>(null) }
     // FIX [6]: where should Back from HeroDetail go?
@@ -138,13 +139,11 @@ private fun MLBBPlusApp(onLaunchWidget: (String, String) -> Unit) {
         autoStartLastRole = prefs.getBoolean("auto_start_last_role", false)
     }
 
-    // FIX [7] + new batch: single source of truth.
-    // Old: this map duplicated HomeScreen's map. Now both use
-    // RoleTypes in Models.kt, so they cannot diverge.
-    val validTypes = remember { RoleTypes.byRole }
+    // Types come from the guide files (RoleTypes -> GameData.guides), so the dropdown, this
+    // check and the overlay can never disagree. Re-pick the first type when the role changes.
     LaunchedEffect(selectedRole) {
-        val types = validTypes[selectedRole] ?: listOf("Tank")
-        if (selectedRoleType !in types) selectedRoleType = types.first()
+        val types = RoleTypes.typesFor(selectedRole)
+        if (selectedRoleType !in types) selectedRoleType = types.firstOrNull().orEmpty()
     }
 
     // FIX [8]: single theme wrapper, not inline darkColorScheme.
@@ -241,7 +240,21 @@ private fun MLBBPlusApp(onLaunchWidget: (String, String) -> Unit) {
                             }
                         )
                     }
-                    Tab.PATCH -> PatchNotesScreen()
+                    Tab.PATCH -> PatchNotesScreen(
+                        onHeroClick = { heroId ->
+                            GameData.heroesById[heroId]?.let {
+                                selectedHero = it
+                                heroReturnTab = Tab.PATCH
+                                tab = Tab.HEROES
+                            }
+                        },
+                        onItemClick = { itemId ->
+                            GameData.itemsById[itemId]?.let {
+                                selectedItem = it
+                                tab = Tab.ITEMS
+                            }
+                        }
+                    )
                     Tab.SETTINGS -> SettingsScreen(
                         overlayGranted = overlayGranted,
                         // FIX [9]: do NOT set overlayGranted = true here.
