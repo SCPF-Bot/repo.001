@@ -3,12 +3,18 @@ package com.mlbb.plus.ui.screens
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -23,7 +29,7 @@ import com.mlbb.plus.ui.components.SectionLabel
 import com.mlbb.plus.ui.components.AppIcons
 import com.mlbb.plus.ui.components.ScreenTitleBar
 import com.mlbb.plus.ui.model.GameData
-import com.mlbb.plus.ui.theme.MLBBPlusColors
+import com.mlbb.plus.ui.theme.AppUiColors
 
 // ============================================================
 // plus/ui/screens/SettingsScreen.kt  ->  FIXED
@@ -55,42 +61,84 @@ import com.mlbb.plus.ui.theme.MLBBPlusColors
 
 @Composable
 fun SettingsScreen(overlayGranted: Boolean, onOverlayGrantedChange: (Boolean) -> Unit, autoStartLastRole: Boolean, onAutoStartChange: (Boolean) -> Unit) {
-    Column(Modifier.fillMaxSize().background(MLBBPlusColors.GithubBg)) {
+    Column(Modifier.fillMaxSize().background(AppUiColors.GithubBg)) {
         ScreenTitleBar("SETTINGS", AppIcons.Settings)
-        Box(Modifier.weight(1f)) {
-            SettingsContent(overlayGranted, onOverlayGrantedChange, autoStartLastRole, onAutoStartChange)
-        }
+        SettingsContent(overlayGranted, onOverlayGrantedChange, autoStartLastRole, onAutoStartChange)
     }
 }
 
 @Composable
 private fun SettingsContent(overlayGranted: Boolean, onOverlayGrantedChange: (Boolean) -> Unit, autoStartLastRole: Boolean, onAutoStartChange: (Boolean) -> Unit) {
-    Column(Modifier.fillMaxSize().background(MLBBPlusColors.GithubBg).verticalScroll(rememberScrollState()).padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        // FIX [1]: OFF is ignored - system permission cannot be
-        // revoked from a Switch. ON is a request to open settings.
+    Column(
+        Modifier.fillMaxSize().background(AppUiColors.GithubBg)
+            .verticalScroll(rememberScrollState()).padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        SectionLabel("FLOATING GUIDE")
+        Column(
+            Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp))
+                .background(AppUiColors.GithubCard)
+                .border(1.dp, AppUiColors.GithubBorder, RoundedCornerShape(16.dp)).padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                Box(Modifier.size(38.dp).clip(RoundedCornerShape(11.dp)).background((if (overlayGranted) AppUiColors.Green else AppUiColors.Orange).copy(alpha = 0.15f)), contentAlignment = Alignment.Center) {
+                    Text(if (overlayGranted) "✓" else "!", color = if (overlayGranted) AppUiColors.Green else AppUiColors.Orange, fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                }
+                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                    Text(if (overlayGranted) "Permission is enabled" else "Permission is needed", color = AppUiColors.GithubText, fontWeight = FontWeight.SemiBold, fontSize = 15.sp)
+                    Text(
+                        if (overlayGranted) "The floating guide is allowed to appear over other apps."
+                        else "Android needs your permission before the guide can appear over Mobile Legends.",
+                        color = AppUiColors.GithubSecondary, fontSize = 12.sp, lineHeight = 17.sp
+                    )
+                }
+            }
+            Button(
+                onClick = { onOverlayGrantedChange(true) },
+                modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = AppUiColors.Gold, contentColor = Color(0xFF171717)),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Text(if (overlayGranted) "Manage Android permission" else "Open Android settings", fontWeight = FontWeight.Bold)
+            }
+            Text(
+                "On the next screen, find MLBB Plus and enable ‘Display over other apps’. You can return here afterward.",
+                color = AppUiColors.GithubSecondary, fontSize = 11.sp, lineHeight = 16.sp
+            )
+        }
+
+        SectionLabel("STARTUP")
         SettingsRow(
-            title = "Overlay permission",
-            subtitle = if (overlayGranted) "Granted \u2022 turn off in system settings" else "Not granted \u2022 turn on to open system settings",
-            checked = overlayGranted,
-            onChecked = { wanted -> if (wanted) onOverlayGrantedChange(true) }
+            title = "Start the guide when the app opens",
+            subtitle = "Automatically show your last selected position and playstyle when you open MLBB Plus. Requires overlay permission.",
+            checked = autoStartLastRole,
+            onChecked = onAutoStartChange
         )
-        SettingsRow(title = "Auto-start last role", subtitle = "Launch widget automatically on app open", checked = autoStartLastRole, onChecked = onAutoStartChange)
+
         DataFilesSection()
-        Text("MLBB Plus v1.0", color = MLBBPlusColors.GithubSecondary, fontSize = 12.sp)
+        Text("MLBB Plus v1.0", color = AppUiColors.GithubSecondary, fontSize = 12.sp)
     }
 }
 
 @Composable
 private fun SettingsRow(title: String, subtitle: String, checked: Boolean, onChecked: (Boolean) -> Unit) {
     Row(
-        Modifier.fillMaxWidth().clip(RoundedCornerShape(14.dp)).background(MLBBPlusColors.GithubCard).border(1.dp, MLBBPlusColors.GithubBorder, RoundedCornerShape(14.dp))
-            .semantics { role = Role.Switch }
-            .clickable { onChecked(!checked) }
-            .padding(14.dp),
+        Modifier.fillMaxWidth().clip(RoundedCornerShape(14.dp)).background(AppUiColors.GithubCard)
+            .border(1.dp, AppUiColors.GithubBorder, RoundedCornerShape(14.dp))
+            .toggleable(value = checked, role = Role.Switch, onValueChange = onChecked)
+            .heightIn(min = 76.dp).padding(14.dp),
         horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically
     ) {
-        Column { Text(title, color = MLBBPlusColors.GithubText, fontWeight = FontWeight.SemiBold, fontSize = 14.sp); Text(subtitle, color = MLBBPlusColors.GithubSecondary, fontSize = 12.sp) }
-        Switch(checked = checked, onCheckedChange = onChecked, colors = SwitchDefaults.colors(checkedThumbColor = MLBBPlusColors.Gold, checkedTrackColor = MLBBPlusColors.Gold.copy(alpha = 0.3f)))
+        Column(Modifier.weight(1f).padding(end = 12.dp), verticalArrangement = Arrangement.spacedBy(3.dp)) {
+            Text(title, color = AppUiColors.GithubText, fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
+            Text(subtitle, color = AppUiColors.GithubSecondary, fontSize = 12.sp, lineHeight = 17.sp)
+        }
+        Switch(
+            checked = checked,
+            onCheckedChange = null,
+            colors = SwitchDefaults.colors(checkedThumbColor = AppUiColors.Gold, checkedTrackColor = AppUiColors.Gold.copy(alpha = 0.3f))
+        )
     }
 }
 
@@ -102,32 +150,47 @@ private fun SettingsRow(title: String, subtitle: String, checked: Boolean, onChe
 private fun DataFilesSection() {
     val notes = GameData.patchNotes
     val livePatch = notes.displayVersion
-    SectionLabel("DATA FILES")
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+    var expanded by rememberSaveable { mutableStateOf(false) }
+    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        Row(
+            Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).background(AppUiColors.GithubCard)
+                .border(1.dp, AppUiColors.GithubBorder, RoundedCornerShape(12.dp))
+                .semantics { role = Role.Button }.clickable { expanded = !expanded }
+                .heightIn(min = 56.dp).padding(horizontal = 14.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Column(Modifier.weight(1f)) {
+                Text("Data status & troubleshooting", color = AppUiColors.GithubText, fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
+                Text("Advanced details about the app's local guide files", color = AppUiColors.GithubSecondary, fontSize = 11.sp)
+            }
+            Text(if (expanded) "−" else "+", color = AppUiColors.Gold, fontSize = 22.sp, fontWeight = FontWeight.Medium)
+        }
+        if (expanded) Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         val fullProfiles = GameData.heroes.count { it.hasFullProfile }
         DataRow(
             "heroes.json",
             "${GameData.liveHeroes.size} live \u2022 ${GameData.advancedHeroes.size} advanced \u2022 $fullProfiles with full profile (skills + build)",
             if (GameData.heroes.isEmpty()) "MISSING" else if (fullProfiles < GameData.heroes.size) "PARTIAL" else "OK",
-            if (GameData.heroes.isEmpty()) MLBBPlusColors.Red else if (fullProfiles < GameData.heroes.size) MLBBPlusColors.Orange else MLBBPlusColors.Green
+            if (GameData.heroes.isEmpty()) AppUiColors.Red else if (fullProfiles < GameData.heroes.size) AppUiColors.Orange else AppUiColors.Green
         )
         DataRow(
             "items.json",
             "${GameData.items.size} items",
             if (GameData.items.isEmpty()) "MISSING" else "OK",
-            if (GameData.items.isEmpty()) MLBBPlusColors.Red else MLBBPlusColors.Green
+            if (GameData.items.isEmpty()) AppUiColors.Red else AppUiColors.Green
         )
         val adv = if (notes.advancedServer.hasContent) " \u2022 Advanced ${notes.advancedDisplayVersion}" else " \u2022 no Advanced / Nov 01 data in file"
         DataRow(
             "patch_notes.json",
             "Patch $livePatch \u2022 ${notes.originalServer.heroChanges.size} hero / ${notes.originalServer.itemChanges.size} item changes$adv",
             if (notes.originalServer.hasContent) "OK" else "MISSING",
-            if (notes.originalServer.hasContent) MLBBPlusColors.Green else MLBBPlusColors.Red
+            if (notes.originalServer.hasContent) AppUiColors.Green else AppUiColors.Red
         )
         com.mlbb.plus.ui.model.RoleTypes.roles.forEach { role ->
             val g = GameData.guides[role]
             if (g == null) {
-                DataRow("${role.lowercase()}_guide.json", "Not found or invalid \u2014 overlay runs without a guide", "MISSING", MLBBPlusColors.Red)
+                DataRow("${role.lowercase()}_guide.json", "Not found or invalid \u2014 overlay runs without a guide", "MISSING", AppUiColors.Red)
             } else {
                 val older = g.patch.isNotBlank() && g.patch != livePatch
                 DataRow(
@@ -136,17 +199,18 @@ private fun DataFilesSection() {
                         (if (g.updated.isNotBlank()) " \u2022 ${g.updated}" else "") +
                         (if (older) " \u2022 older than $livePatch" else ""),
                     if (older) "OLDER" else "OK",
-                    if (older) MLBBPlusColors.Orange else MLBBPlusColors.Green
+                    if (older) AppUiColors.Orange else AppUiColors.Green
                 )
             }
         }
         val missingPicks = GameData.unlinkedGuidePicks
         val missingItems = GameData.unlinkedGuideItems
         if (missingPicks.isNotEmpty()) {
-            Text("Guide picks not in heroes.json: ${missingPicks.joinToString(", ")}", color = MLBBPlusColors.Orange, fontSize = 12.sp)
+            Text("Guide picks not in heroes.json: ${missingPicks.joinToString(", ")}", color = AppUiColors.Orange, fontSize = 12.sp)
         }
         if (missingItems.isNotEmpty()) {
-            Text("Guide core items not in items.json: ${missingItems.joinToString(", ")}", color = MLBBPlusColors.Orange, fontSize = 12.sp)
+            Text("Guide core items not in items.json: ${missingItems.joinToString(", ")}", color = AppUiColors.Orange, fontSize = 12.sp)
+        }
         }
     }
 }
@@ -154,13 +218,13 @@ private fun DataFilesSection() {
 @Composable
 private fun DataRow(name: String, detail: String, status: String, color: Color) {
     Row(
-        Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).background(MLBBPlusColors.GithubCard)
-            .border(1.dp, MLBBPlusColors.GithubBorder, RoundedCornerShape(12.dp)).padding(12.dp),
+        Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).background(AppUiColors.GithubCard)
+            .border(1.dp, AppUiColors.GithubBorder, RoundedCornerShape(12.dp)).padding(12.dp),
         horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically
     ) {
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-            Text(name, color = MLBBPlusColors.GithubText, fontWeight = FontWeight.SemiBold, fontSize = 13.sp)
-            Text(detail, color = MLBBPlusColors.GithubSecondary, fontSize = 11.sp, lineHeight = 15.sp)
+            Text(name, color = AppUiColors.GithubText, fontWeight = FontWeight.SemiBold, fontSize = 13.sp)
+            Text(detail, color = AppUiColors.GithubSecondary, fontSize = 11.sp, lineHeight = 15.sp)
         }
         Box(
             Modifier.clip(RoundedCornerShape(8.dp)).background(color.copy(alpha = 0.16f))

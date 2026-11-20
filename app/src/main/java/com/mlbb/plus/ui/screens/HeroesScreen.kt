@@ -33,11 +33,13 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -54,50 +56,65 @@ import com.mlbb.plus.ui.components.AppIcons
 import com.mlbb.plus.ui.components.FilterPill
 import com.mlbb.plus.ui.components.ScreenTitleBar
 import com.mlbb.plus.ui.components.SearchField
+import com.mlbb.plus.ui.components.SortMenu
 import com.mlbb.plus.ui.components.StatDivider
 import com.mlbb.plus.ui.components.SubHeading
 import com.mlbb.plus.ui.model.GameData
 import com.mlbb.plus.ui.model.Hero
 import com.mlbb.plus.ui.model.Item
-import com.mlbb.plus.ui.theme.MLBBPlusColors
+import com.mlbb.plus.ui.theme.AppUiColors
 
 // Hero Explorer + Hero detail, restyled to the gold/navy look.
-// Logic (filters, tabs, relations, fallbacks) is unchanged from the previous version.
+// FIX 2026-11-21 - Synergies / Counters self-reference + bestPartners type:
+//  [A] JSON had self in synergies/counters (Angela [34,55], Hanabi [60,65], Claude [60,65]...).
+//      UI had no filter, so it showed Angela as her own partner.
+//  [B] Models.kt bestPartners was List<String> but JSON sends List<Int> IDs.
+//      Old parsing turned [34,55] into ["34","55"], so Overview showed "34, 55".
+//      Fixed in Models.kt (List<Int> + toIntList) + here (resolve IDs -> names, filter self).
 
 enum class DetailTab { OVERVIEW, COUNTERS, SYNERGIES }
 
 private fun tierColor(tier: String): Color {
     val t = tier.uppercase().trim()
     return when {
-        t.startsWith("S") -> MLBBPlusColors.TierS
-        t.startsWith("A") -> MLBBPlusColors.TierA
-        t.isBlank() -> MLBBPlusColors.TierA
-        else -> MLBBPlusColors.TierB
+        t.startsWith("S") -> AppUiColors.TierS
+        t.startsWith("A") -> AppUiColors.TierA
+        t.isBlank() -> AppUiColors.TierA
+        else -> AppUiColors.TierB
     }
 }
 
 @Composable
 fun HeroesScreen(onHeroClick: (Hero) -> Unit) {
-    var query by remember { mutableStateOf("") }
-    var selectedRole by remember { mutableStateOf<String?>(null) }
-    var showAdvanced by remember { mutableStateOf(false) }
-    var selectedTier by remember { mutableStateOf<String?>(null) }
-    var patchOnly by remember { mutableStateOf(false) }
+    var query by rememberSaveable { mutableStateOf("") }
+    var selectedRole by rememberSaveable { mutableStateOf<String?>(null) }
+    var showAdvanced by rememberSaveable { mutableStateOf(false) }
+    var selectedTier by rememberSaveable { mutableStateOf<String?>(null) }
+    var patchOnly by rememberSaveable { mutableStateOf(false) }
+    var sortBy by rememberSaveable { mutableStateOf("Recommended") }
     val hasAdvanced = GameData.advancedHeroes.isNotEmpty()
     val patchChangeIds = remember(GameData.patchNotes) { GameData.patchNotes.originalServer.heroChanges.map { it.heroId }.toSet() }
     val allHeroes = if (showAdvanced) GameData.heroes else GameData.liveHeroes
     val roles = listOf<String?>(null, "Tank", "Fighter", "Mage", "Marksman", "Assassin", "Support")
-    val tiers = listOf<String?>(null, "S", "A", "B")
-    val filtered = remember(query, selectedRole, selectedTier, showAdvanced, patchOnly, allHeroes) {
-        allHeroes.filter {
+    val tiers = listOf<String?>(null, "S", "A", "B", "C")
+    val filtered = remember(query, selectedRole, selectedTier, showAdvanced, patchOnly, allHeroes, sortBy) {
+        val matches = allHeroes.filter {
             (!patchOnly || it.id in patchChangeIds) &&
                 (selectedRole == null || it.role == selectedRole || it.secondaryRole == selectedRole) &&
                 (selectedTier == null || it.tier.uppercase().trim() == selectedTier) &&
-                (query.isBlank() || it.name.contains(query, ignoreCase = true) || it.title.contains(query, ignoreCase = true))
-        }.sortedWith(compareByDescending<Hero> { it.isMeta }.thenByDescending { it.winRate })
+                (query.isBlank() || it.name.contains(query, ignoreCase = true) || it.title.contains(query, ignoreCase = true) || it.slug.contains(query, ignoreCase = true) || it.tags.any { tag -> tag.contains(query, ignoreCase = true) })
+        }
+        when (sortBy) {
+            "Name A–Z" -> matches.sortedBy { it.name.lowercase() }
+            "Win rate" -> matches.sortedByDescending { it.winRate }
+            "Tier" -> matches.sortedWith(compareBy<Hero> { when (it.tier.uppercase().trim()) { "S" -> 0; "A" -> 1; "B" -> 2; "C" -> 3; else -> 4 } }.thenBy { it.name })
+            else -> matches.sortedWith(compareByDescending<Hero> { it.isMeta }.thenByDescending { it.winRate })
+        }
     }
+    val hasActiveFilters = query.isNotBlank() || selectedRole != null || selectedTier != null || patchOnly
+    fun clearFilters() { query = ""; selectedRole = null; selectedTier = null; patchOnly = false }
 
-    Column(Modifier.fillMaxSize().background(MLBBPlusColors.GithubBg)) {
+    Column(Modifier.fillMaxSize().background(AppUiColors.GithubBg)) {
         ScreenTitleBar("HERO EXPLORER", AppIcons.Person)
 
         Row(
@@ -106,28 +123,32 @@ fun HeroesScreen(onHeroClick: (Hero) -> Unit) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                "${filtered.size} heroes \u2022 Patch ${GameData.patchNotes.displayVersion}",
-                color = MLBBPlusColors.GithubSecondary,
+                "Patch ${GameData.patchNotes.displayVersion} • ${allHeroes.size} available heroes",
+                color = AppUiColors.GithubSecondary,
                 fontSize = 12.sp
             )
             // heroes.json has no Advanced-server-only heroes right now, so the switch would do nothing.
             if (hasAdvanced) Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text("Advanced", color = MLBBPlusColors.GithubSecondary, fontSize = 12.sp)
+                Text("Advanced server", color = AppUiColors.GithubSecondary, fontSize = 12.sp)
                 Switch(
                     checked = showAdvanced,
                     onCheckedChange = { showAdvanced = it },
                     colors = SwitchDefaults.colors(
                         checkedThumbColor = Color.Black,
-                        checkedTrackColor = MLBBPlusColors.Gold,
-                        uncheckedThumbColor = MLBBPlusColors.GithubSecondary,
-                        uncheckedTrackColor = MLBBPlusColors.GithubSurface,
-                        uncheckedBorderColor = MLBBPlusColors.GithubBorder
+                        checkedTrackColor = AppUiColors.Gold,
+                        uncheckedThumbColor = AppUiColors.GithubSecondary,
+                        uncheckedTrackColor = AppUiColors.GithubSurface,
+                        uncheckedBorderColor = AppUiColors.GithubBorder
                     )
                 )
             }
         }
 
-        SearchField(query = query, onQueryChange = { query = it }, placeholder = "Search heroes\u2026")
+        SearchField(query = query, onQueryChange = { query = it }, placeholder = "Search by hero, title, or tag")
+        Row(Modifier.fillMaxWidth().padding(start = 16.dp, end = 8.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
+            Text("Filter by role", color = AppUiColors.GithubSecondary, fontSize = 11.sp, fontWeight = FontWeight.SemiBold)
+            SortMenu(selected = sortBy, options = listOf("Recommended", "Name A–Z", "Win rate", "Tier"), onSelect = { sortBy = it })
+        }
 
         LazyRow(
             horizontalArrangement = Arrangement.spacedBy(10.dp),
@@ -138,26 +159,36 @@ fun HeroesScreen(onHeroClick: (Hero) -> Unit) {
                 FilterPill(label = role ?: "All", selected = selectedRole == role, onClick = { selectedRole = role })
             }
         }
+        Row(Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 2.dp), verticalAlignment = Alignment.CenterVertically) {
+            Text("Filter by tier", color = AppUiColors.GithubSecondary, fontSize = 11.sp, fontWeight = FontWeight.SemiBold)
+        }
         LazyRow(
             horizontalArrangement = Arrangement.spacedBy(10.dp),
             contentPadding = PaddingValues(horizontal = 16.dp),
-            modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
+            modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp)
         ) {
             items(tiers) { t ->
                 FilterPill(label = if (t == null) "All Tiers" else "Tier $t", selected = selectedTier == t, onClick = { selectedTier = t })
             }
             if (patchChangeIds.isNotEmpty()) item {
-                FilterPill(label = "Patch ${GameData.patchNotes.displayVersion} changes", selected = patchOnly, onClick = { patchOnly = !patchOnly })
+                FilterPill(label = "Changed this patch", selected = patchOnly, onClick = { patchOnly = !patchOnly })
             }
         }
 
+        Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
+            Text("${filtered.size} of ${allHeroes.size} heroes", color = AppUiColors.GithubSecondary, fontSize = 12.sp)
+            if (hasActiveFilters) TextButton(onClick = { clearFilters() }) { Text("Clear filters", color = AppUiColors.Gold) }
+        }
         if (filtered.isEmpty()) {
-            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text("No heroes match these filters", color = MLBBPlusColors.GithubSecondary)
+            Column(Modifier.fillMaxWidth().weight(1f).padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+                Text("No heroes found", color = AppUiColors.GithubText, fontWeight = FontWeight.SemiBold, fontSize = 17.sp)
+                Spacer(Modifier.height(6.dp))
+                Text("Try a different name or remove one or more filters.", color = AppUiColors.GithubSecondary, fontSize = 13.sp, textAlign = TextAlign.Center)
+                if (hasActiveFilters) TextButton(onClick = { clearFilters() }) { Text("Reset search and filters", color = AppUiColors.Gold) }
             }
         } else {
             LazyVerticalGrid(
-                columns = GridCells.Fixed(3),
+                columns = GridCells.Adaptive(minSize = 104.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp),
                 horizontalArrangement = Arrangement.spacedBy(10.dp),
                 contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 16.dp),
@@ -178,8 +209,8 @@ private fun HeroGridCard(hero: Hero, onClick: () -> Unit) {
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
             .clip(shape)
-            .background(MLBBPlusColors.GithubCard)
-            .border(1.dp, MLBBPlusColors.GithubBorder.copy(alpha = 0.7f), shape)
+            .background(AppUiColors.GithubCard)
+            .border(1.dp, AppUiColors.GithubBorder.copy(alpha = 0.7f), shape)
             .clickable(role = Role.Button, onClick = onClick)
             .padding(8.dp)
     ) {
@@ -188,12 +219,12 @@ private fun HeroGridCard(hero: Hero, onClick: () -> Unit) {
                 hero = hero,
                 modifier = Modifier
                     .fillMaxSize()
-                    .clip(CircleShape)
-                    .border(1.dp, tierColor(hero.tier).copy(alpha = 0.35f), CircleShape)
+                    .clip(RoundedCornerShape(12.dp))
+                    .border(1.dp, tierColor(hero.tier).copy(alpha = 0.45f), RoundedCornerShape(12.dp))
             )
             if (!hero.isLive) {
                 Box(
-                    Modifier.align(Alignment.TopEnd).clip(RoundedCornerShape(6.dp)).background(MLBBPlusColors.Orange)
+                    Modifier.align(Alignment.TopEnd).clip(RoundedCornerShape(6.dp)).background(AppUiColors.Orange)
                         .padding(horizontal = 4.dp, vertical = 2.dp)
                 ) { Text("ADV", color = Color.Black, fontSize = 8.sp, fontWeight = FontWeight.Bold) }
             }
@@ -206,7 +237,7 @@ private fun HeroGridCard(hero: Hero, onClick: () -> Unit) {
             }
             if (hero.isOP) {
                 Box(
-                    Modifier.align(Alignment.TopStart).clip(RoundedCornerShape(6.dp)).background(MLBBPlusColors.Gold)
+                    Modifier.align(Alignment.TopStart).clip(RoundedCornerShape(6.dp)).background(AppUiColors.Gold)
                         .padding(horizontal = 4.dp, vertical = 2.dp)
                 ) { Text("OP", color = Color.Black, fontSize = 8.sp, fontWeight = FontWeight.Bold) }
             }
@@ -215,7 +246,7 @@ private fun HeroGridCard(hero: Hero, onClick: () -> Unit) {
             hero.name,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
-            color = MLBBPlusColors.GithubText.copy(alpha = 0.85f),
+            color = AppUiColors.GithubText.copy(alpha = 0.85f),
             fontSize = 12.sp,
             textAlign = TextAlign.Center,
             modifier = Modifier.fillMaxWidth().padding(top = 8.dp, bottom = 2.dp)
@@ -229,7 +260,7 @@ fun HeroDetailScreen(hero: Hero, onBack: () -> Unit, onHeroClick: (Hero) -> Unit
     val related = GameData.heroesById
     val itemsById = GameData.itemsById
 
-    Column(Modifier.fillMaxSize().background(MLBBPlusColors.GithubBg)) {
+    Column(Modifier.fillMaxSize().background(AppUiColors.GithubBg)) {
         // ---- Banner ----
         Box(Modifier.fillMaxWidth().height(230.dp)) {
             HeroImage(hero = hero, modifier = Modifier.fillMaxSize())
@@ -239,8 +270,8 @@ fun HeroDetailScreen(hero: Hero, onBack: () -> Unit, onHeroClick: (Hero) -> Unit
                         listOf(
                             Color.Black.copy(alpha = 0.25f),
                             Color.Transparent,
-                            MLBBPlusColors.GithubBg.copy(alpha = 0.55f),
-                            MLBBPlusColors.GithubBg
+                            AppUiColors.GithubBg.copy(alpha = 0.55f),
+                            AppUiColors.GithubBg
                         )
                     )
                 )
@@ -250,13 +281,13 @@ fun HeroDetailScreen(hero: Hero, onBack: () -> Unit, onHeroClick: (Hero) -> Unit
                     .align(Alignment.TopStart)
                     .statusBarsPadding()
                     .padding(8.dp)
-                    .size(44.dp)
+                    .size(48.dp)
                     .clip(CircleShape)
                     .background(Color.Black.copy(alpha = 0.35f))
                     .clickable(role = Role.Button, onClick = onBack),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(AppIcons.ArrowBack, contentDescription = "Back", tint = MLBBPlusColors.Gold)
+                Icon(AppIcons.ArrowBack, contentDescription = "Back", tint = AppUiColors.Gold)
             }
             Column(Modifier.align(Alignment.BottomStart).padding(horizontal = 20.dp, vertical = 14.dp)) {
                 Box(
@@ -269,11 +300,11 @@ fun HeroDetailScreen(hero: Hero, onBack: () -> Unit, onHeroClick: (Hero) -> Unit
                     Text("${hero.tier} Tier", color = Color.White.copy(alpha = 0.85f), fontSize = 13.sp)
                 }
                 Text(hero.name, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 32.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                Text(hero.displayRole, color = MLBBPlusColors.GithubSecondary, fontSize = 15.sp)
+                Text(hero.displayRole, color = AppUiColors.GithubSecondary, fontSize = 15.sp)
                 if (!hero.isLive) {
                     Text(
                         "\u26A0 ADVANCED SERVER ONLY",
-                        color = MLBBPlusColors.Orange,
+                        color = AppUiColors.Orange,
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Bold
                     )
@@ -286,39 +317,39 @@ fun HeroDetailScreen(hero: Hero, onBack: () -> Unit, onHeroClick: (Hero) -> Unit
         // show a dash for those instead of passing them off as real numbers.
         val tracked = hero.hasLiveStats
         Row(
-            Modifier.fillMaxWidth().background(MLBBPlusColors.GithubCard).padding(vertical = 16.dp),
+            Modifier.fillMaxWidth().background(AppUiColors.GithubCard).padding(vertical = 16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             // winRate / pickRate / banRate / patchTrend are 0..1 (Models.kt) -> *100 is correct.
-            HeroStatItem(Modifier.weight(1f), "Win Rate", if (tracked) "%.0f%%".format(hero.winRate * 100) else "\u2014", MLBBPlusColors.Green)
+            HeroStatItem(Modifier.weight(1f), "Win Rate", if (tracked) "%.0f%%".format(hero.winRate * 100) else "\u2014", AppUiColors.Green)
             StatDivider()
-            HeroStatItem(Modifier.weight(1f), "Pick Rate", if (tracked) "%.0f%%".format(hero.pickRate * 100) else "\u2014", MLBBPlusColors.Blue)
+            HeroStatItem(Modifier.weight(1f), "Pick Rate", if (tracked) "%.0f%%".format(hero.pickRate * 100) else "\u2014", AppUiColors.Blue)
             StatDivider()
-            HeroStatItem(Modifier.weight(1f), "Ban Rate", if (tracked) "%.0f%%".format(hero.banRate * 100) else "\u2014", MLBBPlusColors.Red)
+            HeroStatItem(Modifier.weight(1f), "Ban Rate", if (tracked) "%.0f%%".format(hero.banRate * 100) else "\u2014", AppUiColors.Red)
             StatDivider()
             HeroStatItem(
                 Modifier.weight(1f),
                 "Trend",
                 if (tracked) (if (hero.patchTrend >= 0) "+" else "") + "%.0f%%".format(hero.patchTrend * 100) else "\u2014",
-                if (hero.patchTrend >= 0) MLBBPlusColors.Green else MLBBPlusColors.Red
+                if (hero.patchTrend >= 0) AppUiColors.Green else AppUiColors.Red
             )
         }
 
         // ---- Tabs ----
         PrimaryTabRow(
             selectedTabIndex = activeTab.ordinal,
-            containerColor = MLBBPlusColors.Header,
-            contentColor = MLBBPlusColors.Gold
+            containerColor = AppUiColors.Header,
+            contentColor = AppUiColors.Gold
         ) {
             DetailTab.entries.forEach { tab ->
                 Tab(
                     selected = activeTab == tab,
                     onClick = { activeTab = tab },
-                    selectedContentColor = MLBBPlusColors.Gold,
-                    unselectedContentColor = MLBBPlusColors.Gold.copy(alpha = 0.8f),
+                    selectedContentColor = AppUiColors.Gold,
+                    unselectedContentColor = AppUiColors.Gold.copy(alpha = 0.8f),
                     text = {
                         Text(
-                            tab.name.lowercase().replaceFirstChar { it.uppercase() },
+                            if (tab == DetailTab.SYNERGIES) "Partners" else tab.name.lowercase().replaceFirstChar { it.uppercase() },
                             fontSize = 15.sp,
                             fontWeight = if (activeTab == tab) FontWeight.Bold else FontWeight.Normal
                         )
@@ -332,23 +363,24 @@ fun HeroDetailScreen(hero: Hero, onBack: () -> Unit, onHeroClick: (Hero) -> Unit
             verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
             when (activeTab) {
-                DetailTab.OVERVIEW -> HeroOverviewTab(hero, itemsById)
+                DetailTab.OVERVIEW -> HeroOverviewTab(hero, itemsById, related)
                 DetailTab.COUNTERS -> HeroRelationTab(
                     "Heroes that BEAT ${hero.name}", hero.counteredBy,
                     "${hero.name} BEATS", hero.counters,
-                    related, onHeroClick
+                    related, onHeroClick,
+                    currentHeroId = hero.id
                 )
                 DetailTab.SYNERGIES -> {
                     Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
                         SubHeading("BEST PARTNERS")
-                        val partners = hero.synergies.mapNotNull { related[it] }
-                        if (partners.isNotEmpty()) {
+                        // FIX: filter self - JSON bug put Angela (55) in her own synergies [34,55].
+                        // Also fall back to bestPartners as IDs (Models.kt FIX [10]), not name-chips.
+                        val partners = hero.synergies.filter { it != hero.id }.mapNotNull { related[it] }
+                        val fallbackPartners = hero.bestPartners.filter { it != hero.id }.mapNotNull { related[it] }
+                        val toShow = if (partners.isNotEmpty()) partners else fallbackPartners
+                        if (toShow.isNotEmpty()) {
                             LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                                items(partners, key = { it.id }) { h -> HeroPortraitSmall(h, onHeroClick) }
-                            }
-                        } else if (hero.bestPartners.isNotEmpty()) {
-                            Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                hero.bestPartners.forEach { HeroChip(it) }
+                                items(toShow, key = { it.id }) { h -> HeroPortraitSmall(h, onHeroClick) }
                             }
                         } else {
                             NoData("No synergy data for this hero yet")
@@ -364,17 +396,17 @@ fun HeroDetailScreen(hero: Hero, onBack: () -> Unit, onHeroClick: (Hero) -> Unit
 private fun HeroStatItem(modifier: Modifier, label: String, value: String, color: Color) {
     Column(modifier, horizontalAlignment = Alignment.CenterHorizontally) {
         Text(value, color = color, fontWeight = FontWeight.Bold, fontSize = 22.sp, maxLines = 1)
-        Text(label, color = MLBBPlusColors.GithubSecondary.copy(alpha = 0.8f), fontSize = 12.sp, maxLines = 1)
+        Text(label, color = AppUiColors.GithubSecondary.copy(alpha = 0.8f), fontSize = 12.sp, maxLines = 1)
     }
 }
 
 @Composable
 private fun NoData(text: String) {
-    Text(text, color = MLBBPlusColors.GithubSecondary.copy(alpha = 0.7f), fontSize = 13.sp)
+    Text(text, color = AppUiColors.GithubSecondary.copy(alpha = 0.7f), fontSize = 13.sp)
 }
 
 @Composable
-private fun HeroOverviewTab(hero: Hero, itemsById: Map<Int, Item>) {
+private fun HeroOverviewTab(hero: Hero, itemsById: Map<Int, Item>, heroesById: Map<Int, Hero> = emptyMap()) {
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         // ---- This patch (patch_notes.json) ----
         GameData.patchChangeForHero(hero.id)?.let { change ->
@@ -389,9 +421,9 @@ private fun HeroOverviewTab(hero: Hero, itemsById: Map<Int, Item>) {
                         if (change.tierChange.isNotBlank()) " \u2022 ${change.tierChange.replace("->", "\u2192")}" else "",
                     color = c, fontSize = 12.sp, fontWeight = FontWeight.Bold, letterSpacing = 0.5.sp
                 )
-                if (change.title.isNotBlank()) Text(change.title, color = MLBBPlusColors.GithubText, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
-                change.changes.forEach { Text("\u2022 $it", color = MLBBPlusColors.GithubText, fontSize = 13.sp, lineHeight = 18.sp) }
-                if (change.impact.isNotBlank()) Text("Impact: ${change.impact}", color = MLBBPlusColors.GithubSecondary, fontSize = 12.sp)
+                if (change.title.isNotBlank()) Text(change.title, color = AppUiColors.GithubText, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+                change.changes.forEach { Text("\u2022 $it", color = AppUiColors.GithubText, fontSize = 13.sp, lineHeight = 18.sp) }
+                if (change.impact.isNotBlank()) Text("Impact: ${change.impact}", color = AppUiColors.GithubSecondary, fontSize = 12.sp)
             }
         }
         // ---- Where the overlay guides use this hero ----
@@ -400,8 +432,8 @@ private fun HeroOverviewTab(hero: Hero, itemsById: Map<Int, Item>) {
             SubHeading("IN OVERLAY GUIDES")
             guideRefs.forEach { ref ->
                 Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                    Text("${ref.role} \u2014 ${ref.typeLabel}", color = MLBBPlusColors.GithubText, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
-                    if (ref.note.isNotBlank()) Text(ref.note, color = MLBBPlusColors.GithubSecondary, fontSize = 12.sp, lineHeight = 17.sp)
+                    Text("${ref.role} \u2014 ${ref.typeLabel}", color = AppUiColors.GithubText, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+                    if (ref.note.isNotBlank()) Text(ref.note, color = AppUiColors.GithubSecondary, fontSize = 12.sp, lineHeight = 17.sp)
                 }
             }
         }
@@ -410,8 +442,8 @@ private fun HeroOverviewTab(hero: Hero, itemsById: Map<Int, Item>) {
         HeroInfoRow("Tier", hero.tier)
         HeroInfoRow("Difficulty", "${hero.difficulty}/10")
         HeroInfoRow("Released", "${hero.releaseYear}")
-        if (hero.isOP) HeroInfoTag("OP PICK", MLBBPlusColors.Gold)
-        if (hero.isMeta) HeroInfoTag("META \u2022 Patch ${hero.patchVersion}", MLBBPlusColors.Green)
+        if (hero.isOP) HeroInfoTag("OP PICK", AppUiColors.Gold)
+        if (hero.isMeta) HeroInfoTag("META \u2022 Patch ${hero.patchVersion}", AppUiColors.Green)
 
         if (hero.specialty.isNotEmpty()) {
             SubHeading("SPECIALTY")
@@ -419,24 +451,32 @@ private fun HeroOverviewTab(hero: Hero, itemsById: Map<Int, Item>) {
                 hero.specialty.forEach { HeroChip(it) }
             }
         }
+        if (hero.description.isNotBlank()) {
+            SubHeading("OVERVIEW")
+            Text(hero.description, color = AppUiColors.GithubText, fontSize = 13.sp, lineHeight = 19.sp)
+        }
         if (hero.lore.isNotBlank()) {
             SubHeading("LORE")
-            Text(hero.lore, color = MLBBPlusColors.GithubSecondary, fontSize = 13.sp, lineHeight = 19.sp)
+            Text(hero.lore, color = AppUiColors.GithubSecondary, fontSize = 13.sp, lineHeight = 19.sp)
+        }
+        if (hero.patchNotes.isNotBlank()) {
+            SubHeading("PATCH ${hero.patchVersion} NOTES")
+            Text(hero.patchNotes, color = AppUiColors.GithubSecondary, fontSize = 13.sp, lineHeight = 19.sp)
         }
         if (hero.skills.isNotEmpty()) {
             SubHeading("SKILLS")
             hero.skills.forEach { s ->
                 Column {
-                    Text("${s.type} \u2014 ${s.name}", color = MLBBPlusColors.GithubText, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
-                    Text(s.description, color = MLBBPlusColors.GithubSecondary, fontSize = 13.sp, lineHeight = 19.sp)
+                    Text("${s.type} \u2014 ${s.name}", color = AppUiColors.GithubText, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+                    Text(s.description, color = AppUiColors.GithubSecondary, fontSize = 13.sp, lineHeight = 19.sp)
                 }
             }
         }
         if (hero.recommendedEmblem.emblem.isNotBlank()) {
             SubHeading("RECOMMENDED EMBLEM")
-            Text(hero.recommendedEmblem.emblem, color = MLBBPlusColors.GithubText, fontSize = 14.sp)
+            Text(hero.recommendedEmblem.emblem, color = AppUiColors.GithubText, fontSize = 14.sp)
             if (hero.recommendedEmblem.talents.isNotEmpty()) {
-                Text(hero.recommendedEmblem.talents.joinToString(" \u2022 "), color = MLBBPlusColors.GithubSecondary, fontSize = 13.sp)
+                Text(hero.recommendedEmblem.talents.joinToString(" \u2022 "), color = AppUiColors.GithubSecondary, fontSize = 13.sp)
             }
         }
         if (hero.recommendedSpells.isNotEmpty()) {
@@ -451,32 +491,35 @@ private fun HeroOverviewTab(hero: Hero, itemsById: Map<Int, Item>) {
             Row(horizontalArrangement = Arrangement.spacedBy(14.dp), verticalAlignment = Alignment.CenterVertically) {
                 Box(
                     Modifier.size(34.dp)
-                        .background(MLBBPlusColors.Gold.copy(alpha = 0.15f), RoundedCornerShape(8.dp))
-                        .border(1.dp, MLBBPlusColors.Gold.copy(alpha = 0.4f), RoundedCornerShape(8.dp)),
+                        .background(AppUiColors.Gold.copy(alpha = 0.15f), RoundedCornerShape(8.dp))
+                        .border(1.dp, AppUiColors.Gold.copy(alpha = 0.4f), RoundedCornerShape(8.dp)),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text("${item.priority}", color = MLBBPlusColors.Gold, fontSize = 13.sp, fontWeight = FontWeight.Bold)
+                    Text("${item.priority}", color = AppUiColors.Gold, fontSize = 13.sp, fontWeight = FontWeight.Bold)
                 }
                 Column {
-                    Text(resolved?.name ?: item.name.ifBlank { "Item #${item.itemId}" }, color = MLBBPlusColors.GithubText, fontSize = 15.sp)
+                    Text(resolved?.name ?: item.name.ifBlank { "Item #${item.itemId}" }, color = AppUiColors.GithubText, fontSize = 15.sp)
                     if (resolved != null) {
-                        Text("${resolved.price} Gold \u2022 ${resolved.category}", color = MLBBPlusColors.GithubSecondary, fontSize = 11.sp)
+                        Text("${resolved.price} Gold \u2022 ${resolved.category}", color = AppUiColors.GithubSecondary, fontSize = 11.sp)
                     }
                 }
             }
         }
         if (hero.countersReason.isNotBlank()) {
             SubHeading("MATCHUP NOTES")
-            Text(hero.countersReason, color = MLBBPlusColors.GithubText, fontSize = 14.sp, lineHeight = 20.sp)
+            Text(hero.countersReason, color = AppUiColors.GithubText, fontSize = 14.sp, lineHeight = 20.sp)
         }
-        if (hero.bestPartners.isNotEmpty()) {
+        // FIX [10]: bestPartners is now List<Int> IDs. Resolve to names, filter self.
+        // Old code did joinToString on List<String> ["34","55"] -> showed "34, 55".
+        val bestPartnerNames = hero.bestPartners.filter { it != hero.id }.mapNotNull { heroesById[it]?.name }
+        if (bestPartnerNames.isNotEmpty()) {
             SubHeading("BEST PARTNERS")
-            Text(hero.bestPartners.joinToString(", "), color = MLBBPlusColors.GithubText, fontSize = 14.sp)
+            Text(bestPartnerNames.joinToString(", "), color = AppUiColors.GithubText, fontSize = 14.sp)
         }
         if (!hero.hasFullProfile) {
             Text(
-                "Skills, build and counters for ${hero.name} are not in heroes.json yet.",
-                color = MLBBPlusColors.GithubSecondary.copy(alpha = 0.8f), fontSize = 12.sp
+                "Some profile sections for ${hero.name} are not available in the current heroes.json data.",
+                color = AppUiColors.GithubSecondary.copy(alpha = 0.8f), fontSize = 12.sp
             )
         }
         SubHeading("BASE STATS")
@@ -491,11 +534,13 @@ private fun HeroOverviewTab(hero: Hero, itemsById: Map<Int, Item>) {
 private fun HeroRelationTab(
     sectionA: String, idsA: List<Int>,
     sectionB: String, idsB: List<Int>,
-    related: Map<Int, Hero>, onHeroClick: (Hero) -> Unit
+    related: Map<Int, Hero>, onHeroClick: (Hero) -> Unit,
+    currentHeroId: Int = 0
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
         SubHeading(sectionA)
-        val listA = idsA.mapNotNull { related[it] }
+        // FIX: filter self - e.g. Hanabi counters [60,65] contained Hanabi (60) itself.
+        val listA = idsA.filter { it != currentHeroId }.mapNotNull { related[it] }
         if (listA.isNotEmpty()) {
             LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 items(listA, key = { it.id }) { h -> HeroPortraitSmall(h, onHeroClick) }
@@ -503,9 +548,9 @@ private fun HeroRelationTab(
         } else {
             NoData("No counter data for this hero yet")
         }
-        Box(Modifier.fillMaxWidth().height(1.dp).background(MLBBPlusColors.GithubBorder))
+        Box(Modifier.fillMaxWidth().height(1.dp).background(AppUiColors.GithubBorder))
         SubHeading(sectionB)
-        val listB = idsB.mapNotNull { related[it] }
+        val listB = idsB.filter { it != currentHeroId }.mapNotNull { related[it] }
         if (listB.isNotEmpty()) {
             LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 items(listB, key = { it.id }) { h -> HeroPortraitSmall(h, onHeroClick) }
@@ -529,7 +574,7 @@ fun HeroPortraitSmall(hero: Hero, onClick: (Hero) -> Unit) {
         )
         Text(
             hero.name,
-            color = MLBBPlusColors.GithubSecondary,
+            color = AppUiColors.GithubSecondary,
             fontSize = 12.sp,
             modifier = Modifier.padding(top = 6.dp).width(66.dp),
             textAlign = TextAlign.Center,
@@ -542,8 +587,8 @@ fun HeroPortraitSmall(hero: Hero, onClick: (Hero) -> Unit) {
 @Composable
 private fun HeroInfoRow(label: String, value: String) {
     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-        Text(label, color = MLBBPlusColors.GithubSecondary, fontSize = 15.sp)
-        Text(value, color = MLBBPlusColors.GithubText, fontSize = 15.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.End, modifier = Modifier.padding(start = 16.dp))
+        Text(label, color = AppUiColors.GithubSecondary, fontSize = 15.sp)
+        Text(value, color = AppUiColors.GithubText, fontSize = 15.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.End, modifier = Modifier.padding(start = 16.dp))
     }
 }
 
@@ -563,10 +608,10 @@ private fun HeroInfoTag(label: String, color: Color) {
 private fun HeroChip(label: String) {
     Box(
         Modifier
-            .background(MLBBPlusColors.Gold.copy(alpha = 0.12f), RoundedCornerShape(20.dp))
-            .border(1.dp, MLBBPlusColors.Gold.copy(alpha = 0.35f), RoundedCornerShape(20.dp))
+            .background(AppUiColors.Gold.copy(alpha = 0.12f), RoundedCornerShape(20.dp))
+            .border(1.dp, AppUiColors.Gold.copy(alpha = 0.35f), RoundedCornerShape(20.dp))
             .padding(horizontal = 16.dp, vertical = 8.dp)
     ) {
-        Text(label, color = MLBBPlusColors.Gold, fontSize = 14.sp)
+        Text(label, color = AppUiColors.Gold, fontSize = 14.sp)
     }
 }

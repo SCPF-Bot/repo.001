@@ -9,6 +9,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -24,7 +25,7 @@ import com.mlbb.plus.ui.components.AppIcons
 import com.mlbb.plus.ui.components.ScreenTitleBar
 import com.mlbb.plus.ui.model.GameData
 import com.mlbb.plus.ui.model.PatchData
-import com.mlbb.plus.ui.theme.MLBBPlusColors
+import com.mlbb.plus.ui.theme.AppUiColors
 
 // ============================================================
 // plus/ui/screens/PatchNotesScreen.kt  ->  FIXED
@@ -77,18 +78,18 @@ private enum class PatchTab(val label: String) {
 // internal: HomeScreen / HeroesScreen use the same buff / nerf / revamp colors.
 internal fun patchBadgeColor(type: String): Color {
     return when (type.trim().lowercase()) {
-        "buff" -> MLBBPlusColors.PatchBuff
-        "nerf" -> MLBBPlusColors.PatchNerf
-        "revamp" -> MLBBPlusColors.PatchRevamp
-        "adjust" -> MLBBPlusColors.PatchAdjust
-        "reversion" -> MLBBPlusColors.PatchReversion
-        else -> MLBBPlusColors.GithubSecondary
+        "buff" -> AppUiColors.PatchBuff
+        "nerf" -> AppUiColors.PatchNerf
+        "revamp" -> AppUiColors.PatchRevamp
+        "adjust" -> AppUiColors.PatchAdjust
+        "reversion" -> AppUiColors.PatchReversion
+        else -> AppUiColors.GithubSecondary
     }
 }
 
 @Composable
 fun PatchNotesScreen(onHeroClick: (Int) -> Unit = {}, onItemClick: (Int) -> Unit = {}) {
-    Column(Modifier.fillMaxSize().background(MLBBPlusColors.GithubBg)) {
+    Column(Modifier.fillMaxSize().background(AppUiColors.GithubBg)) {
         ScreenTitleBar("PATCH NOTES", AppIcons.History)
         Box(Modifier.weight(1f)) { PatchNotesContent(onHeroClick, onItemClick) }
     }
@@ -106,31 +107,31 @@ private fun PatchNotesContent(onHeroClick: (Int) -> Unit, onItemClick: (Int) -> 
             if (notes.nov01Advanced.hasContent || notes.nov01OriginalEvent.isNotEmpty()) add(PatchTab.NOV01)
         }
     }
-    var requested by remember { mutableStateOf(PatchTab.CURRENT) }
+    var requested by rememberSaveable { mutableStateOf(PatchTab.CURRENT) }
     val tab = if (requested in tabs) requested else PatchTab.CURRENT
     val data: PatchData = when (tab) {
         PatchTab.ADVANCED -> notes.advancedServer
         PatchTab.NOV01 -> notes.nov01Advanced
         PatchTab.CURRENT -> notes.originalServer
     }
-    Column(Modifier.fillMaxSize().background(MLBBPlusColors.GithubBg).verticalScroll(rememberScrollState()).padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+    Column(Modifier.fillMaxSize().background(AppUiColors.GithubBg).verticalScroll(rememberScrollState()).padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
         val header = buildString {
             if (notes.updated.isNotBlank()) append("Updated ${notes.updated} \u2022 ")
             append("Patch ${notes.displayVersion}")
             if (notes.originalServer.season.isNotBlank()) append(" \u2022 ${notes.originalServer.season}")
         }
-        Text(header, color = MLBBPlusColors.GithubSecondary, fontSize = 11.sp)
+        Text(header, color = AppUiColors.GithubSecondary, fontSize = 11.sp)
         if (tabs.size > 1) {
-            Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(100.dp)).background(MLBBPlusColors.GithubCard).border(1.dp, MLBBPlusColors.GithubBorder, RoundedCornerShape(100.dp)).padding(4.dp)) {
+            Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(100.dp)).background(AppUiColors.GithubCard).border(1.dp, AppUiColors.GithubBorder, RoundedCornerShape(100.dp)).padding(4.dp)) {
                 tabs.forEach { t ->
                     Box(
                         Modifier.weight(1f).clip(RoundedCornerShape(100.dp))
-                            .background(if (tab == t) MLBBPlusColors.Gold else MLBBPlusColors.GithubCard)
+                            .background(if (tab == t) AppUiColors.Gold else AppUiColors.GithubCard)
                             .semantics { role = Role.Tab; selected = (tab == t) }
                             .clickable { requested = t }.padding(vertical = 10.dp),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text(t.label, color = if (tab == t) Color.Black else MLBBPlusColors.GithubText, fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                        Text(t.label, color = if (tab == t) Color.Black else AppUiColors.GithubText, fontWeight = FontWeight.Bold, fontSize = 12.sp)
                     }
                 }
             }
@@ -152,11 +153,11 @@ private fun PatchNotesContent(onHeroClick: (Int) -> Unit, onItemClick: (Int) -> 
             data.server.takeIf { it.isNotBlank() },
             data.date.takeIf { it.isNotBlank() }
         ).filterNotNull().joinToString(" \u2022 ")
-        PatchCard(title = cardTitle, body = data.summary.ifBlank { "No summary in patch_notes.json" })
+        PatchCard(title = cardTitle, body = data.summary.ifBlank { "Patch details are supplied by the heroes.json patch manifest." })
         if (data.warning.isNotBlank()) PatchCard(title = "\u26A0 Testing Only", body = data.warning)
         if (data.highlights.isNotEmpty()) PatchCard(title = "HIGHLIGHTS", body = data.highlights.joinToString("\n\u2022 ", prefix = "\u2022 "))
         if (data.heroChanges.isNotEmpty()) {
-            Text("HERO CHANGES (${data.heroChanges.size})", color = MLBBPlusColors.Gold, fontWeight = FontWeight.Bold, fontSize = 12.sp, letterSpacing = 0.8.sp)
+            Text("HERO CHANGES (${data.heroChanges.size})", color = AppUiColors.Gold, fontWeight = FontWeight.Bold, fontSize = 12.sp, letterSpacing = 0.8.sp)
             data.heroChanges.forEach { ch ->
                 val typeLabel = ch.type.trim().uppercase().ifBlank { "CHANGE" }
                 val known = GameData.heroesById[ch.heroId]
@@ -164,7 +165,7 @@ private fun PatchNotesContent(onHeroClick: (Int) -> Unit, onItemClick: (Int) -> 
                     // "Revamp - Ride Kupa" says more than the bare type; skip titles that just repeat it.
                     if (ch.title.isNotBlank() && !ch.title.trim().equals(ch.type.trim(), ignoreCase = true)) append("${ch.title}\n")
                     if (ch.changes.isNotEmpty()) append(ch.changes.joinToString("\n\u2022 ", prefix = "\u2022 "))
-                    else append("No details in patch_notes.json")
+                    else append("No additional change details supplied.")
                     if (ch.skillsAffected.isNotEmpty()) append("\n\nSkills: ${ch.skillsAffected.joinToString(", ")}")
                     if (ch.impact.isNotBlank()) append("\nImpact: ${ch.impact}")
                     if (known != null) append("\n\nTap for hero details \u2192")
@@ -178,11 +179,11 @@ private fun PatchNotesContent(onHeroClick: (Int) -> Unit, onItemClick: (Int) -> 
             }
         }
         if (data.itemChanges.isNotEmpty()) {
-            Text("ITEM CHANGES", color = MLBBPlusColors.Gold, fontWeight = FontWeight.Bold, fontSize = 12.sp, letterSpacing = 0.8.sp)
+            Text("ITEM CHANGES", color = AppUiColors.Gold, fontWeight = FontWeight.Bold, fontSize = 12.sp, letterSpacing = 0.8.sp)
             data.itemChanges.forEach { ic ->
                 val typeLabel = ic.type.trim().uppercase().ifBlank { "CHANGE" }
                 val known = GameData.itemsById[ic.itemId]
-                val body = (if (ic.changes.isNotEmpty()) ic.changes.joinToString("\n\u2022 ", prefix = "\u2022 ") else "No details in patch_notes.json") +
+                val body = (if (ic.changes.isNotEmpty()) ic.changes.joinToString("\n\u2022 ", prefix = "\u2022 ") else "No additional change details supplied.") +
                     (if (known != null) "\n\nTap for item details \u2192" else "")
                 PatchCard(
                     title = "${ic.itemName.ifBlank { "Item" }} \u2014 $typeLabel",
@@ -194,6 +195,7 @@ private fun PatchNotesContent(onHeroClick: (Int) -> Unit, onItemClick: (Int) -> 
         }
         if (data.battlefieldChanges.isNotEmpty()) PatchCard(title = "BATTLEFIELD", body = data.battlefieldChanges.joinToString("\n\u2022 ", prefix = "\u2022 "))
         if (data.systemChanges.isNotEmpty()) PatchCard(title = "SYSTEM", body = data.systemChanges.joinToString("\n\u2022 ", prefix = "\u2022 "))
+        if (data.equipmentChanges.isNotEmpty()) PatchCard(title = "EQUIPMENT CHANGES", body = data.equipmentChanges.joinToString("\n\u2022 ", prefix = "\u2022 "))
         if (data.metaNotes.isNotBlank()) PatchCard(title = "META NOTES", body = data.metaNotes)
         if (tab == PatchTab.CURRENT) {
             // Meta by lane, from heroes.json (isMeta + tracked win rate) instead of a hardcoded Roam card.
@@ -219,24 +221,24 @@ private fun PatchNotesContent(onHeroClick: (Int) -> Unit, onItemClick: (Int) -> 
         }
         val footer = listOf(data.source, data.previousPatch.takeIf { it.isNotBlank() }?.let { "Previous patch: $it" })
             .filterNotNull().filter { it.isNotBlank() }
-        if (footer.isNotEmpty()) Text(footer.joinToString("\n"), color = MLBBPlusColors.GithubSecondary.copy(alpha = 0.8f), fontSize = 11.sp, lineHeight = 16.sp)
+        if (footer.isNotEmpty()) Text(footer.joinToString("\n"), color = AppUiColors.GithubSecondary.copy(alpha = 0.8f), fontSize = 11.sp, lineHeight = 16.sp)
     }
 }
 
 @Composable
 private fun PatchCard(title: String, body: String, badgeColor: Color? = null, onClick: (() -> Unit)? = null) {
     Box(
-        Modifier.fillMaxWidth().clip(RoundedCornerShape(14.dp)).background(MLBBPlusColors.GithubCard)
-            .border(1.dp, MLBBPlusColors.GithubBorder, RoundedCornerShape(14.dp))
+        Modifier.fillMaxWidth().clip(RoundedCornerShape(14.dp)).background(AppUiColors.GithubCard)
+            .border(1.dp, AppUiColors.GithubBorder, RoundedCornerShape(14.dp))
             .then(if (onClick != null) Modifier.clickable(role = Role.Button, onClick = onClick) else Modifier)
-            .padding(14.dp)
+            .padding(16.dp)
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 if (badgeColor != null) Box(Modifier.size(8.dp).clip(RoundedCornerShape(4.dp)).background(badgeColor))
-                Text(title, color = MLBBPlusColors.GithubText, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                Text(title, color = AppUiColors.GithubText, fontWeight = FontWeight.Bold, fontSize = 14.sp)
             }
-            Text(body, color = MLBBPlusColors.GithubSecondary, fontSize = 13.sp)
+            Text(body, color = AppUiColors.GithubSecondary, fontSize = 13.sp, lineHeight = 19.sp)
         }
     }
 }

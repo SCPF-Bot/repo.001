@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -17,10 +18,17 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -35,7 +43,9 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.mlbb.plus.ui.theme.MLBBPlusColors
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.ImeAction
+import com.mlbb.plus.ui.theme.AppUiColors
 
 // ============================================================
 // Shared look-and-feel: icons, title bars, chips, search field.
@@ -106,31 +116,32 @@ fun roleColor(role: String): Color = when (role.trim().lowercase()) {
 /** Centered gold title with icon, used by Heroes / Items / Patch Notes / Settings. */
 @Composable
 fun ScreenTitleBar(title: String, icon: ImageVector, modifier: Modifier = Modifier) {
-    Box(
-        modifier
-            .fillMaxWidth()
-            .background(MLBBPlusColors.Header)
+    Row(
+        modifier.fillMaxWidth()
+            .background(AppUiColors.Header)
             .statusBarsPadding()
-            .padding(vertical = 18.dp),
-        contentAlignment = Alignment.Center
+            .padding(horizontal = 20.dp, vertical = 18.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            Icon(icon, contentDescription = null, tint = MLBBPlusColors.Gold, modifier = Modifier.size(22.dp))
-            Text(
-                title,
-                color = MLBBPlusColors.Gold,
-                fontWeight = FontWeight.Bold,
-                fontSize = 18.sp,
-                letterSpacing = 1.5.sp
-            )
+        Box(
+            Modifier.size(40.dp).clip(RoundedCornerShape(12.dp))
+                .background(AppUiColors.Gold.copy(alpha = 0.13f)),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(icon, contentDescription = null, tint = AppUiColors.Gold, modifier = Modifier.size(22.dp))
         }
+        Text(
+            title, color = AppUiColors.GithubText, fontWeight = FontWeight.Bold,
+            fontSize = 19.sp, letterSpacing = 0.3.sp
+        )
     }
 }
 
 /** Home header: icon tile + gold title + subtitle, with a gold hairline underneath. */
 @Composable
 fun AppHeader(title: String, subtitle: String, icon: ImageVector, modifier: Modifier = Modifier) {
-    Column(modifier.fillMaxWidth().background(MLBBPlusColors.Header).statusBarsPadding()) {
+    Column(modifier.fillMaxWidth().background(AppUiColors.Header).statusBarsPadding()) {
         Row(
             Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 18.dp),
             verticalAlignment = Alignment.CenterVertically,
@@ -140,18 +151,18 @@ fun AppHeader(title: String, subtitle: String, icon: ImageVector, modifier: Modi
                 Modifier
                     .size(48.dp)
                     .clip(RoundedCornerShape(14.dp))
-                    .background(MLBBPlusColors.Gold.copy(alpha = 0.14f))
-                    .border(1.dp, MLBBPlusColors.Gold.copy(alpha = 0.55f), RoundedCornerShape(14.dp)),
+                    .background(AppUiColors.Gold.copy(alpha = 0.14f))
+                    .border(1.dp, AppUiColors.Gold.copy(alpha = 0.55f), RoundedCornerShape(14.dp)),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(icon, contentDescription = null, tint = MLBBPlusColors.Gold, modifier = Modifier.size(26.dp))
+                Icon(icon, contentDescription = null, tint = AppUiColors.Gold, modifier = Modifier.size(26.dp))
             }
             Column {
-                Text(title, color = MLBBPlusColors.Gold, fontWeight = FontWeight.Bold, fontSize = 22.sp, letterSpacing = 1.5.sp)
-                Text(subtitle, color = MLBBPlusColors.GithubSecondary, fontSize = 12.sp)
+                Text(title, color = AppUiColors.Gold, fontWeight = FontWeight.Bold, fontSize = 22.sp, letterSpacing = 1.5.sp)
+                Text(subtitle, color = AppUiColors.GithubSecondary, fontSize = 12.sp)
             }
         }
-        Box(Modifier.fillMaxWidth().height(1.dp).background(MLBBPlusColors.Gold.copy(alpha = 0.35f)))
+        Box(Modifier.fillMaxWidth().height(1.dp).background(AppUiColors.Gold.copy(alpha = 0.35f)))
     }
 }
 
@@ -159,15 +170,15 @@ fun AppHeader(title: String, subtitle: String, icon: ImageVector, modifier: Modi
 @Composable
 fun SectionLabel(text: String, modifier: Modifier = Modifier) {
     Row(modifier, verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-        Box(Modifier.width(3.dp).height(14.dp).clip(RoundedCornerShape(2.dp)).background(MLBBPlusColors.Gold))
-        Text(text, color = MLBBPlusColors.GithubSecondary, fontWeight = FontWeight.Bold, fontSize = 12.sp, letterSpacing = 1.5.sp)
+        Box(Modifier.width(3.dp).height(14.dp).clip(RoundedCornerShape(2.dp)).background(AppUiColors.Gold))
+        Text(text, color = AppUiColors.GithubSecondary, fontWeight = FontWeight.Bold, fontSize = 12.sp, letterSpacing = 1.5.sp)
     }
 }
 
 /** Gold, letter-spaced heading used inside detail pages ("RECOMMENDED SPELLS"). */
 @Composable
 fun SubHeading(text: String, modifier: Modifier = Modifier) {
-    Text(text, modifier = modifier, color = MLBBPlusColors.Gold, fontWeight = FontWeight.Bold, fontSize = 13.sp, letterSpacing = 1.sp)
+    Text(text, modifier = modifier, color = AppUiColors.Gold, fontWeight = FontWeight.Bold, fontSize = 13.sp, letterSpacing = 1.sp)
 }
 
 /** Rounded outlined filter pill. Selected = gold tint + gold border. */
@@ -177,16 +188,17 @@ fun FilterPill(label: String, selected: Boolean, onClick: () -> Unit, modifier: 
     Box(
         modifier
             .clip(shape)
-            .background(if (selected) MLBBPlusColors.Gold.copy(alpha = 0.18f) else Color.Transparent)
-            .border(1.dp, if (selected) MLBBPlusColors.Gold.copy(alpha = 0.8f) else MLBBPlusColors.GithubBorder, shape)
+            .background(if (selected) AppUiColors.Gold.copy(alpha = 0.18f) else Color.Transparent)
+            .border(1.dp, if (selected) AppUiColors.Gold.copy(alpha = 0.8f) else AppUiColors.GithubBorder, shape)
             .semantics { role = Role.Tab; this.selected = selected }
             .clickable(onClick = onClick)
-            .padding(horizontal = 16.dp, vertical = 9.dp),
+            .heightIn(min = 48.dp)
+            .padding(horizontal = 16.dp, vertical = 10.dp),
         contentAlignment = Alignment.Center
     ) {
         Text(
             label,
-            color = if (selected) MLBBPlusColors.Gold else MLBBPlusColors.GithubText.copy(alpha = 0.85f),
+            color = if (selected) AppUiColors.Gold else AppUiColors.GithubText.copy(alpha = 0.85f),
             fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
             fontSize = 14.sp,
             maxLines = 1
@@ -199,28 +211,53 @@ fun SearchField(query: String, onQueryChange: (String) -> Unit, placeholder: Str
     OutlinedTextField(
         value = query,
         onValueChange = onQueryChange,
-        placeholder = { Text(placeholder, color = MLBBPlusColors.GithubSecondary, fontSize = 14.sp, maxLines = 1) },
-        leadingIcon = { Icon(AppIcons.Search, contentDescription = null, tint = MLBBPlusColors.Gold) },
+        placeholder = { Text(placeholder, color = AppUiColors.GithubSecondary, fontSize = 14.sp, maxLines = 1) },
+        leadingIcon = { Icon(AppIcons.Search, contentDescription = null, tint = AppUiColors.Gold) },
         trailingIcon = {
             if (query.isNotEmpty()) {
                 IconButton(onClick = { onQueryChange("") }) {
-                    Icon(AppIcons.Close, contentDescription = "Clear search", tint = MLBBPlusColors.GithubSecondary)
+                    Icon(AppIcons.Close, contentDescription = "Clear search", tint = AppUiColors.GithubSecondary)
                 }
             }
         },
         singleLine = true,
+        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
         shape = RoundedCornerShape(16.dp),
         colors = OutlinedTextFieldDefaults.colors(
-            focusedBorderColor = MLBBPlusColors.Gold.copy(alpha = 0.8f),
-            unfocusedBorderColor = MLBBPlusColors.GithubBorder,
-            focusedTextColor = MLBBPlusColors.GithubText,
-            unfocusedTextColor = MLBBPlusColors.GithubText,
-            cursorColor = MLBBPlusColors.Gold,
-            focusedContainerColor = MLBBPlusColors.GithubCard,
-            unfocusedContainerColor = MLBBPlusColors.GithubCard
+            focusedBorderColor = AppUiColors.Gold.copy(alpha = 0.8f),
+            unfocusedBorderColor = AppUiColors.GithubBorder,
+            focusedTextColor = AppUiColors.GithubText,
+            unfocusedTextColor = AppUiColors.GithubText,
+            cursorColor = AppUiColors.Gold,
+            focusedContainerColor = AppUiColors.GithubCard,
+            unfocusedContainerColor = AppUiColors.GithubCard
         ),
-        modifier = modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)
+        modifier = modifier.fillMaxWidth().heightIn(min = 56.dp).padding(horizontal = 16.dp, vertical = 6.dp)
     )
+}
+
+
+/** Compact, clearly labelled sort control for users who want more control over long lists. */
+@Composable
+fun SortMenu(selected: String, options: List<String>, onSelect: (String) -> Unit, modifier: Modifier = Modifier) {
+    var expanded by remember { mutableStateOf(false) }
+    Box(modifier) {
+        TextButton(onClick = { expanded = true }, modifier = Modifier.heightIn(min = 48.dp)) {
+            Text("Sort: $selected  ▾", color = AppUiColors.Gold, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
+        }
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false },
+            modifier = Modifier.background(AppUiColors.GithubCard)
+        ) {
+            options.forEach { option ->
+                DropdownMenuItem(
+                    text = { Text(option, color = AppUiColors.GithubText) },
+                    onClick = { onSelect(option); expanded = false }
+                )
+            }
+        }
+    }
 }
 
 /** Small light-gray tier square (S / A / B) that sits on a portrait corner. */
@@ -240,5 +277,5 @@ fun TierBadge(tier: String, modifier: Modifier = Modifier) {
 
 @Composable
 fun StatDivider(modifier: Modifier = Modifier) {
-    Spacer(modifier.width(1.dp).height(36.dp).background(MLBBPlusColors.GithubBorder))
+    Spacer(modifier.width(1.dp).height(36.dp).background(AppUiColors.GithubBorder))
 }

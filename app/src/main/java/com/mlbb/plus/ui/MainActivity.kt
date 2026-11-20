@@ -7,10 +7,15 @@ import android.os.Bundle
 import android.provider.Settings
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -27,8 +32,8 @@ import com.mlbb.plus.ui.model.RoleTypes
 import com.mlbb.plus.ui.model.Hero
 import com.mlbb.plus.ui.model.Item
 import com.mlbb.plus.ui.screens.*
-import com.mlbb.plus.ui.theme.MLBBPlusColors
-import com.mlbb.plus.ui.theme.MLBBPlusTheme
+import com.mlbb.plus.ui.theme.AppUiColors
+import com.mlbb.plus.ui.theme.AppUiTheme
 
 // ============================================================
 // mlbb/ui/MainActivity.kt  ->  FIXED
@@ -57,8 +62,8 @@ import com.mlbb.plus.ui.theme.MLBBPlusTheme
 //      dropping to the Heroes list and losing the Item detail.
 //  [7] validTypes moved to remember{} so the map is not rebuilt
 //      on every recomposition.
-//  [8] NEW batch: use MLBBPlusTheme() wrapper from
-//      MLBBPlusTheme.kt instead of inline MaterialTheme.
+//  [8] App screens use their own AppUiTheme; the floating overlay
+//      keeps the original MLBBPlusTheme and palette unchanged.
 //  [9] NEW batch: onOverlayGrantedChange no longer sets the
 //      Boolean directly. SettingsScreen only forwards ON as
 //      a request to open system settings. Setting the Boolean
@@ -105,10 +110,10 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 private fun MLBBPlusApp(onLaunchWidget: (String, String) -> Unit) {
-    var tab by remember { mutableStateOf(Tab.HOME) }
-    var selectedRole by remember { mutableStateOf("Roam") }
+    var tab by rememberSaveable { mutableStateOf(Tab.HOME) }
+    var selectedRole by rememberSaveable { mutableStateOf("Roam") }
     // The type is a guide type ID from <role>_guide.json ("initiator", "crit", ...), not a label.
-    var selectedRoleType by remember { mutableStateOf(RoleTypes.defaultTypeFor("Roam")) }
+    var selectedRoleType by rememberSaveable { mutableStateOf(RoleTypes.defaultTypeFor("Roam")) }
     var selectedHero by remember { mutableStateOf<Hero?>(null) }
     var selectedItem by remember { mutableStateOf<Item?>(null) }
     // FIX [6]: where should Back from HeroDetail go?
@@ -134,9 +139,24 @@ private fun MLBBPlusApp(onLaunchWidget: (String, String) -> Unit) {
 
     // FIX [5]: real auto-start state, persisted.
     var autoStartLastRole by remember { mutableStateOf(false) }
+    var preferencesLoaded by remember { mutableStateOf(false) }
+    var autoStartTriggeredThisSession by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) {
         val prefs = ctx.getSharedPreferences("mlbb_plus_prefs", Context.MODE_PRIVATE)
+        val savedRole = prefs.getString("last_role", "Roam") ?: "Roam"
+        selectedRole = savedRole.takeIf { it in RoleTypes.roles } ?: "Roam"
+        selectedRoleType = prefs.getString("last_role_type", RoleTypes.defaultTypeFor(selectedRole))
+            ?: RoleTypes.defaultTypeFor(selectedRole)
         autoStartLastRole = prefs.getBoolean("auto_start_last_role", false)
+        preferencesLoaded = true
+    }
+    LaunchedEffect(selectedRole, selectedRoleType, preferencesLoaded) {
+        if (preferencesLoaded) {
+            ctx.getSharedPreferences("mlbb_plus_prefs", Context.MODE_PRIVATE).edit()
+                .putString("last_role", selectedRole)
+                .putString("last_role_type", selectedRoleType)
+                .apply()
+        }
     }
 
     // Types come from the guide files (RoleTypes -> GameData.guides), so the dropdown, this
@@ -146,46 +166,104 @@ private fun MLBBPlusApp(onLaunchWidget: (String, String) -> Unit) {
         if (selectedRoleType !in types) selectedRoleType = types.firstOrNull().orEmpty()
     }
 
-    // FIX [8]: single theme wrapper, not inline darkColorScheme.
-    MLBBPlusTheme {
-        Scaffold(
-            containerColor = MLBBPlusColors.GithubBg,
-            bottomBar = {
-                NavigationBar(
-                    containerColor = MLBBPlusColors.Header,
-                    contentColor = MLBBPlusColors.Gold,
-                    tonalElevation = 0.dp
-                ) {
-                    Tab.entries.forEach { t ->
-                        NavigationBarItem(
-                            selected = tab == t,
-                            onClick = {
-                                tab = t
-                                // Tapping the bottom bar is an explicit reset:
-                                // clear detail state. Programmatic navigation
-                                // (heroReturnTab) does NOT go through here.
-                                if (t != Tab.HEROES) {
-                                    selectedHero = null
-                                    heroReturnTab = null
-                                }
-                                if (t != Tab.ITEMS) selectedItem = null
-                            },
-                            icon = { Icon(t.icon, contentDescription = null) },
-                            label = { Text(t.label, fontSize = 12.sp, maxLines = 1) },
-                            alwaysShowLabel = true,
-                            colors = NavigationBarItemDefaults.colors(
-                                selectedIconColor = Color.Black,
-                                selectedTextColor = MLBBPlusColors.Gold,
-                                unselectedIconColor = MLBBPlusColors.GithubSecondary,
-                                unselectedTextColor = MLBBPlusColors.GithubSecondary,
-                                indicatorColor = MLBBPlusColors.Gold
+    // Honour the startup preference once per app session. Do not attempt to start
+    // the overlay until Android's permission is actually granted.
+    LaunchedEffect(autoStartLastRole, overlayGranted, overlayRunning, selectedRole, selectedRoleType, preferencesLoaded) {
+        if (preferencesLoaded && autoStartLastRole && overlayGranted && !overlayRunning && !autoStartTriggeredThisSession) {
+            autoStartTriggeredThisSession = true
+            onLaunchWidget(selectedRole, selectedRoleType)
+        }
+    }
+
+    // System Back follows the visible navigation hierarchy instead of closing the app
+    // while a detail page is open.
+    BackHandler(enabled = selectedHero != null || selectedItem != null || tab != Tab.HOME) {
+        when {
+            selectedHero != null -> {
+                selectedHero = null
+                heroReturnTab?.let { tab = it }
+                heroReturnTab = null
+            }
+            selectedItem != null -> selectedItem = null
+            tab != Tab.HOME -> tab = Tab.HOME
+        }
+    }
+
+    fun selectTab(next: Tab) {
+        tab = next
+        // A direct navigation-tab tap starts that section at its list/root.
+        if (next != Tab.HEROES) { selectedHero = null; heroReturnTab = null }
+        if (next != Tab.ITEMS) selectedItem = null
+    }
+
+    val saveableStateHolder = rememberSaveableStateHolder()
+
+    // App-only theme keeps the floating overlay theme and palette unchanged.
+    AppUiTheme {
+        BoxWithConstraints(Modifier.fillMaxSize()) {
+            val useNavigationRail = maxWidth >= 600.dp
+            Row(Modifier.fillMaxSize()) {
+                if (useNavigationRail) {
+                    NavigationRail(
+                        containerColor = AppUiColors.Header,
+                        contentColor = AppUiColors.Gold,
+                        header = { Spacer(Modifier.height(12.dp)) }
+                    ) {
+                        Tab.entries.forEach { t ->
+                            NavigationRailItem(
+                                selected = tab == t,
+                                onClick = { selectTab(t) },
+                                icon = { Icon(t.icon, contentDescription = null) },
+                                label = { Text(t.label, fontSize = 11.sp) },
+                                alwaysShowLabel = true,
+                                colors = NavigationRailItemDefaults.colors(
+                                    selectedIconColor = Color(0xFF171717),
+                                    selectedTextColor = AppUiColors.Gold,
+                                    unselectedIconColor = AppUiColors.GithubSecondary,
+                                    unselectedTextColor = AppUiColors.GithubSecondary,
+                                    indicatorColor = AppUiColors.Gold
+                                )
                             )
-                        )
+                        }
                     }
                 }
-            }
-        ) { padding ->
-            Box(Modifier.fillMaxSize().padding(padding).background(MLBBPlusColors.GithubBg)) {
+                Scaffold(
+                    modifier = Modifier.weight(1f),
+                    containerColor = AppUiColors.GithubBg,
+                    bottomBar = {
+                        if (!useNavigationRail) {
+                            NavigationBar(
+                                containerColor = AppUiColors.Header,
+                                contentColor = AppUiColors.Gold,
+                                tonalElevation = 3.dp
+                            ) {
+                                Tab.entries.forEach { t ->
+                                    NavigationBarItem(
+                                        selected = tab == t,
+                                        onClick = { selectTab(t) },
+                                        icon = { Icon(t.icon, contentDescription = null) },
+                                        label = { Text(t.label, fontSize = 11.sp, maxLines = 1, fontWeight = if (tab == t) androidx.compose.ui.text.font.FontWeight.SemiBold else androidx.compose.ui.text.font.FontWeight.Medium) },
+                                        alwaysShowLabel = true,
+                                        colors = NavigationBarItemDefaults.colors(
+                                            selectedIconColor = Color(0xFF171717),
+                                            selectedTextColor = AppUiColors.Gold,
+                                            unselectedIconColor = AppUiColors.GithubSecondary,
+                                            unselectedTextColor = AppUiColors.GithubSecondary,
+                                            indicatorColor = AppUiColors.Gold
+                                        )
+                                    )
+                                }
+                            }
+                        }
+                    }
+                ) { padding ->
+                    Box(Modifier.fillMaxSize().padding(padding).background(AppUiColors.GithubBg)) {
+                        val contentKey = when (tab) {
+                            Tab.HEROES -> if (selectedHero == null) "heroes-list" else "hero-detail"
+                            Tab.ITEMS -> if (selectedItem == null) "items-list" else "item-detail"
+                            else -> tab.name
+                        }
+                        saveableStateHolder.SaveableStateProvider(contentKey) {
                 when (tab) {
                     Tab.HOME -> HomeScreen(
                         selectedRole = selectedRole,
@@ -282,6 +360,9 @@ private fun MLBBPlusApp(onLaunchWidget: (String, String) -> Unit) {
                                 .edit().putBoolean("auto_start_last_role", value).apply()
                         }
                     )
+                }
+                        }
+                    }
                 }
             }
         }

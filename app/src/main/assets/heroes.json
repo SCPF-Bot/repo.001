@@ -1,5 +1,5 @@
 {
-  "version": "2.2.23",
+  "version": "2.2.23-fixed",
   "updated": "2026-11-21",
   "patchDate": "2026-11-11",
   "patchName": "Patch 2.2.23 — Popol and Kupa Revamp (Original Server)",
@@ -2378,13 +2378,13 @@
         6
       ],
       "synergies": [
-        21,
-        47
+        6,
+        102
       ],
       "countersReason": "Hayabusa counters squishy backlines with Shadow Kill. Weak vs CC that stops his shadow escapes.",
       "bestPartners": [
-        21,
-        47
+        6,
+        102
       ],
       "lore": "Hayabusa, Shadow of Obscurity, is a shadow assassin who marks enemies and deletes them with Ougi: Shadow Kill. His Quad Shadow lets him teleport between shadows, making him one of the hardest assassins to catch.",
       "description": "Hayabusa counters squishy backlines with Shadow Kill. Weak vs CC that stops his shadow escapes.",
@@ -5224,13 +5224,13 @@
         6
       ],
       "synergies": [
-        21,
-        47
+        6,
+        26
       ],
       "countersReason": "Lancelot counters squishy backlines with untargetable burst. High skill ceiling — Puncture resets are key.",
       "bestPartners": [
-        21,
-        47
+        6,
+        26
       ],
       "lore": "Lancelot, Blade of Roses, is a dash assassin who is untargetable during his skills. His Thorned Rose and Phantom Execution can delete a backline in seconds — if you can hit the dashes.",
       "description": "Lancelot counters squishy backlines with untargetable burst. High skill ceiling — Puncture resets are key.",
@@ -6100,13 +6100,13 @@
         21
       ],
       "synergies": [
-        34,
-        55
+        79,
+        95
       ],
-      "countersReason": "Angela counters burst comps with Heartguard save. The best save support — a well-timed Heartguard turns a lost fight.",
+      "countersReason": "Angela does not 1v1 marksmen. 'Angela BEATS' means her Heartguard saves allies from Hanabi / Claude burst. She is countered by Saber / Lancelot / Hayabusa who can burst through Heartguard.",
       "bestPartners": [
-        34,
-        55
+        79,
+        95
       ],
       "lore": "Angela, Cute Puppet, is a possessor support who attaches to an ally with Heartguard and shields + heals them from anywhere. Her Love Waves heal and slow, and her Puppet-on-a-String roots enemies.",
       "description": "Angela counters burst comps with Heartguard save. The best save support — a well-timed Heartguard turns a lost fight.",
@@ -6640,8 +6640,8 @@
         1001
       ],
       "counters": [
-        60,
-        65
+        15,
+        25
       ],
       "counteredBy": [
         3,
@@ -7187,8 +7187,8 @@
         1010
       ],
       "counters": [
-        60,
-        65
+        70,
+        41
       ],
       "counteredBy": [
         3,
@@ -10255,13 +10255,13 @@
         21
       ],
       "synergies": [
-        6,
-        93
+        115,
+        60
       ],
       "countersReason": "Atlas counters grouped enemies with Fatal Links. 2.2.23 nerf reduces his early damage and poke — still a top initiator, just less lane pressure.",
       "bestPartners": [
-        6,
-        93
+        115,
+        60
       ],
       "lore": "Atlas, Ocean Gladiator, is a mecha tank who grabs enemies with Fatal Links. NERFED in Patch 2.2.23 — Skill 1 Base Damage reduced (115-300 -> 90-260) and Skill 1 cooldown increased (4.5s -> 5.0s). His ultimate still pulls entire teams, but his early poke is weaker.",
       "description": "Atlas counters grouped enemies with Fatal Links. 2.2.23 nerf reduces his early damage and poke — still a top initiator, just less lane pressure.",
@@ -14654,5 +14654,6 @@
       "file": "hirara.webp",
       "patchNotes": ""
     }
-  ]
+  ],
+  "fixNotes": "Fix 2026-11-21: Removed self-references in counters/synergies/bestPartners (6 heroes). Angela synergies [34,55] -> [79,95]. Hayabusa [21,47] -> [6,102]. Lancelot [21,47] -> [6,26]. Hanabi counters [60,65] -> [15,25]. Claude counters [60,65] -> [70,41]. Atlas synergies [6,93] -> [115,60]. Added .kt defensive filter recommendation."
 }

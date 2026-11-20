@@ -8,7 +8,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 
 // ============================================================
-// MLBB Plus theme: deep-navy surfaces, gold accent, monospace type.
+// Shared overlay theme: original deep-navy surfaces, gold accent, and monospace typography.
 //
 // Property names (Github*) are kept so every existing screen,
 // the overlay widget and the back-compat aliases keep compiling;
@@ -60,8 +60,6 @@ object MLBBPlusColors {
 
 private val Mono = FontFamily.Monospace
 private val BaseType = Typography()
-
-// Every text style uses the monospace family, so all existing Text() calls pick it up.
 private val MLBBPlusTypography = Typography(
     displayLarge = BaseType.displayLarge.copy(fontFamily = Mono),
     displayMedium = BaseType.displayMedium.copy(fontFamily = Mono),
@@ -120,3 +118,60 @@ val MLBBTeal = MLBBPlusColors.Teal
 val MLBBBlue = MLBBPlusColors.Blue
 val TierSPlus = Color(0xFFFFE55C)
 val TierAPlus = Color(0xFF79B8FF)
+
+
+/** App-screen palette. Kept separate so the floating overlay retains its existing appearance. */
+object AppUiColors {
+    val GithubBg = Color(0xFF0B0E14)
+    val GithubCard = Color(0xFF151B27)
+    val GithubSurface = Color(0xFF202A39)
+    val GithubBorder = Color(0xFF2B394B)
+    val GithubText = Color(0xFFF2F5FA)
+    val GithubSecondary = Color(0xFFADB8C8)
+    val GithubDisabled = Color(0xFFADB8C8)
+    val Header = Color(0xFF111925)
+    val Gold = Color(0xFFFFD45A)
+    val GoldDark = Color(0xFFC99A25)
+    val GoldBg = Color(0xFFFFD45A).copy(alpha = 0.15f)
+    val Green = Color(0xFF3DDC97)
+    val Red = Color(0xFFE85B70)
+    val Orange = Color(0xFFF5A623)
+    val Blue = Color(0xFF68AFFF)
+    val Teal = Color(0xFF42D6C5)
+    val BlueOld = Blue
+    val TierS = Gold
+    val TierA = Blue
+    val TierB = GithubSecondary
+    val PatchBuff = Green
+    val PatchNerf = Red
+    val PatchRevamp = Gold
+    val PatchAdjust = GithubSecondary
+    val PatchReversion = Orange
+    val Advanced = Orange
+    val AdvancedBg = Orange.copy(alpha = 0.15f)
+    val OP = Gold
+    val Meta = Green
+}
+
+@Composable
+fun AppUiTheme(content: @Composable () -> Unit) {
+    MaterialTheme(
+        colorScheme = darkColorScheme(
+            primary = AppUiColors.Gold,
+            onPrimary = Color(0xFF171717),
+            background = AppUiColors.GithubBg,
+            onBackground = AppUiColors.GithubText,
+            surface = AppUiColors.GithubCard,
+            onSurface = AppUiColors.GithubText,
+            surfaceVariant = AppUiColors.GithubSurface,
+            onSurfaceVariant = AppUiColors.GithubSecondary,
+            outline = AppUiColors.GithubBorder,
+            secondary = AppUiColors.Gold,
+            onSecondary = Color(0xFF171717),
+            error = AppUiColors.Red,
+            onError = Color.White
+        ),
+        typography = Typography(),
+        content = content
+    )
+}

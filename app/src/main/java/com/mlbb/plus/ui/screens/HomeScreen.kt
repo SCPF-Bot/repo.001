@@ -10,11 +10,13 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -52,7 +54,7 @@ import com.mlbb.plus.ui.model.Hero
 import com.mlbb.plus.ui.model.HeroPick
 import com.mlbb.plus.ui.model.PatchHeroChange
 import com.mlbb.plus.ui.model.RoleTypes
-import com.mlbb.plus.ui.theme.MLBBPlusColors
+import com.mlbb.plus.ui.theme.AppUiColors
 
 @Composable
 fun HomeScreen(
@@ -74,11 +76,14 @@ fun HomeScreen(
     val guide = GameData.guides[selectedRole]
     val guideType = guide?.type(selectedRoleType) ?: guide?.types?.firstOrNull()
 
-    Box(Modifier.fillMaxSize().background(MLBBPlusColors.GithubBg)) {
-        Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
+    Box(Modifier.fillMaxSize().background(AppUiColors.GithubBg)) {
+        Column(
+            Modifier.fillMaxHeight().widthIn(max = 960.dp).fillMaxWidth()
+                .align(Alignment.TopCenter).verticalScroll(rememberScrollState())
+        ) {
             AppHeader(
                 title = "MLBB PLUS",
-                subtitle = "$selectedRole guide \u2022 patch ${guide?.patch?.ifBlank { null } ?: patch} \u2022 in-game overlay",
+                subtitle = "$selectedRole guide \u2022 patch ${guide?.patch?.ifBlank { null } ?: patch} \u2022 floating guide",
                 icon = AppIcons.Shield
             )
 
@@ -87,6 +92,8 @@ fun HomeScreen(
                 verticalArrangement = Arrangement.spacedBy(22.dp)
             ) {
                 PatchBanner(onClick = onOpenPatchNotes)
+
+                QuickStartCard(overlayGranted = overlayGranted)
 
                 RolePanel(
                     selectedRole = selectedRole,
@@ -125,9 +132,9 @@ fun HomeScreen(
 
                 SectionLabel("QUICK ACTIONS")
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    QuickActionCard("Hero Explorer", AppIcons.Person, MLBBPlusColors.Blue, Modifier.weight(1f), onOpenHeroes)
-                    QuickActionCard("Item Explorer", AppIcons.Apps, MLBBPlusColors.Teal, Modifier.weight(1f), onOpenItems)
-                    QuickActionCard("Patch Notes", AppIcons.History, MLBBPlusColors.GithubSecondary, Modifier.weight(1f), onOpenPatchNotes)
+                    QuickActionCard("Hero Explorer", AppIcons.Person, AppUiColors.Blue, Modifier.weight(1f), onOpenHeroes)
+                    QuickActionCard("Item Explorer", AppIcons.Apps, AppUiColors.Teal, Modifier.weight(1f), onOpenItems)
+                    QuickActionCard("Patch Notes", AppIcons.History, AppUiColors.GithubSecondary, Modifier.weight(1f), onOpenPatchNotes)
                 }
 
                 SectionLabel("TOP META HEROES")
@@ -146,9 +153,43 @@ fun HomeScreen(
         }
 
         LaunchButton(
+            enabledPermission = overlayGranted,
             onClick = onLaunchWidget,
             modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp)
         )
+    }
+}
+
+@Composable
+private fun QuickStartCard(overlayGranted: Boolean) {
+    val shape = RoundedCornerShape(16.dp)
+    Column(
+        Modifier.fillMaxWidth().clip(shape)
+            .background(AppUiColors.GithubSurface.copy(alpha = 0.72f))
+            .border(1.dp, AppUiColors.GithubBorder, shape).padding(14.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Text("QUICK START", color = AppUiColors.Gold, fontWeight = FontWeight.Bold, fontSize = 12.sp, letterSpacing = 1.sp)
+        QuickStartStep("1", "Choose your position", "Pick the role you play most often.")
+        QuickStartStep("2", "Choose a playstyle", "The guide updates to match your strategy.")
+        if (overlayGranted) {
+            QuickStartStep("3", "Open your floating guide", "Tap Launch Widget at the bottom of the screen.")
+        } else {
+            QuickStartStep("3", "Allow the guide to appear", "Tap Enable Widget, then turn on ‘Display over other apps’ in Android settings.")
+        }
+    }
+}
+
+@Composable
+private fun QuickStartStep(number: String, title: String, detail: String) {
+    Row(horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.Top) {
+        Box(Modifier.size(24.dp).clip(CircleShape).background(AppUiColors.Gold.copy(alpha = 0.16f)), contentAlignment = Alignment.Center) {
+            Text(number, color = AppUiColors.Gold, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+        }
+        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(1.dp)) {
+            Text(title, color = AppUiColors.GithubText, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
+            Text(detail, color = AppUiColors.GithubSecondary, fontSize = 12.sp, lineHeight = 17.sp)
+        }
     }
 }
 
@@ -170,27 +211,27 @@ private fun PatchBanner(onClick: () -> Unit) {
             .clip(shape)
             .background(
                 Brush.horizontalGradient(
-                    listOf(MLBBPlusColors.Gold.copy(alpha = 0.14f), MLBBPlusColors.Gold.copy(alpha = 0.04f))
+                    listOf(AppUiColors.Gold.copy(alpha = 0.14f), AppUiColors.Gold.copy(alpha = 0.04f))
                 )
             )
-            .border(1.dp, MLBBPlusColors.Gold.copy(alpha = 0.45f), shape)
+            .border(1.dp, AppUiColors.Gold.copy(alpha = 0.45f), shape)
             .clickable(role = Role.Button, onClick = onClick)
             .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(14.dp)
     ) {
         Box(
-            Modifier.size(52.dp).clip(RoundedCornerShape(14.dp)).background(MLBBPlusColors.Gold.copy(alpha = 0.18f)),
+            Modifier.size(52.dp).clip(RoundedCornerShape(14.dp)).background(AppUiColors.Gold.copy(alpha = 0.18f)),
             contentAlignment = Alignment.Center
         ) {
-            Icon(AppIcons.Fire, contentDescription = null, tint = MLBBPlusColors.Gold, modifier = Modifier.size(28.dp))
+            Icon(AppIcons.Fire, contentDescription = null, tint = AppUiColors.Gold, modifier = Modifier.size(28.dp))
         }
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-            Text("CURRENT META", color = MLBBPlusColors.Gold, fontWeight = FontWeight.Bold, fontSize = 17.sp, letterSpacing = 1.sp)
-            Text(headline, color = MLBBPlusColors.GithubText, fontSize = 13.sp, fontWeight = FontWeight.SemiBold, maxLines = 1, overflow = TextOverflow.Ellipsis)
-            Text(counts, color = MLBBPlusColors.GithubSecondary, fontSize = 12.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text("CURRENT META", color = AppUiColors.Gold, fontWeight = FontWeight.Bold, fontSize = 17.sp, letterSpacing = 1.sp)
+            Text(headline, color = AppUiColors.GithubText, fontSize = 13.sp, fontWeight = FontWeight.SemiBold, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text(counts, color = AppUiColors.GithubSecondary, fontSize = 12.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
-        Icon(AppIcons.ChevronRight, contentDescription = null, tint = MLBBPlusColors.Gold)
+        Icon(AppIcons.ChevronRight, contentDescription = null, tint = AppUiColors.Gold)
     }
 }
 
@@ -216,17 +257,17 @@ private fun RolePanel(
         Modifier
             .fillMaxWidth()
             .clip(shape)
-            .background(MLBBPlusColors.GithubCard)
-            .border(1.dp, MLBBPlusColors.Gold.copy(alpha = 0.30f), shape)
+            .background(AppUiColors.GithubCard)
+            .border(1.dp, AppUiColors.Gold.copy(alpha = 0.30f), shape)
     ) {
         // Gold top edge, like the "Your Insights" card in the reference.
-        Box(Modifier.fillMaxWidth().height(2.dp).background(MLBBPlusColors.Gold.copy(alpha = 0.85f)))
+        Box(Modifier.fillMaxWidth().height(2.dp).background(AppUiColors.Gold.copy(alpha = 0.85f)))
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                Icon(AppIcons.Shield, contentDescription = null, tint = MLBBPlusColors.Gold, modifier = Modifier.size(20.dp))
+                Icon(AppIcons.Shield, contentDescription = null, tint = AppUiColors.Gold, modifier = Modifier.size(20.dp))
                 Text(
                     "$selectedRole Guide",
-                    color = MLBBPlusColors.Gold,
+                    color = AppUiColors.Gold,
                     fontWeight = FontWeight.Bold,
                     fontSize = 17.sp,
                     modifier = Modifier.weight(1f),
@@ -234,35 +275,35 @@ private fun RolePanel(
                     overflow = TextOverflow.Ellipsis
                 )
                 StatusChip(
-                    text = if (overlayGranted) "READY" else "NEEDS PERMISSION",
-                    color = if (overlayGranted) MLBBPlusColors.Green else MLBBPlusColors.Orange
+                    text = if (overlayGranted) "PERMISSION ON" else "SETUP NEEDED",
+                    color = if (overlayGranted) AppUiColors.Green else AppUiColors.Orange
                 )
             }
 
             if (guide == null) {
                 Text(
                     "No ${selectedRole.lowercase()}_guide.json found. The overlay still gives you the game timer, Turtle / Lord tracker and enemy spell cooldowns.",
-                    color = MLBBPlusColors.GithubSecondary, fontSize = 13.sp, lineHeight = 19.sp
+                    color = AppUiColors.GithubSecondary, fontSize = 13.sp, lineHeight = 19.sp
                 )
             } else {
                 Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                     StatusChip(
                         text = if (guideStale) "GUIDE ${guide.patch} \u2022 OLDER THAN $livePatch" else "PATCH ${guide.patch.ifBlank { livePatch }}",
-                        color = if (guideStale) MLBBPlusColors.Orange else MLBBPlusColors.Green
+                        color = if (guideStale) AppUiColors.Orange else AppUiColors.Green
                     )
-                    StatusChip("${guide.types.size} TYPES", MLBBPlusColors.Blue)
-                    StatusChip("${guide.stepCount} STEPS", MLBBPlusColors.Teal)
-                    if (guide.updated.isNotBlank()) StatusChip("UPDATED ${guide.updated}", MLBBPlusColors.GithubSecondary)
+                    StatusChip("${guide.types.size} TYPES", AppUiColors.Blue)
+                    StatusChip("${guide.stepCount} STEPS", AppUiColors.Teal)
+                    if (guide.updated.isNotBlank()) StatusChip("UPDATED ${guide.updated}", AppUiColors.GithubSecondary)
                 }
             }
 
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    Text("ROLE", color = MLBBPlusColors.GithubSecondary, fontSize = 11.sp, letterSpacing = 1.sp)
+                    Text("POSITION", color = AppUiColors.GithubSecondary, fontSize = 11.sp, letterSpacing = 1.sp)
                     DropdownBox(value = selectedRole, options = roles, labels = { it }, onSelect = onRoleChange)
                 }
                 Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    Text("TYPE", color = MLBBPlusColors.GithubSecondary, fontSize = 11.sp, letterSpacing = 1.sp)
+                    Text("PLAYSTYLE", color = AppUiColors.GithubSecondary, fontSize = 11.sp, letterSpacing = 1.sp)
                     // Options are guide type IDs; the labels come from <role>_guide.json.
                     DropdownBox(
                         value = selectedRoleType,
@@ -275,22 +316,24 @@ private fun RolePanel(
 
             if (guideType != null) {
                 if (guideType.blurb.isNotBlank()) {
-                    Text(guideType.blurb, color = MLBBPlusColors.Gold, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
+                    Text(guideType.blurb, color = AppUiColors.Gold, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
                 }
                 if (guideType.playstyle.isNotBlank()) {
-                    Text(guideType.playstyle, color = MLBBPlusColors.GithubSecondary, fontSize = 13.sp, lineHeight = 19.sp)
+                    Text(guideType.playstyle, color = AppUiColors.GithubSecondary, fontSize = 13.sp, lineHeight = 19.sp)
                 }
                 GuideTypeBriefing(guideType = guideType, onHeroClick = onHeroClick)
             }
 
             Text(
-                if (overlayGranted) "\u2713 Overlay permission granted" else "\u25CB Overlay permission needed",
-                color = if (overlayGranted) MLBBPlusColors.Green else MLBBPlusColors.Orange,
-                fontSize = 12.sp
+                if (overlayGranted) "The floating guide is allowed to appear over your game."
+                else "To show the floating guide, tap Enable Widget and allow ‘Display over other apps’ in Android settings.",
+                color = if (overlayGranted) AppUiColors.Green else AppUiColors.Orange,
+                fontSize = 12.sp,
+                lineHeight = 18.sp
             )
             Text(
                 if (overlayRunning) "\u25CF Overlay is running" else "\u25CB Overlay is not running",
-                color = if (overlayRunning) MLBBPlusColors.Green else MLBBPlusColors.GithubSecondary,
+                color = if (overlayRunning) AppUiColors.Green else AppUiColors.GithubSecondary,
                 fontSize = 12.sp
             )
         }
@@ -301,11 +344,11 @@ private fun RolePanel(
 @Composable
 private fun GuideTypeBriefing(guideType: GuideType, onHeroClick: (Int) -> Unit) {
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        if (guideType.winCondition.isNotBlank()) BriefLine("WIN", guideType.winCondition, MLBBPlusColors.Green)
-        if (guideType.loseCondition.isNotBlank()) BriefLine("AVOID", guideType.loseCondition, MLBBPlusColors.Red)
+        if (guideType.winCondition.isNotBlank()) BriefLine("WIN", guideType.winCondition, AppUiColors.Green)
+        if (guideType.loseCondition.isNotBlank()) BriefLine("AVOID", guideType.loseCondition, AppUiColors.Red)
 
         if (guideType.heroes.isNotEmpty()) {
-            Text("PICKS", color = MLBBPlusColors.GithubSecondary, fontSize = 11.sp, letterSpacing = 1.sp)
+            Text("PICKS", color = AppUiColors.GithubSecondary, fontSize = 11.sp, letterSpacing = 1.sp)
             Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 guideType.heroes.forEach { pick -> PickChip(pick, onHeroClick) }
             }
@@ -322,14 +365,14 @@ private fun GuideTypeBriefing(guideType: GuideType, onHeroClick: (Int) -> Unit) 
                 Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(12.dp))
-                    .background(MLBBPlusColors.GithubSurface)
+                    .background(AppUiColors.GithubSurface)
                     .padding(12.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 loadout.forEach { (label, value) ->
                     Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                        Text(label.uppercase(), color = MLBBPlusColors.Gold, fontSize = 10.sp, fontWeight = FontWeight.Bold, letterSpacing = 0.8.sp)
-                        Text(value, color = MLBBPlusColors.GithubText, fontSize = 12.sp, lineHeight = 17.sp)
+                        Text(label.uppercase(), color = AppUiColors.Gold, fontSize = 10.sp, fontWeight = FontWeight.Bold, letterSpacing = 0.8.sp)
+                        Text(value, color = AppUiColors.GithubText, fontSize = 12.sp, lineHeight = 17.sp)
                     }
                 }
             }
@@ -346,7 +389,7 @@ private fun BriefLine(label: String, text: String, color: Color) {
                 .background(color.copy(alpha = 0.16f))
                 .padding(horizontal = 6.dp, vertical = 2.dp)
         ) { Text(label, color = color, fontSize = 10.sp, fontWeight = FontWeight.Bold, letterSpacing = 0.5.sp) }
-        Text(text, color = MLBBPlusColors.GithubText, fontSize = 12.sp, lineHeight = 17.sp, modifier = Modifier.weight(1f))
+        Text(text, color = AppUiColors.GithubText, fontSize = 12.sp, lineHeight = 17.sp, modifier = Modifier.weight(1f))
     }
 }
 
@@ -359,8 +402,8 @@ private fun PickChip(pick: HeroPick, onHeroClick: (Int) -> Unit) {
         Modifier
             .width(if (pick.note.isBlank()) 120.dp else 176.dp)
             .clip(shape)
-            .background(MLBBPlusColors.GithubSurface)
-            .border(1.dp, MLBBPlusColors.GithubBorder, shape)
+            .background(AppUiColors.GithubSurface)
+            .border(1.dp, AppUiColors.GithubBorder, shape)
             .then(if (hero != null) Modifier.clickable(role = Role.Button) { onHeroClick(hero.id) } else Modifier)
             .padding(8.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -370,11 +413,11 @@ private fun PickChip(pick: HeroPick, onHeroClick: (Int) -> Unit) {
             HeroImage(hero = hero, modifier = Modifier.size(34.dp).clip(CircleShape))
         }
         Column(Modifier.weight(1f)) {
-            Text(pick.name, color = MLBBPlusColors.GithubText, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text(pick.name, color = AppUiColors.GithubText, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, maxLines = 1, overflow = TextOverflow.Ellipsis)
             if (pick.note.isNotBlank()) {
-                Text(pick.note, color = MLBBPlusColors.GithubSecondary, fontSize = 10.sp, lineHeight = 13.sp, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                Text(pick.note, color = AppUiColors.GithubSecondary, fontSize = 10.sp, lineHeight = 13.sp, maxLines = 2, overflow = TextOverflow.Ellipsis)
             } else if (hero != null) {
-                Text("Tier ${hero.tier}", color = MLBBPlusColors.GithubSecondary, fontSize = 10.sp)
+                Text("Tier ${hero.tier}", color = AppUiColors.GithubSecondary, fontSize = 10.sp)
             }
         }
     }
@@ -390,25 +433,25 @@ private fun MechanicsCard(guide: GuideFile) {
         Modifier
             .fillMaxWidth()
             .clip(shape)
-            .background(MLBBPlusColors.GithubCard)
-            .border(1.dp, MLBBPlusColors.GithubBorder, shape)
+            .background(AppUiColors.GithubCard)
+            .border(1.dp, AppUiColors.GithubBorder, shape)
             .padding(14.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         notes.forEach { note ->
             Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                Text(note.title, color = MLBBPlusColors.Gold, fontSize = 12.sp, fontWeight = FontWeight.Bold)
-                Text(note.text, color = MLBBPlusColors.GithubSecondary, fontSize = 12.sp, lineHeight = 18.sp)
+                Text(note.title, color = AppUiColors.Gold, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                Text(note.text, color = AppUiColors.GithubSecondary, fontSize = 12.sp, lineHeight = 18.sp)
             }
         }
         if (showAll && guide.globalRules.isNotEmpty()) {
-            Text("RULES OF THUMB", color = MLBBPlusColors.GithubSecondary, fontSize = 11.sp, letterSpacing = 1.sp)
-            guide.globalRules.forEach { Text("\u2022 $it", color = MLBBPlusColors.GithubText, fontSize = 12.sp, lineHeight = 18.sp) }
+            Text("RULES OF THUMB", color = AppUiColors.GithubSecondary, fontSize = 11.sp, letterSpacing = 1.sp)
+            guide.globalRules.forEach { Text("\u2022 $it", color = AppUiColors.GithubText, fontSize = 12.sp, lineHeight = 18.sp) }
         }
         if (guide.mechanics.size > 3 || guide.globalRules.isNotEmpty()) {
             Text(
                 if (showAll) "Show less" else "Show all ${guide.mechanics.size} notes + rules",
-                color = MLBBPlusColors.Gold,
+                color = AppUiColors.Gold,
                 fontSize = 12.sp,
                 fontWeight = FontWeight.SemiBold,
                 modifier = Modifier.clickable(role = Role.Button) { showAll = !showAll }.padding(vertical = 4.dp)
@@ -433,10 +476,10 @@ private fun MoverCard(hero: Hero, change: PatchHeroChange, onClick: () -> Unit) 
     ) {
         HeroImage(hero = hero, modifier = Modifier.size(52.dp).clip(CircleShape).border(2.dp, color, CircleShape))
         Spacer(Modifier.height(8.dp))
-        Text(hero.name, color = MLBBPlusColors.GithubText, fontSize = 12.sp, fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        Text(hero.name, color = AppUiColors.GithubText, fontSize = 12.sp, fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis)
         Text(change.type.uppercase().ifBlank { "CHANGE" }, color = color, fontSize = 10.sp, fontWeight = FontWeight.Bold, letterSpacing = 0.5.sp)
         if (change.tierChange.isNotBlank()) {
-            Text(change.tierChange.replace("->", "\u2192"), color = MLBBPlusColors.GithubSecondary, fontSize = 10.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text(change.tierChange.replace("->", "\u2192"), color = AppUiColors.GithubSecondary, fontSize = 10.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
     }
 }
@@ -462,25 +505,25 @@ private fun DropdownBox(value: String, options: List<String>, labels: (String) -
             Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(12.dp))
-                .background(MLBBPlusColors.GithubSurface)
-                .border(1.dp, MLBBPlusColors.GithubBorder, RoundedCornerShape(12.dp))
+                .background(AppUiColors.GithubSurface)
+                .border(1.dp, AppUiColors.GithubBorder, RoundedCornerShape(12.dp))
                 .semantics { role = Role.DropdownList }
                 .clickable { expanded = true }
                 .padding(horizontal = 14.dp, vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Text(labels(value), color = MLBBPlusColors.GithubText, fontWeight = FontWeight.SemiBold, fontSize = 14.sp, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
-            Text("\u25BE", color = MLBBPlusColors.Gold, fontSize = 14.sp)
+            Text(labels(value), color = AppUiColors.GithubText, fontWeight = FontWeight.SemiBold, fontSize = 14.sp, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
+            Text("\u25BE", color = AppUiColors.Gold, fontSize = 14.sp)
         }
         DropdownMenu(
             expanded = expanded,
             onDismissRequest = { expanded = false },
-            modifier = Modifier.background(MLBBPlusColors.GithubCard)
+            modifier = Modifier.background(AppUiColors.GithubCard)
         ) {
             options.forEach { opt ->
                 DropdownMenuItem(
-                    text = { Text(labels(opt), color = MLBBPlusColors.GithubText) },
+                    text = { Text(labels(opt), color = AppUiColors.GithubText) },
                     onClick = { onSelect(opt); expanded = false }
                 )
             }
@@ -504,9 +547,9 @@ private fun QuickActionCard(label: String, icon: ImageVector, tint: Color, modif
             Modifier.size(44.dp).clip(RoundedCornerShape(12.dp)).background(tint.copy(alpha = 0.22f)),
             contentAlignment = Alignment.Center
         ) {
-            Icon(icon, contentDescription = null, tint = if (tint == MLBBPlusColors.GithubSecondary) MLBBPlusColors.GithubText else tint, modifier = Modifier.size(24.dp))
+            Icon(icon, contentDescription = null, tint = if (tint == AppUiColors.GithubSecondary) AppUiColors.GithubText else tint, modifier = Modifier.size(24.dp))
         }
-        Text(label, color = MLBBPlusColors.GithubText, fontWeight = FontWeight.SemiBold, fontSize = 13.sp, maxLines = 2, overflow = TextOverflow.Ellipsis, lineHeight = 17.sp)
+        Text(label, color = AppUiColors.GithubText, fontWeight = FontWeight.SemiBold, fontSize = 13.sp, maxLines = 2, overflow = TextOverflow.Ellipsis, lineHeight = 17.sp)
     }
 }
 
@@ -518,8 +561,8 @@ private fun MetaHeroCard(hero: Hero, onClick: () -> Unit) {
         modifier = Modifier
             .width(96.dp)
             .clip(shape)
-            .background(MLBBPlusColors.GithubCard)
-            .border(1.dp, MLBBPlusColors.GithubBorder, shape)
+            .background(AppUiColors.GithubCard)
+            .border(1.dp, AppUiColors.GithubBorder, shape)
             .clickable(onClick = onClick)
             .padding(horizontal = 8.dp, vertical = 12.dp)
     ) {
@@ -534,28 +577,28 @@ private fun MetaHeroCard(hero: Hero, onClick: () -> Unit) {
             TierBadge(hero.tier, Modifier.align(Alignment.TopEnd))
         }
         Spacer(Modifier.height(8.dp))
-        Text(hero.name, color = MLBBPlusColors.GithubText, fontSize = 13.sp, fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        Text(hero.name, color = AppUiColors.GithubText, fontSize = 13.sp, fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis)
         // winRate is 0..1 (Models.kt) -> *100 is correct.
         Text(
             if (hero.hasLiveStats) "%.0f%% win".format(hero.winRate * 100) else "Tier ${hero.tier}",
-            color = MLBBPlusColors.GithubSecondary,
+            color = AppUiColors.GithubSecondary,
             fontSize = 12.sp
         )
     }
 }
 
 @Composable
-private fun LaunchButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
+private fun LaunchButton(enabledPermission: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier) {
     Row(
         modifier
             .clip(RoundedCornerShape(20.dp))
-            .background(MLBBPlusColors.Gold)
+            .background(AppUiColors.Gold)
             .clickable(role = Role.Button, onClick = onClick)
             .padding(horizontal = 24.dp, vertical = 18.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         Icon(AppIcons.PlayArrow, contentDescription = null, tint = Color.Black, modifier = Modifier.size(24.dp))
-        Text("Launch Widget", color = Color.Black, fontWeight = FontWeight.Bold, fontSize = 15.sp, letterSpacing = 0.5.sp)
+        Text(if (enabledPermission) "Launch Widget" else "Enable Widget", color = Color.Black, fontWeight = FontWeight.Bold, fontSize = 15.sp, letterSpacing = 0.5.sp)
     }
 }
