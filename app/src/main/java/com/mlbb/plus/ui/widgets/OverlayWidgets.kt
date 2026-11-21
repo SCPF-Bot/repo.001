@@ -458,7 +458,7 @@ private fun computeObjective(
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun RoamGuideWidget(role: String = "Roam", roleType: String = "Tank", onBack: () -> Unit) {
+fun RoamGuideWidget(role: String = "Roam", roleType: String = "", onBack: () -> Unit) {
     val context = LocalContext.current
     // V8 FIX: Width from displayMetrics (true screen), NOT LocalConfiguration.
     // In a WRAP_CONTENT overlay window, LocalConfiguration returns the WINDOW size,

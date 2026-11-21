@@ -62,7 +62,8 @@ MLBB-Plus/
 │       │   ├── mid_guide.json
 │       │   ├── gold_guide.json
 │       │   ├── exp_guide.json
-│       │   └── heroes/*.webp
+│       │   ├── heroes/*.webp
+│       │   └── items/*.webp
 │       ├── java/com/mlbb/plus/ui/
 │       │   ├── MainActivity.kt
 │       │   ├── WidgetOverlayService.kt
@@ -88,10 +89,9 @@ MLBB-Plus/
 │   ├── overview.md
 │   ├── structure.md
 │   ├── links.md
-│   ├── MATCHUP-DATA-SOURCES.md
-│   ├── MATCHUP-DATA-UPDATE.md
-│   ├── UX-UI-OVERHAUL.md
-│   └── matchup-data-audit.json
+│   └── refactoring-report.md
+├── scripts/
+│   └── validate_assets.py
 ├── gradle/
 │   ├── libs.versions.toml
 │   └── wrapper/{gradle-wrapper.jar,gradle-wrapper.properties}
@@ -103,7 +103,7 @@ MLBB-Plus/
 └── readme.md
 ```
 
-`app/src/main/assets/heroes/` contains the bundled hero portrait WebP files. The project snapshot has 133 hero records and 41 item records in the JSON data. The resource directory contains launcher artwork and Android theme resources.
+`app/src/main/assets/heroes/` contains the bundled hero portraits and `app/src/main/assets/items/` contains portraits for all 41 item records (40 active, one removed legacy item). The resource directory contains launcher artwork and Android theme resources.
 
 ## 3. Startup and navigation chain
 
@@ -286,7 +286,7 @@ sequenceDiagram
 - Coil Compose: `3.0.4`.
 - SavedState: `1.2.1`.
 - Other UI: Compose UI, Foundation, Material 3, tooling preview.
-- Repositories: Google, Maven Central, JitPack.
+- Repositories: Google and Maven Central.
 - Release build enables code minification and resource shrinking; debug disables both.
 - Gradle wrapper distribution: Gradle `9.6.1`.
 
@@ -296,7 +296,7 @@ The versions above are read from `gradle/libs.versions.toml`, `app/build.gradle.
 
 | If you change… | Also inspect / validate… |
 |---|---|
-| Hero JSON fields | `Hero`, `JsonLoader.loadHeroes`, hero list/detail UI, `matchup-data-audit.json` |
+| Hero JSON fields | `Hero`, `JsonLoader.loadHeroes`, hero list/detail UI, `heroes.json` relationship fields |
 | Hero IDs or names | Item/guide references, guide name-to-ID linking, relationship IDs, patch changes |
 | Item JSON fields | `Item`, `JsonLoader.loadItems`, item detail UI, hero core-build resolution |
 | Guide JSON schema | Both `GuideLoader` and the private parser in `OverlayWidgets.kt`; Home and overlay must remain compatible |
@@ -321,40 +321,34 @@ The versions above are read from `gradle/libs.versions.toml`, `app/build.gradle.
 
 - Product mission and roadmap: [overview.md](overview.md)
 - External references and sources: [links.md](links.md)
-- Matchup data methodology: [MATCHUP-DATA-SOURCES.md](MATCHUP-DATA-SOURCES.md)
-- Matchup refresh notes: [MATCHUP-DATA-UPDATE.md](MATCHUP-DATA-UPDATE.md)
-- UX/UI decisions: [UX-UI-OVERHAUL.md](UX-UI-OVERHAUL.md)
+- Matchup data methodology: [links.md](links.md#3-mlbb-game-data-and-matchup-references)
+- Kotlin review and UX/UI decisions: [refactoring-report.md](refactoring-report.md)
 
 
 ## 11. UX changes and implementation boundaries
 
-The recorded UX/UI refresh changed the main app experience but deliberately preserved the floating overlay implementation.
+The refactor improves the catalogue experience while preserving the floating guide's original in-match purpose.
 
-Main-app changes recorded:
-- Home Quick Start guidance and clearer Position / Playstyle / Enable Widget wording.
-- Direct Android Settings flow for overlay permission, with explanatory copy.
-- Functional remember-last-position/playstyle startup preference, conditional on overlay permission.
-- Improved Back handling and preservation of search, filters, sort choices, and selected patch tab while navigating.
-- Hero/item sorting, clear-filter actions, result counts, and empty states.
-- Adaptive navigation rail at wider window sizes while retaining bottom navigation on phones.
-- Constrained Home content width on larger screens.
-- Expandable technical diagnostics and improved toggle/accessibility semantics.
+Implemented in this pass:
+- Hero and item grids use adaptive columns instead of seven fixed columns.
+- Search, category/role/tier filters, and sort selections use saveable state.
+- Hero and item sorting controls are visible and connected to their existing sort state.
+- Removed item entries remain available in the data model but are excluded from the active item catalogue.
+- Item detail relationship sections now use the JSON model's actual field names and semantics.
+- Item portraits exist for every item record and have a runtime fallback through Coil.
+- The overlay service validates role and playstyle IDs when starting or restoring the widget.
 
-The following files were explicitly unchanged by that refresh:
-- `ui/WidgetOverlayService.kt`
-- `ui/widgets/JetOverlay.kt`
-- `ui/widgets/OverlayWidgets.kt`
-- `ui/theme/MLBBPlusTheme.kt`
+The overlay continues to provide a role-aware guide, match timer, objective timing, and enemy battle-spell cooldown tracking. It remains draggable, dismissible, and touch-pass-through outside its window. The refactor does not replace it with a generic floating button or add distracting animation.
 
 ## 12. Matchup data validation record
 
-The companion audit (`matchup-data-audit.json`) reports 133 heroes, with all 133 covered in each relationship category. Every hero has at least three toughest-matchup entries; toughest lists range from 3–5 entries, favorable lists from 4–5, and best-measured-ally lists from 4–5. Forty-three heroes use the direct MLBBHub fallback for toughest matchups.
+The matchup source, snapshot date, rank/timeframe, fallback method, and interpretation caveats are documented in [links.md](links.md#3-mlbb-game-data-and-matchup-references). The repository does not ship a separate machine-readable matchup audit artifact.
 
-When hero IDs, names, or matchup arrays change, validate:
+When hero IDs, names, or matchup arrays change, validate that:
 1. Every relationship ID resolves through `GameData.heroesById`.
 2. No hero links to itself and no duplicate relationship IDs occur.
 3. The direction of `counters` and `counteredBy` remains consistent with the documented definitions.
-4. `matchup-data-audit.json` is regenerated and checked against the new asset snapshot.
-5. Source date, patch, rank scope, timeframe, fallback provenance, and caveats are updated together.
+4. Source date, patch, rank scope, timeframe, fallback provenance, and caveats are updated together.
 
-The audit validates coverage and counts; it does not independently validate the quality or predictive power of each matchup.
+`scripts/validate_assets.py` checks JSON syntax, duplicate hero/item IDs, declared item counts, and every declared portrait path. It does **not** prove the accuracy or predictive power of matchup data; that requires a separate data audit.
+

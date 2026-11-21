@@ -80,8 +80,9 @@ The app should avoid assuming that every user understands game abbreviations or 
 | `patch_notes.json` | Patch 2.2.23 Original Server notes and change lists |
 | Five guide JSON files | 26 role/playstyle types total (6 Roam, 5 each Jungle/Mid/Gold/EXP) |
 | Hero portraits | Bundled WebP portraits under `assets/heroes/` |
+| Item portraits | 41 bundled WebP portraits under `assets/items/` (40 active, one removed legacy record; original illustrative artwork, not official game art) |
 
-The matchup snapshot is dated 2026-11-21, all ranks, past one day. It contains three relationship concepts: toughest matchups, favorable matchups, and best measured allies. The derivation and fallback approach are documented in [MATCHUP-DATA-SOURCES.md](MATCHUP-DATA-SOURCES.md). These are statistical associations, not deterministic advice.
+The matchup snapshot is dated 2026-11-21, all ranks, past one day. It contains three relationship concepts: toughest matchups, favorable matchups, and best measured allies. The derivation and fallback approach are documented in [links.md](links.md#3-mlbb-game-data-and-matchup-references). These are statistical associations, not deterministic advice.
 
 ## 6. Product principles
 
@@ -126,7 +127,7 @@ Roadmap status is based on code and bundled assets in this repository snapshot, 
 - [x] Objective timers and enemy battle-spell tracking in overlay.
 - [x] Patch-note integration and guide references on hero/item details.
 - [x] Matchup and synergy fields for all 133 heroes, with methodology and source notes.
-- [x] UX refinements for quick start, search/filter/sort, navigation, and settings diagnostics.
+- [x] UX refinements for quick start, search/filter/sort, navigation, and settings diagnostics.nostics.
 
 ### Next priorities — reliability and maintainability
 
@@ -176,8 +177,8 @@ A release should not be considered ready until:
 
 - Read [structure.md](structure.md) for the detailed file map, dependency chains, and data flow.
 - Read [links.md](links.md) for Android documentation, UX references, game-data sources, and matchup resources.
-- Read [MATCHUP-DATA-SOURCES.md](MATCHUP-DATA-SOURCES.md) for the current matchup methodology.
-- Read [UX-UI-OVERHAUL.md](UX-UI-OVERHAUL.md) for the recorded UI/UX changes.
+- Read [links.md](links.md) for the matchup methodology and external source index.
+- Read [refactoring-report.md](refactoring-report.md) for the exhaustive Kotlin review and applied refactors.
 
 
 ## 11. UX / UI implementation record
@@ -208,3 +209,8 @@ The 2026-11-21 matchup audit reports:
 The fallback roster is: Angela, Arlott, Aulus, Aurora, Badang, Brody, Carmilla, Cecilion, Chou, Claude, Clint, Dyrroth, Guinevere, Gusion, Hayabusa, Hilda, Hirara, Julian, Kadita, Kagura, Lapu-Lapu, Leomord, Lesley, Luo Yi, Martis, Minotaur, Miya, Moskov, Nana, Natan, Nolan, Novaria, Obsidia, Paquito, Pharsa, Selena, Sora, Suyou, Terizla, Vexana, Yi Sun-shin, Yu Zhong, and Zetian.
 
 The audit is a coverage/shape check, not proof that every recommendation is strategically correct. Interpret the relationship fields using the methodology summarized in the Sources section of `links.md`; matchup associations are not guarantees.
+
+
+## 10. Refactoring snapshot (21 November 2026)
+
+The latest repository refactor fixes model/UI mismatches in the item and hero screens, restores the shared `AssetImage` API expected by catalogue screens, adds item status handling, switches hero/item catalogues to adaptive grids, makes catalogue filters and sorting saveable, and validates overlay role/playstyle defaults. All item JSON image paths now resolve to local WebP files. See [refactoring-report.md](refactoring-report.md) for the complete file-by-file review and build-validation caveat.

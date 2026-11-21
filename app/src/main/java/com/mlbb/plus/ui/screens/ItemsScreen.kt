@@ -32,6 +32,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -49,11 +50,11 @@ import androidx.compose.ui.unit.sp
 import com.mlbb.plus.ui.model.GameData
 import com.mlbb.plus.ui.model.Hero
 import com.mlbb.plus.ui.model.Item
+import com.mlbb.plus.ui.components.FilterPill
 import com.mlbb.plus.ui.theme.MLBBPlusColors
-import com.mlbb.plus.ui.widgets.AssetImage
 
-private enum class ItemTab { OVERVIEW, BUILD_PATH, SYNERGIES }
-private enum class ItemSort { RECOMMENDED, PRICE_LOW, PRICE_HIGH, TIER }
+private enum class ItemTab { OVERVIEW, BUILD_PATH, MATCHUPS }
+private enum class ItemSort { RECOMMENDED, PRICE_LOW, PRICE_HIGH }
 
 private fun tierRank(tier: String): Int {
     val t = tier.trim().uppercase()
@@ -80,18 +81,19 @@ fun ItemsScreen(
     onItemClick: (Item) -> Unit = {},
     onHeroClick: (Hero) -> Unit = {}
 ) {
-    var query by remember { mutableStateOf("") }
-    var selectedCat by remember { mutableStateOf("All") }
-    var sort by remember { mutableStateOf(ItemSort.RECOMMENDED) }
+    var query by rememberSaveable { mutableStateOf("") }
+    var selectedCat by rememberSaveable { mutableStateOf("All") }
+    var sort by rememberSaveable { mutableStateOf(ItemSort.RECOMMENDED) }
 
-    val categories = remember {
-        val cats = GameData.items.map { it.category }.filter { it.isNotBlank() }.distinct().sorted()
+    val activeItems = remember { GameData.items.filter { it.status == "active" } }
+    val categories = remember(activeItems) {
+        val cats = activeItems.map { it.category }.filter { it.isNotBlank() }.distinct().sorted()
         listOf("All") + cats
     }
 
-    val filtered = remember(query, selectedCat, sort) {
+    val filtered = remember(query, selectedCat, sort, activeItems) {
         val q = query.trim().lowercase()
-        val base = GameData.items.filter { item ->
+        val base = activeItems.filter { item ->
             val matchesQuery = q.isBlank() ||
                 item.name.lowercase().contains(q) ||
                 item.category.lowercase().contains(q)
@@ -102,7 +104,6 @@ fun ItemsScreen(
         when (sort) {
             ItemSort.PRICE_LOW -> base.sortedBy { it.price }
             ItemSort.PRICE_HIGH -> base.sortedByDescending { it.price }
-            ItemSort.TIER -> base.sortedWith(compareBy({ tierRank(it.tier) }, { it.price }))
             ItemSort.RECOMMENDED -> base.sortedWith(compareBy({ tierRank(it.tier) }, { it.price }))
         }
     }
@@ -167,20 +168,33 @@ fun ItemsScreen(
             }
         }
 
+        Row(
+            modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            listOf(
+                ItemSort.RECOMMENDED to "Recommended",
+                ItemSort.PRICE_LOW to "Price: low to high",
+                ItemSort.PRICE_HIGH to "Price: high to low"
+            ).forEach { (option, label) ->
+                FilterPill(label, sort == option, onClick = { sort = option })
+            }
+        }
+
         Text(
-            text = "${filtered.size} of ${GameData.items.size} items",
+            text = "${filtered.size} of ${activeItems.size} active items",
             color = MLBBPlusColors.GithubSecondary,
             fontSize = 12.sp,
             modifier = Modifier.padding(vertical = 4.dp)
         )
 
-        // 7 columns — compact thumbnails so item icons stay small
+        // Adaptive columns keep portraits readable on compact and wide screens
         LazyVerticalGrid(
-            columns = GridCells.Fixed(7),
+            columns = GridCells.Adaptive(minSize = 84.dp),
             contentPadding = PaddingValues(vertical = 8.dp),
             horizontalArrangement = Arrangement.spacedBy(6.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier.fillMaxWidth().weight(1f)
         ) {
             items(filtered, key = { it.id }) { item ->
                 Column(
@@ -206,7 +220,7 @@ fun ItemsScreen(
                     Text(
                         text = item.name,
                         color = MLBBPlusColors.GithubText,
-                        fontSize = 9.sp,
+                        fontSize = 10.sp,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         textAlign = TextAlign.Center,
@@ -215,7 +229,7 @@ fun ItemsScreen(
                     Text(
                         text = "${item.price} Gold",
                         color = MLBBPlusColors.Gold,
-                        fontSize = 8.sp,
+                        fontSize = 9.sp,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         textAlign = TextAlign.Center
@@ -242,11 +256,16 @@ fun ItemDetailScreen(
         }
     }
     val relatedItems = remember(item.id) {
-        // All related items, no take(5) limit
-        item.relatedItemIds.mapNotNull { GameData.itemsById[it] }
+        (item.counters + item.counteredBy).distinct()
+            .filter { it != item.id }
+            .mapNotNull { GameData.itemsById[it] }
+            .filter { it.status == "active" }
     }
     val synergyHeroes = remember(item.id) {
-        item.synergyHeroIds.mapNotNull { GameData.heroesById[it] }
+        item.synergiesHeroes.mapNotNull { GameData.heroesById[it] }
+    }
+    val matchupHeroes = remember(item.id) {
+        item.worksAgainstHeroes.mapNotNull { GameData.heroesById[it] }
     }
 
     Column(
@@ -293,7 +312,7 @@ fun ItemDetailScreen(
                         .clickable { selectedTab = tab }
                         .padding(horizontal = 14.dp, vertical = 8.dp)
                 ) {
-                    Text(tab.name, color = if (selected) MLBBPlusColors.Gold else MLBBPlusColors.GithubText, fontSize = 13.sp, fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal)
+                    Text(if (tab == ItemTab.MATCHUPS) "HERO LINKS" else tab.name.replace("_", " "), color = if (selected) MLBBPlusColors.Gold else MLBBPlusColors.GithubText, fontSize = 13.sp, fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal)
                 }
             }
         }
@@ -306,7 +325,7 @@ fun ItemDetailScreen(
                     Text("Stats", color = MLBBPlusColors.GithubText, fontWeight = FontWeight.Bold, fontSize = 14.sp)
                     Spacer(modifier = Modifier.height(8.dp))
                     item.statsDetailed.forEach { stat ->
-                        Text("• ${stat.label}: ${stat.value}", color = MLBBPlusColors.GithubText, fontSize = 13.sp)
+                        Text("• ${stat.stat}: ${stat.value}", color = MLBBPlusColors.GithubText, fontSize = 13.sp)
                     }
                     Spacer(modifier = Modifier.height(12.dp))
                 }
@@ -362,11 +381,11 @@ fun ItemDetailScreen(
                     }
                 }
             }
-            ItemTab.SYNERGIES -> {
-                Text("Works Well On", color = MLBBPlusColors.GithubText, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+            ItemTab.MATCHUPS -> {
+                Text("Hero Synergies", color = MLBBPlusColors.GithubText, fontWeight = FontWeight.Bold, fontSize = 14.sp)
                 Spacer(modifier = Modifier.height(8.dp))
                 if (synergyHeroes.isEmpty()) {
-                    Text("No synergy heroes in items.json", color = MLBBPlusColors.GithubSecondary, fontSize = 13.sp)
+                    Text("No hero synergy data for this item.", color = MLBBPlusColors.GithubSecondary, fontSize = 13.sp)
                 } else {
                     LazyRow(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                         items(synergyHeroes, key = { it.id }) { hero ->
@@ -374,6 +393,26 @@ fun ItemDetailScreen(
                                 modifier = Modifier
                                     .width(56.dp)
                                     .clickable { onHeroClick(hero) },
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Box(modifier = Modifier.size(52.dp).clip(RoundedCornerShape(10.dp))) {
+                                    AssetImage(hero = hero, modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop, contentDescription = hero.name)
+                                }
+                                Text(hero.name, color = MLBBPlusColors.GithubText, fontSize = 10.sp, maxLines = 1, overflow = TextOverflow.Ellipsis, textAlign = TextAlign.Center)
+                            }
+                        }
+                    }
+                }
+                Spacer(modifier = Modifier.height(16.dp))
+                Text("Effective Against", color = MLBBPlusColors.GithubText, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                Spacer(modifier = Modifier.height(8.dp))
+                if (matchupHeroes.isEmpty()) {
+                    Text("No matchup data for this item.", color = MLBBPlusColors.GithubSecondary, fontSize = 13.sp)
+                } else {
+                    LazyRow(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                        items(matchupHeroes, key = { it.id }) { hero ->
+                            Column(
+                                modifier = Modifier.width(56.dp).clickable { onHeroClick(hero) },
                                 horizontalAlignment = Alignment.CenterHorizontally
                             ) {
                                 Box(modifier = Modifier.size(52.dp).clip(RoundedCornerShape(10.dp))) {

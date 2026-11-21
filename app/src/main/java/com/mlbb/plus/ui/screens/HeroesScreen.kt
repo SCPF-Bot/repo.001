@@ -34,6 +34,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -50,9 +51,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.mlbb.plus.ui.model.GameData
 import com.mlbb.plus.ui.model.Hero
-import com.mlbb.plus.ui.model.RoleTypes
+import com.mlbb.plus.ui.components.FilterPill
 import com.mlbb.plus.ui.theme.MLBBPlusColors
-import com.mlbb.plus.ui.widgets.AssetImage
 
 private enum class HeroTab { OVERVIEW, COUNTERS, SYNERGIES }
 private enum class HeroSort { RECOMMENDED, WIN_RATE, NAME }
@@ -91,20 +91,24 @@ fun HeroesScreen(
     onHeroClick: (Hero) -> Unit = {},
     onItemClick: (com.mlbb.plus.ui.model.Item) -> Unit = {}
 ) {
-    var query by remember { mutableStateOf("") }
-    var selectedRole by remember { mutableStateOf("All") }
-    var selectedTier by remember { mutableStateOf("All") }
-    var showAdvanced by remember { mutableStateOf(false) }
-    var sort by remember { mutableStateOf(HeroSort.RECOMMENDED) }
+    var query by rememberSaveable { mutableStateOf("") }
+    var selectedRole by rememberSaveable { mutableStateOf("All") }
+    var selectedTier by rememberSaveable { mutableStateOf("All") }
+    var sort by rememberSaveable { mutableStateOf(HeroSort.RECOMMENDED) }
 
-    val allHeroes = remember(showAdvanced) {
-        if (showAdvanced) GameData.liveHeroes else GameData.liveHeroes
+    val allHeroes = remember { GameData.liveHeroes }
+
+    val roles = remember(allHeroes) {
+        val heroRoles = allHeroes.flatMap { listOfNotNull(it.role, it.secondaryRole) }
+            .map { it.trim() }
+            .filter { it.isNotEmpty() }
+            .distinct()
+            .sorted()
+        listOf("All") + heroRoles
     }
-
-    val roles = remember { listOf("All") + RoleTypes.byRole.keys.sorted() }
     val tiers = remember { listOf("All", "S", "A", "B") }
 
-    val filtered = remember(query, selectedRole, selectedTier, showAdvanced, sort, allHeroes) {
+    val filtered = remember(query, selectedRole, selectedTier, sort, allHeroes) {
         val q = query.trim().lowercase()
         val base = allHeroes.filter { hero ->
             val matchesQuery = q.isBlank() ||
@@ -210,6 +214,19 @@ fun HeroesScreen(
             }
         }
 
+        Row(
+            modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            listOf(
+                HeroSort.RECOMMENDED to "Recommended",
+                HeroSort.WIN_RATE to "Win rate",
+                HeroSort.NAME to "Name"
+            ).forEach { (option, label) ->
+                FilterPill(label, sort == option, onClick = { sort = option })
+            }
+        }
+
         Text(
             text = "${filtered.size} of ${allHeroes.size} heroes",
             color = MLBBPlusColors.GithubSecondary,
@@ -217,13 +234,13 @@ fun HeroesScreen(
             modifier = Modifier.padding(vertical = 4.dp)
         )
 
-        // 7 columns — compact thumbnails so portraits stay small
+        // Adaptive columns keep hero portraits readable across window sizes
         LazyVerticalGrid(
-            columns = GridCells.Fixed(7),
+            columns = GridCells.Adaptive(minSize = 84.dp),
             contentPadding = PaddingValues(vertical = 8.dp),
             horizontalArrangement = Arrangement.spacedBy(6.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier.fillMaxWidth().weight(1f)
         ) {
             items(filtered, key = { it.id }) { hero ->
                 Column(
@@ -257,7 +274,7 @@ fun HeroesScreen(
                             Text(
                                 text = normalizedTier(hero.tier),
                                 color = Color.Black,
-                                fontSize = 8.sp,
+                                fontSize = 9.sp,
                                 fontWeight = FontWeight.Bold
                             )
                         }
@@ -265,7 +282,7 @@ fun HeroesScreen(
                     Text(
                         text = hero.name,
                         color = MLBBPlusColors.GithubText,
-                        fontSize = 9.sp,
+                        fontSize = 10.sp,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         textAlign = TextAlign.Center,

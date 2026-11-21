@@ -51,8 +51,8 @@ import com.mlbb.plus.ui.theme.MLBBPlusColors
 //      true forever. Fix: remember(id, imagePath).
 // ============================================================
 
-private fun assetModel(imageFromJson: String, id: Int, folder: String): String {
-    val path = imageFromJson.ifBlank { "images/$folder/$id.webp" }.trim()
+private fun assetModel(imageFromJson: String, fallbackPath: String): String {
+    val path = imageFromJson.ifBlank { fallbackPath }.trim()
     // Already a full URL / file URI / android_asset URI -> use as-is.
     if (path.startsWith("http://") || path.startsWith("https://") ||
         path.startsWith("file://") || path.startsWith("content://")
@@ -63,8 +63,13 @@ private fun assetModel(imageFromJson: String, id: Int, folder: String): String {
 }
 
 @Composable
-fun HeroImage(hero: Hero, modifier: Modifier) {
-    val model = assetModel(hero.image, hero.id, "heroes")
+fun HeroImage(
+    hero: Hero,
+    modifier: Modifier,
+    contentScale: ContentScale = ContentScale.Crop,
+    contentDescription: String = hero.name
+) {
+    val model = assetModel(hero.image.ifBlank { hero.portrait }, "heroes/${hero.slug.ifBlank { hero.id.toString() }}.webp")
     // FIX [5]: reset failed when model changes.
     var failed by remember(hero.id, model) { mutableStateOf(false) }
     if (failed) {
@@ -72,13 +77,13 @@ fun HeroImage(hero: Hero, modifier: Modifier) {
             initial = hero.name.firstOrNull()?.uppercase() ?: "?",
             tint = roleColor(hero.role),
             modifier = modifier,
-            contentDescription = hero.name
+            contentDescription = contentDescription
         )
     } else {
         AsyncImage(
             model = model,
-            contentDescription = hero.name,
-            contentScale = ContentScale.Crop,
+            contentDescription = contentDescription,
+            contentScale = contentScale,
             modifier = modifier,
             // FIX [1]: Coil3 onState, not onSuccess/onError.
             onState = { state ->
@@ -89,21 +94,26 @@ fun HeroImage(hero: Hero, modifier: Modifier) {
 }
 
 @Composable
-fun ItemImage(item: Item, modifier: Modifier) {
-    val model = assetModel(item.image, item.id, "items")
+fun ItemImage(
+    item: Item,
+    modifier: Modifier,
+    contentScale: ContentScale = ContentScale.Crop,
+    contentDescription: String = item.name
+) {
+    val model = assetModel(item.image, "items/${item.id}.webp")
     var failed by remember(item.id, model) { mutableStateOf(false) }
     if (failed) {
         FallbackPortrait(
             initial = item.name.firstOrNull()?.uppercase() ?: "?",
             tint = MLBBPlusColors.Gold,
             modifier = modifier,
-            contentDescription = item.name
+            contentDescription = contentDescription
         )
     } else {
         AsyncImage(
             model = model,
-            contentDescription = item.name,
-            contentScale = ContentScale.Crop,
+            contentDescription = contentDescription,
+            contentScale = contentScale,
             modifier = modifier,
             onState = { state ->
                 failed = state is AsyncImagePainter.State.Error
@@ -113,7 +123,7 @@ fun ItemImage(item: Item, modifier: Modifier) {
 }
 
 /**
- * Shown when no portrait file exists in assets (this repo ships none yet).
+ * Shown when a bundled portrait cannot be loaded.
  * The CALLER decides the shape (circle / rounded) with clip(); this only paints
  * a role-tinted gradient with a scaled initial, so grids still look finished.
  */
@@ -138,4 +148,26 @@ private fun FallbackPortrait(initial: String, tint: Color, modifier: Modifier, c
             fontSize = (basis * 0.42f).sp
         )
     }
+}
+
+
+/** Shared image entry point for list/detail cards. */
+@Composable
+fun AssetImage(
+    hero: Hero,
+    modifier: Modifier,
+    contentScale: ContentScale = ContentScale.Crop,
+    contentDescription: String = hero.name
+) {
+    HeroImage(hero, modifier, contentScale, contentDescription)
+}
+
+@Composable
+fun AssetImage(
+    item: Item,
+    modifier: Modifier,
+    contentScale: ContentScale = ContentScale.Crop,
+    contentDescription: String = item.name
+) {
+    ItemImage(item, modifier, contentScale, contentDescription)
 }

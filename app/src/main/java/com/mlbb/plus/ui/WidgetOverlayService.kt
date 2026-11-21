@@ -15,6 +15,7 @@ import androidx.compose.runtime.setValue
 import androidx.core.app.NotificationCompat
 import androidx.core.app.ServiceCompat
 import com.mlbb.plus.ui.model.GameData
+import com.mlbb.plus.ui.model.RoleTypes
 import com.mlbb.plus.ui.theme.MLBBPlusTheme
 import com.mlbb.plus.ui.widgets.JetOverlay
 import com.mlbb.plus.ui.widgets.RoamGuideWidget
@@ -68,6 +69,9 @@ class WidgetOverlayService : Service() {
         super.onCreate()
         // Service can start without MainActivity - load JSONs here too
         GameData.load(this)
+        if (currentRoleType !in RoleTypes.typesFor(currentRole)) {
+            updateRole(currentRole, RoleTypes.defaultTypeFor(currentRole))
+        }
         createChannel()
         // FIX [2]: must call startForeground immediately in onCreate.
         ServiceCompat.startForeground(
@@ -91,8 +95,12 @@ class WidgetOverlayService : Service() {
 
         // FIX [5]: intent is null when the system restarts a
         // START_STICKY service - fall back to last known role.
-        val role = intent?.getStringExtra(EXTRA_ROLE) ?: currentRole
-        val roleType = intent?.getStringExtra(EXTRA_ROLE_TYPE) ?: currentRoleType
+        val requestedRole = intent?.getStringExtra(EXTRA_ROLE) ?: currentRole
+        val role = requestedRole.takeIf { it in RoleTypes.roles } ?: "Roam"
+        val requestedType = intent?.getStringExtra(EXTRA_ROLE_TYPE) ?: currentRoleType
+        val validTypes = RoleTypes.typesFor(role)
+        val roleType = requestedType.takeIf { it in validTypes }
+            ?: RoleTypes.defaultTypeFor(role)
         updateRole(role, roleType)
         markRunning(true)
 
@@ -174,7 +182,7 @@ class WidgetOverlayService : Service() {
 
         var currentRole by mutableStateOf("Roam")
             internal set
-        var currentRoleType by mutableStateOf("Tank")
+        var currentRoleType by mutableStateOf("")
             internal set
 
         // FIX [4]: explicit mutation helpers.

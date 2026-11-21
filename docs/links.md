@@ -39,7 +39,7 @@ This index separates **official platform documentation**, **UX references**, **g
 | [Material Design 3](https://m3.material.io/) | Design tokens, component behavior, hierarchy, and interaction patterns. |
 | [Material Design — Accessibility](https://m3.material.io/foundations/accessible-design/overview) | Contrast, readable typography, accessible controls, and inclusive interaction. |
 
-These are design references, not a claim that every recommendation has already been implemented. See [UX-UI-OVERHAUL.md](UX-UI-OVERHAUL.md) for the project-specific changes recorded so far.
+These are design references, not a claim that every recommendation has already been implemented. See [refactoring-report.md](refactoring-report.md) for the file-by-file review and implemented UX changes.
 
 ## 3. MLBB game-data and matchup references
 
@@ -69,7 +69,7 @@ The current `heroes.json` stores relationship IDs in four fields:
 - `counteredBy`: toughest opponents for the selected hero.
 - `synergies` and `bestPartners`: measured same-team ally relationships. In the current data snapshot, these two fields are populated from the same ally list for compatibility with the existing model/UI.
 
-The current snapshot method is described in [MATCHUP-DATA-SOURCES.md](MATCHUP-DATA-SOURCES.md):
+The current snapshot method and interpretation limits are described in this section and in [overview.md](overview.md):
 
 1. `counters` uses the primary dataset's ranked counter picks.
 2. `synergies` / `bestPartners` use its ranked teammate synergy picks.
@@ -103,10 +103,7 @@ Exact dependency versions are recorded in `gradle/libs.versions.toml`; see [stru
 
 - [overview.md](overview.md) — mission, vision, current capabilities, technology stack, and roadmap.
 - [structure.md](structure.md) — file-by-file map, dependency/data flow, service lifecycle, and change-impact guide.
-- [MATCHUP-DATA-SOURCES.md](MATCHUP-DATA-SOURCES.md) — detailed matchup source and methodology notes.
-- [MATCHUP-DATA-UPDATE.md](MATCHUP-DATA-UPDATE.md) — earlier matchup refresh notes; read together with the later full-roster snapshot documentation.
-- [matchup-data-audit.json](matchup-data-audit.json) — machine-readable matchup data audit generated for the data refresh.
-- [UX-UI-OVERHAUL.md](UX-UI-OVERHAUL.md) — UX/UI work summary and design references.
+- [refactoring-report.md](refactoring-report.md) — exhaustive Kotlin review, per-file recommendations, UI changes, and validation notes.
 
 ## 6. Maintenance rules for this link index
 
@@ -177,9 +174,24 @@ These are design references, not evidence that every recommendation is fully imp
 
 ## 9. Canonical documentation map
 
-The consolidated documentation set is:
-- `overview.md` — product mission, capabilities, snapshot, UX implementation record, audit summary, and roadmap.
-- `structure.md` — repository map, runtime/data flow, file responsibilities, UX implementation boundaries, and validation impact.
-- `links.md` — external platform/design/game-data references, matchup methodology, audit figures, historical data note, and maintenance caveats.
+The current documentation set is:
+- `overview.md` — product mission, capabilities, snapshot, and roadmap.
+- `structure.md` — repository map, runtime/data flow, file responsibilities, and change-impact guide.
+- `links.md` — external platform/design/game-data references, matchup methodology, and maintenance caveats.
+- `refactoring-report.md` — Kotlin file-by-file review, applied refactors, remaining recommendations, and validation record.
 
-The original standalone `MATCHUP-DATA-SOURCES.md`, `MATCHUP-DATA-UPDATE.md`, `UX-UI-OVERHAUL.md`, and `matchup-data-audit.json` are now represented in these three canonical documents. Keep the standalone originals only if you want a separate archival copy.
+
+## 10. Additional references used by the refactor
+
+| Resource | Why it matters to this repository |
+|---|---|
+| [Compose lazy lists and grids](https://developer.android.com/develop/ui/compose/lists) | Lazy list/grid behavior, stable keys, and adaptive item layouts for the hero and item catalogues. |
+| [Compose adaptive layouts](https://developer.android.com/develop/ui/compose/layouts/adaptive) | Responsive layouts across compact phones, landscape, tablets, and resizable windows. |
+| [Compose side effects](https://developer.android.com/develop/ui/compose/side-effects) | Correct cancellation and lifecycle of timer loops and effects in the floating guide. |
+| [Compose in Views interoperability](https://developer.android.com/develop/ui/compose/migrate/interoperability-apis/compose-in-views) | `ComposeView` hosting inside the `WindowManager` overlay. |
+| [Android DataStore](https://developer.android.com/topic/libraries/architecture/datastore) | A future replacement for direct `SharedPreferences` access if preferences become more complex. |
+| [Android AssetManager](https://developer.android.com/reference/android/content/res/AssetManager) | Loading bundled JSON and image resources from `assets/`. |
+| [Kotlin null safety](https://kotlinlang.org/docs/null-safety.html) | Defensive parsing and explicit handling of optional fields in the bundled JSON models. |
+| [Kotlin collections](https://kotlinlang.org/docs/collections-overview.html) | Building and caching indexes for hero, item, and guide cross-references. |
+
+The project keeps Coil 3 for image loading and Compose animation APIs for small state transitions. Lottie was evaluated as an optional enhancement but not added: the overlay is a tactical in-game tool, so decorative motion would add dependency and visual noise without improving its primary task.
