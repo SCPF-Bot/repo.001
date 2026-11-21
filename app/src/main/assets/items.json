@@ -4,8 +4,8 @@
   "patchDate": "2026-11-11",
   "patchName": "Patch 2.2.23 — Popol and Kupa Revamp (Original Server)",
   "season": "Season 42 — Starward Decade",
-  "source": "MLBB Plus local data, updated to Patch 2.2.23 (Nov 11, 2026 Original Server). Item stats cross-checked vs MLBB in-game patch notes via Kazuki Official / mlbb.tools / timesaver.gg mirror, and MLBBGuides item DB (Nov 1, 2026) + MLBB Draft / Fandom. Item IDs are stable MLBB Plus IDs (1000 Attack, 2000 Magic, 3000 Defense, 4000 Roam, 5000 Movement, 6000 Jungle/Magic) because Moonton does not publish a public official numeric item ID like hero IDs. Use this ID as primary key. + Small / Tier 1-2 components, potions, blessings and missing Tier 3 items added Nov 21, 2026 from MLBB Fandom Equipment list + METAMMO MLBB Items List (Oct 30, 2026) + MLBBGuides item DB (Nov 1, 2026). Portrait URLs are Fandom static.wikia.nocookie.net URLs, verified via MD5 filename pattern (e.g. Great Dragon Spear d/d4, Conceal e/e0).",
-  "totalItems": 107,
+  "source": "https://mobile-legends.fandom.com/wiki/Equipment",
+  "totalItems": 102,
   "totalActiveItems": 102,
   "patchChanges": [
     "Chastise Pauldron (3009) NERFED: Chastise 75% -> 80% (attackers keep more Attack Speed)",
@@ -18,12 +18,15 @@
     "Portraits: Added 'portrait' + 'fandomFile' to every item. See items_portraits.md for the flat code-block list.",
     "Original 41 items kept unchanged (IDs, stats, buildPaths) so heroes.json references still work. New items use IDs 1017-1018, 2007-2013, 3010-3015, 4105-4112, 5006-5007, 5101, 6101, 9101-9103, 1101-1112, 2101-2110, 3101-3111, 9901-9903."
   ],
-  "notes": {
-    "broadsword": "No MLBB shop item is named Broadsword. Use Legion Sword (1106) / Dagger (1101).",
-    "portraitPattern": "https://static.wikia.nocookie.net/mobile-legends/images/{md5[0]}/{md5[0:2]}/{FandomFilename} — MD5 of Fandom filename.",
-    "blessings": "Conceal / Dire Hit / Encourage / Favor / Flame / Ice / Bloody Retribution cost 0 gold — unlocked via Thriving / Retribution, not bought.",
-    "legacy": "Blade of Despair Fragment, Pirate's Dagger, Mana Necklace, Roam Boots are legacy/alias entries kept for buildPath compatibility."
-  },
+  "notes": [
+    "broadsword",
+    "portraitPattern",
+    "blessings",
+    "equipmentSource",
+    "portraitOverrides",
+    "Removed legacy entries: Roam Boots, Blade of Despair Fragment, Pirate's Dagger, and Mana Necklace. Equipment page direct access was blocked; names were cross-checked against its search-indexed mirrored list where available. This list may not be exhaustive.",
+    "Removed Twilight Armor; replaced by Chastise Pauldron."
+  ],
   "schema": {
     "id": "Stable MLBB Plus item ID. Heroes.json coreItems and coreBuild reference this ID.",
     "name": "Official in-game item name",
@@ -73,7 +76,7 @@
       "lore": "A blade that thirsts for despair.",
       "buildPath": [
         "Legion Sword",
-        "Blade of Despair Fragment"
+        "Legion Sword"
       ],
       "buildsInto": [],
       "image": "items/1001.webp",
@@ -1980,56 +1983,6 @@
       "fandomFile": "Immortality.png"
     },
     {
-      "id": 3007,
-      "name": "Twilight Armor",
-      "slug": "twilight-armor",
-      "category": "Defense",
-      "tier": "C",
-      "price": 2100,
-      "sellPrice": 1260,
-      "stats": [
-        "+1200 HP",
-        "+20 Physical Defense"
-      ],
-      "statsDetailed": [
-        {
-          "stat": "HP",
-          "value": 1200
-        },
-        {
-          "stat": "Physical Defense",
-          "value": 20
-        }
-      ],
-      "passive": {
-        "name": "Twilight (Legacy)",
-        "description": "REMOVED in current patch. Previously: Capped damage from a single hit. This item no longer exists in the shop in Patch 2.2.23."
-      },
-      "active": null,
-      "description": "LEGACY / REMOVED — Twilight Armor was replaced by Chastise Pauldron (ID 3009) in the current item system. Kept in this file for backwards compatibility with old builds. Do not show in shop. Use Chastise Pauldron instead.",
-      "lore": "Twilight fades — replaced by Chastise.",
-      "buildPath": [],
-      "buildsInto": [
-        3009
-      ],
-      "image": "items/3007.webp",
-      "counters": [],
-      "counteredBy": [],
-      "synergiesHeroes": [],
-      "worksAgainstHeroes": [],
-      "recommendedFor": [],
-      "tags": [
-        "defense",
-        "removed",
-        "legacy"
-      ],
-      "patchVersion": "2.2.23",
-      "status": "removed",
-      "replacedBy": 3009,
-      "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/9/9f/Twilight_Armor.png",
-      "fandomFile": "Twilight_Armor.png"
-    },
-    {
       "id": 3008,
       "name": "Guardian Helmet",
       "slug": "guardian-helmet",
@@ -2840,7 +2793,7 @@
         "Javelin"
       ],
       "buildsInto": [],
-      "image": "items/1017.webp",
+      "image": "items/1017.png",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/d/d4/Great_Dragon_Spear.png",
       "fandomFile": "Great_Dragon_Spear.png",
       "counters": [],
@@ -2898,7 +2851,7 @@
         "Knife"
       ],
       "buildsInto": [],
-      "image": "items/1018.webp",
+      "image": "items/1018.png",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/2/2b/Rose_Gold_Meteor.png",
       "fandomFile": "Rose_Gold_Meteor.png",
       "counters": [],
@@ -2942,7 +2895,7 @@
         "Dagger"
       ],
       "buildsInto": [],
-      "image": "items/1101.webp",
+      "image": "items/1101.png",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/4/45/Dagger.png",
       "fandomFile": "Dagger.png",
       "counters": [],
@@ -2980,7 +2933,7 @@
       "lore": "",
       "buildPath": [],
       "buildsInto": [],
-      "image": "items/1102.webp",
+      "image": "items/1102.png",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/5/58/Knife.png",
       "fandomFile": "Knife.png",
       "counters": [],
@@ -3018,7 +2971,7 @@
       "lore": "",
       "buildPath": [],
       "buildsInto": [],
-      "image": "items/1103.webp",
+      "image": "items/1103.png",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/1/1d/Javelin.png",
       "fandomFile": "Javelin.png",
       "counters": [],
@@ -3061,7 +3014,7 @@
       "lore": "",
       "buildPath": [],
       "buildsInto": [],
-      "image": "items/1104.webp",
+      "image": "items/1104.png",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/f/f9/Vampire_Mallet.png",
       "fandomFile": "Vampire_Mallet.png",
       "counters": [],
@@ -3105,7 +3058,7 @@
       "lore": "",
       "buildPath": [],
       "buildsInto": [],
-      "image": "items/1105.webp",
+      "image": "items/1105.png",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/b/be/Iron_Hunting_Bow.png",
       "fandomFile": "Iron_Hunting_Bow.png",
       "counters": [],
@@ -3147,7 +3100,7 @@
         "Dagger"
       ],
       "buildsInto": [],
-      "image": "items/1106.webp",
+      "image": "items/1106.png",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/1/1e/Legion_Sword.png",
       "fandomFile": "Legion_Sword.png",
       "counters": [],
@@ -3193,7 +3146,7 @@
         "Dagger"
       ],
       "buildsInto": [],
-      "image": "items/1107.webp",
+      "image": "items/1107.png",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/3/32/Regular_Spear.png",
       "fandomFile": "Regular_Spear.png",
       "counters": [],
@@ -3239,7 +3192,7 @@
         "Vitality Crystal"
       ],
       "buildsInto": [],
-      "image": "items/1108.webp",
+      "image": "items/1108.png",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/3/3d/Ogre_Tomahawk.png",
       "fandomFile": "Ogre_Tomahawk.png",
       "counters": [],
@@ -3285,7 +3238,7 @@
         "Dagger"
       ],
       "buildsInto": [],
-      "image": "items/1109.webp",
+      "image": "items/1109.png",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/5/52/Fury_Hammer.png",
       "fandomFile": "Fury_Hammer.png",
       "counters": [],
@@ -3332,7 +3285,7 @@
         "Javelin"
       ],
       "buildsInto": [],
-      "image": "items/1110.webp",
+      "image": "items/1110.png",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/7/75/Rogue_Meteor.png",
       "fandomFile": "Rogue_Meteor.png",
       "counters": [],
@@ -3377,7 +3330,7 @@
         "Knife"
       ],
       "buildsInto": [],
-      "image": "items/1111.webp",
+      "image": "items/1111.png",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/a/a1/Swift_Crossbow.png",
       "fandomFile": "Swift_Crossbow.png",
       "counters": [],
@@ -3427,7 +3380,7 @@
         "Vampire Mallet"
       ],
       "buildsInto": [],
-      "image": "items/1112.webp",
+      "image": "items/1112.png",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/a/ae/Magic_Blade.png",
       "fandomFile": "Magic_Blade.png",
       "counters": [],
@@ -3484,7 +3437,7 @@
         "Power Crystal"
       ],
       "buildsInto": [],
-      "image": "items/2007.webp",
+      "image": "items/2007.png",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/0/07/Wishing_Lantern.png",
       "fandomFile": "Wishing_Lantern.png",
       "counters": [],
@@ -3546,7 +3499,7 @@
         "Mystery Codex"
       ],
       "buildsInto": [],
-      "image": "items/2008.webp",
+      "image": "items/2008.png",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/d/da/Ice_Queen_Wand.png",
       "fandomFile": "Ice_Queen_Wand.png",
       "counters": [],
@@ -3599,7 +3552,7 @@
         "Vitality Crystal"
       ],
       "buildsInto": [],
-      "image": "items/2009.webp",
+      "image": "items/2009.png",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/4/4e/Concentrated_Energy.png",
       "fandomFile": "Concentrated_Energy.png",
       "counters": [],
@@ -3660,7 +3613,7 @@
         "Book of Sages"
       ],
       "buildsInto": [],
-      "image": "items/2010.webp",
+      "image": "items/2010.png",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/4/4a/Clock_of_Destiny.png",
       "fandomFile": "Clock_of_Destiny.png",
       "counters": [],
@@ -3718,7 +3671,7 @@
         "Magic Wand"
       ],
       "buildsInto": [],
-      "image": "items/2011.webp",
+      "image": "items/2011.png",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/2/21/Enchanted_Talisman.png",
       "fandomFile": "Enchanted_Talisman.png",
       "counters": [],
@@ -3781,7 +3734,7 @@
         "Book of Sages"
       ],
       "buildsInto": [],
-      "image": "items/2012.webp",
+      "image": "items/2012.png",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/e/ed/Feather_of_Heaven.png",
       "fandomFile": "Feather_of_Heaven.png",
       "counters": [],
@@ -3832,7 +3785,7 @@
         "Magic Wand"
       ],
       "buildsInto": [],
-      "image": "items/2013.webp",
+      "image": "items/2013.png",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/9/9a/Divine_Glaive.png",
       "fandomFile": "Divine_Glaive.png",
       "counters": [],
@@ -3872,7 +3825,7 @@
       "lore": "",
       "buildPath": [],
       "buildsInto": [],
-      "image": "items/2101.webp",
+      "image": "items/2101.png",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/2/2c/Mystery_Codex.png",
       "fandomFile": "Mystery_Codex.png",
       "counters": [],
@@ -3910,7 +3863,7 @@
       "lore": "",
       "buildPath": [],
       "buildsInto": [],
-      "image": "items/2102.webp",
+      "image": "items/2102.png",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/f/fd/Power_Crystal.png",
       "fandomFile": "Power_Crystal.png",
       "counters": [],
@@ -3949,7 +3902,7 @@
       "lore": "",
       "buildPath": [],
       "buildsInto": [],
-      "image": "items/2103.webp",
+      "image": "items/2103.png",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/c/cd/Magic_Necklace.png",
       "fandomFile": "Magic_Necklace.png",
       "counters": [],
@@ -3994,7 +3947,7 @@
       "lore": "",
       "buildPath": [],
       "buildsInto": [],
-      "image": "items/2104.webp",
+      "image": "items/2104.png",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/3/35/Book_of_Sages.png",
       "fandomFile": "Book_of_Sages.png",
       "counters": [],
@@ -4035,7 +3988,7 @@
         "Mystery Codex"
       ],
       "buildsInto": [],
-      "image": "items/2105.webp",
+      "image": "items/2105.png",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/b/bc/Magic_Wand.png",
       "fandomFile": "Magic_Wand.png",
       "counters": [],
@@ -4080,7 +4033,7 @@
         "Mystery Codex"
       ],
       "buildsInto": [],
-      "image": "items/2106.webp",
+      "image": "items/2106.png",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/e/e9/Exotic_Veil.png",
       "fandomFile": "Exotic_Veil.png",
       "counters": [],
@@ -4125,7 +4078,7 @@
         "Mystery Codex"
       ],
       "buildsInto": [],
-      "image": "items/2107.webp",
+      "image": "items/2107.png",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/2/23/Mystic_Container.png",
       "fandomFile": "Mystic_Container.png",
       "counters": [],
@@ -4177,7 +4130,7 @@
         "Book of Sages"
       ],
       "buildsInto": [],
-      "image": "items/2108.webp",
+      "image": "items/2108.png",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/0/0a/Tome_of_Evil.png",
       "fandomFile": "Tome_of_Evil.png",
       "counters": [],
@@ -4227,7 +4180,7 @@
         "Vitality Crystal"
       ],
       "buildsInto": [],
-      "image": "items/2109.webp",
+      "image": "items/2109.png",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/d/d4/Elegant_Gem.png",
       "fandomFile": "Elegant_Gem.png",
       "counters": [],
@@ -4277,7 +4230,7 @@
         "Magic Necklace"
       ],
       "buildsInto": [],
-      "image": "items/2110.webp",
+      "image": "items/2110.png",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/6/6d/Azure_Blade.png",
       "fandomFile": "Azure_Blade.png",
       "counters": [],
@@ -4338,7 +4291,7 @@
         "Expert Gloves"
       ],
       "buildsInto": [],
-      "image": "items/3010.webp",
+      "image": "items/3010.png",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/f/f4/Queen%27s_Wings.png",
       "fandomFile": "Queen%27s_Wings.png",
       "counters": [],
@@ -4401,7 +4354,7 @@
         "Magic Resist Cloak"
       ],
       "buildsInto": [],
-      "image": "items/3011.webp",
+      "image": "items/3011.png",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/d/dd/Thunder_Belt.png",
       "fandomFile": "Thunder_Belt.png",
       "counters": [],
@@ -4454,7 +4407,7 @@
         "Magic Resist Cloak"
       ],
       "buildsInto": [],
-      "image": "items/3012.webp",
+      "image": "items/3012.png",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/8/80/Cursed_Helmet.png",
       "fandomFile": "Cursed_Helmet.png",
       "counters": [],
@@ -4515,7 +4468,7 @@
         "Vitality Crystal"
       ],
       "buildsInto": [],
-      "image": "items/3013.webp",
+      "image": "items/3013.png",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/1/17/Oracle.png",
       "fandomFile": "Oracle.png",
       "counters": [],
@@ -4574,7 +4527,7 @@
         "Leather Jerkin"
       ],
       "buildsInto": [],
-      "image": "items/3014.webp",
+      "image": "items/3014.png",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/f/f6/Brute_Force_Breastplate.png",
       "fandomFile": "Brute_Force_Breastplate.png",
       "counters": [],
@@ -4631,7 +4584,7 @@
         "Vitality Crystal"
       ],
       "buildsInto": [],
-      "image": "items/3015.webp",
+      "image": "items/3015.png",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/2/21/Valkyrie%27s_Shield.png",
       "fandomFile": "Valkyrie%27s_Shield.png",
       "counters": [],
@@ -4671,7 +4624,7 @@
       "lore": "",
       "buildPath": [],
       "buildsInto": [],
-      "image": "items/3101.webp",
+      "image": "items/3101.png",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/e/ea/Vitality_Crystal.png",
       "fandomFile": "Vitality_Crystal.png",
       "counters": [],
@@ -4710,7 +4663,7 @@
       "lore": "",
       "buildPath": [],
       "buildsInto": [],
-      "image": "items/3102.webp",
+      "image": "items/3102.png",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/5/58/Leather_Jerkin.png",
       "fandomFile": "Leather_Jerkin.png",
       "counters": [],
@@ -4748,7 +4701,7 @@
       "lore": "",
       "buildPath": [],
       "buildsInto": [],
-      "image": "items/3103.webp",
+      "image": "items/3103.png",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/4/4c/Magic_Resist_Cloak.png",
       "fandomFile": "Magic_Resist_Cloak.png",
       "counters": [],
@@ -4786,7 +4739,7 @@
       "lore": "",
       "buildPath": [],
       "buildsInto": [],
-      "image": "items/3104.webp",
+      "image": "items/3104.png",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/d/d7/Healing_Necklace.png",
       "fandomFile": "Healing_Necklace.png",
       "counters": [],
@@ -4830,7 +4783,7 @@
       "lore": "",
       "buildPath": [],
       "buildsInto": [],
-      "image": "items/3105.webp",
+      "image": "items/3105.png",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/9/91/Hero%27s_Ring.png",
       "fandomFile": "Hero%27s_Ring.png",
       "counters": [],
@@ -4871,7 +4824,7 @@
         "Leather Jerkin"
       ],
       "buildsInto": [],
-      "image": "items/3106.webp",
+      "image": "items/3106.png",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/3/3c/Steel_Legplates.png",
       "fandomFile": "Steel_Legplates.png",
       "counters": [],
@@ -4911,7 +4864,7 @@
         "Vitality Crystal"
       ],
       "buildsInto": [],
-      "image": "items/3107.webp",
+      "image": "items/3107.png",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/0/04/Ares_Belt.png",
       "fandomFile": "Ares_Belt.png",
       "counters": [],
@@ -4955,7 +4908,7 @@
         "Vitality Crystal"
       ],
       "buildsInto": [],
-      "image": "items/3108.webp",
+      "image": "items/3108.png",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/8/8c/Molten_Essence.png",
       "fandomFile": "Molten_Essence.png",
       "counters": [],
@@ -5003,7 +4956,7 @@
         "Leather Jerkin"
       ],
       "buildsInto": [],
-      "image": "items/3109.webp",
+      "image": "items/3109.png",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/0/0f/Dreadnaught_Armor.png",
       "fandomFile": "Dreadnaught_Armor.png",
       "counters": [],
@@ -5052,7 +5005,7 @@
         "Magic Resist Cloak"
       ],
       "buildsInto": [],
-      "image": "items/3110.webp",
+      "image": "items/3110.png",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/5/5d/Black_Ice_Shield.png",
       "fandomFile": "Black_Ice_Shield.png",
       "counters": [],
@@ -5099,7 +5052,7 @@
         "Magic Resist Cloak"
       ],
       "buildsInto": [],
-      "image": "items/3111.webp",
+      "image": "items/3111.png",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/a/a4/Silence_Robe.png",
       "fandomFile": "Silence_Robe.png",
       "counters": [],
@@ -5113,46 +5066,6 @@
       ],
       "patchVersion": "2.2.23",
       "status": "active"
-    },
-    {
-      "id": 4105,
-      "name": "Roam Boots",
-      "slug": "roam-boots",
-      "category": "Roam",
-      "tier": "Tier 1",
-      "price": 250,
-      "sellPrice": 150,
-      "stats": [
-        "+20 Movement Speed"
-      ],
-      "statsDetailed": [
-        {
-          "stat": "Movement Speed",
-          "value": 20
-        }
-      ],
-      "passive": null,
-      "active": null,
-      "description": "Legacy base used in this file's buildPath for Courage Mask / Favor. In current MLBB, Roam is a Blessing unlocked via Thriving, not a separate boots item. Kept for buildPath compatibility.",
-      "lore": "",
-      "buildPath": [
-        "Boots"
-      ],
-      "buildsInto": [],
-      "image": "items/4105.png",
-      "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/f/fd/Roam_Boots.png",
-      "fandomFile": "Roam_Boots.png",
-      "counters": [],
-      "counteredBy": [],
-      "synergiesHeroes": [],
-      "worksAgainstHeroes": [],
-      "recommendedFor": [],
-      "tags": [
-        "roam",
-        "component"
-      ],
-      "patchVersion": "2.2.23",
-      "status": "legacy"
     },
     {
       "id": 4106,
@@ -5180,7 +5093,7 @@
       "lore": "",
       "buildPath": [],
       "buildsInto": [],
-      "image": "items/4106.webp",
+      "image": "items/4106.png",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/e/e0/Active_-_Conceal.png",
       "fandomFile": "Active_-_Conceal.png",
       "counters": [],
@@ -5225,7 +5138,7 @@
       "lore": "",
       "buildPath": [],
       "buildsInto": [],
-      "image": "items/4107.webp",
+      "image": "items/4107.png",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/1/17/Passive_-_Dire_Hit.png",
       "fandomFile": "Passive_-_Dire_Hit.png",
       "counters": [],
@@ -5266,7 +5179,7 @@
       "lore": "",
       "buildPath": [],
       "buildsInto": [],
-      "image": "items/4108.webp",
+      "image": "items/4108.png",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/9/9f/Flame_Retribution.png",
       "fandomFile": "Flame_Retribution.png",
       "counters": [],
@@ -5307,7 +5220,7 @@
       "lore": "",
       "buildPath": [],
       "buildsInto": [],
-      "image": "items/4109.webp",
+      "image": "items/4109.png",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/b/bd/Ice_Retribution.png",
       "fandomFile": "Ice_Retribution.png",
       "counters": [],
@@ -5348,7 +5261,7 @@
       "lore": "",
       "buildPath": [],
       "buildsInto": [],
-      "image": "items/4110.webp",
+      "image": "items/4110.png",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/4/4c/Bloody_Retribution.png",
       "fandomFile": "Bloody_Retribution.png",
       "counters": [],
@@ -5389,7 +5302,7 @@
       "lore": "",
       "buildPath": [],
       "buildsInto": [],
-      "image": "items/4111.webp",
+      "image": "items/4111.png",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/8/86/Passive_-_Encourage.png",
       "fandomFile": "Passive_-_Encourage.png",
       "counters": [],
@@ -5430,7 +5343,7 @@
       "lore": "",
       "buildPath": [],
       "buildsInto": [],
-      "image": "items/4112.webp",
+      "image": "items/4112.png",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/a/a0/Passive_-_Favor.png",
       "fandomFile": "Passive_-_Favor.png",
       "counters": [],
@@ -5481,7 +5394,7 @@
         "Mystery Codex"
       ],
       "buildsInto": [],
-      "image": "items/5006.webp",
+      "image": "items/5006.png",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/1/15/Arcane_Boots.png",
       "fandomFile": "Arcane_Boots.png",
       "counters": [],
@@ -5532,7 +5445,7 @@
         "Magic Necklace"
       ],
       "buildsInto": [],
-      "image": "items/5007.webp",
+      "image": "items/5007.png",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/1/17/Demon_Shoes.png",
       "fandomFile": "Demon_Shoes.png",
       "counters": [],
@@ -5573,7 +5486,7 @@
       "lore": "",
       "buildPath": [],
       "buildsInto": [],
-      "image": "items/5101.webp",
+      "image": "items/5101.png",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/5/59/Boots.png",
       "fandomFile": "Boots.png",
       "counters": [],
@@ -5611,7 +5524,7 @@
       "lore": "",
       "buildPath": [],
       "buildsInto": [],
-      "image": "items/6101.webp",
+      "image": "items/6101.png",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/1/13/Expert_Gloves.png",
       "fandomFile": "Expert_Gloves.png",
       "counters": [],
@@ -5657,7 +5570,7 @@
       "lore": "",
       "buildPath": [],
       "buildsInto": [],
-      "image": "items/9101.webp",
+      "image": "items/9101.png",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/0/06/Power_Potion.png",
       "fandomFile": "Power_Potion.png",
       "counters": [],
@@ -5704,7 +5617,7 @@
       "lore": "",
       "buildPath": [],
       "buildsInto": [],
-      "image": "items/9102.webp",
+      "image": "items/9102.png",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/5/58/Magic_Potion.png",
       "fandomFile": "Magic_Potion.png",
       "counters": [],
@@ -5751,7 +5664,7 @@
       "lore": "",
       "buildPath": [],
       "buildsInto": [],
-      "image": "items/9103.webp",
+      "image": "items/9103.png",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/0/03/Rock_Potion.png",
       "fandomFile": "Rock_Potion.png",
       "counters": [],
@@ -5766,122 +5679,6 @@
       ],
       "patchVersion": "2.2.23",
       "status": "active"
-    },
-    {
-      "id": 9901,
-      "name": "Blade of Despair Fragment",
-      "slug": "blade-of-despair-fragment",
-      "category": "Attack",
-      "tier": "Tier 2",
-      "price": 0,
-      "sellPrice": 0,
-      "stats": [
-        "Legacy component"
-      ],
-      "statsDetailed": [
-        {
-          "stat": "Legacy",
-          "value": "Component"
-        }
-      ],
-      "passive": null,
-      "active": null,
-      "description": "Legacy component kept only because the original file's buildPath for Blade of Despair / Berserker's Fury / Sky Piercer references it. Not purchasable in the current shop — Blade of Despair now builds from Legion Sword.",
-      "lore": "",
-      "buildPath": [],
-      "buildsInto": [],
-      "image": "items/9901.png",
-      "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/4/46/Blade_of_Despair_Fragment.png",
-      "fandomFile": "Blade_of_Despair_Fragment.png",
-      "counters": [],
-      "counteredBy": [],
-      "synergiesHeroes": [],
-      "worksAgainstHeroes": [],
-      "recommendedFor": [],
-      "tags": [
-        "attack",
-        "legacy"
-      ],
-      "patchVersion": "2.2.23",
-      "status": "legacy"
-    },
-    {
-      "id": 9902,
-      "name": "Pirate's Dagger",
-      "slug": "pirates-dagger",
-      "category": "Attack",
-      "tier": "Tier 1",
-      "price": 0,
-      "sellPrice": 0,
-      "stats": [
-        "Legacy component"
-      ],
-      "statsDetailed": [
-        {
-          "stat": "Legacy",
-          "value": "Component"
-        }
-      ],
-      "passive": null,
-      "active": null,
-      "description": "Legacy component kept only because the original file's buildPath for Malefic Roar / Hunter Strike / Malefic Gun references it. Not purchasable in the current shop.",
-      "lore": "",
-      "buildPath": [],
-      "buildsInto": [],
-      "image": "items/9902.png",
-      "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/8/86/Pirate%27s_Dagger.png",
-      "fandomFile": "Pirate%27s_Dagger.png",
-      "counters": [],
-      "counteredBy": [],
-      "synergiesHeroes": [],
-      "worksAgainstHeroes": [],
-      "recommendedFor": [],
-      "tags": [
-        "attack",
-        "legacy"
-      ],
-      "patchVersion": "2.2.23",
-      "status": "legacy"
-    },
-    {
-      "id": 9903,
-      "name": "Mana Necklace",
-      "slug": "mana-necklace",
-      "category": "Magic",
-      "tier": "Tier 1",
-      "price": 120,
-      "sellPrice": 72,
-      "stats": [
-        "+2 Mana Regen"
-      ],
-      "statsDetailed": [
-        {
-          "stat": "Mana Regen",
-          "value": 2
-        }
-      ],
-      "passive": null,
-      "active": null,
-      "description": "Old name for Magic Necklace (2103). Same item, renamed. Kept as an alias entry so old buildPaths that say 'Mana Necklace' still resolve.",
-      "lore": "",
-      "buildPath": [],
-      "buildsInto": [],
-      "image": "items/9903.png",
-      "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/a/aa/Mana_Necklace.png",
-      "fandomFile": "Mana_Necklace.png",
-      "counters": [],
-      "counteredBy": [],
-      "synergiesHeroes": [],
-      "worksAgainstHeroes": [],
-      "recommendedFor": [],
-      "tags": [
-        "magic",
-        "legacy",
-        "alias"
-      ],
-      "patchVersion": "2.2.23",
-      "status": "legacy",
-      "alias": "Magic Necklace"
     }
   ]
 }
