@@ -1,237 +1,180 @@
-# MLBB Plus
+# MLBB Plus — Product Overview
 
-> One app. Every role. Help right on top of your game.
+> **One companion for every lane. Practical guidance, available when the match is happening.**
 
-**MLBB Plus** is a lightweight Android overlay companion for Mobile Legends: Bang Bang.
-It started as a Roam Guide, but it is built to grow into tools for every role — Roam, Jungle, Mid, Gold, and EXP.
+**Project snapshot:** 21 November 2026  
+**Bundled game-data patch:** 2.2.23 · Original Server · Season 42  
+**Android application ID:** `com.mlbb.plus`
 
-Tap the app icon → overlay starts → app auto-closes → you are back in-game.
+## 1. What MLBB Plus is
 
----
+MLBB Plus is a fan-made Android companion for Mobile Legends: Bang Bang. It combines an offline reference library with a floating in-game guide overlay. The main app helps players browse heroes, builds, items, matchups, patch changes, and lane-specific plans. The overlay keeps time-sensitive guide steps, objective timers, and enemy spell tracking accessible while the player is in another app or game.
 
-## Mission
+The current build includes five role guide datasets: Roam, Jungle, Mid, Gold, and EXP. The overlay is implemented as a shared role-aware guide surface rather than five separate overlay services.
 
-Give MLBB players clear, in-game guidance without leaving the match.
+The project is not affiliated with or endorsed by Moonton. Mobile Legends: Bang Bang and its assets / game data remain the property of their respective rights holders.
 
-- **Stay in-game:** No alt-tabbing, no pausing to read a guide.
-- **Be fast:** One tap to start. The app closes itself after launching the overlay.
-- **Be practical:** Rotation, pathing, and timing — not walls of text.
-- **Stay light:** Small app, no heavy SDKs, no account login.
+## 2. Mission
 
-First feature: **Roam Guide** — jungle pathing, rotation, and gank timing for roamers.
+Help MLBB players make clearer, faster in-match decisions by presenting useful, understandable guidance without forcing them to leave the game to consult long-form guides.
 
-## Vision
+The product aims to:
 
-Become the all-in-one overlay companion for every MLBB role.
+- **Reduce friction:** surface the relevant guide, hero, item, and patch context in a few taps.
+- **Support every lane:** provide practical role and playstyle plans for Roam, Jungle, Mid, Gold, and EXP.
+- **Make information actionable:** prioritize rotations, objectives, timings, builds, counters, and team composition context over unstructured walls of text.
+- **Work offline for core reference:** bundle the current hero, item, patch, and guide catalogues in the app.
+- **Explain uncertainty:** distinguish measured statistical trends from guaranteed outcomes, especially for counters and teammate synergy.
+- **Stay lightweight:** use a single Android app module, Compose UI, bundled JSON, and a focused set of dependencies.
 
-- A roamer opens the app and sees roam rotations.
-- A jungler opens the app and sees jungle timers and pathing.
-- A mid laner opens the app and sees wave + roam timing.
-- A gold laner opens the app and sees farm + positioning.
-- An EXP laner opens the app and sees matchup + turtle timing.
+## 3. Vision
 
-Every role gets the same fast pattern: **open → overlay → auto-close**.
+Become a reliable, easy-to-use companion for the full MLBB match lifecycle—from draft and hero selection through laning, rotations, objectives, team fights, and post-patch adaptation.
 
-Long-term: personalized guides, per-hero tips, and per-patch updates, all inside one app — **MLBB Plus**.
+A player should be able to:
 
----
+1. Choose a lane and playstyle.
+2. Review a concise plan and hero/item recommendations.
+3. Launch the overlay when it is useful.
+4. Read the next actionable step and objective timing without losing game context.
+5. Explore a hero, matchup, item, or patch change when they want deeper detail.
 
-## Roadmap
+Long-term, MLBB Plus should make its information easier to maintain and trust through transparent sources, patch-aware data, robust validation, and a safe update mechanism.
 
-### Phase 1 — Roam Guide (Done)
-- [x] Separate Roam Guide from MLBB Assistant into standalone app
-- [x] New structure: `ui/` + `ui/widgets/`
-- [x] `MainActivity` + `WidgetOverlayService` + `JetOverlay` + `OverlayWidgets`
-- [x] `roam_guide.json` in `app/src/main/assets/`
-- [x] Rename to **MLBB Plus** — `com.mlbb.plus`, `Theme.MLBBPlus`
-- [x] `isMinifyEnabled = true` release build passing
-- [x] Cleanup: `res/xml/`, `config/detekt`, old features removed
+## 4. Who it serves
 
-### Phase 2 — Launcher Polish (In Progress)
-- [x] GitHub dark theme — `#0D1117` background, `#161B22` cards, `#2F81F7` accent
-- [x] Fix status-bar overlap with `statusBarsPadding()` + `navigationBarsPadding()` + `enableEdgeToEdge()`
-- [x] Improved launcher UI: header, Roam Guide card, READY / NEEDS PERMISSION chip
-- [x] Auto-start + auto-close on launch
-- [x] Re-open app while running shows only **Stop Roam Guide**
-- [x] This docs file — `docs/OVERVIEW.md`
+- **Newer / less technical players:** clear labels, quick-start guidance, explanations of why a recommendation matters, and predictable navigation.
+- **Experienced players:** searchable catalogues, filters, sorting, compact statistics, hero-specific matchups, item relationships, and concise overlay controls.
+- **Players learning a new lane:** structured role types, strengths/weaknesses, win conditions, lose conditions, core items, spells, and timed steps.
 
-### Phase 3 — Expand to All Roles (Next)
+The app should avoid assuming that every user understands game abbreviations or Android overlay permissions. Advanced details can remain available without making the first-use path intimidating.
 
-`JetOverlay` is generic, so no new service or new app is needed. Each new role = new widget + new JSON + new card in `MainActivity`.
+## 5. Current product capabilities
 
-#### 3.1 Jungle Guide — Easiest next, reuses Roam logic
-- [ ] Jungle pathing: buff → buff → turtle routes
-- [ ] Buff timers, Turtle / Lord timers
-- [ ] When to invade vs. farm
-- [ ] Gank priority: Gold > Mid > EXP
-- File: `JungleGuideWidget.kt` + `assets/jungle_guide.json`
+### Main app
 
-#### 3.2 Mid Guide
-- [ ] Wave clear → roam timing
-- [ ] When to help Jungle / Gold / EXP
-- [ ] Vision spots + bush check timing
-- [ ] Power spike by level 4
-- File: `MidGuideWidget.kt` + `assets/mid_guide.json`
+| Area | Current capability |
+|---|---|
+| Home | Role and guide-type selection, guide briefing, quick-start guidance, launch state, patch banner, meta/mover content, quick navigation |
+| Heroes | Search, filters, sorting, hero cards, hero detail, skills/build/profile data, hero relationships and guide references |
+| Items | Search, filters, sorting, item details, stats/passives/actives, build relationships, heroes using an item |
+| Patch | Original Server patch summary, hero/item changes, equipment/battlefield/system notes, links to affected entities |
+| Settings | Overlay permission flow, auto-start-last-role preference, bundled-data diagnostics |
 
-#### 3.3 Gold Guide
-- [ ] Farm pattern: last-hit, freeze, push timing
-- [ ] When to rotate to turtle / teamfight
-- [ ] Positioning in teamfights, when to stay back
-- [ ] Power spike: 1st item / 2nd item timing
-- File: `GoldGuideWidget.kt` + `assets/gold_guide.json`
+### Floating guide overlay
 
-#### 3.4 EXP Guide
-- [ ] Lane matchup: winning / losing / even
-- [ ] Emblem + spell suggestion per matchup
-- [ ] When to help Turtle vs. split push
-- [ ] Cut wave timing, when to TP / rotate
-- File: `ExpGuideWidget.kt` + `assets/exp_guide.json`
+- Role-aware guide plans sourced from the five `*_guide.json` assets.
+- Guide type / playstyle selection.
+- Timed instruction steps and phase / callout content.
+- Objective timing support for Turtle and Lord.
+- Battle-spell defaults and enemy spell cooldown tracking.
+- Compact / expanded presentation and touch interaction state.
+- Foreground notification with an explicit Stop action.
 
-#### 3.5 Role Picker in Launcher
-- [ ] Home screen shows 5 cards: Roam / Jungle / Mid / Gold / EXP
-- [ ] Tap a role → start that overlay → auto-close
-- [ ] Remember last role: next launch auto-starts same role with zero taps
-- [ ] Re-open while running → Stop → pick a different role
+### Bundled data snapshot
 
-### Phase 4 — Customization
-- [ ] Per-hero picks inside each guide
-- [ ] Settings: overlay size, opacity, position
-- [ ] Patch notes / data updates via `*_guide.json` files
+| Dataset | Snapshot contents |
+|---|---|
+| `heroes.json` | 133 hero records, patch metadata, matchup provenance, hero patch changes, equipment changes |
+| `items.json` | 41 item records and item patch metadata |
+| `patch_notes.json` | Patch 2.2.23 Original Server notes and change lists |
+| Five guide JSON files | 26 role/playstyle types total (6 Roam, 5 each Jungle/Mid/Gold/EXP) |
+| Hero portraits | Bundled WebP portraits under `assets/heroes/` |
 
-### Phase 5 — Polish & Release
-- [ ] App icon + Play listing assets for MLBB Plus
-- [ ] Onboarding: permission flow + first-run tutorial
-- [ ] Crash / ANR cleanup, release build verification
+The matchup snapshot is dated 2026-11-21, all ranks, past one day. It contains three relationship concepts: toughest matchups, favorable matchups, and best measured allies. The derivation and fallback approach are documented in [MATCHUP-DATA-SOURCES.md](MATCHUP-DATA-SOURCES.md). These are statistical associations, not deterministic advice.
 
----
+## 6. Product principles
 
-## How It Works
+1. **Useful before clever:** the next action should be obvious; avoid decorative complexity that competes with gameplay information.
+2. **Progressive disclosure:** beginners see plain-language explanations first; technical/statistical detail remains accessible on demand.
+3. **Trust through provenance:** show source, update date, rank scope, and limitations for volatile data.
+4. **Offline-first reference:** core catalogue and guide reading should remain available without a network connection.
+5. **One source of truth per dataset:** hero/item IDs and shared metadata should resolve consistently across screens and guide references.
+6. **Protect the game experience:** overlay behavior should remain predictable, dismissible, readable, and respectful of Android permission controls.
+7. **Patch-aware, not patch-assumptive:** stale data must be identifiable; do not imply that an old build reflects the current live patch.
 
-1. **Launch:** User taps **MLBB Plus** icon.
-2. **Check:** `MainActivity` checks `Settings.canDrawOverlays()`.
-3. **Pick (future):** User taps Roam / Jungle / Mid / Gold / EXP. If last role is saved, skip this and auto-start it.
-4. **Auto-start:** `startForegroundService(WidgetOverlayService)` with the picked role, then `finish()`.
-5. **Overlay:** `WidgetOverlayService` starts in foreground, calls `JetOverlay.initialize()` then `JetOverlay.show()`.
-6. **Guide:** The picked widget renders inside `JetOverlay` from data in its `*_guide.json`.
-7. **Stop:** User re-opens the app while running → sees only **Stop** → stops service → app closes. Or uses Back inside the overlay to hide it.
+## 7. Technology stack
 
----
+| Layer | Current implementation |
+|---|---|
+| Language | Kotlin 2.3.21 |
+| Android build | Android Gradle Plugin 9.2.1; Gradle wrapper 9.6.1 |
+| Android SDK | compile 37, target 36, min 29 |
+| Runtime | Single Activity + Android foreground Service |
+| UI | Jetpack Compose, Material 3, Compose BOM 2026.06.00 |
+| Lifecycle / Activity | AndroidX Lifecycle 2.11.0; Activity Compose 1.13.0 |
+| Images | Coil Compose 3.0.4; bundled WebP portraits |
+| Data format | Local JSON assets parsed with `org.json` into Kotlin data classes |
+| Preferences | `SharedPreferences` for last role, last guide type, and auto-start setting |
+| Overlay | `WindowManager` / `TYPE_APPLICATION_OVERLAY` host with ComposeView (`JetOverlay`) |
+| Service | Android foreground service declared as `specialUse` for the overlay use case |
+| Release optimization | R8 minification and resource shrinking enabled for release |
 
-## Directory Structure
+There is currently no remote backend, authentication, analytics SDK, database, dependency-injection framework, repository layer, or automated test suite in this repository snapshot. Do not document these as existing features until they are implemented.
 
-```
-MLBB-Plus/
-├── .github/
-│   └── workflows/
-│       ├── debug.yml              # Debug build
-│       └── release.yml            # Release build (minify = true)
-│
-├── app/
-│   ├── build.gradle.kts           # namespace = com.mlbb, applicationId = com.mlbb.plus
-│   ├── proguard-rules.pro         # Tiny rules for overlay + Compose
-│   └── src/main/
-│       ├── AndroidManifest.xml    # MainActivity + WidgetOverlayService, overlay + FGS permissions
-│       ├── java/com/mlbb/
-│       │   └── ui/
-│       │       ├── MainActivity.kt          # Launcher: GitHub dark UI, role picker, auto-start + auto-close
-│       │       ├── WidgetOverlayService.kt  # Foreground service, hosts JetOverlay, tracks isRunning
-│       │       └── widgets/
-│       │           ├── JetOverlay.kt        # Generic overlay engine (initialize / show / hide)
-│       │           ├── OverlayWidgets.kt    # RoamGuideWidget today, split per-role later
-│       │           ├── RoamGuideWidget.kt   # Future: split from OverlayWidgets.kt
-│       │           ├── JungleGuideWidget.kt # Future
-│       │           ├── MidGuideWidget.kt    # Future
-│       │           ├── GoldGuideWidget.kt   # Future
-│       │           └── ExpGuideWidget.kt    # Future
-│       ├── res/
-│       │   ├── values/
-│       │   │   ├── strings.xml    # app_name = MLBB Plus
-│       │   │   ├── themes.xml     # Theme.MLBBPlus, GitHub dark
-│       │   │   └── colors.xml     # github_bg, github_card, github_blue, etc.
-│       │   ├── mipmap-*/          # Launcher icons
-│       │   └── drawable/          # Icons / backgrounds
-│       └── assets/
-│           ├── roam_guide.json    # Roam Guide data
-│           ├── jungle_guide.json  # Future
-│           ├── mid_guide.json     # Future
-│           ├── gold_guide.json    # Future
-│           └── exp_guide.json     # Future
-│
-├── docs/
-│   └── OVERVIEW.md                # This file: mission, vision, roadmap, structure
-│
-├── gradle/
-│   └── libs.versions.toml         # Compose, Activity, Lifecycle versions
-│
-├── settings.gradle.kts            # Only :app
-└── README.md                      # Quick start (optional, points to docs/OVERVIEW.md)
-```
+## 8. Roadmap
 
-### Key Files
+Roadmap status is based on code and bundled assets in this repository snapshot, not on an external project board.
 
-| File | What it does |
-| :--- | :--- |
-| `ui/MainActivity.kt` | Launcher. Checks overlay permission, picks role, auto-starts, auto-closes, shows Stop when running. |
-| `ui/WidgetOverlayService.kt` | Foreground service. Owns the overlay lifecycle, tracks `isRunning`. |
-| `ui/widgets/JetOverlay.kt` | Reusable overlay engine. Any future role can reuse it. |
-| `ui/widgets/OverlayWidgets.kt` | Actual guide UI. `RoamGuideWidget` is the first one. Split per-role before it gets too big. |
-| `assets/roam_guide.json` | Data for Roam Guide. Content can change without changing code. |
-| `res/values/themes.xml` | `Theme.MLBBPlus`, GitHub dark, status-bar colors. |
+### Current baseline — Catalogue + five-role guide (implemented)
 
----
+- [x] Single Android app module and launcher experience.
+- [x] Compose main app with Home, Heroes, Items, Patch, and Settings sections.
+- [x] Hero and item catalogue with detail screens and cross-links.
+- [x] Five role guide assets: Roam, Jungle, Mid, Gold, and EXP.
+- [x] Shared role-aware floating overlay and foreground notification / Stop action.
+- [x] Objective timers and enemy battle-spell tracking in overlay.
+- [x] Patch-note integration and guide references on hero/item details.
+- [x] Matchup and synergy fields for all 133 heroes, with methodology and source notes.
+- [x] UX refinements for quick start, search/filter/sort, navigation, and settings diagnostics.
 
-## Adding a New Role Guide
+### Next priorities — reliability and maintainability
 
-The widget is data-driven — no new Kotlin per role.
+- [ ] Establish a reproducible clean debug and release build in CI; record SDK / JDK / Gradle requirements.
+- [ ] Add automated JSON schema and referential-integrity tests for heroes, items, guides, patch notes, and image paths.
+- [ ] Add Kotlin unit tests for JSON parsing, guide linking, matchup resolution, and patch merging.
+- [ ] Consolidate the duplicated guide JSON parsing logic so screen summaries and overlay execution cannot silently diverge.
+- [ ] Add a visible data freshness / source details screen and a consistent stale-data warning.
+- [ ] Audit all guide steps, objective timings, and role recommendations against the current live patch before publishing a new data snapshot.
+- [ ] Verify accessibility, large text, landscape, and tablet/foldable layouts on real devices or emulators.
+- [ ] Test overlay permission, foreground-service start/stop, notification behavior, and OEM-specific restrictions across supported Android versions.
 
-1. Add `<role>_guide.json` to `app/src/main/assets/`: `roam_guide.json`, `jungle_guide.json`, `mid_guide.json`, `gold_guide.json`, `exp_guide.json` (lowercase role name + `_guide.json`).
-2. Use the same shape as `roam_guide.json` (below).
-3. In the overlay, tap the selector in the widget header → pick the **role** → pick the **type**. The widget loads that file and adapts instantly.
+### Medium-term roadmap — content and user control
 
-A role with no file still works (timer, objective, spell tracker); the role menu marks it `no guide`.
+- [ ] Add a versioned data-update pipeline with integrity checks, rollback, and offline fallback; keep the bundled assets as the safe baseline.
+- [ ] Add rank / server / patch scope filters to matchup and meta statistics when reliable source data supports them.
+- [ ] Explain matchup direction, sample limitations, and recommendation confidence in the UI.
+- [ ] Add per-hero role/loadout recommendations and draft planning that accounts for the full team composition.
+- [ ] Add bookmarks / favorites and recently viewed heroes or items.
+- [ ] Add overlay customization for size, opacity, position, and compactness, with sensible defaults.
+- [ ] Add optional guide-language support and clearer glossary explanations for game terms.
 
-### JSON shape the widget reads
+### Longer-term possibilities — only after data quality and reliability are established
 
-- `meta.patch` — shown in the expanded view (optional).
-- `blessings[]` — `{ id, name, effect }` (optional; shown when a type's `blessing_id` matches).
-- `roles[]` — one entry per **type** in the type menu (`plans` or `types` also accepted as the key):
-  - `id`, `label` (`"Initiator - Start Fight"` → menu shows the full label, header shows the part before ` - `)
-  - `blessing`, `blessing_id`, `heroes` (strings or `{ "name": ... }`), `emblem` (optional)
-  - `objective_templates` — `turtle_contest`, `turtle_trade`, `lord_contest`, `lord_trade` (optional)
-  - `steps[]` (required, at least one) — `startSeconds`, `endSeconds`, `instruction` (or `description`), and optional `timeLabel`, `phase`, `callout`, `checklist[]`, `vision`, `decision`, `dont`
+- [ ] User-configurable guide profiles and saved builds.
+- [ ] Patch-diff history and notifications when tracked heroes/items change.
+- [ ] More advanced draft assistant and team-composition analysis.
+- [ ] Local analytics / training mode to help users review their own decisions without collecting sensitive account data.
+- [ ] Optional community guide contributions with review, provenance, versioning, and moderation.
 
-Types with no `steps` are skipped. A file that is missing or invalid is treated as "no guide" (see logcat tag `RoamGuideWidget`).
+These are proposals, not commitments or implemented functionality. Prioritize correctness, accessibility, and reliability before adding more recommendation surfaces.
 
-That is why the app is called **MLBB Plus**, not just Roam Guide.
+## 9. Quality gates for future releases
 
----
+A release should not be considered ready until:
 
-### What the widget reads (V13)
+- The app assembles in both debug and release configurations.
+- JSON parsing tests pass and every referenced hero/item ID resolves.
+- Every guide hero pick and core item either resolves or is explicitly documented as unlinked.
+- Matchup arrays contain no self-links or duplicate IDs, and their direction is tested.
+- Asset paths resolve or show a designed fallback.
+- The overlay starts, updates, hides, and stops correctly; notification and permission flows work.
+- Screens remain usable with TalkBack, enlarged text, narrow phones, landscape, and larger windows.
+- Data source, snapshot date, patch, rank scope, and known limitations are documented.
 
-- `meta.objective_timers` -> Turtle / Lord spawn, respawn, 6:00 cutoff, 8:00 conversion (+5s), evolve time.
-- `battle_spells.spells` + `.defaults` -> enemy spell cooldowns and default spell per lane (Sprint is 75s in 2.2.23). A built-in table is only a fallback.
-- Per step: `instruction`/`description`, `compact` (hidden-mode peek), `phase`, `objective_contest`, `objective_trade`, `checklist`, `vision`, `decision`, `dont`.
-- Per type (shown pre-game, expanded): `win_condition`, `lose_condition`, `emblem`, `battle_spells`, `core_items`, `heroes`, blessing / `retribution_types`.
-- `meta.global_rules` -> one rule per step in expanded mode.
-- The launcher passes the guide **type id** (`initiator`, `crit`, `tank_exp`...). Types are read from the guide files (`RoleTypes` in `Models.kt`), never hardcoded.
+## 10. Where to go next
 
-### What the screens read
-
-- `model/Guides.kt` parses every `*_guide.json` once (`GameData.guides`): Home shows type playstyle, win/avoid, picks (tap -> hero), loadout, mechanics; Hero Detail shows "In overlay guides"; Item Detail shows "Core in overlay guides" and "Core on heroes"; Settings lists every data file with its patch and health.
-- `patch_notes.json` (flat layout) feeds the Home banner and movers, hero/item badges and detail cards, and the Patch screen.
-
-## Build
-
-- **Debug:** Run `.github/workflows/debug.yml` in Actions, or `./gradlew :app:assembleDebug`
-- **Release:** Run `.github/workflows/release.yml`, or `./gradlew :app:assembleRelease`
-- Release uses `isMinifyEnabled = true`, `isShrinkResources = false`.
-
-## Permissions
-
-- `SYSTEM_ALERT_WINDOW` — draw overlay on top of game
-- `FOREGROUND_SERVICE` + `FOREGROUND_SERVICE_SPECIAL_USE` — keep overlay alive
-- `POST_NOTIFICATIONS` — show “MLBB Plus running” notification
-
----
-
-*MLBB Plus is a fan-made companion tool. Not affiliated with Moonton.*
+- Read [structure.md](structure.md) for the detailed file map, dependency chains, and data flow.
+- Read [links.md](links.md) for Android documentation, UX references, game-data sources, and matchup resources.
+- Read [MATCHUP-DATA-SOURCES.md](MATCHUP-DATA-SOURCES.md) for the current matchup methodology.
+- Read [UX-UI-OVERHAUL.md](UX-UI-OVERHAUL.md) for the recorded UI/UX changes.

@@ -1,0 +1,117 @@
+# MLBB Plus — Documentation, Resources, and Data Sources
+
+This index separates **official platform documentation**, **UX references**, **game-data / matchup sources**, and **project-local documentation**. A link being listed does not mean the app calls that website at runtime. The current app ships local JSON assets and does not fetch these sources while running.
+
+## 1. Android platform and app architecture
+
+| Resource | Why it matters to this project |
+|---|---|
+| [Guide to app architecture](https://developer.android.com/topic/architecture) | Separation of concerns, UI/data layers, state holders, lifecycle, and adaptive app structure. |
+| [Recommendations for Android architecture](https://developer.android.com/topic/architecture/recommendations) | Practical guidance for layered architecture, repositories, unidirectional data flow, ViewModels, and lifecycle-aware UI state. |
+| [UI layer](https://developer.android.com/topic/architecture/ui-layer) | How UI state is exposed and consumed by Compose screens. |
+| [Compose UI architecture](https://developer.android.com/develop/ui/compose/architecture) | State/events and unidirectional data flow principles used by composables. |
+| [State in Jetpack Compose](https://developer.android.com/develop/ui/compose/state) | `remember`, `rememberSaveable`, observable state, and state hoisting. |
+| [Where to hoist state](https://developer.android.com/develop/ui/compose/state-hoisting) | Guidance for keeping state at the lowest common owner and separating UI logic from business logic. |
+| [Build adaptive apps](https://developer.android.com/develop/ui/compose/layouts/adaptive) | Responsive patterns for phones, tablets, foldables, and resizable windows. |
+| [Material 3 in Compose](https://developer.android.com/develop/ui/compose/designsystems/material3) | Material 3 components and theming for Android UI. |
+| [Compose accessibility](https://developer.android.com/develop/ui/compose/accessibility) | Semantics, accessibility services, and inclusive Compose interaction. |
+| [Compose accessibility semantics](https://developer.android.com/develop/ui/compose/accessibility/semantics) | Descriptions, roles, state, and semantics for interactive controls. |
+| [Android app accessibility](https://developer.android.com/guide/topics/ui/accessibility/apps) | Touch target sizing, content descriptions, and app accessibility practices. |
+| [Android app quality guidelines](https://developer.android.com/docs/quality-guidelines/core-app-quality) | Compatibility, stability, performance, and user-experience quality checks. |
+
+### Overlay and service APIs
+
+| Resource | Why it matters |
+|---|---|
+| [Manifest.permission reference — SYSTEM_ALERT_WINDOW](https://developer.android.com/reference/android/Manifest.permission#SYSTEM_ALERT_WINDOW) | Defines the special permission used to draw application-overlay windows. |
+| [Settings API reference](https://developer.android.com/reference/android/provider/Settings#ACTION_MANAGE_OVERLAY_PERMISSION) | Documents the system screen for managing overlay permission. |
+| [Services overview](https://developer.android.com/develop/background-work/services) | Service lifecycle and foreground-service behavior. |
+| [Foreground services overview](https://developer.android.com/develop/background-work/services/fgs) | User-visible work, notification requirements, start/stop constraints, and policy considerations. |
+| [Foreground service types](https://developer.android.com/develop/background-work/services/fgs/service-types) | Requirements and declarations for foreground service types, including `specialUse`. |
+| [Android notifications](https://developer.android.com/develop/ui/views/notifications) | Notification channels, actions, and user-visible service status. |
+
+## 2. UX and interaction design references
+
+| Resource | Project application |
+|---|---|
+| [Nielsen Norman Group — 10 usability heuristics](https://www.nngroup.com/articles/ten-usability-heuristics/) | System status visibility, match to real-world language, user control, consistency, error prevention, recognition over recall, and minimalist design. |
+| [Nielsen Norman Group — Recognition rather than recall](https://www.nngroup.com/articles/recognition-and-recall/) | Keep options, labels, and current selections visible so users do not need to remember hidden steps. |
+| [Material Design 3](https://m3.material.io/) | Design tokens, component behavior, hierarchy, and interaction patterns. |
+| [Material Design — Accessibility](https://m3.material.io/foundations/accessible-design/overview) | Contrast, readable typography, accessible controls, and inclusive interaction. |
+
+These are design references, not a claim that every recommendation has already been implemented. See [UX-UI-OVERHAUL.md](UX-UI-OVERHAUL.md) for the project-specific changes recorded so far.
+
+## 3. MLBB game-data and matchup references
+
+### Primary matchup dataset recorded in the current hero asset
+
+| Source | URL | Recorded use |
+|---|---|---|
+| MLBB Meta Analyser project | [Project / methodology](https://github.com/lnsdeep/MLBB-Meta-Analyser) | Primary source for favorable-matchup and same-team synergy lists. The project describes its data as Moonton GMS-derived ranked data and daily refreshed. It is an independent third-party project, not a Moonton-operated service. |
+| MLBB Meta Analyser CSV export | [Latest CSV export](https://github.com/lnsdeep/MLBB-Meta-Analyser/blob/main/data/exports/mlbb_meta_latest.csv) | The all-ranks / past-1-day snapshot used for the 21 November 2026 matchup update. The export contains rank/timeframe slices; the project selected the `all` rank and `1d` timeframe. |
+| MLBB Meta Analyser hosted page | [Hosted analyser](https://lnsdeep.github.io/MLBB-Meta-Analyser/) | Project overview and access to published analysis. |
+
+### Direct counters and secondary cross-checks
+
+| Source | URL | Recorded use / caveat |
+|---|---|---|
+| MLBBHub | [Counter picker](https://mlbbhub.com/counter) | Direct ranked-counter fallback for 43 heroes where the reverse-indexed primary source did not provide sufficient toughest-matchup coverage; also used to cross-check favorable-matchup direction. |
+| MLBB.gg | [Atlas counter page](https://mlbb.gg/counter/atlas) | Hero-specific counter reference supplied by the project owner; recheck page freshness before importing any values. |
+| MLBBMeta | [Counters](https://mlbbmeta.com/counters/) | Additional matchup reference supplied for comparison; not the primary source for the current full-roster snapshot. |
+| MLCounters | [Aamon matchup page](https://www.mlcounters.app/hero/aamon#counter-panels) | Secondary hero-specific counter / synergy reference supplied for comparison; not the primary source for the current full-roster snapshot. |
+| MLBB Guides | [Counter page example](https://www.mlbbguides.com/counter/?hero=hirara) | Additional hero-counter guide reference supplied by the project owner. Confirm hero slug and page freshness before relying on an individual result. |
+
+### Interpretation rules for matchup fields
+
+The current `heroes.json` stores relationship IDs in four fields:
+
+- `counters`: favorable opponents for the selected hero (the selected hero tends to perform well against these opponents).
+- `counteredBy`: toughest opponents for the selected hero.
+- `synergies` and `bestPartners`: measured same-team ally relationships. In the current data snapshot, these two fields are populated from the same ally list for compatibility with the existing model/UI.
+
+The current snapshot method is described in [MATCHUP-DATA-SOURCES.md](MATCHUP-DATA-SOURCES.md):
+
+1. `counters` uses the primary dataset's ranked counter picks.
+2. `synergies` / `bestPartners` use its ranked teammate synergy picks.
+3. `counteredBy` is derived by reversing favorable-counter edges, scoring appearances by source rank (5 down to 1), then selecting the strongest reverse edges.
+4. For 43 heroes with fewer than three reverse edges, direct ranked MLBBHub counter picks are used as a fallback.
+5. Unresolved placeholder IDs / names are excluded rather than guessed.
+
+**Important:** these are observational win-rate associations, not causal proof or guaranteed draft advice. Rank, patch, sample size, lane, player skill, bans, and team composition can change the result. The 2026-11-21 asset snapshot is specifically all ranks / past one day / patch 2.2.23; it will age and should be refreshed and revalidated for later patches.
+
+### Other game references
+
+- [Mobile Legends: Bang Bang official website](https://www.mobilelegends.com/) — official game and publisher reference.
+- [Google Play — Mobile Legends: Bang Bang](https://play.google.com/store/apps/details?id=com.mobile.legends) — public app listing.
+
+## 4. Libraries and frameworks used by the code
+
+| Dependency | Official resource | Use in project |
+|---|---|---|
+| Kotlin | [Kotlin documentation](https://kotlinlang.org/docs/home.html) | Application language and data/model code. |
+| Android Gradle Plugin | [Android Gradle Plugin release notes](https://developer.android.com/build/releases/gradle-plugin) | Android build configuration. |
+| Jetpack Compose | [Compose documentation](https://developer.android.com/develop/ui/compose/documentation) | Declarative app and overlay UI. |
+| Material 3 | [Material 3 Compose](https://developer.android.com/develop/ui/compose/designsystems/material3) | Main app components and theming. |
+| AndroidX Activity | [Activity release notes](https://developer.android.com/jetpack/androidx/releases/activity) | Compose activity integration and Back handling. |
+| AndroidX Lifecycle | [Lifecycle release notes](https://developer.android.com/jetpack/androidx/releases/lifecycle) | Lifecycle observer and Compose lifecycle integration. |
+| Coil 3 | [Coil documentation](https://coil-kt.github.io/coil/) | Compose image loading / bundled asset image rendering. |
+| Gradle version catalog | [Gradle version catalogs](https://docs.gradle.org/current/userguide/version_catalogs.html) | Centralized dependency/plugin versions in `gradle/libs.versions.toml`. |
+
+Exact dependency versions are recorded in `gradle/libs.versions.toml`; see [structure.md](structure.md#7-build-platform-and-dependencies) for the snapshot's version table.
+
+## 5. Project-local documentation
+
+- [overview.md](overview.md) — mission, vision, current capabilities, technology stack, and roadmap.
+- [structure.md](structure.md) — file-by-file map, dependency/data flow, service lifecycle, and change-impact guide.
+- [MATCHUP-DATA-SOURCES.md](MATCHUP-DATA-SOURCES.md) — detailed matchup source and methodology notes.
+- [MATCHUP-DATA-UPDATE.md](MATCHUP-DATA-UPDATE.md) — earlier matchup refresh notes; read together with the later full-roster snapshot documentation.
+- [matchup-data-audit.json](matchup-data-audit.json) — machine-readable matchup data audit generated for the data refresh.
+- [UX-UI-OVERHAUL.md](UX-UI-OVERHAUL.md) — UX/UI work summary and design references.
+
+## 6. Maintenance rules for this link index
+
+- Prefer official Android / Kotlin / library documentation for platform and API behavior.
+- Record the exact source URL, snapshot date, patch, rank scope, and timeframe whenever game statistics are imported.
+- Keep primary data sources distinct from secondary cross-checks and editorial guides.
+- Revisit third-party pages before each patch refresh; page structure and statistical coverage can change.
+- Do not imply that a listed website is called by the app at runtime unless a network client is actually implemented.
