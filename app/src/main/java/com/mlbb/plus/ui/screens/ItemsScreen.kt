@@ -1,208 +1,386 @@
 package com.mlbb.plus.ui.screens
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.mlbb.plus.ui.components.AppIcons
-import com.mlbb.plus.ui.components.FilterPill
-import com.mlbb.plus.ui.components.ScreenTitleBar
-import com.mlbb.plus.ui.components.SearchField
-import com.mlbb.plus.ui.components.SortMenu
 import com.mlbb.plus.ui.model.GameData
 import com.mlbb.plus.ui.model.Hero
 import com.mlbb.plus.ui.model.Item
-import com.mlbb.plus.ui.theme.AppUiColors
+import com.mlbb.plus.ui.theme.MLBBPlusColors
+import com.mlbb.plus.ui.widgets.AssetImage
 
-// ============================================================
-// plus/ui/screens/ItemsScreen.kt  ->  FIXED
-// ------------------------------------------------------------
-// FIXES:
-//  [1] CRITICAL - Detail tab stuck across items (same bug as Heroes).
-//      Old: remember { OVERVIEW } in ItemDetailScreen. Tap a related
-//      item (build path / counters) -> same composable, new item,
-//      old tab kept. Fix: remember(item.id).
-//  [2] Tier sort was wrong: compareByDescending { tier == "S" }
-//      thenBy price mixed A and B together by price. Fix: tier
-//      rank S=0, A=1, B=2 (and anything else last), then price.
-//  [3] Relation tabs showed only first 5, no way to see rest.
-//      Old: itemsA.take(5) in a plain Row. Fix: LazyRow with ALL
-//      items, key = id, no take(5).
-//  [4] Build path Row overflow: 3 components + arrows overflow a
-//      320dp phone and get clipped. Fix: horizontalScroll Row.
-//  [5] Build path lookup by exact name: GameData.items.find {
-//      it.name == comp }. A typo / case / whitespace difference
-//      makes the tap do nothing. Fix: equals(..., ignoreCase=true)
-//      + trim(), firstOrNull.
-//  [6] filtered list rebuilt on every recomposition.
-//      Fix: remember(query, selectedCat).
-//  [7] Patch fallback duplicated. Fix: displayVersion.
-// ============================================================
+private enum class ItemTab { OVERVIEW, BUILD_PATH, SYNERGIES }
+private enum class ItemSort { RECOMMENDED, PRICE_LOW, PRICE_HIGH, TIER }
 
-private fun tierRank(tier: String): Int = when (tier.uppercase().trim()) {
-    "S" -> 0
-    "A" -> 1
-    "B" -> 2
-    else -> 3
+private fun tierRank(tier: String): Int {
+    val t = tier.trim().uppercase()
+    return when {
+        t.startsWith("S") -> 0
+        t.startsWith("A") -> 1
+        t.startsWith("B") -> 2
+        else -> 3
+    }
+}
+
+private fun tierColor(tier: String): Color {
+    val t = tier.trim().uppercase()
+    return when {
+        t.startsWith("S") -> MLBBPlusColors.TierS
+        t.startsWith("A") -> MLBBPlusColors.TierA
+        t.startsWith("B") -> MLBBPlusColors.TierB
+        else -> MLBBPlusColors.GithubSecondary
+    }
 }
 
 @Composable
-fun ItemsScreen(onItemClick: (Item) -> Unit) {
-    var query by rememberSaveable { mutableStateOf("") }
-    var selectedCat by rememberSaveable { mutableStateOf<String?>(null) }
-    var guideOnly by rememberSaveable { mutableStateOf(false) }
-    var sortBy by rememberSaveable { mutableStateOf("Recommended") }
-    val patchItemIds = remember(GameData.patchNotes) { GameData.patchNotes.originalServer.itemChanges.map { it.itemId }.toSet() }
-    val cats = listOf<String?>(null, "Attack", "Magic", "Defense", "Movement", "Roam", "Jungle")
-    // FIX [6]: recompute only when inputs change.
-    val filtered = remember(query, selectedCat, guideOnly, GameData.items, sortBy) {
-        val matches = GameData.items.filter {
-            (!guideOnly || GameData.guideRefsForItem(it.name).isNotEmpty()) &&
-                (selectedCat == null || it.category == selectedCat) &&
-                (query.isBlank() || it.name.contains(query, ignoreCase = true) || it.category.contains(query, ignoreCase = true))
+fun ItemsScreen(
+    onItemClick: (Item) -> Unit = {},
+    onHeroClick: (Hero) -> Unit = {}
+) {
+    var query by remember { mutableStateOf("") }
+    var selectedCat by remember { mutableStateOf("All") }
+    var sort by remember { mutableStateOf(ItemSort.RECOMMENDED) }
+
+    val categories = remember {
+        val cats = GameData.items.map { it.category }.filter { it.isNotBlank() }.distinct().sorted()
+        listOf("All") + cats
+    }
+
+    val filtered = remember(query, selectedCat, sort) {
+        val q = query.trim().lowercase()
+        val base = GameData.items.filter { item ->
+            val matchesQuery = q.isBlank() ||
+                item.name.lowercase().contains(q) ||
+                item.category.lowercase().contains(q)
+            val matchesCat = selectedCat == "All" ||
+                item.category.equals(selectedCat, ignoreCase = true)
+            matchesQuery && matchesCat
         }
-        when (sortBy) {
-            "Name A–Z" -> matches.sortedBy { it.name.lowercase() }
-            "Lowest price" -> matches.sortedBy { it.price }
-            "Highest price" -> matches.sortedByDescending { it.price }
-            else -> matches.sortedWith(compareBy<Item> { tierRank(it.tier) }.thenBy { it.price })
+        when (sort) {
+            ItemSort.PRICE_LOW -> base.sortedBy { it.price }
+            ItemSort.PRICE_HIGH -> base.sortedByDescending { it.price }
+            ItemSort.TIER -> base.sortedWith(compareBy({ tierRank(it.tier) }, { it.price }))
+            ItemSort.RECOMMENDED -> base.sortedWith(compareBy({ tierRank(it.tier) }, { it.price }))
         }
     }
-    val hasActiveFilters = query.isNotBlank() || selectedCat != null || guideOnly
-    fun clearFilters() { query = ""; selectedCat = null; guideOnly = false }
-    Column(Modifier.fillMaxSize().background(AppUiColors.GithubBg)) {
-        ScreenTitleBar("ITEM EXPLORER", AppIcons.Apps)
-        Text("Patch ${GameData.patchNotes.displayVersion} item catalog", color = AppUiColors.GithubSecondary, fontSize = 12.sp, modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp))
-        SearchField(query = query, onQueryChange = { query = it }, placeholder = "Search by item name or category")
-        Row(Modifier.fillMaxWidth().padding(start = 16.dp, end = 8.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
-            Text("Filter by category", color = AppUiColors.GithubSecondary, fontSize = 11.sp, fontWeight = FontWeight.SemiBold)
-            SortMenu(selected = sortBy, options = listOf("Recommended", "Name A–Z", "Lowest price", "Highest price"), onSelect = { sortBy = it })
-        }
-        LazyRow(horizontalArrangement = Arrangement.spacedBy(10.dp), contentPadding = PaddingValues(horizontal = 16.dp), modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
-            items(cats) { cat ->
-                FilterPill(label = cat ?: "All", selected = selectedCat == cat, onClick = { selectedCat = cat })
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MLBBPlusColors.GithubBg)
+            .padding(horizontal = 8.dp)
+    ) {
+        Text(
+            text = "ITEM EXPLORER",
+            color = MLBBPlusColors.GithubText,
+            fontSize = 20.sp,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(top = 16.dp, bottom = 4.dp)
+        )
+        Text(
+            text = "Patch ${GameData.patchNotes.displayVersion} item catalog",
+            color = MLBBPlusColors.GithubSecondary,
+            fontSize = 12.sp,
+            modifier = Modifier.padding(bottom = 12.dp)
+        )
+
+        OutlinedTextField(
+            value = query,
+            onValueChange = { query = it },
+            placeholder = { Text("Search by item name or category", color = MLBBPlusColors.GithubSecondary, fontSize = 13.sp) },
+            singleLine = true,
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedTextColor = MLBBPlusColors.GithubText,
+                unfocusedTextColor = MLBBPlusColors.GithubText,
+                focusedContainerColor = MLBBPlusColors.GithubCard,
+                unfocusedContainerColor = MLBBPlusColors.GithubCard,
+                focusedBorderColor = MLBBPlusColors.Gold,
+                unfocusedBorderColor = MLBBPlusColors.GithubBorder
+            ),
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        Text("Filter by category", color = MLBBPlusColors.GithubSecondary, fontSize = 12.sp)
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .horizontalScroll(rememberScrollState())
+                .padding(vertical = 8.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            categories.forEach { cat ->
+                val selected = cat == selectedCat
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(if (selected) MLBBPlusColors.GoldBg else MLBBPlusColors.GithubCard)
+                        .clickable { selectedCat = cat }
+                        .padding(horizontal = 14.dp, vertical = 8.dp)
+                ) {
+                    Text(cat, color = if (selected) MLBBPlusColors.Gold else MLBBPlusColors.GithubText, fontSize = 13.sp)
+                }
             }
-            // Items that the role guides (jungle / mid / gold / exp *_guide.json) list as core items.
-            if (GameData.guides.values.any { g -> g.types.any { it.coreItems.isNotEmpty() } }) item {
-                FilterPill(label = "Used in guides", selected = guideOnly, onClick = { guideOnly = !guideOnly })
-            }
         }
-        Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
-            Text("${filtered.size} of ${GameData.items.size} items", color = AppUiColors.GithubSecondary, fontSize = 12.sp)
-            if (hasActiveFilters) TextButton(onClick = { clearFilters() }) { Text("Clear filters", color = AppUiColors.Gold) }
-        }
-        if (filtered.isEmpty()) {
-            Column(Modifier.fillMaxWidth().weight(1f).padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
-                Text("No items found", color = AppUiColors.GithubText, fontWeight = FontWeight.SemiBold, fontSize = 17.sp)
-                Spacer(Modifier.height(6.dp))
-                Text("Try another item name or category, or clear your filters.", color = AppUiColors.GithubSecondary, fontSize = 13.sp, textAlign = TextAlign.Center)
-                if (hasActiveFilters) TextButton(onClick = { clearFilters() }) { Text("Reset search and filters", color = AppUiColors.Gold) }
-            }
-        } else {
-            LazyVerticalGrid(
-                columns = GridCells.Adaptive(minSize = 104.dp),
-                verticalArrangement = Arrangement.spacedBy(10.dp),
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
-                contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 16.dp),
-                modifier = Modifier.fillMaxSize()
-            ) {
-                items(filtered, key = { it.id }) { item ->
-                    val cardShape = RoundedCornerShape(16.dp)
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier.clip(cardShape).background(AppUiColors.GithubCard)
-                            .border(1.dp, AppUiColors.GithubBorder.copy(alpha = 0.7f), cardShape)
-                            .clickable(role = Role.Button) { onItemClick(item) }.padding(8.dp)
+
+        Text(
+            text = "${filtered.size} of ${GameData.items.size} items",
+            color = MLBBPlusColors.GithubSecondary,
+            fontSize = 12.sp,
+            modifier = Modifier.padding(vertical = 4.dp)
+        )
+
+        // 7 columns — compact thumbnails so item icons stay small
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(7),
+            contentPadding = PaddingValues(vertical = 8.dp),
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.fillMaxSize()
+        ) {
+            items(filtered, key = { it.id }) { item ->
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { onItemClick(item) },
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .aspectRatio(1f)
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(MLBBPlusColors.GithubCard)
                     ) {
-                        Box(Modifier.fillMaxWidth().aspectRatio(1f)) {
-                            ItemImage(item = item, modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(12.dp)).background(AppUiColors.GithubSurface))
-                            if (item.id in patchItemIds) {
-                                Box(Modifier.align(Alignment.TopEnd).clip(RoundedCornerShape(6.dp)).background(AppUiColors.Orange).padding(horizontal = 4.dp, vertical = 2.dp)) {
-                                    Text("PATCH", color = Color.Black, fontSize = 8.sp, fontWeight = FontWeight.Bold)
+                        AssetImage(
+                            item = item,
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = ContentScale.Crop,
+                            contentDescription = item.name
+                        )
+                    }
+                    Text(
+                        text = item.name,
+                        color = MLBBPlusColors.GithubText,
+                        fontSize = 9.sp,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.padding(top = 3.dp)
+                    )
+                    Text(
+                        text = "${item.price} Gold",
+                        color = MLBBPlusColors.Gold,
+                        fontSize = 8.sp,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        textAlign = TextAlign.Center
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun ItemDetailScreen(
+    item: Item,
+    onBack: () -> Unit = {},
+    onItemClick: (Item) -> Unit = {},
+    onHeroClick: (Hero) -> Unit = {}
+) {
+    // Reset tab when item changes
+    var selectedTab by remember(item.id) { mutableStateOf(ItemTab.OVERVIEW) }
+
+    val buildPathItems = remember(item.id) {
+        item.buildPath.mapNotNull { comp ->
+            GameData.items.firstOrNull { it.name.equals(comp.trim(), ignoreCase = true) }
+        }
+    }
+    val relatedItems = remember(item.id) {
+        // All related items, no take(5) limit
+        item.relatedItemIds.mapNotNull { GameData.itemsById[it] }
+    }
+    val synergyHeroes = remember(item.id) {
+        item.synergyHeroIds.mapNotNull { GameData.heroesById[it] }
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MLBBPlusColors.GithubBg)
+            .verticalScroll(rememberScrollState())
+            .padding(12.dp)
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Box(
+                modifier = Modifier
+                    .size(72.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(MLBBPlusColors.GithubCard)
+            ) {
+                AssetImage(item = item, modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop, contentDescription = item.name)
+            }
+            Spacer(modifier = Modifier.width(12.dp))
+            Column {
+                Text(item.name, color = MLBBPlusColors.GithubText, fontSize = 20.sp, fontWeight = FontWeight.Bold)
+                Text(item.category, color = MLBBPlusColors.GithubSecondary, fontSize = 13.sp)
+                Text(
+                    text = "Tier ${item.tier.trim().uppercase()} • ${item.price} Gold",
+                    color = tierColor(item.tier),
+                    fontSize = 12.sp
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.horizontalScroll(rememberScrollState())
+        ) {
+            ItemTab.values().forEach { tab ->
+                val selected = tab == selectedTab
+                Box(
+                    modifier = Modifier
+                        .semantics { role = Role.Tab; this.selected = selected }
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(if (selected) MLBBPlusColors.GoldBg else MLBBPlusColors.GithubCard)
+                        .clickable { selectedTab = tab }
+                        .padding(horizontal = 14.dp, vertical = 8.dp)
+                ) {
+                    Text(tab.name, color = if (selected) MLBBPlusColors.Gold else MLBBPlusColors.GithubText, fontSize = 13.sp, fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal)
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        when (selectedTab) {
+            ItemTab.OVERVIEW -> {
+                if (item.statsDetailed.isNotEmpty()) {
+                    Text("Stats", color = MLBBPlusColors.GithubText, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                    Spacer(modifier = Modifier.height(8.dp))
+                    item.statsDetailed.forEach { stat ->
+                        Text("• ${stat.label}: ${stat.value}", color = MLBBPlusColors.GithubText, fontSize = 13.sp)
+                    }
+                    Spacer(modifier = Modifier.height(12.dp))
+                }
+                if (relatedItems.isNotEmpty()) {
+                    Text("Related Items", color = MLBBPlusColors.GithubText, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                    Spacer(modifier = Modifier.height(8.dp))
+                    LazyRow(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                        items(relatedItems, key = { it.id }) { rel ->
+                            Column(
+                                modifier = Modifier
+                                    .width(56.dp)
+                                    .clickable { onItemClick(rel) },
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Box(modifier = Modifier.size(52.dp).clip(RoundedCornerShape(10.dp))) {
+                                    AssetImage(item = rel, modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop, contentDescription = rel.name)
                                 }
+                                Text(rel.name, color = MLBBPlusColors.GithubText, fontSize = 10.sp, maxLines = 1, overflow = TextOverflow.Ellipsis, textAlign = TextAlign.Center)
                             }
                         }
-                        Text(item.name, maxLines = 1, overflow = TextOverflow.Ellipsis, color = AppUiColors.GithubText.copy(alpha = 0.85f), fontSize = 11.sp, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth().padding(top = 8.dp))
-                        Text("${item.price} Gold", color = AppUiColors.Gold.copy(alpha = 0.85f), fontSize = 10.sp, modifier = Modifier.padding(bottom = 2.dp))
                     }
                 }
             }
-        }
-    }
-}
-
-@Composable
-fun ItemDetailScreen(item: Item, onBack: () -> Unit, onItemClick: (Item) -> Unit, onHeroClick: (Hero) -> Unit) {
-    // FIX [1]: reset tab when item changes.
-    var activeTab by remember(item.id) { mutableStateOf(DetailTab.OVERVIEW) }
-    val itemsById = GameData.itemsById
-    val heroesById = GameData.heroesById
-    Column(Modifier.fillMaxSize().background(AppUiColors.GithubBg)) {
-        Box(Modifier.fillMaxWidth().height(180.dp)) {
-            ItemImage(item = item, modifier = Modifier.fillMaxSize())
-            Box(Modifier.fillMaxSize().background(Brush.verticalGradient(listOf(Color.Transparent, AppUiColors.GithubBg.copy(alpha = 0.3f), AppUiColors.GithubBg))))
-            Box(
-                Modifier.align(Alignment.TopStart).statusBarsPadding().padding(8.dp).size(48.dp).clip(CircleShape)
-                    .background(Color.Black.copy(alpha = 0.35f)).clickable { onBack() },
-                contentAlignment = Alignment.Center
-            ) { Icon(AppIcons.ArrowBack, contentDescription = "Back", tint = AppUiColors.Gold) }
-            Column(Modifier.align(Alignment.BottomStart).padding(16.dp)) {
-                Text(item.name, color = AppUiColors.GithubText, fontWeight = FontWeight.Bold, fontSize = 22.sp)
-                Text("${item.category} \u2022 Tier ${item.tier} \u2022 #${item.id} \u2022 ${item.price} Gold", color = AppUiColors.GithubSecondary, fontSize = 12.sp)
-            }
-        }
-        Row(Modifier.fillMaxWidth().background(AppUiColors.GithubCard).padding(vertical = 14.dp), horizontalArrangement = Arrangement.SpaceEvenly) {
-            val labels = listOf("Price", "Sell", "Category")
-            val values = listOf("${item.price}", "${item.sellPrice}", item.category)
-            values.forEachIndexed { i, v -> if (i > 0) Box(Modifier.width(1.dp).height(36.dp).background(AppUiColors.GithubBorder)); Column(horizontalAlignment = Alignment.CenterHorizontally) { Text(v, color = AppUiColors.Gold, fontWeight = FontWeight.Bold, fontSize = 16.sp); Text(labels[i], color = AppUiColors.GithubSecondary, fontSize = 10.sp) } }
-        }
-        PrimaryTabRow(selectedTabIndex = activeTab.ordinal, containerColor = AppUiColors.GithubCard, contentColor = AppUiColors.Gold) {
-            DetailTab.entries.forEach { tab -> Tab(selected = activeTab == tab, onClick = { activeTab = tab }, text = { Text(if (tab == DetailTab.SYNERGIES) "Partners" else tab.name.lowercase().replaceFirstChar { it.uppercase() }, fontWeight = if (activeTab == tab) FontWeight.Bold else FontWeight.Normal) }) }
-        }
-        Column(Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            when (activeTab) {
-                DetailTab.OVERVIEW -> ItemOverviewTab(item, onItemClick, onHeroClick)
-                DetailTab.COUNTERS -> ItemRelationTab("ITEMS THAT COUNTER ${item.name.uppercase()}", item.counteredBy.mapNotNull { itemsById[it] }, "${item.name.uppercase()} COUNTERS", item.counters.mapNotNull { itemsById[it] }, onItemClick)
-                DetailTab.SYNERGIES -> {
-                    Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
-                        Text("BEST PARTNERS", color = AppUiColors.Gold, fontSize = 10.sp, fontWeight = FontWeight.Bold, letterSpacing = 0.8.sp)
-                        val partners = item.synergiesHeroes.mapNotNull { heroesById[it] }
-                        if (partners.isNotEmpty()) {
-                            LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) { items(partners, key = { it.id }) { h -> HeroPortraitSmall(h, onHeroClick) } }
-                        } else if (item.synergiesHeroes.isEmpty()) {
-                            Text("No hero synergy data for this item yet", color = AppUiColors.GithubSecondary, fontSize = 12.sp)
+            ItemTab.BUILD_PATH -> {
+                Text("Build Path", color = MLBBPlusColors.GithubText, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                Spacer(modifier = Modifier.height(8.dp))
+                if (buildPathItems.isEmpty()) {
+                    Text("No build path in items.json", color = MLBBPlusColors.GithubSecondary, fontSize = 13.sp)
+                } else {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .horizontalScroll(rememberScrollState()),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        buildPathItems.forEachIndexed { index, comp ->
+                            Column(
+                                modifier = Modifier
+                                    .width(56.dp)
+                                    .clickable { onItemClick(comp) },
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Box(modifier = Modifier.size(52.dp).clip(RoundedCornerShape(10.dp))) {
+                                    AssetImage(item = comp, modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop, contentDescription = comp.name)
+                                }
+                                Text(comp.name, color = MLBBPlusColors.GithubText, fontSize = 10.sp, maxLines = 1, overflow = TextOverflow.Ellipsis, textAlign = TextAlign.Center)
+                            }
+                            if (index < buildPathItems.lastIndex) {
+                                Text("→", color = MLBBPlusColors.GithubSecondary, fontSize = 16.sp)
+                            }
                         }
-                        Box(Modifier.fillMaxWidth().height(1.dp).background(AppUiColors.GithubBorder))
-                        Text("WORKS BEST AGAINST", color = AppUiColors.Gold, fontSize = 10.sp, fontWeight = FontWeight.Bold, letterSpacing = 0.8.sp)
-                        val against = item.worksAgainstHeroes.mapNotNull { heroesById[it] }
-                        if (against.isNotEmpty()) {
-                            LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) { items(against, key = { it.id }) { h -> HeroPortraitSmall(h, onHeroClick) } }
-                        } else if (item.worksAgainstHeroes.isEmpty()) {
-                            Text("No \"works against\" data for this item yet", color = AppUiColors.GithubSecondary, fontSize = 12.sp)
+                    }
+                }
+            }
+            ItemTab.SYNERGIES -> {
+                Text("Works Well On", color = MLBBPlusColors.GithubText, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                Spacer(modifier = Modifier.height(8.dp))
+                if (synergyHeroes.isEmpty()) {
+                    Text("No synergy heroes in items.json", color = MLBBPlusColors.GithubSecondary, fontSize = 13.sp)
+                } else {
+                    LazyRow(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                        items(synergyHeroes, key = { it.id }) { hero ->
+                            Column(
+                                modifier = Modifier
+                                    .width(56.dp)
+                                    .clickable { onHeroClick(hero) },
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Box(modifier = Modifier.size(52.dp).clip(RoundedCornerShape(10.dp))) {
+                                    AssetImage(hero = hero, modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop, contentDescription = hero.name)
+                                }
+                                Text(hero.name, color = MLBBPlusColors.GithubText, fontSize = 10.sp, maxLines = 1, overflow = TextOverflow.Ellipsis, textAlign = TextAlign.Center)
+                            }
                         }
                     }
                 }
@@ -212,92 +390,6 @@ fun ItemDetailScreen(item: Item, onBack: () -> Unit, onItemClick: (Item) -> Unit
 }
 
 @Composable
-private fun ItemOverviewTab(item: Item, onItemClick: (Item) -> Unit, onHeroClick: (Hero) -> Unit) {
-    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        // ---- This patch (patch_notes.json itemChanges) ----
-        GameData.patchChangeForItem(item.id)?.let { change ->
-            Column(
-                Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).background(AppUiColors.Orange.copy(alpha = 0.10f))
-                    .border(1.dp, AppUiColors.Orange.copy(alpha = 0.45f), RoundedCornerShape(12.dp)).padding(12.dp),
-                verticalArrangement = Arrangement.spacedBy(4.dp)
-            ) {
-                Text("PATCH ${GameData.patchNotes.displayVersion} \u2022 ${change.type.uppercase().ifBlank { "CHANGE" }}", color = AppUiColors.Orange, fontSize = 11.sp, fontWeight = FontWeight.Bold, letterSpacing = 0.8.sp)
-                change.changes.forEach { Text("\u2022 $it", color = AppUiColors.GithubText, fontSize = 13.sp) }
-            }
-        }
-        // ---- Role guides that list this item as a core item ----
-        val guideRefs = GameData.guideRefsForItem(item.name)
-        if (guideRefs.isNotEmpty()) {
-            Text("CORE IN OVERLAY GUIDES", color = AppUiColors.Gold, fontSize = 10.sp, fontWeight = FontWeight.Bold, letterSpacing = 0.8.sp)
-            Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                guideRefs.forEach { ref ->
-                    Box(Modifier.clip(RoundedCornerShape(20.dp)).background(AppUiColors.Gold.copy(alpha = 0.12f)).border(1.dp, AppUiColors.Gold.copy(alpha = 0.35f), RoundedCornerShape(20.dp)).padding(horizontal = 12.dp, vertical = 6.dp)) {
-                        Text("${ref.role} \u2022 ${ref.typeLabel}", color = AppUiColors.Gold, fontSize = 12.sp)
-                    }
-                }
-            }
-        }
-        // ---- Heroes whose core build (heroes.json) includes it ----
-        val coreOn = GameData.heroesUsingItem(item.id)
-        if (coreOn.isNotEmpty()) {
-            Text("CORE ON HEROES", color = AppUiColors.Gold, fontSize = 10.sp, fontWeight = FontWeight.Bold, letterSpacing = 0.8.sp)
-            LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) { items(coreOn, key = { it.id }) { h -> HeroPortraitSmall(h, onHeroClick) } }
-        }
-        Text("FULL DESCRIPTION", color = AppUiColors.Gold, fontSize = 10.sp, fontWeight = FontWeight.Bold, letterSpacing = 0.8.sp)
-        Text(item.description.ifBlank { "No description" }, color = AppUiColors.GithubText, fontSize = 13.sp)
-        if (item.passiveName != null) { Text("PASSIVE \u2014 ${item.passiveName}", color = AppUiColors.Gold, fontSize = 10.sp, fontWeight = FontWeight.Bold, letterSpacing = 0.8.sp); Text(item.passiveDescription ?: "", color = AppUiColors.GithubText, fontSize = 13.sp) }
-        if (item.activeName != null) { Text("ACTIVE \u2014 ${item.activeName}", color = AppUiColors.Gold, fontSize = 10.sp, fontWeight = FontWeight.Bold, letterSpacing = 0.8.sp); Text(item.activeDescription ?: "", color = AppUiColors.GithubText, fontSize = 13.sp) }
-        Text("STATS", color = AppUiColors.Gold, fontSize = 10.sp, fontWeight = FontWeight.Bold, letterSpacing = 0.8.sp)
-        item.stats.forEach { Text("\u2022 $it", color = AppUiColors.GithubText, fontSize = 13.sp) }
-        if (item.statsDetailed.isNotEmpty()) item.statsDetailed.forEach { Text("${it.stat}: ${it.value}", color = AppUiColors.GithubSecondary, fontSize = 12.sp) }
-        Text("Price: ${item.price} Gold \u2022 Sell: ${item.sellPrice} Gold", color = AppUiColors.Gold, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
-        if (item.recommendedFor.isNotEmpty()) { Text("RECOMMENDED FOR", color = AppUiColors.Gold, fontSize = 10.sp, fontWeight = FontWeight.Bold, letterSpacing = 0.8.sp); Text(item.recommendedFor.joinToString(", "), color = AppUiColors.GithubText, fontSize = 13.sp) }
-        Text("LORE", color = AppUiColors.Gold, fontSize = 10.sp, fontWeight = FontWeight.Bold, letterSpacing = 0.8.sp)
-        Text(item.lore ?: "No lore for this item", color = AppUiColors.GithubSecondary, fontSize = 12.sp)
-        Text("BUILD PATH", color = AppUiColors.Gold, fontSize = 10.sp, fontWeight = FontWeight.Bold, letterSpacing = 0.8.sp)
-        if (item.buildPath.isEmpty()) { Text("No build path", color = AppUiColors.GithubSecondary, fontSize = 12.sp) } else {
-            // FIX [4]: horizontal scroll, not clipped Row.
-            Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-                item.buildPath.forEachIndexed { i, comp ->
-                    if (i > 0) Text("\u2192", color = AppUiColors.Gold, fontWeight = FontWeight.Bold)
-                    Box(Modifier.clip(RoundedCornerShape(8.dp)).background(AppUiColors.GithubSurface).border(1.dp, AppUiColors.GithubBorder, RoundedCornerShape(8.dp)).clickable {
-                        // FIX [5]: case-insensitive + trim, not exact ==.
-                        GameData.items.firstOrNull { it.name.equals(comp.trim(), ignoreCase = true) }?.let { onItemClick(it) }
-                    }.padding(horizontal = 10.dp, vertical = 8.dp)) { Text(comp, color = AppUiColors.GithubText, fontSize = 12.sp) }
-                }
-                Text("\u2192", color = AppUiColors.Gold, fontWeight = FontWeight.Bold)
-                Box(Modifier.clip(RoundedCornerShape(8.dp)).background(AppUiColors.Gold.copy(alpha = 0.15f)).border(1.dp, AppUiColors.Gold, RoundedCornerShape(8.dp)).padding(horizontal = 10.dp, vertical = 8.dp)) { Text(item.name, color = AppUiColors.Gold, fontSize = 12.sp, fontWeight = FontWeight.Bold) }
-            }
-            Text("Combine ${item.buildPath.joinToString(" + ")} to craft \u2022 Final: ${item.price} Gold", color = AppUiColors.GithubSecondary, fontSize = 11.sp)
-        }
-        if (item.tags.isNotEmpty()) Text("Tags: ${item.tags.joinToString(", ")}", color = AppUiColors.GithubSecondary, fontSize = 11.sp)
-    }
-}
-
-@Composable
-private fun ItemRelationTab(sectionA: String, itemsA: List<Item>, sectionB: String, itemsB: List<Item>, onItemClick: (Item) -> Unit) {
-    Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
-        Text(sectionA, color = AppUiColors.Gold, fontSize = 10.sp, fontWeight = FontWeight.Bold, letterSpacing = 0.8.sp)
-        // FIX [3]: LazyRow with ALL items, not take(5) in a Row.
-        if (itemsA.isNotEmpty()) {
-            LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) { items(itemsA, key = { it.id }) { it -> ItemPortraitSmall(it, onItemClick) } }
-        } else {
-            Text("No counter data for this item yet", color = AppUiColors.GithubSecondary, fontSize = 12.sp)
-        }
-        Box(Modifier.fillMaxWidth().height(1.dp).background(AppUiColors.GithubBorder))
-        Text(sectionB, color = AppUiColors.Gold, fontSize = 10.sp, fontWeight = FontWeight.Bold, letterSpacing = 0.8.sp)
-        if (itemsB.isNotEmpty()) {
-            LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) { items(itemsB, key = { it.id }) { it -> ItemPortraitSmall(it, onItemClick) } }
-        } else {
-            Text("No counter data for this item yet", color = AppUiColors.GithubSecondary, fontSize = 12.sp)
-        }
-    }
-}
-
-@Composable
-private fun ItemPortraitSmall(item: Item, onClick: (Item) -> Unit) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.clickable { onClick(item) }) {
-        ItemImage(item = item, modifier = Modifier.size(52.dp).clip(RoundedCornerShape(8.dp)).background(AppUiColors.GithubSurface).border(1.dp, AppUiColors.GithubBorder, RoundedCornerShape(8.dp)))
-        Text(item.name, color = AppUiColors.GithubSecondary, fontSize = 10.sp, modifier = Modifier.padding(top = 4.dp), maxLines = 1, overflow = TextOverflow.Ellipsis)
-    }
+fun ItemsScreenContent(onItemClick: (Item) -> Unit = {}) {
+    ItemsScreen(onItemClick = onItemClick)
 }
