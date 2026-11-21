@@ -324,3 +324,37 @@ The versions above are read from `gradle/libs.versions.toml`, `app/build.gradle.
 - Matchup data methodology: [MATCHUP-DATA-SOURCES.md](MATCHUP-DATA-SOURCES.md)
 - Matchup refresh notes: [MATCHUP-DATA-UPDATE.md](MATCHUP-DATA-UPDATE.md)
 - UX/UI decisions: [UX-UI-OVERHAUL.md](UX-UI-OVERHAUL.md)
+
+
+## 11. UX changes and implementation boundaries
+
+The recorded UX/UI refresh changed the main app experience but deliberately preserved the floating overlay implementation.
+
+Main-app changes recorded:
+- Home Quick Start guidance and clearer Position / Playstyle / Enable Widget wording.
+- Direct Android Settings flow for overlay permission, with explanatory copy.
+- Functional remember-last-position/playstyle startup preference, conditional on overlay permission.
+- Improved Back handling and preservation of search, filters, sort choices, and selected patch tab while navigating.
+- Hero/item sorting, clear-filter actions, result counts, and empty states.
+- Adaptive navigation rail at wider window sizes while retaining bottom navigation on phones.
+- Constrained Home content width on larger screens.
+- Expandable technical diagnostics and improved toggle/accessibility semantics.
+
+The following files were explicitly unchanged by that refresh:
+- `ui/WidgetOverlayService.kt`
+- `ui/widgets/JetOverlay.kt`
+- `ui/widgets/OverlayWidgets.kt`
+- `ui/theme/MLBBPlusTheme.kt`
+
+## 12. Matchup data validation record
+
+The companion audit (`matchup-data-audit.json`) reports 133 heroes, with all 133 covered in each relationship category. Every hero has at least three toughest-matchup entries; toughest lists range from 3–5 entries, favorable lists from 4–5, and best-measured-ally lists from 4–5. Forty-three heroes use the direct MLBBHub fallback for toughest matchups.
+
+When hero IDs, names, or matchup arrays change, validate:
+1. Every relationship ID resolves through `GameData.heroesById`.
+2. No hero links to itself and no duplicate relationship IDs occur.
+3. The direction of `counters` and `counteredBy` remains consistent with the documented definitions.
+4. `matchup-data-audit.json` is regenerated and checked against the new asset snapshot.
+5. Source date, patch, rank scope, timeframe, fallback provenance, and caveats are updated together.
+
+The audit validates coverage and counts; it does not independently validate the quality or predictive power of each matchup.

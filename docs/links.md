@@ -115,3 +115,71 @@ Exact dependency versions are recorded in `gradle/libs.versions.toml`; see [stru
 - Keep primary data sources distinct from secondary cross-checks and editorial guides.
 - Revisit third-party pages before each patch refresh; page structure and statistical coverage can change.
 - Do not imply that a listed website is called by the app at runtime unless a network client is actually implemented.
+
+
+## 7. Current matchup snapshot: provenance, methodology, and audit
+
+### Snapshot identity
+
+- Asset: `app/src/main/assets/heroes.json`
+- Snapshot date: **2026-11-21**
+- Game patch: **2.2.23**
+- Scope: **all ranks / past 1 day**
+- Primary source: MLBB Meta Analyser CSV export
+- Secondary direct-counter fallback: MLBBHub for 43 heroes
+
+The primary export contains 3,990 rows across hero, rank, and timeframe slices, with up to five counter and five teammate-synergy entries per hero. The MLBB Meta Analyser project describes its statistics as extracted from Moonton's Game Management System and refreshed daily. It is an independent third-party project, not a Moonton-operated service.
+
+### Field definitions and derivation
+
+- `counters`: favorable opponents for the selected hero; the selected hero tends to perform well against these opponents. Up to five entries.
+- `bestPartners` / `synergies`: top measured same-team ally relationships. In this snapshot, the fields carry the same ally list for compatibility with the existing model/UI.
+- `counteredBy`: toughest opponents for the selected hero. The primary method reverses favorable-counter edges: if hero A appears in hero B's favorable list, B becomes a tough matchup for A. Reverse edges are weighted by source rank (5 points for rank 1 down to 1 point for rank 5), then the strongest edges are retained, up to five.
+- **Fallback:** when a hero has fewer than three reverse edges, the top three direct ranked counter picks from that hero's MLBBHub page are used. The recorded fallback pages were updated between November 17 and November 20, 2026. Per-hero provenance is recorded in `counteredBySource` / `counteredByUpdated`.
+
+Unresolved placeholder IDs or names (for example, `Hero #133`) are excluded rather than guessed. The 43 fallback heroes are Angela, Arlott, Aulus, Aurora, Badang, Brody, Carmilla, Cecilion, Chou, Claude, Clint, Dyrroth, Guinevere, Gusion, Hayabusa, Hilda, Hirara, Julian, Kadita, Kagura, Lapu-Lapu, Leomord, Lesley, Luo Yi, Martis, Minotaur, Miya, Moskov, Nana, Natan, Nolan, Novaria, Obsidia, Paquito, Pharsa, Selena, Sora, Suyou, Terizla, Vexana, Yi Sun-shin, Yu Zhong, and Zetian.
+
+### Audit results
+
+The machine-readable audit reports:
+| Check | Result |
+|---|---:|
+| Heroes in dataset | 133 |
+| Heroes with favorable matchups | 133 |
+| Heroes with toughest matchups | 133 |
+| Heroes with at least 3 toughest matchups | 133 |
+| Heroes with best measured allies | 133 |
+| Toughest matchups per hero | 3–5 |
+| Favorable matchups per hero | 4–5 |
+| Best measured allies per hero | 4–5 |
+| Heroes using MLBBHub counter fallback | 43 |
+
+### Interpretation and maintenance caveats
+
+These are observational win-rate associations, not causal proof or guaranteed draft advice. The snapshot is all-ranks / past-one-day, not a rank-specific recommendation. Patch, rank, sample size, lane, player skill, bans, and team composition can change outcomes. The reverse-index method is an aggregation of source-ranked recommendations, not a separately published per-pair score.
+
+The snapshot is time-sensitive and should be refreshed and revalidated for later patches. Record source URL, snapshot date, patch, rank scope, timeframe, and fallback provenance whenever data is imported. Keep primary statistical sources distinct from secondary cross-checks and editorial guides.
+
+### Historical update note
+
+The earlier 2026-11-21 partial cleanup populated sourced relationships for Hayabusa, Saber, Lancelot, Hanabi, and Eudora while leaving other heroes empty rather than inventing values. That state was superseded later the same day by the complete 133-hero snapshot described above. The partial update is retained here as history only; it is not the current data state.
+
+## 8. UX / accessibility design references
+
+The recorded app-screen refresh used these references:
+- [Android adaptive layouts](https://developer.android.com/design/ui/mobile/guides/layout-and-content/adapt-layout)
+- [Android accessibility for Compose](https://developer.android.com/guide/topics/ui/accessibility/composables)
+- [Compose accessibility semantics](https://developer.android.com/develop/ui/compose/accessibility/semantics)
+- [Android minimum touch targets](https://developer.android.com/guide/topics/ui/accessibility/apps)
+- [Nielsen Norman Group usability heuristics](https://www.nngroup.com/articles/ten-usability-heuristics/)
+
+These are design references, not evidence that every recommendation is fully implemented. The implementation record is summarized in `overview.md` and mapped to code in `structure.md`.
+
+## 9. Canonical documentation map
+
+The consolidated documentation set is:
+- `overview.md` — product mission, capabilities, snapshot, UX implementation record, audit summary, and roadmap.
+- `structure.md` — repository map, runtime/data flow, file responsibilities, UX implementation boundaries, and validation impact.
+- `links.md` — external platform/design/game-data references, matchup methodology, audit figures, historical data note, and maintenance caveats.
+
+The original standalone `MATCHUP-DATA-SOURCES.md`, `MATCHUP-DATA-UPDATE.md`, `UX-UI-OVERHAUL.md`, and `matchup-data-audit.json` are now represented in these three canonical documents. Keep the standalone originals only if you want a separate archival copy.

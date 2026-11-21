@@ -178,3 +178,33 @@ A release should not be considered ready until:
 - Read [links.md](links.md) for Android documentation, UX references, game-data sources, and matchup resources.
 - Read [MATCHUP-DATA-SOURCES.md](MATCHUP-DATA-SOURCES.md) for the current matchup methodology.
 - Read [UX-UI-OVERHAUL.md](UX-UI-OVERHAUL.md) for the recorded UI/UX changes.
+
+
+## 11. UX / UI implementation record
+
+The current app-screen refresh improves first-use clarity and navigation while intentionally preserving the floating overlay implementation.
+
+Implemented refinements:
+- Home includes a plain-language Quick Start flow for choosing a position, selecting a playstyle, and enabling the floating guide.
+- Setup terminology uses clearer labels such as **Position**, **Playstyle**, **Enable Widget**, and **Display over other apps**.
+- Overlay permission is requested through a direct Android Settings action with an explanation, rather than a misleading in-app permission switch.
+- The startup preference remembers the last selected position and playstyle and can start the guide on app launch when overlay permission is already granted.
+- Back handling, section navigation, and detail-page return behavior were improved.
+- Hero and item explorers include sorting, clear-filter actions, result counts, and useful empty states; search/filter/sort state and the selected patch tab are preserved during navigation.
+- Wider windows use a responsive navigation rail; phones retain bottom navigation. Home content width is constrained on larger screens.
+- Technical data-file diagnostics are grouped in an expandable troubleshooting section.
+- Compose toggle semantics and practical minimum touch sizes support accessibility.
+
+The refresh did not change the overlay implementation files: `WidgetOverlayService.kt`, `JetOverlay.kt`, `OverlayWidgets.kt`, and `MLBBPlusTheme.kt`.
+
+## 12. Matchup snapshot audit summary
+
+The 2026-11-21 matchup audit reports:
+- 133 heroes total; all 133 have favorable-matchup entries, toughest-matchup entries, and best-measured-ally entries.
+- All 133 have at least three toughest matchups.
+- Toughest-matchup lists contain 3–5 entries; favorable-matchup and best-measured-ally lists contain 4–5 entries.
+- Direct MLBBHub counter fallback was used for 43 heroes.
+
+The fallback roster is: Angela, Arlott, Aulus, Aurora, Badang, Brody, Carmilla, Cecilion, Chou, Claude, Clint, Dyrroth, Guinevere, Gusion, Hayabusa, Hilda, Hirara, Julian, Kadita, Kagura, Lapu-Lapu, Leomord, Lesley, Luo Yi, Martis, Minotaur, Miya, Moskov, Nana, Natan, Nolan, Novaria, Obsidia, Paquito, Pharsa, Selena, Sora, Suyou, Terizla, Vexana, Yi Sun-shin, Yu Zhong, and Zetian.
+
+The audit is a coverage/shape check, not proof that every recommendation is strategically correct. Interpret the relationship fields using the methodology summarized in the Sources section of `links.md`; matchup associations are not guarantees.
