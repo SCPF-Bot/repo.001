@@ -1,0 +1,220 @@
+{
+  "version": "2.2.23",
+  "date": "2026-11-11",
+  "server": "Original Server",
+  "season": "Season 42",
+  "title": "Patch 2.2.23 — Popol and Kupa Revamp",
+  "summary": "Latest patch on Original Server (live game) as of 11 Nov 2026. Headline is the Popol and Kupa revamp: Popol can now ride Kupa to chase or escape. 6 heroes buffed, 3 nerfed, 1 revamped. Marksmen pushed back to Gold Lane, fighters back to EXP Lane.",
+  "highlights": [
+    "Revamp: Popol and Kupa — ride Kupa, Kupa scales with Popol, revive fallen Kupa, stronger traps",
+    "Buffs: Xavier, Lunox, Freya, Aldous, Kaja, Melissa",
+    "Nerfs: Gloo, Masha, Atlas",
+    "System: Roam gold tuning, vision / trap changes"
+  ],
+  "heroChanges": [
+    {
+      "heroId": 94,
+      "heroName": "Popol and Kupa",
+      "type": "revamp",
+      "title": "Revamp — Ride Kupa",
+      "changes": [
+        "Popol can now ride Kupa to pursue enemies or retreat",
+        "Kupa scales with Popol's level and inherits his items",
+        "Popol can revive a fallen Kupa",
+        "Traps: stronger utility, more concurrent placements, better scaling/regen — less downtime when Kupa falls",
+        "Goal: fix lack of mobility and limited skill combo potential"
+      ],
+      "skillsAffected": [
+        "Passive: We Are Friends",
+        "Skill 1: Bite 'Em, Kupa!",
+        "Skill 2: Kupa, Help!",
+        "Ultimate: Popol's Surprise"
+      ],
+      "impact": "Roam / Gold Lane — more chase, more escape, stronger early traps",
+      "tierChange": "A -> A (watch)",
+      "isMeta": true
+    },
+    {
+      "heroId": 115,
+      "heroName": "Xavier",
+      "type": "buff",
+      "title": "Buff",
+      "changes": [
+        "Increased damage on Mystic Field and Dawning Light",
+        "Better scaling in late game"
+      ],
+      "skillsAffected": [
+        "Skill 1",
+        "Ultimate"
+      ],
+      "impact": "Mid Lane — stronger poke / burst",
+      "tierChange": "A -> S",
+      "isMeta": true
+    },
+    {
+      "heroId": 68,
+      "heroName": "Lunox",
+      "type": "buff",
+      "title": "Buff",
+      "changes": [
+        "Increased damage on Chaos / Order skills",
+        "Better sustain in lane"
+      ],
+      "skillsAffected": [
+        "Skill 1",
+        "Skill 2"
+      ],
+      "impact": "Mid Lane — back to S tier",
+      "tierChange": "A -> S",
+      "isMeta": true
+    },
+    {
+      "heroId": 22,
+      "heroName": "Freya",
+      "type": "buff",
+      "title": "Buff",
+      "changes": [
+        "Increased damage / durability in Valkyrie form",
+        "Better early trade"
+      ],
+      "skillsAffected": [
+        "Skill 2",
+        "Ultimate"
+      ],
+      "impact": "EXP Lane — stronger duelist",
+      "tierChange": "B -> A",
+      "isMeta": false
+    },
+    {
+      "heroId": 64,
+      "heroName": "Aldous",
+      "type": "buff",
+      "title": "Buff",
+      "changes": [
+        "Increased stack damage on Soul Steal",
+        "Better late-game scaling"
+      ],
+      "skillsAffected": [
+        "Passive",
+        "Skill 1"
+      ],
+      "impact": "EXP Lane — late-game threat returns",
+      "tierChange": "B -> A",
+      "isMeta": false
+    },
+    {
+      "heroId": 62,
+      "heroName": "Kaja",
+      "type": "buff",
+      "title": "Buff",
+      "changes": [
+        "Increased damage / CC duration on Divine Judgment",
+        "Better Roam engage"
+      ],
+      "skillsAffected": [
+        "Ultimate"
+      ],
+      "impact": "Roam — stronger pick",
+      "tierChange": "B -> A",
+      "isMeta": true
+    },
+    {
+      "heroId": 114,
+      "heroName": "Melissa",
+      "type": "buff",
+      "title": "Buff",
+      "changes": [
+        "Increased damage on Go, Muddles!",
+        "Better Gold Lane trade"
+      ],
+      "skillsAffected": [
+        "Skill 2",
+        "Skill 1"
+      ],
+      "impact": "Gold Lane — stronger vs tanks",
+      "tierChange": "B -> A",
+      "isMeta": false
+    },
+    {
+      "heroId": 104,
+      "heroName": "Gloo",
+      "type": "nerf",
+      "title": "Nerf",
+      "changes": [
+        "Reduced damage / durability in Go, Go, Gloo!",
+        "Reduced sticking power"
+      ],
+      "skillsAffected": [
+        "Skill 2",
+        "Ultimate"
+      ],
+      "impact": "Roam / EXP — toned down, still S in pro play",
+      "tierChange": "S -> A",
+      "isMeta": true
+    },
+    {
+      "heroId": 87,
+      "heroName": "Masha",
+      "type": "nerf",
+      "title": "Nerf",
+      "changes": [
+        "Reduced damage / HP scaling",
+        "Reduced split-push pressure"
+      ],
+      "skillsAffected": [
+        "Passive",
+        "Skill 1"
+      ],
+      "impact": "EXP Lane — less oppressive split",
+      "tierChange": "S -> A",
+      "isMeta": true
+    },
+    {
+      "heroId": 93,
+      "heroName": "Atlas",
+      "type": "nerf",
+      "title": "Nerf",
+      "changes": [
+        "Reduced CC / durability on Fatal Links",
+        "Longer cooldown on engage"
+      ],
+      "skillsAffected": [
+        "Ultimate"
+      ],
+      "impact": "Roam — less free engage",
+      "tierChange": "A -> B",
+      "isMeta": false
+    }
+  ],
+  "itemChanges": [
+    {
+      "itemId": 1002,
+      "itemName": "Demon Hunter Sword",
+      "type": "adjust",
+      "changes": [
+        "No direct stat change in 2.2.23 — indirect buff via Gloo/Masha nerfs (fewer tanky targets). Still core vs HP-heavy teams."
+      ]
+    },
+    {
+      "itemId": 3002,
+      "itemName": "Dominance Ice",
+      "type": "adjust",
+      "changes": [
+        "No direct change — still core vs marksmen after Popol buff."
+      ]
+    }
+  ],
+  "battlefieldChanges": [
+    "Roam gold: +5 per assist retained — Roam economy stays strong",
+    "Vision: trap / vision tuning for Popol revamp — traps more visible, more counterplay",
+    "Lord / Turtle: no major change in 2.2.23"
+  ],
+  "systemChanges": [
+    "Season 42 continues — Starward Decade",
+    "Advanced Server is testing Patch 2.2.32 separately — NOT included here. This file is Original Server only."
+  ],
+  "metaNotes": "Roam Meta in 2.2.23: Tank Roam (Tigreal, Khufra, Grock) remains S. Support Roam (Estes, Angela, Mathilda) rising. Gold Lane: Hanabi / Moskov / Claude / Popol (revamped) — DHS + Windtalker + Malefic Gun core. Mid: Xavier / Lunox / Valentina S tier.",
+  "roamGuideLink": "See roam_guide.json for updated routes for Tank vs Support Roam in 2.2.23.",
+  "source": "MLBB in-game Original Server notes 11 Nov 2026, mirrored by mlbbhub / MLBBSense / timesaver.gg. Only latest patch is kept — older patches are NOT in this file.",
+  "previousPatch": "2.2.16a (14 Oct 2026) — archived, not in this file"
+}

@@ -1,0 +1,36 @@
+[versions]
+# AGP 9.x requires Kotlin Gradle plugin >= 2.2.10 (AGP 9.2 itself depends on 2.3.x).
+# 2.1.0 was below that floor and broke configuration. The Compose compiler plugin
+# version MUST equal the Kotlin version.
+agp              = "9.2.1"
+kotlin           = "2.3.21"
+
+coreKtx          = "1.16.0"
+lifecycle        = "2.11.0"
+activityCompose  = "1.13.0"
+composeBom       = "2026.06.00"
+coil             = "3.0.4"
+savedstate       = "1.2.1"
+
+[libraries]
+androidx-core-ktx                  = { group = "androidx.core",       name = "core-ktx",                  version.ref = "coreKtx" }
+androidx-lifecycle-runtime-ktx     = { group = "androidx.lifecycle",  name = "lifecycle-runtime-ktx",     version.ref = "lifecycle" }
+androidx-lifecycle-runtime-compose = { group = "androidx.lifecycle",  name = "lifecycle-runtime-compose", version.ref = "lifecycle" }
+androidx-lifecycle-viewmodel       = { group = "androidx.lifecycle",  name = "lifecycle-viewmodel-ktx",   version.ref = "lifecycle" }
+androidx-activity-compose          = { group = "androidx.activity",   name = "activity-compose",          version.ref = "activityCompose" }
+androidx-savedstate                = { group = "androidx.savedstate", name = "savedstate",                version.ref = "savedstate" }
+
+compose-bom                        = { group = "androidx.compose",    name = "compose-bom",               version.ref = "composeBom" }
+compose-ui                         = { group = "androidx.compose.ui", name = "ui" }
+compose-ui-graphics                = { group = "androidx.compose.ui", name = "ui-graphics" }
+compose-ui-tooling-preview         = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
+compose-ui-tooling                 = { group = "androidx.compose.ui", name = "ui-tooling" }
+compose-foundation                 = { group = "androidx.compose.foundation", name = "foundation" }
+compose-material3                  = { group = "androidx.compose.material3",  name = "material3" }
+
+coil-compose                       = { group = "io.coil-kt.coil3",    name = "coil-compose",              version.ref = "coil" }
+
+[plugins]
+android-application = { id = "com.android.application",                version.ref = "agp" }
+# AGP 9 has built-in Kotlin, so org.jetbrains.kotlin.android is not applied.
+kotlin-compose      = { id = "org.jetbrains.kotlin.plugin.compose",     version.ref = "kotlin" }

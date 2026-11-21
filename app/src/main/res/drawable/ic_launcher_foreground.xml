@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    MLBB Draft Assistant — adaptive icon foreground
+    Design language: MOBA tactical HUD
+      • Pointy-top gold hexagon frame (r=26) — strategy / shield
+      • Inner ghost hexagon (r=19, 47% alpha gold) — depth layer
+      • Cyan targeting circle (r=13) — precision / draft focus
+      • Four crosshair ticks extending outward from circle — reticle
+      • Gold center diamond — selection lock-in
+      • Center white dot — cursor
+    All shapes live inside the 72×72 dp safe zone (18dp inset on 108dp canvas).
+    Glow layers use wide semi-transparent strokes behind solid lines for a
+    neon-HUD effect without requiring a hardware blur pass.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- ── Outer hexagon glow (gold, wide semi-transparent stroke) ─────────── -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#4DE8B84B"
+        android:strokeWidth="6"
+        android:strokeLineJoin="round"
+        android:pathData="M54,28 L76.52,41 L76.52,67 L54,80 L31.48,67 L31.48,41 Z" />
+
+    <!-- ── Outer hexagon — solid gold outline ────────────────────────────── -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#E8B84B"
+        android:strokeWidth="2"
+        android:strokeLineJoin="miter"
+        android:pathData="M54,28 L76.52,41 L76.52,67 L54,80 L31.48,67 L31.48,41 Z" />
+
+    <!-- Corner accent marks at each vertex (tiny gold square caps) -->
+    <path
+        android:fillColor="#E8B84B"
+        android:pathData="M52.5,26.5 L55.5,26.5 L55.5,29.5 L52.5,29.5 Z" />
+    <path
+        android:fillColor="#E8B84B"
+        android:pathData="M75.02,39.5 L78.02,39.5 L78.02,42.5 L75.02,42.5 Z" />
+    <path
+        android:fillColor="#E8B84B"
+        android:pathData="M75.02,65.5 L78.02,65.5 L78.02,68.5 L75.02,68.5 Z" />
+    <path
+        android:fillColor="#E8B84B"
+        android:pathData="M52.5,78.5 L55.5,78.5 L55.5,81.5 L52.5,81.5 Z" />
+    <path
+        android:fillColor="#E8B84B"
+        android:pathData="M29.98,65.5 L32.98,65.5 L32.98,68.5 L29.98,68.5 Z" />
+    <path
+        android:fillColor="#E8B84B"
+        android:pathData="M29.98,39.5 L32.98,39.5 L32.98,42.5 L29.98,42.5 Z" />
+
+    <!-- ── Inner ghost hexagon — depth layer ─────────────────────────────── -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#78E8B84B"
+        android:strokeWidth="0.8"
+        android:strokeLineJoin="miter"
+        android:pathData="M54,35 L70.45,44.5 L70.45,63.5 L54,73 L37.55,63.5 L37.55,44.5 Z" />
+
+    <!-- ── Targeting circle glow (cyan, wide semi-transparent) ───────────── -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#3300E5FF"
+        android:strokeWidth="5"
+        android:pathData="M54,41 A13,13 0 1,0 54,67 A13,13 0 1,0 54,41 Z" />
+
+    <!-- ── Targeting circle — solid cyan ─────────────────────────────────── -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#00E5FF"
+        android:strokeWidth="1.5"
+        android:pathData="M54,41 A13,13 0 1,0 54,67 A13,13 0 1,0 54,41 Z" />
+
+    <!-- ── Crosshair ticks (extend outward from circle edge, gap inside) ─── -->
+    <!-- Top -->
+    <path
+        android:strokeColor="#00E5FF"
+        android:strokeWidth="1.5"
+        android:strokeLineCap="square"
+        android:pathData="M54,37 L54,41" />
+    <!-- Right -->
+    <path
+        android:strokeColor="#00E5FF"
+        android:strokeWidth="1.5"
+        android:strokeLineCap="square"
+        android:pathData="M67,54 L71,54" />
+    <!-- Bottom -->
+    <path
+        android:strokeColor="#00E5FF"
+        android:strokeWidth="1.5"
+        android:strokeLineCap="square"
+        android:pathData="M54,67 L54,71" />
+    <!-- Left -->
+    <path
+        android:strokeColor="#00E5FF"
+        android:strokeWidth="1.5"
+        android:strokeLineCap="square"
+        android:pathData="M41,54 L37,54" />
+
+    <!-- ── Center diamond — gold fill ────────────────────────────────────── -->
+    <path
+        android:fillColor="#E8B84B"
+        android:pathData="M54,49.5 L58.5,54 L54,58.5 L49.5,54 Z" />
+
+    <!-- ── Center dot — white ─────────────────────────────────────────────── -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M54,52.5 A1.5,1.5 0 1,0 54,55.5 A1.5,1.5 0 1,0 54,52.5 Z" />
+
+</vector>
