@@ -310,8 +310,8 @@ fun HeroDetailScreen(
     val synergies = remember(hero.id) {
         hero.synergies.mapNotNull { GameData.heroesById[it] }
     }
-    val coreBuild = remember(hero.id) {
-        hero.coreBuild.filter { it.itemId != 0 }
+    val coreBuild = remember(hero.id, hero.coreItems) {
+        hero.coreItems.filter { buildItem -> buildItem.itemId != 0 }
     }
 
     Column(

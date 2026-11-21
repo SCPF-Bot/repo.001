@@ -131,3 +131,10 @@ The implementation decisions above are grounded in the official platform and lib
 - [Android overlay permission](https://developer.android.com/reference/android/Manifest.permission#SYSTEM_ALERT_WINDOW)
 - [Coil](https://coil-kt.github.io/coil/)
 - [Material 3 for Compose](https://developer.android.com/develop/ui/compose/designsystems/material3)
+
+## Follow-up release compilation fix
+
+- `HeroesScreen.kt`: corrected the hero detail core-build source from the nonexistent `Hero.coreBuild` property to the model's declared `Hero.coreItems` property.
+- Made the `remember` keys include `hero.coreItems`, so the filtered build list is recalculated when the hero's item build changes.
+- Used an explicit lambda parameter (`buildItem`) to make the item type clear and avoid a misleading unresolved-`it` cascade.
+- Release build attempted with `./gradlew :app:assembleRelease`; it could not start because the environment could not resolve `services.gradle.org` to download Gradle 9.6.1. Compilation is therefore not yet verified.
