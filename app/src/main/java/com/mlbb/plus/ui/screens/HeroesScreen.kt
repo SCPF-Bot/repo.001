@@ -385,7 +385,7 @@ fun HeroDetailScreen(
                         }
                     }
                 }
-                if (hero.spells.isNotEmpty()) {
+                if (hero.recommendedSpells.isNotEmpty()) {
                     Text("Spells", color = MLBBPlusColors.GithubText, fontWeight = FontWeight.Bold, fontSize = 14.sp)
                     Row(
                         modifier = Modifier
@@ -394,7 +394,7 @@ fun HeroDetailScreen(
                             .padding(vertical = 8.dp),
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        hero.spells.forEach { s ->
+                        hero.recommendedSpells.forEach { s ->
                             Box(
                                 modifier = Modifier
                                     .clip(RoundedCornerShape(12.dp))
@@ -477,20 +477,27 @@ fun HeroDetailScreen(
                         }
                     }
                 } else if (hero.bestPartners.isNotEmpty()) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .horizontalScroll(rememberScrollState()),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        hero.bestPartners.forEach { name ->
-                            Box(
-                                modifier = Modifier
-                                    .clip(RoundedCornerShape(12.dp))
-                                    .background(MLBBPlusColors.GithubCard)
-                                    .padding(horizontal = 10.dp, vertical = 6.dp)
-                            ) { Text(name, color = MLBBPlusColors.GithubText, fontSize = 12.sp) }
+                    val partnerNames = hero.bestPartners.mapNotNull { partnerId ->
+                        GameData.heroesById[partnerId]?.name
+                    }
+                    if (partnerNames.isNotEmpty()) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .horizontalScroll(rememberScrollState()),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            partnerNames.forEach { partnerName ->
+                                Box(
+                                    modifier = Modifier
+                                        .clip(RoundedCornerShape(12.dp))
+                                        .background(MLBBPlusColors.GithubCard)
+                                        .padding(horizontal = 10.dp, vertical = 6.dp)
+                                ) { Text(partnerName, color = MLBBPlusColors.GithubText, fontSize = 12.sp) }
+                            }
                         }
+                    } else {
+                        Text("No synergy data in heroes.json", color = MLBBPlusColors.GithubSecondary, fontSize = 13.sp)
                     }
                 } else {
                     Text("No synergy data in heroes.json", color = MLBBPlusColors.GithubSecondary, fontSize = 13.sp)
