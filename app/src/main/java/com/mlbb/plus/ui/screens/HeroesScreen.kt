@@ -349,7 +349,11 @@ fun HeroDetailScreen(hero: Hero, onBack: () -> Unit, onHeroClick: (Hero) -> Unit
                     unselectedContentColor = AppUiColors.Gold.copy(alpha = 0.8f),
                     text = {
                         Text(
-                            if (tab == DetailTab.SYNERGIES) "Partners" else tab.name.lowercase().replaceFirstChar { it.uppercase() },
+                            when (tab) {
+                                DetailTab.SYNERGIES -> "Partners"
+                                DetailTab.COUNTERS -> "Matchups"
+                                else -> "Overview"
+                            },
                             fontSize = 15.sp,
                             fontWeight = if (activeTab == tab) FontWeight.Bold else FontWeight.Normal
                         )
@@ -365,16 +369,25 @@ fun HeroDetailScreen(hero: Hero, onBack: () -> Unit, onHeroClick: (Hero) -> Unit
             when (activeTab) {
                 DetailTab.OVERVIEW -> HeroOverviewTab(hero, itemsById, related)
                 DetailTab.COUNTERS -> HeroRelationTab(
-                    "Heroes that BEAT ${hero.name}", hero.counteredBy,
-                    "${hero.name} BEATS", hero.counters,
+                    "TOUGHEST MATCHUPS FOR ${hero.name.uppercase()}", hero.counteredBy,
+                    "FAVORABLE MATCHUPS FOR ${hero.name.uppercase()}", hero.counters,
                     related, onHeroClick,
-                    currentHeroId = hero.id
+                    currentHeroId = hero.id,
+                    source = hero.matchupDataSource,
+                    updated = hero.matchupDataUpdated,
+                    window = hero.matchupDataWindow,
+                    rank = hero.matchupDataRank
                 )
                 DetailTab.SYNERGIES -> {
                     Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
-                        SubHeading("BEST PARTNERS")
-                        // FIX: filter self - JSON bug put Angela (55) in her own synergies [34,55].
-                        // Also fall back to bestPartners as IDs (Models.kt FIX [10]), not name-chips.
+                        SubHeading("BEST MEASURED ALLIES")
+                        if (hero.matchupDataSource.isNotBlank()) {
+                            Text(
+                                "${hero.matchupDataSource} • same-team ranked win-rate association • ${hero.matchupDataRank.ifBlank { "All ranks" }} • ${hero.matchupDataWindow.ifBlank { "recent sample" }} • updated ${hero.matchupDataUpdated.ifBlank { "date unavailable" }}. This is a statistical trend, not a guaranteed combo.",
+                                color = AppUiColors.GithubSecondary, fontSize = 12.sp, lineHeight = 17.sp
+                            )
+                        }
+                        // Resolve verified hero IDs to profiles; never show self as a partner.
                         val partners = hero.synergies.filter { it != hero.id }.mapNotNull { related[it] }
                         val fallbackPartners = hero.bestPartners.filter { it != hero.id }.mapNotNull { related[it] }
                         val toShow = if (partners.isNotEmpty()) partners else fallbackPartners
@@ -383,7 +396,7 @@ fun HeroDetailScreen(hero: Hero, onBack: () -> Unit, onHeroClick: (Hero) -> Unit
                                 items(toShow, key = { it.id }) { h -> HeroPortraitSmall(h, onHeroClick) }
                             }
                         } else {
-                            NoData("No synergy data for this hero yet")
+                            NoData("No sourced synergy data for this hero yet. We hide unverified recommendations rather than repeating generic picks.")
                         }
                     }
                 }
@@ -535,9 +548,24 @@ private fun HeroRelationTab(
     sectionA: String, idsA: List<Int>,
     sectionB: String, idsB: List<Int>,
     related: Map<Int, Hero>, onHeroClick: (Hero) -> Unit,
-    currentHeroId: Int = 0
+    currentHeroId: Int = 0,
+    source: String = "",
+    updated: String = "",
+    window: String = "",
+    rank: String = ""
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+        if (source.isNotBlank()) {
+            Text(
+                "$source • ${rank.ifBlank { "All ranks" }} ranked matchup data • ${window.ifBlank { "recent sample" }} • updated ${updated.ifBlank { "date unavailable" }}. These are win-rate trends, not guaranteed counters.",
+                color = AppUiColors.GithubSecondary, fontSize = 12.sp, lineHeight = 17.sp
+            )
+        } else {
+            Text(
+                "Sourced matchup data is not available for this hero yet. Unverified or repeated placeholder picks are hidden.",
+                color = AppUiColors.GithubSecondary, fontSize = 12.sp, lineHeight = 17.sp
+            )
+        }
         SubHeading(sectionA)
         // FIX: filter self - e.g. Hanabi counters [60,65] contained Hanabi (60) itself.
         val listA = idsA.filter { it != currentHeroId }.mapNotNull { related[it] }
@@ -546,7 +574,7 @@ private fun HeroRelationTab(
                 items(listA, key = { it.id }) { h -> HeroPortraitSmall(h, onHeroClick) }
             }
         } else {
-            NoData("No counter data for this hero yet")
+            NoData("No sourced matchup data available yet")
         }
         Box(Modifier.fillMaxWidth().height(1.dp).background(AppUiColors.GithubBorder))
         SubHeading(sectionB)
@@ -556,7 +584,7 @@ private fun HeroRelationTab(
                 items(listB, key = { it.id }) { h -> HeroPortraitSmall(h, onHeroClick) }
             }
         } else {
-            NoData("No counter data for this hero yet")
+            NoData("No sourced matchup data available yet")
         }
     }
 }

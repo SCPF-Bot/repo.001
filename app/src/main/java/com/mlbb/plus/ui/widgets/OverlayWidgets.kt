@@ -492,8 +492,8 @@ fun RoamGuideWidget(role: String = "Roam", roleType: String = "Tank", onBack: ()
     // 0 = default: short description (2 lines)
     // 1 = expand: full description (6 lines) + details
     // 2 = full collapsed: even short description hidden, only header left
-    // Loop: 0 -> 1 -> 2 -> 0. Key avoids restoring old Boolean (would crash).
-    var displayMode by rememberSaveable(key = "displayModeV14") { mutableIntStateOf(0) } // V10: default = short guide text visible
+    // Loop: 0 -> 1 -> 2 -> 0. Positional saveable state keeps this local to the widget.
+    var displayMode by rememberSaveable { mutableIntStateOf(0) } // V10: default = short guide text visible
     var helpExpanded by rememberSaveable { mutableStateOf(false) }
     // V8 FIX (4): Hide instructions DELETED. It hid the description with no way
     // back (button lived inside expanded section, so once hidden you couldn't
@@ -573,16 +573,16 @@ fun RoamGuideWidget(role: String = "Roam", roleType: String = "Tank", onBack: ()
     // ("Second Turtle", "First Lord"), so prefer them when the step is about the objective that is up;
     // otherwise fall back to the role-level template. objective_trade was never shown before.
     val stepAboutObjective = currentStep != null && currentStep.phase.contains(objective.label, ignoreCase = true)
-    val contestText = (if (stepAboutObjective) currentStep?.objectiveContest else null).takeUnless { it.isNullOrBlank() }
+    val contestText = (if (stepAboutObjective) currentStep.objectiveContest else null).takeUnless { it.isNullOrBlank() }
         ?: if (isTurtle) selectedPlan?.turtleContest.orEmpty() else selectedPlan?.lordContest.orEmpty()
-    val tradeText = (if (stepAboutObjective) currentStep?.objectiveTrade else null).takeUnless { it.isNullOrBlank() }
+    val tradeText = (if (stepAboutObjective) currentStep.objectiveTrade else null).takeUnless { it.isNullOrBlank() }
         ?: if (isTurtle) selectedPlan?.turtleTrade.orEmpty() else selectedPlan?.lordTrade.orEmpty()
     val objectiveDescription = if (!hasGuide) "No guide data for $activeRole (${guideAssetFor(activeRole)} missing or invalid). Timer, objective and spells still work." else when {
         objective.isAlive -> contestText
         // FIX V7: slain label = LAST slain, not NEXT. At 7:26 you killed Turtle,
         // next is Lord — old said "Lord slain".
         lastSlainAt != null -> "${if (lastSlainWasLord) "Lord" else "Turtle"} slain. Next: ${objective.label}. Push, farm, or reset." // V9: countdown lives in the pill; no per-second text churn
-        else -> currentStep?.description.orEmpty()
+        else -> currentStep.description
     }
     // V13: hidden mode (≡) peeks the guide's one-line `compact` text instead of the full instruction.
     val peekText = if (objective.isAlive || lastSlainAt != null) objectiveDescription
@@ -605,7 +605,7 @@ fun RoamGuideWidget(role: String = "Roam", roleType: String = "Tank", onBack: ()
     val widthFraction = (baseFraction + adaptiveExtra).coerceAtMost(maxFraction)
     val widgetWidth = (screenWidthDp * widthFraction)
         .coerceAtLeast(WIDGET_MIN_WIDTH_DP)
-        .coerceAtMost((screenWidthDp - 8).toFloat())
+        .coerceAtMost(screenWidthDp - 8)
     // V7 FIX: Step progress for timer background. Fixed value, no fillMaxHeight.
     val stepProgress = if (currentStep != null) {
         val span = (currentStep.endSeconds - currentStep.startSeconds).coerceAtLeast(1)
@@ -1056,7 +1056,7 @@ private fun EnemySpellTrackerWidget(
                     else (spell.cooldownSeconds - elapsedSinceUse).coerceAtLeast(0)
                 val isCoolingDown = elapsedSinceUse != null && remaining > 0
                 val progress = if (isCoolingDown) {
-                    (elapsedSinceUse!!.toFloat() / spell.cooldownSeconds).coerceIn(0f, 1f)
+                    (elapsedSinceUse.toFloat() / spell.cooldownSeconds).coerceIn(0f, 1f)
                 } else {
                     0f
                 }

@@ -141,6 +141,11 @@ data class Hero(
     //   Old code parsed [34,55] via toStringList() -> ["34","55"], so Overview showed "34, 55".
     //   Now List<Int> like synergies/counters/counteredBy. UI resolves IDs -> names via heroesById.
     val bestPartners: List<Int> = emptyList(),
+    // Provenance for the current matchup snapshot. Empty means no verified matchup data is shown.
+    val matchupDataSource: String = "",
+    val matchupDataUpdated: String = "",
+    val matchupDataWindow: String = "",
+    val matchupDataRank: String = "",
     val lore: String = "",
     val stats: HeroStats = HeroStats(),
     val tags: List<String> = emptyList(),
@@ -359,6 +364,10 @@ object JsonLoader {
                             countersReason = o.optStr("countersReason"),
                             // FIX [10]: parse as IDs, not names. Legacy name-strings are dropped (synergies covers fallback).
                             bestPartners = if (o.has("bestPartners")) o.getJSONArray("bestPartners").toIntList() else emptyList(),
+                            matchupDataSource = o.optStr("matchupDataSource"),
+                            matchupDataUpdated = o.optStr("matchupDataUpdated"),
+                            matchupDataWindow = o.optStr("matchupDataWindow"),
+                            matchupDataRank = o.optStr("matchupDataRank"),
                             lore = o.optStr("lore"),
                             stats = HeroStats(
                                 hp = statsObj.optInt("hp", 2500), hpGrowth = statsObj.optInt("hpGrowth", 150),
