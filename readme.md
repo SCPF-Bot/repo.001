@@ -25,3 +25,4 @@ python3 scripts/validate_assets.py
 - [`docs/structure.md`](docs/structure.md) — project structure, runtime flows, architecture, and change-impact map.
 - [`docs/links.md`](docs/links.md) — official Android/Kotlin/library docs, UX references, and game-data provenance.
 - [`docs/refactoring-report.md`](docs/refactoring-report.md) — exhaustive Kotlin review, implemented changes, file-by-file recommendations, and validation notes.
+\n\n### Item portraits\n\n`items.json` now contains all 107 items and portrait URLs from the supplied portrait list. The original 41 bundled WebP portraits are retained. New portrait assets are stored as `items/{id}.png`; run `python3 scripts/download_item_portraits.py` (or the release workflow does this automatically) to download them before building. If a portrait source is temporarily unavailable, the UI uses its initials fallback.\n

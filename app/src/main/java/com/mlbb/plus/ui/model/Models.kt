@@ -199,6 +199,7 @@ data class Item(
     val recommendedFor: List<String> = emptyList(),
     val tags: List<String> = emptyList(),
     val image: String = "",
+    val portrait: String = "",
     /** active items appear in the catalog; removed entries remain available for legacy builds. */
     val status: String = "active"
 )
@@ -425,7 +426,7 @@ object JsonLoader {
                             worksAgainstHeroes = if (o.has("worksAgainstHeroes")) o.getJSONArray("worksAgainstHeroes").toIntList() else emptyList(),
                             recommendedFor = if (o.has("recommendedFor")) o.getJSONArray("recommendedFor").toStringList() else emptyList(),
                             tags = if (o.has("tags")) o.getJSONArray("tags").toStringList() else emptyList(),
-                            image = o.optStr("image"),
+                            image = o.optStr("image"), portrait = o.optStr("portrait"),
                             status = o.optStrNonBlank("status", "active").lowercase()
                         )
                     )

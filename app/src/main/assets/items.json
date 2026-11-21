@@ -4,15 +4,26 @@
   "patchDate": "2026-11-11",
   "patchName": "Patch 2.2.23 — Popol and Kupa Revamp (Original Server)",
   "season": "Season 42 — Starward Decade",
-  "source": "MLBB Plus local data, updated to Patch 2.2.23 (Nov 11, 2026 Original Server). Item stats cross-checked vs MLBB in-game patch notes via Kazuki Official / mlbb.tools / timesaver.gg mirror, and MLBBGuides item DB (Nov 1, 2026) + MLBB Draft / Fandom. Item IDs are stable MLBB Plus IDs (1000 Attack, 2000 Magic, 3000 Defense, 4000 Roam, 5000 Movement, 6000 Jungle/Magic) because Moonton does not publish a public official numeric item ID like hero IDs. Use this ID as primary key.",
-  "totalItems": 41,
-  "totalActiveItems": 40,
+  "source": "MLBB Plus local data, updated to Patch 2.2.23 (Nov 11, 2026 Original Server). Item stats cross-checked vs MLBB in-game patch notes via Kazuki Official / mlbb.tools / timesaver.gg mirror, and MLBBGuides item DB (Nov 1, 2026) + MLBB Draft / Fandom. Item IDs are stable MLBB Plus IDs (1000 Attack, 2000 Magic, 3000 Defense, 4000 Roam, 5000 Movement, 6000 Jungle/Magic) because Moonton does not publish a public official numeric item ID like hero IDs. Use this ID as primary key. + Small / Tier 1-2 components, potions, blessings and missing Tier 3 items added Nov 21, 2026 from MLBB Fandom Equipment list + METAMMO MLBB Items List (Oct 30, 2026) + MLBBGuides item DB (Nov 1, 2026). Portrait URLs are Fandom static.wikia.nocookie.net URLs, verified via MD5 filename pattern (e.g. Great Dragon Spear d/d4, Conceal e/e0).",
+  "totalItems": 107,
+  "totalActiveItems": 102,
   "patchChanges": [
     "Chastise Pauldron (3009) NERFED: Chastise 75% -> 80% (attackers keep more Attack Speed)",
     "Antique Cuirass (3003) BUFFED: Deter 6% -> 8% per stack",
     "Twilight Armor (3007) REMOVED — replaced by Chastise Pauldron",
-    "All other items: stats, prices, passives and descriptions corrected to Nov 2026 values (many were pre-2024 values in 2.2.23 file, e.g. Demon Hunter Sword, Endless Battle, Blade Armor, Guardian Helmet, Winter Crown, Starlium Scythe)"
+    "All other items: stats, prices, passives and descriptions corrected to Nov 2026 values (many were pre-2024 values in 2.2.23 file, e.g. Demon Hunter Sword, Endless Battle, Blade Armor, Guardian Helmet, Winter Crown, Starlium Scythe)",
+    "ADDED 2026-11-21: 66 items — 12 Attack Tier 1/2, 10 Magic Tier 1/2, 11 Defense Tier 1/2, Boots, Expert Gloves, 17 missing Tier 3 (Great Dragon Spear, Rose Gold Meteor, Wishing Lantern, Ice Queen Wand, Concentrated Energy, Clock of Destiny, Enchanted Talisman, Feather of Heaven, Divine Glaive, Queen's Wings, Thunder Belt, Cursed Helmet, Oracle, Brute Force Breastplate, Valkyrie's Shield, Arcane Boots, Demon Shoes), 3 potions, 8 Roam/Jungle blessings + Roam Boots, 3 legacy/alias entries.",
+    "Small items: Dagger (1101), Knife, Javelin, Vampire Mallet, Iron Hunting Bow, Legion Sword, Regular Spear, Ogre Tomahawk, Fury Hammer, Rogue Meteor, Swift Crossbow, Magic Blade, Mystery Codex, Power Crystal, Magic Necklace, Book of Sages, Magic Wand, Exotic Veil, Mystic Container, Tome of Evil, Elegant Gem, Azure Blade, Vitality Crystal, Leather Jerkin, Magic Resist Cloak, Healing Necklace, Hero's Ring, Steel Legplates, Ares Belt, Molten Essence (3108), Dreadnaught Armor, Black Ice Shield, Silence Robe, Boots, Expert Gloves.",
+    "Broadsword: No item literally named Broadsword exists in MLBB. Legion Sword (1106) is the Tier 2 Physical Attack component players mean by 'broadsword'. No fake Broadsword entry was created.",
+    "Portraits: Added 'portrait' + 'fandomFile' to every item. See items_portraits.md for the flat code-block list.",
+    "Original 41 items kept unchanged (IDs, stats, buildPaths) so heroes.json references still work. New items use IDs 1017-1018, 2007-2013, 3010-3015, 4105-4112, 5006-5007, 5101, 6101, 9101-9103, 1101-1112, 2101-2110, 3101-3111, 9901-9903."
   ],
+  "notes": {
+    "broadsword": "No MLBB shop item is named Broadsword. Use Legion Sword (1106) / Dagger (1101).",
+    "portraitPattern": "https://static.wikia.nocookie.net/mobile-legends/images/{md5[0]}/{md5[0:2]}/{FandomFilename} — MD5 of Fandom filename.",
+    "blessings": "Conceal / Dire Hit / Encourage / Favor / Flame / Ice / Bloody Retribution cost 0 gold — unlocked via Thriving / Retribution, not bought.",
+    "legacy": "Blade of Despair Fragment, Pirate's Dagger, Mana Necklace, Roam Boots are legacy/alias entries kept for buildPath compatibility."
+  },
   "schema": {
     "id": "Stable MLBB Plus item ID. Heroes.json coreItems and coreBuild reference this ID.",
     "name": "Official in-game item name",
@@ -26,7 +37,9 @@
     "synergiesHeroes/worksAgainstHeroes": "Hero IDs from heroes.json",
     "image": "Relative path in assets/ — assets/items/{id}.webp",
     "patchVersion": "Patch version this entry reflects",
-    "status": "active / removed (legacy)"
+    "status": "active / removed (legacy)",
+    "portrait": "Fandom portrait URL — static.wikia.nocookie.net/mobile-legends/images/...",
+    "fandomFile": "Fandom filename used to build portrait URL"
   },
   "items": [
     {
@@ -91,7 +104,9 @@
         "burst"
       ],
       "patchVersion": "2.2.23",
-      "status": "active"
+      "status": "active",
+      "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/d/d5/Blade_of_Despair.png",
+      "fandomFile": "Blade_of_Despair.png"
     },
     {
       "id": 1002,
@@ -156,7 +171,9 @@
         "anti-tank"
       ],
       "patchVersion": "2.2.23",
-      "status": "active"
+      "status": "active",
+      "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/1/1a/Demon_Hunter_Sword.png",
+      "fandomFile": "Demon_Hunter_Sword.png"
     },
     {
       "id": 1003,
@@ -219,7 +236,9 @@
         "crit"
       ],
       "patchVersion": "2.2.23",
-      "status": "active"
+      "status": "active",
+      "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/6/6c/Berserker%27s_Fury.png",
+      "fandomFile": "Berserker%27s_Fury.png"
     },
     {
       "id": 1004,
@@ -284,7 +303,9 @@
         "anti-tank"
       ],
       "patchVersion": "2.2.23",
-      "status": "active"
+      "status": "active",
+      "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/1/12/Malefic_Roar.png",
+      "fandomFile": "Malefic_Roar.png"
     },
     {
       "id": 1005,
@@ -354,7 +375,9 @@
         "active"
       ],
       "patchVersion": "2.2.23",
-      "status": "active"
+      "status": "active",
+      "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/e/e3/Wind_of_Nature.png",
+      "fandomFile": "Wind_of_Nature.png"
     },
     {
       "id": 1006,
@@ -423,7 +446,10 @@
         "poke"
       ],
       "patchVersion": "2.2.23",
-      "status": "active"
+      "status": "active",
+      "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/e/ed/Blade_of_the_Heptaseas.png",
+      "fandomFile": "Blade_of_the_Heptaseas.png",
+      "alias": "Blade of the Heptaseas (Fandom / in-game canonical)"
     },
     {
       "id": 1007,
@@ -491,7 +517,9 @@
         "chase"
       ],
       "patchVersion": "2.2.23",
-      "status": "active"
+      "status": "active",
+      "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/b/b9/Hunter_Strike.png",
+      "fandomFile": "Hunter_Strike.png"
     },
     {
       "id": 1008,
@@ -570,7 +598,9 @@
         "sustain"
       ],
       "patchVersion": "2.2.23",
-      "status": "active"
+      "status": "active",
+      "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/2/2b/Endless_Battle.png",
+      "fandomFile": "Endless_Battle.png"
     },
     {
       "id": 1009,
@@ -638,7 +668,9 @@
         "wave-clear"
       ],
       "patchVersion": "2.2.23",
-      "status": "active"
+      "status": "active",
+      "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/4/45/Windtalker.png",
+      "fandomFile": "Windtalker.png"
     },
     {
       "id": 1010,
@@ -704,7 +736,9 @@
         "penetration"
       ],
       "patchVersion": "2.2.23",
-      "status": "active"
+      "status": "active",
+      "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/7/72/Malefic_Gun.png",
+      "fandomFile": "Malefic_Gun.png"
     },
     {
       "id": 1011,
@@ -773,7 +807,9 @@
         "kiting"
       ],
       "patchVersion": "2.2.23",
-      "status": "active"
+      "status": "active",
+      "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/f/f3/Corrosion_Scythe.png",
+      "fandomFile": "Corrosion_Scythe.png"
     },
     {
       "id": 1012,
@@ -835,7 +871,9 @@
         "attack-effects"
       ],
       "patchVersion": "2.2.23",
-      "status": "active"
+      "status": "active",
+      "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/8/80/Golden_Staff.png",
+      "fandomFile": "Golden_Staff.png"
     },
     {
       "id": 1013,
@@ -907,7 +945,10 @@
         "crit"
       ],
       "patchVersion": "2.2.23",
-      "status": "active"
+      "status": "active",
+      "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/f/fd/Haas%27_Claws.png",
+      "fandomFile": "Haas%27_Claws.png",
+      "alias": "Haas' Claws (Fandom)"
     },
     {
       "id": 1014,
@@ -981,7 +1022,9 @@
         "true-damage"
       ],
       "patchVersion": "2.2.23",
-      "status": "active"
+      "status": "active",
+      "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/7/70/War_Axe.png",
+      "fandomFile": "War_Axe.png"
     },
     {
       "id": 1015,
@@ -1045,7 +1088,9 @@
         "anti-heal"
       ],
       "patchVersion": "2.2.23",
-      "status": "active"
+      "status": "active",
+      "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/8/83/Sea_Halberd.png",
+      "fandomFile": "Sea_Halberd.png"
     },
     {
       "id": 1016,
@@ -1107,7 +1152,9 @@
         "execute"
       ],
       "patchVersion": "2.2.23",
-      "status": "active"
+      "status": "active",
+      "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/4/4f/Sky_Piercer.png",
+      "fandomFile": "Sky_Piercer.png"
     },
     {
       "id": 2001,
@@ -1173,7 +1220,9 @@
         "burst"
       ],
       "patchVersion": "2.2.23",
-      "status": "active"
+      "status": "active",
+      "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/e/ee/Lightning_Truncheon.png",
+      "fandomFile": "Lightning_Truncheon.png"
     },
     {
       "id": 2002,
@@ -1231,7 +1280,9 @@
         "burst"
       ],
       "patchVersion": "2.2.23",
-      "status": "active"
+      "status": "active",
+      "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/6/64/Holy_Crystal.png",
+      "fandomFile": "Holy_Crystal.png"
     },
     {
       "id": 2003,
@@ -1297,7 +1348,9 @@
         "penetration"
       ],
       "patchVersion": "2.2.23",
-      "status": "active"
+      "status": "active",
+      "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/2/20/Genius_Wand.png",
+      "fandomFile": "Genius_Wand.png"
     },
     {
       "id": 2004,
@@ -1365,7 +1418,9 @@
         "anti-heal"
       ],
       "patchVersion": "2.2.23",
-      "status": "active"
+      "status": "active",
+      "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/7/7a/Glowing_Wand.png",
+      "fandomFile": "Glowing_Wand.png"
     },
     {
       "id": 2005,
@@ -1422,7 +1477,9 @@
         "survivability"
       ],
       "patchVersion": "2.2.23",
-      "status": "active"
+      "status": "active",
+      "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/4/44/Blood_Wings.png",
+      "fandomFile": "Blood_Wings.png"
     },
     {
       "id": 2006,
@@ -1490,7 +1547,9 @@
         "active"
       ],
       "patchVersion": "2.2.23",
-      "status": "active"
+      "status": "active",
+      "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/9/9d/Winter_Crown.png",
+      "fandomFile": "Winter_Crown.png"
     },
     {
       "id": 3001,
@@ -1556,7 +1615,9 @@
         "reflect"
       ],
       "patchVersion": "2.2.23",
-      "status": "active"
+      "status": "active",
+      "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/d/d9/Blade_Armor.png",
+      "fandomFile": "Blade_Armor.png"
     },
     {
       "id": 3002,
@@ -1628,7 +1689,9 @@
         "anti-heal"
       ],
       "patchVersion": "2.2.23",
-      "status": "active"
+      "status": "active",
+      "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/e/e3/Dominance_Ice.png",
+      "fandomFile": "Dominance_Ice.png"
     },
     {
       "id": 3003,
@@ -1699,7 +1762,9 @@
       ],
       "patchVersion": "2.2.23",
       "status": "active",
-      "patchChange": "BUFFED: Deter 6% -> 8% per stack"
+      "patchChange": "BUFFED: Deter 6% -> 8% per stack",
+      "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/4/40/Antique_Cuirass.png",
+      "fandomFile": "Antique_Cuirass.png"
     },
     {
       "id": 3004,
@@ -1770,7 +1835,10 @@
         "burst"
       ],
       "patchVersion": "2.2.23",
-      "status": "active"
+      "status": "active",
+      "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/1/15/Athena%27s_Shield.png",
+      "fandomFile": "Athena%27s_Shield.png",
+      "alias": "Valkyrie's Shield (renamed version, see id 3015)"
     },
     {
       "id": 3005,
@@ -1840,7 +1908,9 @@
         "poke"
       ],
       "patchVersion": "2.2.23",
-      "status": "active"
+      "status": "active",
+      "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/d/d8/Radiant_Armor.png",
+      "fandomFile": "Radiant_Armor.png"
     },
     {
       "id": 3006,
@@ -1905,7 +1975,9 @@
         "revive"
       ],
       "patchVersion": "2.2.23",
-      "status": "active"
+      "status": "active",
+      "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/8/84/Immortality.png",
+      "fandomFile": "Immortality.png"
     },
     {
       "id": 3007,
@@ -1953,7 +2025,9 @@
       ],
       "patchVersion": "2.2.23",
       "status": "removed",
-      "replacedBy": 3009
+      "replacedBy": 3009,
+      "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/9/9f/Twilight_Armor.png",
+      "fandomFile": "Twilight_Armor.png"
     },
     {
       "id": 3008,
@@ -2016,7 +2090,9 @@
         "sustain"
       ],
       "patchVersion": "2.2.23",
-      "status": "active"
+      "status": "active",
+      "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/a/a3/Guardian_Helmet.png",
+      "fandomFile": "Guardian_Helmet.png"
     },
     {
       "id": 3009,
@@ -2084,7 +2160,9 @@
       ],
       "patchVersion": "2.2.23",
       "status": "active",
-      "patchChange": "NERFED: Chastise 75% -> 80% (attackers keep more Attack Speed)"
+      "patchChange": "NERFED: Chastise 75% -> 80% (attackers keep more Attack Speed)",
+      "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/2/2f/Chastise_Pauldron.png",
+      "fandomFile": "Chastise_Pauldron.png"
     },
     {
       "id": 4001,
@@ -2146,7 +2224,9 @@
         "ultimate"
       ],
       "patchVersion": "2.2.23",
-      "status": "active"
+      "status": "active",
+      "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/7/71/Fleeting_Time.png",
+      "fandomFile": "Fleeting_Time.png"
     },
     {
       "id": 4002,
@@ -2217,7 +2297,9 @@
         "shield"
       ],
       "patchVersion": "2.2.23",
-      "status": "active"
+      "status": "active",
+      "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/c/c5/Flask_of_the_Oasis.png",
+      "fandomFile": "Flask_of_the_Oasis.png"
     },
     {
       "id": 4003,
@@ -2278,7 +2360,9 @@
         "team-buff"
       ],
       "patchVersion": "2.2.23",
-      "status": "active"
+      "status": "active",
+      "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/2/20/Courage_Mask.png",
+      "fandomFile": "Courage_Mask.png"
     },
     {
       "id": 4004,
@@ -2338,7 +2422,9 @@
         "heal"
       ],
       "patchVersion": "2.2.23",
-      "status": "active"
+      "status": "active",
+      "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/0/00/Favor.png",
+      "fandomFile": "Favor.png"
     },
     {
       "id": 5001,
@@ -2389,7 +2475,9 @@
         "attack-speed"
       ],
       "patchVersion": "2.2.23",
-      "status": "active"
+      "status": "active",
+      "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/0/07/Swift_Boots.png",
+      "fandomFile": "Swift_Boots.png"
     },
     {
       "id": 5002,
@@ -2450,7 +2538,9 @@
         "physical-defense"
       ],
       "patchVersion": "2.2.23",
-      "status": "active"
+      "status": "active",
+      "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/4/4b/Warrior_Boots.png",
+      "fandomFile": "Warrior_Boots.png"
     },
     {
       "id": 5003,
@@ -2515,7 +2605,9 @@
         "anti-cc"
       ],
       "patchVersion": "2.2.23",
-      "status": "active"
+      "status": "active",
+      "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/8/89/Tough_Boots.png",
+      "fandomFile": "Tough_Boots.png"
     },
     {
       "id": 5004,
@@ -2566,7 +2658,9 @@
         "cdr"
       ],
       "patchVersion": "2.2.23",
-      "status": "active"
+      "status": "active",
+      "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/5/5a/Magic_Shoes.png",
+      "fandomFile": "Magic_Shoes.png"
     },
     {
       "id": 5005,
@@ -2626,7 +2720,9 @@
         "rotation"
       ],
       "patchVersion": "2.2.23",
-      "status": "active"
+      "status": "active",
+      "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/a/a4/Rapid_Boots.png",
+      "fandomFile": "Rapid_Boots.png"
     },
     {
       "id": 6001,
@@ -2700,7 +2796,3092 @@
         "jungle"
       ],
       "patchVersion": "2.2.23",
+      "status": "active",
+      "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/2/26/Starlium_Scythe.png",
+      "fandomFile": "Starlium_Scythe.png"
+    },
+    {
+      "id": 1017,
+      "name": "Great Dragon Spear",
+      "slug": "great-dragon-spear",
+      "category": "Attack",
+      "tier": "S",
+      "price": 2140,
+      "sellPrice": 1284,
+      "stats": [
+        "+70 Physical Attack",
+        "+10% Cooldown Reduction",
+        "+20% Crit Chance"
+      ],
+      "statsDetailed": [
+        {
+          "stat": "Physical Attack",
+          "value": 70
+        },
+        {
+          "stat": "Cooldown Reduction",
+          "value": "10%"
+        },
+        {
+          "stat": "Crit Chance",
+          "value": "20%"
+        }
+      ],
+      "passive": {
+        "name": "Supreme Warrior",
+        "description": "After casting an Ultimate, increase Movement Speed by 30% for 7.5 seconds. This effect has a 15 seconds cooldown."
+      },
+      "active": null,
+      "description": "CDR + Crit + Attack item for ult-reliant assassins and fighters. Core when you want to chase after ult.",
+      "lore": "",
+      "buildPath": [
+        "Legion Sword",
+        "Iron Hunting Bow",
+        "Javelin"
+      ],
+      "buildsInto": [],
+      "image": "items/1017.png",
+      "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/d/d4/Great_Dragon_Spear.png",
+      "fandomFile": "Great_Dragon_Spear.png",
+      "counters": [],
+      "counteredBy": [],
+      "synergiesHeroes": [],
+      "worksAgainstHeroes": [],
+      "recommendedFor": [
+        "Assassin",
+        "Fighter"
+      ],
+      "tags": [
+        "attack",
+        "crit",
+        "cdr"
+      ],
+      "patchVersion": "2.2.23",
       "status": "active"
+    },
+    {
+      "id": 1018,
+      "name": "Rose Gold Meteor",
+      "slug": "rose-gold-meteor",
+      "category": "Attack",
+      "tier": "A",
+      "price": 2030,
+      "sellPrice": 1218,
+      "stats": [
+        "+30 Physical Attack",
+        "+20% Attack Speed",
+        "+10% Lifesteal"
+      ],
+      "statsDetailed": [
+        {
+          "stat": "Physical Attack",
+          "value": 30
+        },
+        {
+          "stat": "Attack Speed",
+          "value": "20%"
+        },
+        {
+          "stat": "Lifesteal",
+          "value": "10%"
+        }
+      ],
+      "passive": {
+        "name": "Dragon Scale / Lifeline",
+        "description": "Dragon Scale: Every 4 extra Physical Attack increases Hybrid Defense by 1, up to 50 (halved if Main Role is not Fighter). Lifeline: When taking damage that reduces HP below 30%, gains a (120*Hero Level) shield and 50% Movement Speed that rapidly decays over 3 seconds. 60 seconds cooldown."
+      },
+      "active": null,
+      "description": "Attack + lifesteal + low-HP shield item. Fighter sustain pick.",
+      "lore": "",
+      "buildPath": [
+        "Magic Blade",
+        "Knife"
+      ],
+      "buildsInto": [],
+      "image": "items/1018.png",
+      "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/2/2b/Rose_Gold_Meteor.png",
+      "fandomFile": "Rose_Gold_Meteor.png",
+      "counters": [],
+      "counteredBy": [],
+      "synergiesHeroes": [],
+      "worksAgainstHeroes": [],
+      "recommendedFor": [
+        "Fighter",
+        "Marksman"
+      ],
+      "tags": [
+        "attack",
+        "lifesteal",
+        "shield"
+      ],
+      "patchVersion": "2.2.23",
+      "status": "active"
+    },
+    {
+      "id": 1101,
+      "name": "Dagger",
+      "slug": "dagger",
+      "category": "Attack",
+      "tier": "Tier 1",
+      "price": 250,
+      "sellPrice": 150,
+      "stats": [
+        "+15 Physical Attack"
+      ],
+      "statsDetailed": [
+        {
+          "stat": "Physical Attack",
+          "value": 15
+        }
+      ],
+      "passive": null,
+      "active": null,
+      "description": "Basic Attack component. The base unit for Physical Attack value in the shop. Builds into almost every Attack item.",
+      "lore": "The simplest blade.",
+      "buildPath": [
+        "Dagger"
+      ],
+      "buildsInto": [],
+      "image": "items/1101.png",
+      "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/4/45/Dagger.png",
+      "fandomFile": "Dagger.png",
+      "counters": [],
+      "counteredBy": [],
+      "synergiesHeroes": [],
+      "worksAgainstHeroes": [],
+      "recommendedFor": [],
+      "tags": [
+        "attack",
+        "component"
+      ],
+      "patchVersion": "2.2.23",
+      "status": "active"
+    },
+    {
+      "id": 1102,
+      "name": "Knife",
+      "slug": "knife",
+      "category": "Attack",
+      "tier": "Tier 1",
+      "price": 280,
+      "sellPrice": 168,
+      "stats": [
+        "+10% Attack Speed"
+      ],
+      "statsDetailed": [
+        {
+          "stat": "Attack Speed",
+          "value": "10%"
+        }
+      ],
+      "passive": null,
+      "active": null,
+      "description": "Basic Attack Speed component. Builds into Regular Spear, Rogue Meteor, Swift Crossbow and more.",
+      "lore": "",
+      "buildPath": [],
+      "buildsInto": [],
+      "image": "items/1102.png",
+      "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/5/58/Knife.png",
+      "fandomFile": "Knife.png",
+      "counters": [],
+      "counteredBy": [],
+      "synergiesHeroes": [],
+      "worksAgainstHeroes": [],
+      "recommendedFor": [],
+      "tags": [
+        "attack",
+        "component"
+      ],
+      "patchVersion": "2.2.23",
+      "status": "active"
+    },
+    {
+      "id": 1103,
+      "name": "Javelin",
+      "slug": "javelin",
+      "category": "Attack",
+      "tier": "Tier 1",
+      "price": 320,
+      "sellPrice": 192,
+      "stats": [
+        "+8% Crit Chance"
+      ],
+      "statsDetailed": [
+        {
+          "stat": "Crit Chance",
+          "value": "8%"
+        }
+      ],
+      "passive": null,
+      "active": null,
+      "description": "Basic Crit component. Builds into Rogue Meteor and crit items.",
+      "lore": "",
+      "buildPath": [],
+      "buildsInto": [],
+      "image": "items/1103.png",
+      "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/1/1d/Javelin.png",
+      "fandomFile": "Javelin.png",
+      "counters": [],
+      "counteredBy": [],
+      "synergiesHeroes": [],
+      "worksAgainstHeroes": [],
+      "recommendedFor": [],
+      "tags": [
+        "attack",
+        "component"
+      ],
+      "patchVersion": "2.2.23",
+      "status": "active"
+    },
+    {
+      "id": 1104,
+      "name": "Vampire Mallet",
+      "slug": "vampire-mallet",
+      "category": "Attack",
+      "tier": "Tier 1",
+      "price": 400,
+      "sellPrice": 240,
+      "stats": [
+        "+8 Physical Attack",
+        "+8% Lifesteal"
+      ],
+      "statsDetailed": [
+        {
+          "stat": "Physical Attack",
+          "value": 8
+        },
+        {
+          "stat": "Lifesteal",
+          "value": "8%"
+        }
+      ],
+      "passive": null,
+      "active": null,
+      "description": "Starter lifesteal component. Builds into Demon Hunter Sword, Wind of Nature, Haas's Claws and other lifesteal items.",
+      "lore": "",
+      "buildPath": [],
+      "buildsInto": [],
+      "image": "items/1104.png",
+      "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/f/f9/Vampire_Mallet.png",
+      "fandomFile": "Vampire_Mallet.png",
+      "counters": [],
+      "counteredBy": [],
+      "synergiesHeroes": [],
+      "worksAgainstHeroes": [],
+      "recommendedFor": [],
+      "tags": [
+        "attack",
+        "lifesteal",
+        "component"
+      ],
+      "patchVersion": "2.2.23",
+      "status": "active"
+    },
+    {
+      "id": 1105,
+      "name": "Iron Hunting Bow",
+      "slug": "iron-hunting-bow",
+      "category": "Attack",
+      "tier": "Tier 1",
+      "price": 450,
+      "sellPrice": 270,
+      "stats": [
+        "+10 Physical Attack",
+        "+5% Cooldown Reduction"
+      ],
+      "statsDetailed": [
+        {
+          "stat": "Physical Attack",
+          "value": 10
+        },
+        {
+          "stat": "Cooldown Reduction",
+          "value": "5%"
+        }
+      ],
+      "passive": null,
+      "active": null,
+      "description": "Early CDR + Attack component. Builds into Endless Battle, Hunter Strike, War Axe and Great Dragon Spear.",
+      "lore": "",
+      "buildPath": [],
+      "buildsInto": [],
+      "image": "items/1105.png",
+      "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/b/be/Iron_Hunting_Bow.png",
+      "fandomFile": "Iron_Hunting_Bow.png",
+      "counters": [],
+      "counteredBy": [],
+      "synergiesHeroes": [],
+      "worksAgainstHeroes": [],
+      "recommendedFor": [],
+      "tags": [
+        "attack",
+        "cdr",
+        "component"
+      ],
+      "patchVersion": "2.2.23",
+      "status": "active"
+    },
+    {
+      "id": 1106,
+      "name": "Legion Sword",
+      "slug": "legion-sword",
+      "category": "Attack",
+      "tier": "Tier 2",
+      "price": 910,
+      "sellPrice": 546,
+      "stats": [
+        "+60 Physical Attack"
+      ],
+      "statsDetailed": [
+        {
+          "stat": "Physical Attack",
+          "value": 60
+        }
+      ],
+      "passive": null,
+      "active": null,
+      "description": "The main Tier 2 Physical Attack component. Builds into Blade of Despair, Malefic Roar, Berserker's Fury and more. This is the MLBB equivalent of what players sometimes call a 'broadsword' — there is no item literally named Broadsword in MLBB.",
+      "lore": "A legion's standard blade.",
+      "buildPath": [
+        "Dagger",
+        "Dagger"
+      ],
+      "buildsInto": [],
+      "image": "items/1106.png",
+      "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/1/1e/Legion_Sword.png",
+      "fandomFile": "Legion_Sword.png",
+      "counters": [],
+      "counteredBy": [],
+      "synergiesHeroes": [],
+      "worksAgainstHeroes": [],
+      "recommendedFor": [],
+      "tags": [
+        "attack",
+        "component"
+      ],
+      "patchVersion": "2.2.23",
+      "status": "active"
+    },
+    {
+      "id": 1107,
+      "name": "Regular Spear",
+      "slug": "regular-spear",
+      "category": "Attack",
+      "tier": "Tier 2",
+      "price": 600,
+      "sellPrice": 360,
+      "stats": [
+        "+20 Physical Attack",
+        "+10% Attack Speed"
+      ],
+      "statsDetailed": [
+        {
+          "stat": "Physical Attack",
+          "value": 20
+        },
+        {
+          "stat": "Attack Speed",
+          "value": "10%"
+        }
+      ],
+      "passive": null,
+      "active": null,
+      "description": "Balanced Attack Speed + Attack component. Builds into Demon Hunter Sword, Corrosion Scythe, Golden Staff, Sea Halberd and Wind of Nature.",
+      "lore": "",
+      "buildPath": [
+        "Knife",
+        "Dagger"
+      ],
+      "buildsInto": [],
+      "image": "items/1107.png",
+      "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/3/32/Regular_Spear.png",
+      "fandomFile": "Regular_Spear.png",
+      "counters": [],
+      "counteredBy": [],
+      "synergiesHeroes": [],
+      "worksAgainstHeroes": [],
+      "recommendedFor": [],
+      "tags": [
+        "attack",
+        "component"
+      ],
+      "patchVersion": "2.2.23",
+      "status": "active"
+    },
+    {
+      "id": 1108,
+      "name": "Ogre Tomahawk",
+      "slug": "ogre-tomahawk",
+      "category": "Attack",
+      "tier": "Tier 2",
+      "price": 650,
+      "sellPrice": 390,
+      "stats": [
+        "+25 Physical Attack",
+        "+230 HP"
+      ],
+      "statsDetailed": [
+        {
+          "stat": "Physical Attack",
+          "value": 25
+        },
+        {
+          "stat": "HP",
+          "value": 230
+        }
+      ],
+      "passive": null,
+      "active": null,
+      "description": "Attack + HP component. Builds into Endless Battle, War Axe and Blade of the Heptaseas.",
+      "lore": "",
+      "buildPath": [
+        "Dagger",
+        "Vitality Crystal"
+      ],
+      "buildsInto": [],
+      "image": "items/1108.png",
+      "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/3/3d/Ogre_Tomahawk.png",
+      "fandomFile": "Ogre_Tomahawk.png",
+      "counters": [],
+      "counteredBy": [],
+      "synergiesHeroes": [],
+      "worksAgainstHeroes": [],
+      "recommendedFor": [],
+      "tags": [
+        "attack",
+        "hp",
+        "component"
+      ],
+      "patchVersion": "2.2.23",
+      "status": "active"
+    },
+    {
+      "id": 1109,
+      "name": "Fury Hammer",
+      "slug": "fury-hammer",
+      "category": "Attack",
+      "tier": "Tier 2",
+      "price": 830,
+      "sellPrice": 498,
+      "stats": [
+        "+35 Physical Attack",
+        "+12 Physical Penetration"
+      ],
+      "statsDetailed": [
+        {
+          "stat": "Physical Attack",
+          "value": 35
+        },
+        {
+          "stat": "Physical Penetration",
+          "value": 12
+        }
+      ],
+      "passive": null,
+      "active": null,
+      "description": "Penetration component. Builds into Malefic Gun, Hunter Strike and Blade of the Heptaseas.",
+      "lore": "",
+      "buildPath": [
+        "Dagger"
+      ],
+      "buildsInto": [],
+      "image": "items/1109.png",
+      "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/5/52/Fury_Hammer.png",
+      "fandomFile": "Fury_Hammer.png",
+      "counters": [],
+      "counteredBy": [],
+      "synergiesHeroes": [],
+      "worksAgainstHeroes": [],
+      "recommendedFor": [],
+      "tags": [
+        "attack",
+        "penetration",
+        "component"
+      ],
+      "patchVersion": "2.2.23",
+      "status": "active"
+    },
+    {
+      "id": 1110,
+      "name": "Rogue Meteor",
+      "slug": "rogue-meteor",
+      "category": "Attack",
+      "tier": "Tier 2",
+      "price": 900,
+      "sellPrice": 540,
+      "stats": [
+        "+15% Attack Speed",
+        "+10% Crit Chance"
+      ],
+      "statsDetailed": [
+        {
+          "stat": "Attack Speed",
+          "value": "15%"
+        },
+        {
+          "stat": "Crit Chance",
+          "value": "10%"
+        }
+      ],
+      "passive": null,
+      "active": null,
+      "description": "Attack Speed + Crit component. Builds into Windtalker and Haas's Claws.",
+      "lore": "",
+      "buildPath": [
+        "Knife",
+        "Javelin"
+      ],
+      "buildsInto": [],
+      "image": "items/1110.png",
+      "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/7/75/Rogue_Meteor.png",
+      "fandomFile": "Rogue_Meteor.png",
+      "counters": [],
+      "counteredBy": [],
+      "synergiesHeroes": [],
+      "worksAgainstHeroes": [],
+      "recommendedFor": [],
+      "tags": [
+        "attack",
+        "crit",
+        "component"
+      ],
+      "patchVersion": "2.2.23",
+      "status": "active"
+    },
+    {
+      "id": 1111,
+      "name": "Swift Crossbow",
+      "slug": "swift-crossbow",
+      "category": "Attack",
+      "tier": "Tier 2",
+      "price": 1000,
+      "sellPrice": 600,
+      "stats": [
+        "+20% Attack Speed"
+      ],
+      "statsDetailed": [
+        {
+          "stat": "Attack Speed",
+          "value": "20%"
+        }
+      ],
+      "passive": {
+        "name": "Crossbow / Impulse",
+        "description": "Crossbow: Each Basic Attack deals 40 extra Adaptive Damage. Impulse: Basic Attacks grant 3% extra Attack Speed for 3 seconds, capped at 5 stacks."
+      },
+      "active": null,
+      "description": "Attack Speed component with on-hit damage. Builds into Corrosion Scythe and Feather of Heaven.",
+      "lore": "",
+      "buildPath": [
+        "Knife",
+        "Knife"
+      ],
+      "buildsInto": [],
+      "image": "items/1111.png",
+      "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/a/a1/Swift_Crossbow.png",
+      "fandomFile": "Swift_Crossbow.png",
+      "counters": [],
+      "counteredBy": [],
+      "synergiesHeroes": [],
+      "worksAgainstHeroes": [],
+      "recommendedFor": [],
+      "tags": [
+        "attack",
+        "attack-speed",
+        "component"
+      ],
+      "patchVersion": "2.2.23",
+      "status": "active"
+    },
+    {
+      "id": 1112,
+      "name": "Magic Blade",
+      "slug": "magic-blade",
+      "category": "Attack",
+      "tier": "Tier 2",
+      "price": 1050,
+      "sellPrice": 630,
+      "stats": [
+        "+35 Physical Attack",
+        "+10% Lifesteal"
+      ],
+      "statsDetailed": [
+        {
+          "stat": "Physical Attack",
+          "value": 35
+        },
+        {
+          "stat": "Lifesteal",
+          "value": "10%"
+        }
+      ],
+      "passive": {
+        "name": "Lifeline",
+        "description": "When taking damage that reduces HP below 30%, gains a (+60*Hero Level) shield and 50% Movement Speed that rapidly decays over 3 seconds. 60 seconds cooldown."
+      },
+      "active": null,
+      "description": "Lifesteal + shield component. Builds into Rose Gold Meteor.",
+      "lore": "",
+      "buildPath": [
+        "Dagger",
+        "Vampire Mallet"
+      ],
+      "buildsInto": [],
+      "image": "items/1112.png",
+      "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/a/ae/Magic_Blade.png",
+      "fandomFile": "Magic_Blade.png",
+      "counters": [],
+      "counteredBy": [],
+      "synergiesHeroes": [],
+      "worksAgainstHeroes": [],
+      "recommendedFor": [],
+      "tags": [
+        "attack",
+        "lifesteal",
+        "shield",
+        "component"
+      ],
+      "patchVersion": "2.2.23",
+      "status": "active"
+    },
+    {
+      "id": 2007,
+      "name": "Wishing Lantern",
+      "slug": "wishing-lantern",
+      "category": "Magic",
+      "tier": "S",
+      "price": 2250,
+      "sellPrice": 1350,
+      "stats": [
+        "+75 Magic Power",
+        "+400 Mana",
+        "+10% Cooldown Reduction"
+      ],
+      "statsDetailed": [
+        {
+          "stat": "Magic Power",
+          "value": 75
+        },
+        {
+          "stat": "Mana",
+          "value": 400
+        },
+        {
+          "stat": "Cooldown Reduction",
+          "value": "10%"
+        }
+      ],
+      "passive": {
+        "name": "Butterfly Goddess",
+        "description": "For every 900 Magic Damage dealt to an enemy hero (calculated before Damage Reduction), a Butterfly Goddess is summoned to attack the enemy hero, dealing Magic Damage equal to 8% of their Current HP."
+      },
+      "active": null,
+      "description": "Anti-high-HP mage item. Butterfly procs shred tanks and high-HP fighters.",
+      "lore": "",
+      "buildPath": [
+        "Magic Wand",
+        "Book of Sages",
+        "Power Crystal"
+      ],
+      "buildsInto": [],
+      "image": "items/2007.png",
+      "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/0/07/Wishing_Lantern.png",
+      "fandomFile": "Wishing_Lantern.png",
+      "counters": [],
+      "counteredBy": [],
+      "synergiesHeroes": [],
+      "worksAgainstHeroes": [],
+      "recommendedFor": [
+        "Mage"
+      ],
+      "tags": [
+        "magic",
+        "anti-tank"
+      ],
+      "patchVersion": "2.2.23",
+      "status": "active"
+    },
+    {
+      "id": 2008,
+      "name": "Ice Queen Wand",
+      "slug": "ice-queen-wand",
+      "category": "Magic",
+      "tier": "A",
+      "price": 2040,
+      "sellPrice": 1224,
+      "stats": [
+        "+60 Magic Power",
+        "+10% Spell Vamp",
+        "+300 HP",
+        "+7% Movement Speed"
+      ],
+      "statsDetailed": [
+        {
+          "stat": "Magic Power",
+          "value": 60
+        },
+        {
+          "stat": "Spell Vamp",
+          "value": "10%"
+        },
+        {
+          "stat": "HP",
+          "value": 300
+        },
+        {
+          "stat": "Movement Speed",
+          "value": "7%"
+        }
+      ],
+      "passive": {
+        "name": "Ice Bound",
+        "description": "When a skill deals damage to an enemy hero, it will also slow them by 10% for 2 seconds (stacks up to 3 times). 0.4 seconds cooldown."
+      },
+      "active": null,
+      "description": "Slow-on-skill mage item. Strong for poke and control mages.",
+      "lore": "",
+      "buildPath": [
+        "Mystic Container",
+        "Exotic Veil",
+        "Mystery Codex"
+      ],
+      "buildsInto": [],
+      "image": "items/2008.png",
+      "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/d/da/Ice_Queen_Wand.png",
+      "fandomFile": "Ice_Queen_Wand.png",
+      "counters": [],
+      "counteredBy": [],
+      "synergiesHeroes": [],
+      "worksAgainstHeroes": [],
+      "recommendedFor": [
+        "Mage",
+        "Support"
+      ],
+      "tags": [
+        "magic",
+        "slow"
+      ],
+      "patchVersion": "2.2.23",
+      "status": "active"
+    },
+    {
+      "id": 2009,
+      "name": "Concentrated Energy",
+      "slug": "concentrated-energy",
+      "category": "Magic",
+      "tier": "A",
+      "price": 2020,
+      "sellPrice": 1212,
+      "stats": [
+        "+75 Magic Power",
+        "+400 HP"
+      ],
+      "statsDetailed": [
+        {
+          "stat": "Magic Power",
+          "value": 75
+        },
+        {
+          "stat": "HP",
+          "value": 400
+        }
+      ],
+      "passive": {
+        "name": "Recharge",
+        "description": "Increases Magic Power by 5 after dealing Magic Damage (stacks up to 6 times, 1 stack every 0.4 seconds). At full stacks, increases Magic Damage by 12% for 5 seconds."
+      },
+      "active": null,
+      "description": "Sustained-damage mage item. Rewards continuous Magic Damage.",
+      "lore": "",
+      "buildPath": [
+        "Mystic Container",
+        "Magic Wand",
+        "Vitality Crystal"
+      ],
+      "buildsInto": [],
+      "image": "items/2009.png",
+      "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/4/4e/Concentrated_Energy.png",
+      "fandomFile": "Concentrated_Energy.png",
+      "counters": [],
+      "counteredBy": [],
+      "synergiesHeroes": [],
+      "worksAgainstHeroes": [],
+      "recommendedFor": [
+        "Mage"
+      ],
+      "tags": [
+        "magic",
+        "sustain"
+      ],
+      "patchVersion": "2.2.23",
+      "status": "active"
+    },
+    {
+      "id": 2010,
+      "name": "Clock of Destiny",
+      "slug": "clock-of-destiny",
+      "category": "Magic",
+      "tier": "A",
+      "price": 2030,
+      "sellPrice": 1218,
+      "stats": [
+        "+45 Magic Power",
+        "+400 HP",
+        "+400 Mana",
+        "+10% Cooldown Reduction"
+      ],
+      "statsDetailed": [
+        {
+          "stat": "Magic Power",
+          "value": 45
+        },
+        {
+          "stat": "HP",
+          "value": 400
+        },
+        {
+          "stat": "Mana",
+          "value": 400
+        },
+        {
+          "stat": "Cooldown Reduction",
+          "value": "10%"
+        }
+      ],
+      "passive": {
+        "name": "Destiny / Gift",
+        "description": "Destiny: Gains 4.5 (+0.5*Hero Level) Hybrid Defense for 5 seconds when dealing Magic Damage to enemy heroes, stacking up to 6 times. Gift: When HP drops below 50%, recovers 15% of HP over 3 seconds. When Mana drops below 50%, restores 15% of Mana over 3 seconds. 60 seconds cooldown."
+      },
+      "active": null,
+      "description": "Tanky mage item. For magic tanks and mages who need to survive burst.",
+      "lore": "",
+      "buildPath": [
+        "Elegant Gem",
+        "Book of Sages"
+      ],
+      "buildsInto": [],
+      "image": "items/2010.png",
+      "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/4/4a/Clock_of_Destiny.png",
+      "fandomFile": "Clock_of_Destiny.png",
+      "counters": [],
+      "counteredBy": [],
+      "synergiesHeroes": [],
+      "worksAgainstHeroes": [],
+      "recommendedFor": [
+        "Mage",
+        "Tank"
+      ],
+      "tags": [
+        "magic",
+        "tank"
+      ],
+      "patchVersion": "2.2.23",
+      "status": "active"
+    },
+    {
+      "id": 2011,
+      "name": "Enchanted Talisman",
+      "slug": "enchanted-talisman",
+      "category": "Magic",
+      "tier": "A",
+      "price": 2070,
+      "sellPrice": 1242,
+      "stats": [
+        "+70 Magic Power",
+        "+300 HP",
+        "+15% Cooldown Reduction"
+      ],
+      "statsDetailed": [
+        {
+          "stat": "Magic Power",
+          "value": 70
+        },
+        {
+          "stat": "HP",
+          "value": 300
+        },
+        {
+          "stat": "Cooldown Reduction",
+          "value": "15%"
+        }
+      ],
+      "passive": {
+        "name": "Mana Spring / Magic Mastery",
+        "description": "Mana Spring: Regenerates 15% of Max Mana every 10 seconds. Magic Mastery: Max Cooldown Reduction is increased by 5%."
+      },
+      "active": null,
+      "description": "Mana + CDR mage item. Best for spammy mages and supports.",
+      "lore": "",
+      "buildPath": [
+        "Tome of Evil",
+        "Magic Necklace",
+        "Magic Wand"
+      ],
+      "buildsInto": [],
+      "image": "items/2011.png",
+      "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/2/21/Enchanted_Talisman.png",
+      "fandomFile": "Enchanted_Talisman.png",
+      "counters": [],
+      "counteredBy": [],
+      "synergiesHeroes": [],
+      "worksAgainstHeroes": [],
+      "recommendedFor": [
+        "Mage",
+        "Support"
+      ],
+      "tags": [
+        "magic",
+        "cdr",
+        "mana"
+      ],
+      "patchVersion": "2.2.23",
+      "status": "active"
+    },
+    {
+      "id": 2012,
+      "name": "Feather of Heaven",
+      "slug": "feather-of-heaven",
+      "category": "Magic",
+      "tier": "A",
+      "price": 2030,
+      "sellPrice": 1218,
+      "stats": [
+        "+60 Magic Power",
+        "+20% Attack Speed",
+        "+10% Lifesteal",
+        "+5% Cooldown Reduction"
+      ],
+      "statsDetailed": [
+        {
+          "stat": "Magic Power",
+          "value": 60
+        },
+        {
+          "stat": "Attack Speed",
+          "value": "20%"
+        },
+        {
+          "stat": "Lifesteal",
+          "value": "10%"
+        },
+        {
+          "stat": "Cooldown Reduction",
+          "value": "5%"
+        }
+      ],
+      "passive": {
+        "name": "Affliction / Impulse",
+        "description": "Affliction: Each Basic Attack deals extra 50 (+30% Total Magic Power) Magic Damage. Impulse: Basic Attacks grant 6% extra Attack Speed for 3 seconds, capped at 5 stacks."
+      },
+      "active": null,
+      "description": "Magic Basic Attack item. Core for Harith, Lunox, Guinevere and other basic-attack mages.",
+      "lore": "",
+      "buildPath": [
+        "Swift Crossbow",
+        "Book of Sages"
+      ],
+      "buildsInto": [],
+      "image": "items/2012.png",
+      "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/e/ed/Feather_of_Heaven.png",
+      "fandomFile": "Feather_of_Heaven.png",
+      "counters": [],
+      "counteredBy": [],
+      "synergiesHeroes": [],
+      "worksAgainstHeroes": [],
+      "recommendedFor": [
+        "Mage",
+        "Fighter"
+      ],
+      "tags": [
+        "magic",
+        "basic-attack"
+      ],
+      "patchVersion": "2.2.23",
+      "status": "active"
+    },
+    {
+      "id": 2013,
+      "name": "Divine Glaive",
+      "slug": "divine-glaive",
+      "category": "Magic",
+      "tier": "S",
+      "price": 1970,
+      "sellPrice": 1182,
+      "stats": [
+        "+65 Magic Power",
+        "+40% Magic Penetration"
+      ],
+      "statsDetailed": [
+        {
+          "stat": "Magic Power",
+          "value": 65
+        },
+        {
+          "stat": "Magic Penetration",
+          "value": "40%"
+        }
+      ],
+      "passive": {
+        "name": "Spellbreaker",
+        "description": "When attacking an enemy, gains 0.1% extra Magic Penetration for each point of the enemy's Magic Defense, capped at 20%."
+      },
+      "active": null,
+      "description": "Main Magic Penetration item. Core vs high Magic Defense teams.",
+      "lore": "",
+      "buildPath": [
+        "Magic Wand"
+      ],
+      "buildsInto": [],
+      "image": "items/2013.png",
+      "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/9/9a/Divine_Glaive.png",
+      "fandomFile": "Divine_Glaive.png",
+      "counters": [],
+      "counteredBy": [],
+      "synergiesHeroes": [],
+      "worksAgainstHeroes": [],
+      "recommendedFor": [
+        "Mage"
+      ],
+      "tags": [
+        "magic",
+        "penetration"
+      ],
+      "patchVersion": "2.2.23",
+      "status": "active"
+    },
+    {
+      "id": 2101,
+      "name": "Mystery Codex",
+      "slug": "mystery-codex",
+      "category": "Magic",
+      "tier": "Tier 1",
+      "price": 300,
+      "sellPrice": 180,
+      "stats": [
+        "+15 Magic Power"
+      ],
+      "statsDetailed": [
+        {
+          "stat": "Magic Power",
+          "value": 15
+        }
+      ],
+      "passive": null,
+      "active": null,
+      "description": "Basic Magic Power component. Builds into Magic Wand, Exotic Veil and Mystic Container.",
+      "lore": "",
+      "buildPath": [],
+      "buildsInto": [],
+      "image": "items/2101.png",
+      "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/2/2c/Mystery_Codex.png",
+      "fandomFile": "Mystery_Codex.png",
+      "counters": [],
+      "counteredBy": [],
+      "synergiesHeroes": [],
+      "worksAgainstHeroes": [],
+      "recommendedFor": [],
+      "tags": [
+        "magic",
+        "component"
+      ],
+      "patchVersion": "2.2.23",
+      "status": "active"
+    },
+    {
+      "id": 2102,
+      "name": "Power Crystal",
+      "slug": "power-crystal",
+      "category": "Magic",
+      "tier": "Tier 1",
+      "price": 220,
+      "sellPrice": 132,
+      "stats": [
+        "+280 Mana"
+      ],
+      "statsDetailed": [
+        {
+          "stat": "Mana",
+          "value": 280
+        }
+      ],
+      "passive": null,
+      "active": null,
+      "description": "Basic Mana component. Builds into Elegant Gem, Lightning Truncheon and Wishing Lantern.",
+      "lore": "",
+      "buildPath": [],
+      "buildsInto": [],
+      "image": "items/2102.png",
+      "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/f/fd/Power_Crystal.png",
+      "fandomFile": "Power_Crystal.png",
+      "counters": [],
+      "counteredBy": [],
+      "synergiesHeroes": [],
+      "worksAgainstHeroes": [],
+      "recommendedFor": [],
+      "tags": [
+        "magic",
+        "mana",
+        "component"
+      ],
+      "patchVersion": "2.2.23",
+      "status": "active"
+    },
+    {
+      "id": 2103,
+      "name": "Magic Necklace",
+      "slug": "magic-necklace",
+      "category": "Magic",
+      "tier": "Tier 1",
+      "price": 120,
+      "sellPrice": 72,
+      "stats": [
+        "+2 Mana Regen"
+      ],
+      "statsDetailed": [
+        {
+          "stat": "Mana Regen",
+          "value": 2
+        }
+      ],
+      "passive": null,
+      "active": null,
+      "description": "Basic Mana Regen component. Called Mana Necklace in older versions — same item, renamed. Builds into Tome of Evil, Azure Blade, Demon Shoes and Enchanted Talisman.",
+      "lore": "",
+      "buildPath": [],
+      "buildsInto": [],
+      "image": "items/2103.png",
+      "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/c/cd/Magic_Necklace.png",
+      "fandomFile": "Magic_Necklace.png",
+      "counters": [],
+      "counteredBy": [],
+      "synergiesHeroes": [],
+      "worksAgainstHeroes": [],
+      "recommendedFor": [],
+      "tags": [
+        "magic",
+        "mana-regen",
+        "component"
+      ],
+      "patchVersion": "2.2.23",
+      "status": "active",
+      "alias": "Mana Necklace (old name)"
+    },
+    {
+      "id": 2104,
+      "name": "Book of Sages",
+      "slug": "book-of-sages",
+      "category": "Magic",
+      "tier": "Tier 1",
+      "price": 450,
+      "sellPrice": 270,
+      "stats": [
+        "+8 Magic Power",
+        "+5% Cooldown Reduction"
+      ],
+      "statsDetailed": [
+        {
+          "stat": "Magic Power",
+          "value": 8
+        },
+        {
+          "stat": "Cooldown Reduction",
+          "value": "5%"
+        }
+      ],
+      "passive": null,
+      "active": null,
+      "description": "Magic Power + CDR component. Builds into Tome of Evil, Clock of Destiny, Feather of Heaven and more.",
+      "lore": "",
+      "buildPath": [],
+      "buildsInto": [],
+      "image": "items/2104.png",
+      "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/3/35/Book_of_Sages.png",
+      "fandomFile": "Book_of_Sages.png",
+      "counters": [],
+      "counteredBy": [],
+      "synergiesHeroes": [],
+      "worksAgainstHeroes": [],
+      "recommendedFor": [],
+      "tags": [
+        "magic",
+        "cdr",
+        "component"
+      ],
+      "patchVersion": "2.2.23",
+      "status": "active"
+    },
+    {
+      "id": 2105,
+      "name": "Magic Wand",
+      "slug": "magic-wand",
+      "category": "Magic",
+      "tier": "Tier 2",
+      "price": 820,
+      "sellPrice": 492,
+      "stats": [
+        "+45 Magic Power"
+      ],
+      "statsDetailed": [
+        {
+          "stat": "Magic Power",
+          "value": 45
+        }
+      ],
+      "passive": null,
+      "active": null,
+      "description": "Main Tier 2 Magic Power component. Builds into Holy Crystal, Blood Wings, Genius Wand, Glowing Wand and many Magic items.",
+      "lore": "",
+      "buildPath": [
+        "Mystery Codex"
+      ],
+      "buildsInto": [],
+      "image": "items/2105.png",
+      "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/b/bc/Magic_Wand.png",
+      "fandomFile": "Magic_Wand.png",
+      "counters": [],
+      "counteredBy": [],
+      "synergiesHeroes": [],
+      "worksAgainstHeroes": [],
+      "recommendedFor": [],
+      "tags": [
+        "magic",
+        "component"
+      ],
+      "patchVersion": "2.2.23",
+      "status": "active"
+    },
+    {
+      "id": 2106,
+      "name": "Exotic Veil",
+      "slug": "exotic-veil",
+      "category": "Magic",
+      "tier": "Tier 2",
+      "price": 600,
+      "sellPrice": 360,
+      "stats": [
+        "+30 Magic Power",
+        "+5% Movement Speed"
+      ],
+      "statsDetailed": [
+        {
+          "stat": "Magic Power",
+          "value": 30
+        },
+        {
+          "stat": "Movement Speed",
+          "value": "5%"
+        }
+      ],
+      "passive": null,
+      "active": null,
+      "description": "Magic Power + Movement Speed component. Builds into Glowing Wand, Genius Wand and Ice Queen Wand.",
+      "lore": "",
+      "buildPath": [
+        "Mystery Codex"
+      ],
+      "buildsInto": [],
+      "image": "items/2106.png",
+      "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/e/e9/Exotic_Veil.png",
+      "fandomFile": "Exotic_Veil.png",
+      "counters": [],
+      "counteredBy": [],
+      "synergiesHeroes": [],
+      "worksAgainstHeroes": [],
+      "recommendedFor": [],
+      "tags": [
+        "magic",
+        "component"
+      ],
+      "patchVersion": "2.2.23",
+      "status": "active"
+    },
+    {
+      "id": 2107,
+      "name": "Mystic Container",
+      "slug": "mystic-container",
+      "category": "Magic",
+      "tier": "Tier 2",
+      "price": 500,
+      "sellPrice": 300,
+      "stats": [
+        "+15 Magic Power",
+        "+8% Spell Vamp"
+      ],
+      "statsDetailed": [
+        {
+          "stat": "Magic Power",
+          "value": 15
+        },
+        {
+          "stat": "Spell Vamp",
+          "value": "8%"
+        }
+      ],
+      "passive": null,
+      "active": null,
+      "description": "Spell Vamp component. Builds into Concentrated Energy and Ice Queen Wand.",
+      "lore": "",
+      "buildPath": [
+        "Mystery Codex"
+      ],
+      "buildsInto": [],
+      "image": "items/2107.png",
+      "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/2/23/Mystic_Container.png",
+      "fandomFile": "Mystic_Container.png",
+      "counters": [],
+      "counteredBy": [],
+      "synergiesHeroes": [],
+      "worksAgainstHeroes": [],
+      "recommendedFor": [],
+      "tags": [
+        "magic",
+        "lifesteal",
+        "component"
+      ],
+      "patchVersion": "2.2.23",
+      "status": "active"
+    },
+    {
+      "id": 2108,
+      "name": "Tome of Evil",
+      "slug": "tome-of-evil",
+      "category": "Magic",
+      "tier": "Tier 2",
+      "price": 950,
+      "sellPrice": 570,
+      "stats": [
+        "+30 Magic Power",
+        "+2 Mana Regen",
+        "+10% Cooldown Reduction"
+      ],
+      "statsDetailed": [
+        {
+          "stat": "Magic Power",
+          "value": 30
+        },
+        {
+          "stat": "Mana Regen",
+          "value": 2
+        },
+        {
+          "stat": "Cooldown Reduction",
+          "value": "10%"
+        }
+      ],
+      "passive": null,
+      "active": null,
+      "description": "Magic Power + Mana Regen + CDR component. Builds into Enchanted Talisman.",
+      "lore": "",
+      "buildPath": [
+        "Magic Necklace",
+        "Book of Sages"
+      ],
+      "buildsInto": [],
+      "image": "items/2108.png",
+      "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/0/0a/Tome_of_Evil.png",
+      "fandomFile": "Tome_of_Evil.png",
+      "counters": [],
+      "counteredBy": [],
+      "synergiesHeroes": [],
+      "worksAgainstHeroes": [],
+      "recommendedFor": [],
+      "tags": [
+        "magic",
+        "cdr",
+        "component"
+      ],
+      "patchVersion": "2.2.23",
+      "status": "active"
+    },
+    {
+      "id": 2109,
+      "name": "Elegant Gem",
+      "slug": "elegant-gem",
+      "category": "Magic",
+      "tier": "Tier 2",
+      "price": 700,
+      "sellPrice": 420,
+      "stats": [
+        "+300 HP",
+        "+380 Mana"
+      ],
+      "statsDetailed": [
+        {
+          "stat": "HP",
+          "value": 300
+        },
+        {
+          "stat": "Mana",
+          "value": 380
+        }
+      ],
+      "passive": {
+        "name": "Gift",
+        "description": "When HP drops below 50%, recovers 15% of HP over the next 3 seconds. When Mana drops below 50%, restores 15% of Mana over the next 3 seconds. 60 seconds cooldown."
+      },
+      "active": null,
+      "description": "HP + Mana component with Gift sustain. Builds into Clock of Destiny.",
+      "lore": "",
+      "buildPath": [
+        "Power Crystal",
+        "Vitality Crystal"
+      ],
+      "buildsInto": [],
+      "image": "items/2109.png",
+      "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/d/d4/Elegant_Gem.png",
+      "fandomFile": "Elegant_Gem.png",
+      "counters": [],
+      "counteredBy": [],
+      "synergiesHeroes": [],
+      "worksAgainstHeroes": [],
+      "recommendedFor": [],
+      "tags": [
+        "magic",
+        "hp",
+        "mana",
+        "component"
+      ],
+      "patchVersion": "2.2.23",
+      "status": "active"
+    },
+    {
+      "id": 2110,
+      "name": "Azure Blade",
+      "slug": "azure-blade",
+      "category": "Magic",
+      "tier": "Tier 2",
+      "price": 600,
+      "sellPrice": 360,
+      "stats": [
+        "+5 Mana Regen",
+        "+5% Cooldown Reduction"
+      ],
+      "statsDetailed": [
+        {
+          "stat": "Mana Regen",
+          "value": 5
+        },
+        {
+          "stat": "Cooldown Reduction",
+          "value": "5%"
+        }
+      ],
+      "passive": {
+        "name": "Judgement",
+        "description": "After casting a skill, the next Basic Attack within 3 seconds deals 50 extra True Damage (1.5 seconds cooldown)."
+      },
+      "active": null,
+      "description": "CDR + Mana Regen component with True Damage proc. Builds into Endless Battle and Starlium Scythe in some versions.",
+      "lore": "",
+      "buildPath": [
+        "Magic Necklace"
+      ],
+      "buildsInto": [],
+      "image": "items/2110.png",
+      "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/6/6d/Azure_Blade.png",
+      "fandomFile": "Azure_Blade.png",
+      "counters": [],
+      "counteredBy": [],
+      "synergiesHeroes": [],
+      "worksAgainstHeroes": [],
+      "recommendedFor": [],
+      "tags": [
+        "magic",
+        "cdr",
+        "component"
+      ],
+      "patchVersion": "2.2.23",
+      "status": "active"
+    },
+    {
+      "id": 3010,
+      "name": "Queen's Wings",
+      "slug": "queens-wings",
+      "category": "Defense",
+      "tier": "A",
+      "price": 2250,
+      "sellPrice": 1350,
+      "stats": [
+        "+750 HP",
+        "+30 Adaptive Attack",
+        "+10% Cooldown Reduction",
+        "+10% Spell Vamp"
+      ],
+      "statsDetailed": [
+        {
+          "stat": "HP",
+          "value": 750
+        },
+        {
+          "stat": "Adaptive Attack",
+          "value": 30
+        },
+        {
+          "stat": "Cooldown Reduction",
+          "value": "10%"
+        },
+        {
+          "stat": "Spell Vamp",
+          "value": "10%"
+        }
+      ],
+      "passive": {
+        "name": "Demonize / Defiance",
+        "description": "Demonize: When HP drops below 40%, gains 30% Damage Reduction for 3 seconds and reduces skill cooldowns by 2 seconds. 60 seconds cooldown. Defiance: For every 1% HP lost, damage is increased by 0.25%, up to 15%."
+      },
+      "active": null,
+      "description": "Low-HP retaliation item for fighters and sustain heroes.",
+      "lore": "",
+      "buildPath": [
+        "Ares Belt",
+        "Hero's Ring",
+        "Expert Gloves"
+      ],
+      "buildsInto": [],
+      "image": "items/3010.png",
+      "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/f/f4/Queen%27s_Wings.png",
+      "fandomFile": "Queen%27s_Wings.png",
+      "counters": [],
+      "counteredBy": [],
+      "synergiesHeroes": [],
+      "worksAgainstHeroes": [],
+      "recommendedFor": [
+        "Fighter",
+        "Tank"
+      ],
+      "tags": [
+        "defense",
+        "sustain"
+      ],
+      "patchVersion": "2.2.23",
+      "status": "active"
+    },
+    {
+      "id": 3011,
+      "name": "Thunder Belt",
+      "slug": "thunder-belt",
+      "category": "Defense",
+      "tier": "A",
+      "price": 1820,
+      "sellPrice": 1092,
+      "stats": [
+        "+600 HP",
+        "+15 Physical Defense",
+        "+15 Magic Defense",
+        "+20 Movement Speed"
+      ],
+      "statsDetailed": [
+        {
+          "stat": "HP",
+          "value": 600
+        },
+        {
+          "stat": "Physical Defense",
+          "value": 15
+        },
+        {
+          "stat": "Magic Defense",
+          "value": 15
+        },
+        {
+          "stat": "Movement Speed",
+          "value": 20
+        }
+      ],
+      "passive": {
+        "name": "Thunderbolt",
+        "description": "Every 4 seconds, the next Basic Attack deals 50 (+100% Extra Physical Defense) (+100% Extra Magic Defense) extra True Damage to the target and enemies around them, and briefly slows them by 99%. Hybrid Defense permanently increases by 1 each time the attack hits an enemy hero. Reduced to 50% for Marksmen and Mages."
+      },
+      "active": null,
+      "description": "Tank Basic Attack item. Rewards tanks who weave Basic Attacks.",
+      "lore": "",
+      "buildPath": [
+        "Ares Belt",
+        "Leather Jerkin",
+        "Magic Resist Cloak"
+      ],
+      "buildsInto": [],
+      "image": "items/3011.png",
+      "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/d/dd/Thunder_Belt.png",
+      "fandomFile": "Thunder_Belt.png",
+      "counters": [],
+      "counteredBy": [],
+      "synergiesHeroes": [],
+      "worksAgainstHeroes": [],
+      "recommendedFor": [
+        "Tank",
+        "Fighter"
+      ],
+      "tags": [
+        "defense",
+        "true-damage"
+      ],
+      "patchVersion": "2.2.23",
+      "status": "active"
+    },
+    {
+      "id": 3012,
+      "name": "Cursed Helmet",
+      "slug": "cursed-helmet",
+      "category": "Defense",
+      "tier": "A",
+      "price": 1910,
+      "sellPrice": 1146,
+      "stats": [
+        "+1200 HP",
+        "+20 Magic Defense"
+      ],
+      "statsDetailed": [
+        {
+          "stat": "HP",
+          "value": 1200
+        },
+        {
+          "stat": "Magic Defense",
+          "value": 20
+        }
+      ],
+      "passive": {
+        "name": "Burning Soul / Curse",
+        "description": "Burning Soul: Deals (1.2% Total HP) Magic Damage to nearby enemies per second. Increased by 125 (+15*Hero Level)% against creeps and minions. Curse: Dealing damage with Burning Soul reduces the target's Hybrid Defense by 3 for 3 seconds. Stacks up to 3 times."
+      },
+      "active": null,
+      "description": "Tank burn + lane clear item. Upgraded Molten Essence.",
+      "lore": "",
+      "buildPath": [
+        "Molten Essence",
+        "Ares Belt",
+        "Magic Resist Cloak"
+      ],
+      "buildsInto": [],
+      "image": "items/3012.png",
+      "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/8/80/Cursed_Helmet.png",
+      "fandomFile": "Cursed_Helmet.png",
+      "counters": [],
+      "counteredBy": [],
+      "synergiesHeroes": [],
+      "worksAgainstHeroes": [],
+      "recommendedFor": [
+        "Tank"
+      ],
+      "tags": [
+        "defense",
+        "burn"
+      ],
+      "patchVersion": "2.2.23",
+      "status": "active"
+    },
+    {
+      "id": 3013,
+      "name": "Oracle",
+      "slug": "oracle",
+      "category": "Defense",
+      "tier": "A",
+      "price": 1860,
+      "sellPrice": 1116,
+      "stats": [
+        "+850 HP",
+        "+20 Physical Defense",
+        "+20 Magic Defense",
+        "+10% Cooldown Reduction"
+      ],
+      "statsDetailed": [
+        {
+          "stat": "HP",
+          "value": 850
+        },
+        {
+          "stat": "Physical Defense",
+          "value": 20
+        },
+        {
+          "stat": "Magic Defense",
+          "value": 20
+        },
+        {
+          "stat": "Cooldown Reduction",
+          "value": "10%"
+        }
+      ],
+      "passive": {
+        "name": "Bless",
+        "description": "Received Shield and HP Regen effects are increased by 25%."
+      },
+      "active": null,
+      "description": "Regen / shield amplification item. Core for healers, shielders and sustain tanks.",
+      "lore": "",
+      "buildPath": [
+        "Hero's Ring",
+        "Vitality Crystal"
+      ],
+      "buildsInto": [],
+      "image": "items/3013.png",
+      "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/1/17/Oracle.png",
+      "fandomFile": "Oracle.png",
+      "counters": [],
+      "counteredBy": [],
+      "synergiesHeroes": [],
+      "worksAgainstHeroes": [],
+      "recommendedFor": [
+        "Tank",
+        "Support"
+      ],
+      "tags": [
+        "defense",
+        "regen",
+        "shield"
+      ],
+      "patchVersion": "2.2.23",
+      "status": "active"
+    },
+    {
+      "id": 3014,
+      "name": "Brute Force Breastplate",
+      "slug": "brute-force-breastplate",
+      "category": "Defense",
+      "tier": "A",
+      "price": 2070,
+      "sellPrice": 1242,
+      "stats": [
+        "+800 HP",
+        "+20 Physical Defense",
+        "+10% Cooldown Reduction"
+      ],
+      "statsDetailed": [
+        {
+          "stat": "HP",
+          "value": 800
+        },
+        {
+          "stat": "Physical Defense",
+          "value": 20
+        },
+        {
+          "stat": "Cooldown Reduction",
+          "value": "10%"
+        }
+      ],
+      "passive": {
+        "name": "Brute Force",
+        "description": "Each second after dealing damage, gain 8 extra Adaptive Attack and 2% extra Movement Speed for 4 seconds, up to 6 stacks. Gain 25% extra Control Duration Reduction at full stacks."
+      },
+      "active": null,
+      "description": "Fighter-tank hybrid item. Stacks Attack + Speed + CC reduction in extended fights.",
+      "lore": "",
+      "buildPath": [
+        "Ares Belt",
+        "Hero's Ring",
+        "Leather Jerkin"
+      ],
+      "buildsInto": [],
+      "image": "items/3014.png",
+      "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/f/f6/Brute_Force_Breastplate.png",
+      "fandomFile": "Brute_Force_Breastplate.png",
+      "counters": [],
+      "counteredBy": [],
+      "synergiesHeroes": [],
+      "worksAgainstHeroes": [],
+      "recommendedFor": [
+        "Fighter",
+        "Tank"
+      ],
+      "tags": [
+        "defense",
+        "fighter"
+      ],
+      "patchVersion": "2.2.23",
+      "status": "active"
+    },
+    {
+      "id": 3015,
+      "name": "Valkyrie's Shield",
+      "slug": "valkyries-shield",
+      "category": "Defense",
+      "tier": "S",
+      "price": 2150,
+      "sellPrice": 1290,
+      "stats": [
+        "+900 HP",
+        "+48 Magic Defense",
+        "+2 HP Regen"
+      ],
+      "statsDetailed": [
+        {
+          "stat": "HP",
+          "value": 900
+        },
+        {
+          "stat": "Magic Defense",
+          "value": 48
+        },
+        {
+          "stat": "HP Regen",
+          "value": 2
+        }
+      ],
+      "passive": {
+        "name": "Shield",
+        "description": "Upon taking Magic Damage from enemy hero skills or Basic Attacks, reduces Magic Damage taken by 25% for 3 seconds (including the damage that triggers the effect). Regains this effect 5 seconds after leaving combat."
+      },
+      "active": null,
+      "description": "Anti-burst Magic Defense item. In this file Athena's Shield (3004) is the same effect — Valkyrie's Shield is the renamed version used in some patches / regions. Kept as a separate entry so both names resolve.",
+      "lore": "",
+      "buildPath": [
+        "Silence Robe",
+        "Vitality Crystal"
+      ],
+      "buildsInto": [],
+      "image": "items/3015.png",
+      "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/2/21/Valkyrie%27s_Shield.png",
+      "fandomFile": "Valkyrie%27s_Shield.png",
+      "counters": [],
+      "counteredBy": [],
+      "synergiesHeroes": [],
+      "worksAgainstHeroes": [],
+      "recommendedFor": [],
+      "tags": [
+        "defense",
+        "magic-defense",
+        "anti-burst"
+      ],
+      "patchVersion": "2.2.23",
+      "status": "active",
+      "alias": "Athena's Shield (renamed version)"
+    },
+    {
+      "id": 3101,
+      "name": "Vitality Crystal",
+      "slug": "vitality-crystal",
+      "category": "Defense",
+      "tier": "Tier 1",
+      "price": 300,
+      "sellPrice": 180,
+      "stats": [
+        "+230 HP"
+      ],
+      "statsDetailed": [
+        {
+          "stat": "HP",
+          "value": 230
+        }
+      ],
+      "passive": null,
+      "active": null,
+      "description": "Basic HP component. Builds into Ares Belt, Molten Essence, Elegant Gem, Silence Robe and almost every HP item.",
+      "lore": "",
+      "buildPath": [],
+      "buildsInto": [],
+      "image": "items/3101.png",
+      "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/e/ea/Vitality_Crystal.png",
+      "fandomFile": "Vitality_Crystal.png",
+      "counters": [],
+      "counteredBy": [],
+      "synergiesHeroes": [],
+      "worksAgainstHeroes": [],
+      "recommendedFor": [],
+      "tags": [
+        "defense",
+        "hp",
+        "component"
+      ],
+      "patchVersion": "2.2.23",
+      "status": "active"
+    },
+    {
+      "id": 3102,
+      "name": "Leather Jerkin",
+      "slug": "leather-jerkin",
+      "category": "Defense",
+      "tier": "Tier 1",
+      "price": 220,
+      "sellPrice": 132,
+      "stats": [
+        "+14 Physical Defense"
+      ],
+      "statsDetailed": [
+        {
+          "stat": "Physical Defense",
+          "value": 14
+        }
+      ],
+      "passive": null,
+      "active": null,
+      "description": "Basic Physical Defense component. Builds into Steel Legplates, Dreadnaught Armor, Black Ice Shield and more.",
+      "lore": "",
+      "buildPath": [],
+      "buildsInto": [],
+      "image": "items/3102.png",
+      "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/5/58/Leather_Jerkin.png",
+      "fandomFile": "Leather_Jerkin.png",
+      "counters": [],
+      "counteredBy": [],
+      "synergiesHeroes": [],
+      "worksAgainstHeroes": [],
+      "recommendedFor": [],
+      "tags": [
+        "defense",
+        "component"
+      ],
+      "patchVersion": "2.2.23",
+      "status": "active"
+    },
+    {
+      "id": 3103,
+      "name": "Magic Resist Cloak",
+      "slug": "magic-resist-cloak",
+      "category": "Defense",
+      "tier": "Tier 1",
+      "price": 220,
+      "sellPrice": 132,
+      "stats": [
+        "+14 Magic Defense"
+      ],
+      "statsDetailed": [
+        {
+          "stat": "Magic Defense",
+          "value": 14
+        }
+      ],
+      "passive": null,
+      "active": null,
+      "description": "Basic Magic Defense component. Builds into Black Ice Shield, Silence Robe, Thunder Belt and more.",
+      "lore": "",
+      "buildPath": [],
+      "buildsInto": [],
+      "image": "items/3103.png",
+      "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/4/4c/Magic_Resist_Cloak.png",
+      "fandomFile": "Magic_Resist_Cloak.png",
+      "counters": [],
+      "counteredBy": [],
+      "synergiesHeroes": [],
+      "worksAgainstHeroes": [],
+      "recommendedFor": [],
+      "tags": [
+        "defense",
+        "component"
+      ],
+      "patchVersion": "2.2.23",
+      "status": "active"
+    },
+    {
+      "id": 3104,
+      "name": "Healing Necklace",
+      "slug": "healing-necklace",
+      "category": "Defense",
+      "tier": "Tier 1",
+      "price": 140,
+      "sellPrice": 84,
+      "stats": [
+        "+4 HP Regen"
+      ],
+      "statsDetailed": [
+        {
+          "stat": "HP Regen",
+          "value": 4
+        }
+      ],
+      "passive": null,
+      "active": null,
+      "description": "Basic HP Regen component. Builds into Radiant Armor and Rapid Boots.",
+      "lore": "",
+      "buildPath": [],
+      "buildsInto": [],
+      "image": "items/3104.png",
+      "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/d/d7/Healing_Necklace.png",
+      "fandomFile": "Healing_Necklace.png",
+      "counters": [],
+      "counteredBy": [],
+      "synergiesHeroes": [],
+      "worksAgainstHeroes": [],
+      "recommendedFor": [],
+      "tags": [
+        "defense",
+        "regen",
+        "component"
+      ],
+      "patchVersion": "2.2.23",
+      "status": "active"
+    },
+    {
+      "id": 3105,
+      "name": "Hero's Ring",
+      "slug": "heros-ring",
+      "category": "Defense",
+      "tier": "Tier 1",
+      "price": 450,
+      "sellPrice": 270,
+      "stats": [
+        "+150 HP",
+        "+5% Cooldown Reduction"
+      ],
+      "statsDetailed": [
+        {
+          "stat": "HP",
+          "value": 150
+        },
+        {
+          "stat": "Cooldown Reduction",
+          "value": "5%"
+        }
+      ],
+      "passive": null,
+      "active": null,
+      "description": "HP + CDR component. Builds into War Axe, Queen's Wings, Brute Force Breastplate, Oracle, Magic Shoes and Fleeting Time.",
+      "lore": "",
+      "buildPath": [],
+      "buildsInto": [],
+      "image": "items/3105.png",
+      "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/9/91/Hero%27s_Ring.png",
+      "fandomFile": "Hero%27s_Ring.png",
+      "counters": [],
+      "counteredBy": [],
+      "synergiesHeroes": [],
+      "worksAgainstHeroes": [],
+      "recommendedFor": [],
+      "tags": [
+        "defense",
+        "cdr",
+        "component"
+      ],
+      "patchVersion": "2.2.23",
+      "status": "active"
+    },
+    {
+      "id": 3106,
+      "name": "Steel Legplates",
+      "slug": "steel-legplates",
+      "category": "Defense",
+      "tier": "Tier 2",
+      "price": 630,
+      "sellPrice": 378,
+      "stats": [
+        "+35 Physical Defense"
+      ],
+      "statsDetailed": [
+        {
+          "stat": "Physical Defense",
+          "value": 35
+        }
+      ],
+      "passive": null,
+      "active": null,
+      "description": "Main Tier 2 Physical Defense component. Builds into Blade Armor, Chastise Pauldron and Antique Cuirass.",
+      "lore": "",
+      "buildPath": [
+        "Leather Jerkin"
+      ],
+      "buildsInto": [],
+      "image": "items/3106.png",
+      "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/3/3c/Steel_Legplates.png",
+      "fandomFile": "Steel_Legplates.png",
+      "counters": [],
+      "counteredBy": [],
+      "synergiesHeroes": [],
+      "worksAgainstHeroes": [],
+      "recommendedFor": [],
+      "tags": [
+        "defense",
+        "component"
+      ],
+      "patchVersion": "2.2.23",
+      "status": "active"
+    },
+    {
+      "id": 3107,
+      "name": "Ares Belt",
+      "slug": "ares-belt",
+      "category": "Defense",
+      "tier": "Tier 2",
+      "price": 700,
+      "sellPrice": 420,
+      "stats": [
+        "+600 HP"
+      ],
+      "statsDetailed": [
+        {
+          "stat": "HP",
+          "value": 600
+        }
+      ],
+      "passive": null,
+      "active": null,
+      "description": "Main Tier 2 HP component. Builds into Guardian Helmet, Queen's Wings, Thunder Belt, Brute Force Breastplate and Cursed Helmet.",
+      "lore": "",
+      "buildPath": [
+        "Vitality Crystal"
+      ],
+      "buildsInto": [],
+      "image": "items/3107.png",
+      "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/0/04/Ares_Belt.png",
+      "fandomFile": "Ares_Belt.png",
+      "counters": [],
+      "counteredBy": [],
+      "synergiesHeroes": [],
+      "worksAgainstHeroes": [],
+      "recommendedFor": [],
+      "tags": [
+        "defense",
+        "hp",
+        "component"
+      ],
+      "patchVersion": "2.2.23",
+      "status": "active"
+    },
+    {
+      "id": 3108,
+      "name": "Molten Essence",
+      "slug": "molten-essence",
+      "category": "Defense",
+      "tier": "Tier 2",
+      "price": 800,
+      "sellPrice": 480,
+      "stats": [
+        "+540 HP"
+      ],
+      "statsDetailed": [
+        {
+          "stat": "HP",
+          "value": 540
+        }
+      ],
+      "passive": {
+        "name": "Burning Soul",
+        "description": "Deals (0.6% Total HP) Magic Damage to nearby enemies per second. This damage is increased by 125 (+15*Hero Level)% against creeps and minions."
+      },
+      "active": null,
+      "description": "HP + burn component. Builds into Cursed Helmet. Core for tank junglers and laners who want lane clear.",
+      "lore": "",
+      "buildPath": [
+        "Vitality Crystal"
+      ],
+      "buildsInto": [],
+      "image": "items/3108.png",
+      "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/8/8c/Molten_Essence.png",
+      "fandomFile": "Molten_Essence.png",
+      "counters": [],
+      "counteredBy": [],
+      "synergiesHeroes": [],
+      "worksAgainstHeroes": [],
+      "recommendedFor": [
+        "Tank",
+        "Fighter"
+      ],
+      "tags": [
+        "defense",
+        "hp",
+        "burn",
+        "component"
+      ],
+      "patchVersion": "2.2.23",
+      "status": "active"
+    },
+    {
+      "id": 3109,
+      "name": "Dreadnaught Armor",
+      "slug": "dreadnaught-armor",
+      "category": "Defense",
+      "tier": "Tier 2",
+      "price": 730,
+      "sellPrice": 438,
+      "stats": [
+        "+30 Physical Defense"
+      ],
+      "statsDetailed": [
+        {
+          "stat": "Physical Defense",
+          "value": 30
+        }
+      ],
+      "passive": {
+        "name": "Deter",
+        "description": "When hit by a skill, reduces the attacker's Physical Damage by 4% for 2 seconds (stacks up to 3 times)."
+      },
+      "active": null,
+      "description": "Physical Defense + Deter component. Builds into Antique Cuirass.",
+      "lore": "",
+      "buildPath": [
+        "Leather Jerkin"
+      ],
+      "buildsInto": [],
+      "image": "items/3109.png",
+      "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/0/0f/Dreadnaught_Armor.png",
+      "fandomFile": "Dreadnaught_Armor.png",
+      "counters": [],
+      "counteredBy": [],
+      "synergiesHeroes": [],
+      "worksAgainstHeroes": [],
+      "recommendedFor": [],
+      "tags": [
+        "defense",
+        "component"
+      ],
+      "patchVersion": "2.2.23",
+      "status": "active"
+    },
+    {
+      "id": 3110,
+      "name": "Black Ice Shield",
+      "slug": "black-ice-shield",
+      "category": "Defense",
+      "tier": "Tier 2",
+      "price": 780,
+      "sellPrice": 468,
+      "stats": [
+        "+20 Physical Defense",
+        "+20 Magic Defense"
+      ],
+      "statsDetailed": [
+        {
+          "stat": "Physical Defense",
+          "value": 20
+        },
+        {
+          "stat": "Magic Defense",
+          "value": 20
+        }
+      ],
+      "passive": {
+        "name": "Fortress Shield",
+        "description": "For each enemy hero within 3.55 units, Hybrid Defense is increased by 4, up to 20."
+      },
+      "active": null,
+      "description": "Hybrid Defense component. Builds into Dominance Ice.",
+      "lore": "",
+      "buildPath": [
+        "Leather Jerkin",
+        "Magic Resist Cloak"
+      ],
+      "buildsInto": [],
+      "image": "items/3110.png",
+      "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/5/5d/Black_Ice_Shield.png",
+      "fandomFile": "Black_Ice_Shield.png",
+      "counters": [],
+      "counteredBy": [],
+      "synergiesHeroes": [],
+      "worksAgainstHeroes": [],
+      "recommendedFor": [],
+      "tags": [
+        "defense",
+        "hybrid",
+        "component"
+      ],
+      "patchVersion": "2.2.23",
+      "status": "active"
+    },
+    {
+      "id": 3111,
+      "name": "Silence Robe",
+      "slug": "silence-robe",
+      "category": "Defense",
+      "tier": "Tier 2",
+      "price": 1020,
+      "sellPrice": 612,
+      "stats": [
+        "+540 HP",
+        "+23 Magic Defense"
+      ],
+      "statsDetailed": [
+        {
+          "stat": "HP",
+          "value": 540
+        },
+        {
+          "stat": "Magic Defense",
+          "value": 23
+        }
+      ],
+      "passive": null,
+      "active": null,
+      "description": "HP + Magic Defense component. Builds into Radiant Armor and Valkyrie's Shield / Athena's Shield.",
+      "lore": "",
+      "buildPath": [
+        "Vitality Crystal",
+        "Magic Resist Cloak"
+      ],
+      "buildsInto": [],
+      "image": "items/3111.png",
+      "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/a/a4/Silence_Robe.png",
+      "fandomFile": "Silence_Robe.png",
+      "counters": [],
+      "counteredBy": [],
+      "synergiesHeroes": [],
+      "worksAgainstHeroes": [],
+      "recommendedFor": [],
+      "tags": [
+        "defense",
+        "component"
+      ],
+      "patchVersion": "2.2.23",
+      "status": "active"
+    },
+    {
+      "id": 4105,
+      "name": "Roam Boots",
+      "slug": "roam-boots",
+      "category": "Roam",
+      "tier": "Tier 1",
+      "price": 250,
+      "sellPrice": 150,
+      "stats": [
+        "+20 Movement Speed"
+      ],
+      "statsDetailed": [
+        {
+          "stat": "Movement Speed",
+          "value": 20
+        }
+      ],
+      "passive": null,
+      "active": null,
+      "description": "Legacy base used in this file's buildPath for Courage Mask / Favor. In current MLBB, Roam is a Blessing unlocked via Thriving, not a separate boots item. Kept for buildPath compatibility.",
+      "lore": "",
+      "buildPath": [
+        "Boots"
+      ],
+      "buildsInto": [],
+      "image": "items/4105.png",
+      "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/f/fd/Roam_Boots.png",
+      "fandomFile": "Roam_Boots.png",
+      "counters": [],
+      "counteredBy": [],
+      "synergiesHeroes": [],
+      "worksAgainstHeroes": [],
+      "recommendedFor": [],
+      "tags": [
+        "roam",
+        "component"
+      ],
+      "patchVersion": "2.2.23",
+      "status": "legacy"
+    },
+    {
+      "id": 4106,
+      "name": "Conceal",
+      "slug": "conceal",
+      "category": "Roam",
+      "tier": "Blessing",
+      "price": 0,
+      "sellPrice": 0,
+      "stats": [
+        "Conceal Blessing"
+      ],
+      "statsDetailed": [
+        {
+          "stat": "Blessing",
+          "value": "Conceal"
+        }
+      ],
+      "passive": null,
+      "active": {
+        "name": "Conceal",
+        "description": "Conceals you and nearby allied heroes, granting 40% Movement Speed for 5 seconds, or until taking or dealing damage. 60 seconds cooldown. When near allied heroes, you gain 30% EXP and Gold from minions and creeps. Can only be unlocked after accumulating 1000 Gold from Thriving."
+      },
+      "description": "Roam Blessing — stealth engage / escape for the Roamer and nearby allies.",
+      "lore": "",
+      "buildPath": [],
+      "buildsInto": [],
+      "image": "items/4106.png",
+      "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/e/e0/Active_-_Conceal.png",
+      "fandomFile": "Active_-_Conceal.png",
+      "counters": [],
+      "counteredBy": [],
+      "synergiesHeroes": [],
+      "worksAgainstHeroes": [],
+      "recommendedFor": [
+        "Tank",
+        "Support"
+      ],
+      "tags": [
+        "roam",
+        "blessing",
+        "active"
+      ],
+      "patchVersion": "2.2.23",
+      "status": "active"
+    },
+    {
+      "id": 4107,
+      "name": "Dire Hit",
+      "slug": "dire-hit",
+      "category": "Roam",
+      "tier": "Blessing",
+      "price": 0,
+      "sellPrice": 0,
+      "stats": [
+        "Dire Hit Blessing"
+      ],
+      "statsDetailed": [
+        {
+          "stat": "Blessing",
+          "value": "Dire Hit"
+        }
+      ],
+      "passive": {
+        "name": "Dire Hit",
+        "description": "Gains Force while moving, gradually increasing Movement Speed (up to 40). Upon reaching 20 stacks, the next hit consumes all stacks to deal extra True Damage based on stacks. When near allied heroes, you gain 30% EXP and Gold from minions and creeps. Can only be unlocked after accumulating 1000 Gold from Thriving."
+      },
+      "active": null,
+      "description": "Roam Blessing — movement-to-damage for aggressive Roamers.",
+      "lore": "",
+      "buildPath": [],
+      "buildsInto": [],
+      "image": "items/4107.png",
+      "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/1/17/Passive_-_Dire_Hit.png",
+      "fandomFile": "Passive_-_Dire_Hit.png",
+      "counters": [],
+      "counteredBy": [],
+      "synergiesHeroes": [],
+      "worksAgainstHeroes": [],
+      "recommendedFor": [],
+      "tags": [
+        "roam",
+        "blessing"
+      ],
+      "patchVersion": "2.2.23",
+      "status": "active"
+    },
+    {
+      "id": 4108,
+      "name": "Flame Retribution",
+      "slug": "flame-retribution",
+      "category": "Jungle",
+      "tier": "Blessing",
+      "price": 0,
+      "sellPrice": 0,
+      "stats": [
+        "Flame Retribution"
+      ],
+      "statsDetailed": [
+        {
+          "stat": "Blessing",
+          "value": "Flame Retribution"
+        }
+      ],
+      "passive": null,
+      "active": {
+        "name": "Flame Retribution",
+        "description": "Retribution's damage against creeps and minions is increased to 150%. When cast on an enemy hero, deals 100 True Damage and steals 71-120 Physical Attack and Magic Power (scales with level) from them for 3 seconds. Retribution is upgraded when total creep kills, hero kills and assists reaches 5."
+      },
+      "description": "Jungle Blessing — steal Attack / Magic Power from enemy hero.",
+      "lore": "",
+      "buildPath": [],
+      "buildsInto": [],
+      "image": "items/4108.png",
+      "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/9/9f/Flame_Retribution.png",
+      "fandomFile": "Flame_Retribution.png",
+      "counters": [],
+      "counteredBy": [],
+      "synergiesHeroes": [],
+      "worksAgainstHeroes": [],
+      "recommendedFor": [],
+      "tags": [
+        "jungle",
+        "blessing"
+      ],
+      "patchVersion": "2.2.23",
+      "status": "active"
+    },
+    {
+      "id": 4109,
+      "name": "Ice Retribution",
+      "slug": "ice-retribution",
+      "category": "Jungle",
+      "tier": "Blessing",
+      "price": 0,
+      "sellPrice": 0,
+      "stats": [
+        "Ice Retribution"
+      ],
+      "statsDetailed": [
+        {
+          "stat": "Blessing",
+          "value": "Ice Retribution"
+        }
+      ],
+      "passive": null,
+      "active": {
+        "name": "Ice Retribution",
+        "description": "Retribution's damage against creeps and minions is increased to 150%. When cast on an enemy hero, deals 100 True Damage and steals 52-80 Movement Speed (scales with level) from them for 3 seconds. Retribution is upgraded when total creep kills, hero kills and assists reaches 5."
+      },
+      "description": "Jungle Blessing — steal Movement Speed from enemy hero.",
+      "lore": "",
+      "buildPath": [],
+      "buildsInto": [],
+      "image": "items/4109.png",
+      "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/b/bd/Ice_Retribution.png",
+      "fandomFile": "Ice_Retribution.png",
+      "counters": [],
+      "counteredBy": [],
+      "synergiesHeroes": [],
+      "worksAgainstHeroes": [],
+      "recommendedFor": [],
+      "tags": [
+        "jungle",
+        "blessing"
+      ],
+      "patchVersion": "2.2.23",
+      "status": "active"
+    },
+    {
+      "id": 4110,
+      "name": "Bloody Retribution",
+      "slug": "bloody-retribution",
+      "category": "Jungle",
+      "tier": "Blessing",
+      "price": 0,
+      "sellPrice": 0,
+      "stats": [
+        "Bloody Retribution"
+      ],
+      "statsDetailed": [
+        {
+          "stat": "Blessing",
+          "value": "Bloody Retribution"
+        }
+      ],
+      "passive": null,
+      "active": {
+        "name": "Bloody Retribution",
+        "description": "Retribution's damage against creeps and minions is increased to 150%. When cast on an enemy hero, deals 100 True Damage and steals HP equal to 300 plus 24% of the caster's extra HP from them for 3 seconds. Retribution is upgraded when total creep kills, hero kills and assists reaches 5."
+      },
+      "description": "Jungle Blessing — steal HP from enemy hero. Tank jungler pick.",
+      "lore": "",
+      "buildPath": [],
+      "buildsInto": [],
+      "image": "items/4110.png",
+      "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/4/4c/Bloody_Retribution.png",
+      "fandomFile": "Bloody_Retribution.png",
+      "counters": [],
+      "counteredBy": [],
+      "synergiesHeroes": [],
+      "worksAgainstHeroes": [],
+      "recommendedFor": [],
+      "tags": [
+        "jungle",
+        "blessing"
+      ],
+      "patchVersion": "2.2.23",
+      "status": "active"
+    },
+    {
+      "id": 4111,
+      "name": "Blessing: Encourage",
+      "slug": "blessing-encourage",
+      "category": "Roam",
+      "tier": "Blessing",
+      "price": 0,
+      "sellPrice": 0,
+      "stats": [
+        "Encourage Blessing"
+      ],
+      "statsDetailed": [
+        {
+          "stat": "Blessing",
+          "value": "Encourage"
+        }
+      ],
+      "passive": {
+        "name": "Encourage",
+        "description": "Grants you and nearby allied heroes 20 extra Hybrid Defense. When near allied heroes, you gain 30% EXP and Gold from minions and creeps. Can only be unlocked after accumulating 1000 Gold from Thriving."
+      },
+      "active": null,
+      "description": "Roam Blessing component for Courage Mask. Hybrid Defense aura for team.",
+      "lore": "",
+      "buildPath": [],
+      "buildsInto": [],
+      "image": "items/4111.png",
+      "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/8/86/Passive_-_Encourage.png",
+      "fandomFile": "Passive_-_Encourage.png",
+      "counters": [],
+      "counteredBy": [],
+      "synergiesHeroes": [],
+      "worksAgainstHeroes": [],
+      "recommendedFor": [],
+      "tags": [
+        "roam",
+        "blessing"
+      ],
+      "patchVersion": "2.2.23",
+      "status": "active"
+    },
+    {
+      "id": 4112,
+      "name": "Blessing: Favor",
+      "slug": "blessing-favor",
+      "category": "Roam",
+      "tier": "Blessing",
+      "price": 0,
+      "sellPrice": 0,
+      "stats": [
+        "Favor Blessing"
+      ],
+      "statsDetailed": [
+        {
+          "stat": "Blessing",
+          "value": "Favor"
+        }
+      ],
+      "passive": {
+        "name": "Favor",
+        "description": "Every 15 seconds, your next healing or shield skill recovers 400 extra HP to the lowest-HP allied hero within 5 units (including yourself). Skills that only take effect on yourself cannot trigger this effect. When near allied heroes, you gain 30% EXP and Gold from minions and creeps. Can only be unlocked after accumulating 1000 Gold from Thriving."
+      },
+      "active": null,
+      "description": "Roam Blessing component for Favor. Extra heal / shield for lowest-HP ally.",
+      "lore": "",
+      "buildPath": [],
+      "buildsInto": [],
+      "image": "items/4112.png",
+      "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/a/a0/Passive_-_Favor.png",
+      "fandomFile": "Passive_-_Favor.png",
+      "counters": [],
+      "counteredBy": [],
+      "synergiesHeroes": [],
+      "worksAgainstHeroes": [],
+      "recommendedFor": [],
+      "tags": [
+        "roam",
+        "blessing"
+      ],
+      "patchVersion": "2.2.23",
+      "status": "active"
+    },
+    {
+      "id": 5006,
+      "name": "Arcane Boots",
+      "slug": "arcane-boots",
+      "category": "Movement",
+      "tier": "A",
+      "price": 720,
+      "sellPrice": 432,
+      "stats": [
+        "+40 Movement Speed",
+        "+15 Magic Power",
+        "+10 Magic Penetration"
+      ],
+      "statsDetailed": [
+        {
+          "stat": "Movement Speed",
+          "value": 40
+        },
+        {
+          "stat": "Magic Power",
+          "value": 15
+        },
+        {
+          "stat": "Magic Penetration",
+          "value": 10
+        }
+      ],
+      "passive": null,
+      "active": null,
+      "description": "Magic Penetration boots for mages. Default mage boots vs tanky teams.",
+      "lore": "",
+      "buildPath": [
+        "Boots",
+        "Mystery Codex"
+      ],
+      "buildsInto": [],
+      "image": "items/5006.png",
+      "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/1/15/Arcane_Boots.png",
+      "fandomFile": "Arcane_Boots.png",
+      "counters": [],
+      "counteredBy": [],
+      "synergiesHeroes": [],
+      "worksAgainstHeroes": [],
+      "recommendedFor": [
+        "Mage"
+      ],
+      "tags": [
+        "movement",
+        "magic-pen"
+      ],
+      "patchVersion": "2.2.23",
+      "status": "active"
+    },
+    {
+      "id": 5007,
+      "name": "Demon Shoes",
+      "slug": "demon-shoes",
+      "category": "Movement",
+      "tier": "A",
+      "price": 720,
+      "sellPrice": 432,
+      "stats": [
+        "+40 Movement Speed",
+        "+10 Mana Regen"
+      ],
+      "statsDetailed": [
+        {
+          "stat": "Movement Speed",
+          "value": 40
+        },
+        {
+          "stat": "Mana Regen",
+          "value": 10
+        }
+      ],
+      "passive": {
+        "name": "Mysticism",
+        "description": "Getting a kill or assist on an enemy Minion will restore 4% Mana. (An assist occurs when a Minion dies within 2 seconds after taking damage from the hero.)"
+      },
+      "active": null,
+      "description": "Mana Regen boots for mana-hungry mages and supports.",
+      "lore": "",
+      "buildPath": [
+        "Boots",
+        "Magic Necklace"
+      ],
+      "buildsInto": [],
+      "image": "items/5007.png",
+      "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/1/17/Demon_Shoes.png",
+      "fandomFile": "Demon_Shoes.png",
+      "counters": [],
+      "counteredBy": [],
+      "synergiesHeroes": [],
+      "worksAgainstHeroes": [],
+      "recommendedFor": [
+        "Mage",
+        "Support"
+      ],
+      "tags": [
+        "movement",
+        "mana"
+      ],
+      "patchVersion": "2.2.23",
+      "status": "active"
+    },
+    {
+      "id": 5101,
+      "name": "Boots",
+      "slug": "boots",
+      "category": "Movement",
+      "tier": "Tier 1",
+      "price": 250,
+      "sellPrice": 150,
+      "stats": [
+        "+20 Movement Speed"
+      ],
+      "statsDetailed": [
+        {
+          "stat": "Movement Speed",
+          "value": 20
+        }
+      ],
+      "passive": null,
+      "active": null,
+      "description": "Base boots. Builds into all Tier 2 boots: Swift, Warrior, Tough, Magic Shoes, Rapid, Arcane and Demon Shoes.",
+      "lore": "",
+      "buildPath": [],
+      "buildsInto": [],
+      "image": "items/5101.png",
+      "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/5/59/Boots.png",
+      "fandomFile": "Boots.png",
+      "counters": [],
+      "counteredBy": [],
+      "synergiesHeroes": [],
+      "worksAgainstHeroes": [],
+      "recommendedFor": [],
+      "tags": [
+        "movement",
+        "component"
+      ],
+      "patchVersion": "2.2.23",
+      "status": "active"
+    },
+    {
+      "id": 6101,
+      "name": "Expert Gloves",
+      "slug": "expert-gloves",
+      "category": "Attack & Magic",
+      "tier": "Tier 1",
+      "price": 500,
+      "sellPrice": 300,
+      "stats": [
+        "+30 Adaptive Attack"
+      ],
+      "statsDetailed": [
+        {
+          "stat": "Adaptive Attack",
+          "value": 30
+        }
+      ],
+      "passive": null,
+      "active": null,
+      "description": "Adaptive Attack component. Builds into Sky Piercer, Winter Crown, Fleeting Time and Queen's Wings.",
+      "lore": "",
+      "buildPath": [],
+      "buildsInto": [],
+      "image": "items/6101.png",
+      "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/1/13/Expert_Gloves.png",
+      "fandomFile": "Expert_Gloves.png",
+      "counters": [],
+      "counteredBy": [],
+      "synergiesHeroes": [],
+      "worksAgainstHeroes": [],
+      "recommendedFor": [],
+      "tags": [
+        "hybrid",
+        "component"
+      ],
+      "patchVersion": "2.2.23",
+      "status": "active"
+    },
+    {
+      "id": 9101,
+      "name": "Power Potion",
+      "slug": "power-potion",
+      "category": "Attack",
+      "tier": "Tier 3",
+      "price": 1500,
+      "sellPrice": 900,
+      "stats": [
+        "+30 Physical Attack",
+        "+15% Lifesteal (120s)"
+      ],
+      "statsDetailed": [
+        {
+          "stat": "Physical Attack",
+          "value": 30
+        },
+        {
+          "stat": "Lifesteal",
+          "value": "15%"
+        }
+      ],
+      "passive": {
+        "name": "Increase Power",
+        "description": "Automatically used after purchasing, giving 30 Physical Attack and 15% Lifesteal for 120s. Can only have one potion effect at a time."
+      },
+      "active": null,
+      "description": "Late-game Attack potion. Consumable, does not take a permanent slot effect beyond 120s.",
+      "lore": "",
+      "buildPath": [],
+      "buildsInto": [],
+      "image": "items/9101.png",
+      "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/0/06/Power_Potion.png",
+      "fandomFile": "Power_Potion.png",
+      "counters": [],
+      "counteredBy": [],
+      "synergiesHeroes": [],
+      "worksAgainstHeroes": [],
+      "recommendedFor": [],
+      "tags": [
+        "attack",
+        "potion",
+        "consumable"
+      ],
+      "patchVersion": "2.2.23",
+      "status": "active"
+    },
+    {
+      "id": 9102,
+      "name": "Magic Potion",
+      "slug": "magic-potion",
+      "category": "Magic",
+      "tier": "Tier 3",
+      "price": 1500,
+      "sellPrice": 900,
+      "stats": [
+        "+30 Magic Power",
+        "+10% Cooldown Reduction (120s)"
+      ],
+      "statsDetailed": [
+        {
+          "stat": "Magic Power",
+          "value": 30
+        },
+        {
+          "stat": "Cooldown Reduction",
+          "value": "10%"
+        }
+      ],
+      "passive": {
+        "name": "Increase Power",
+        "description": "Automatically used after purchasing, increases Magic Power by 30 and Cooldown Reduction by 10% for 120s. Can only have one potion effect at a time."
+      },
+      "active": null,
+      "description": "Late-game Magic potion. Consumable.",
+      "lore": "",
+      "buildPath": [],
+      "buildsInto": [],
+      "image": "items/9102.png",
+      "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/5/58/Magic_Potion.png",
+      "fandomFile": "Magic_Potion.png",
+      "counters": [],
+      "counteredBy": [],
+      "synergiesHeroes": [],
+      "worksAgainstHeroes": [],
+      "recommendedFor": [],
+      "tags": [
+        "magic",
+        "potion",
+        "consumable"
+      ],
+      "patchVersion": "2.2.23",
+      "status": "active"
+    },
+    {
+      "id": 9103,
+      "name": "Rock Potion",
+      "slug": "rock-potion",
+      "category": "Defense",
+      "tier": "Tier 3",
+      "price": 1500,
+      "sellPrice": 900,
+      "stats": [
+        "+500 Max HP",
+        "+5% Damage Reduction (120s)"
+      ],
+      "statsDetailed": [
+        {
+          "stat": "HP",
+          "value": 500
+        },
+        {
+          "stat": "Damage Reduction",
+          "value": "5%"
+        }
+      ],
+      "passive": {
+        "name": "Increase Power",
+        "description": "Upon purchase, grants 500 Max HP and 5% Damage Reduction for 120 seconds. Can only have one potion effect at a time."
+      },
+      "active": null,
+      "description": "Late-game Defense potion. Consumable.",
+      "lore": "",
+      "buildPath": [],
+      "buildsInto": [],
+      "image": "items/9103.png",
+      "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/0/03/Rock_Potion.png",
+      "fandomFile": "Rock_Potion.png",
+      "counters": [],
+      "counteredBy": [],
+      "synergiesHeroes": [],
+      "worksAgainstHeroes": [],
+      "recommendedFor": [],
+      "tags": [
+        "defense",
+        "potion",
+        "consumable"
+      ],
+      "patchVersion": "2.2.23",
+      "status": "active"
+    },
+    {
+      "id": 9901,
+      "name": "Blade of Despair Fragment",
+      "slug": "blade-of-despair-fragment",
+      "category": "Attack",
+      "tier": "Tier 2",
+      "price": 0,
+      "sellPrice": 0,
+      "stats": [
+        "Legacy component"
+      ],
+      "statsDetailed": [
+        {
+          "stat": "Legacy",
+          "value": "Component"
+        }
+      ],
+      "passive": null,
+      "active": null,
+      "description": "Legacy component kept only because the original file's buildPath for Blade of Despair / Berserker's Fury / Sky Piercer references it. Not purchasable in the current shop — Blade of Despair now builds from Legion Sword.",
+      "lore": "",
+      "buildPath": [],
+      "buildsInto": [],
+      "image": "items/9901.png",
+      "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/4/46/Blade_of_Despair_Fragment.png",
+      "fandomFile": "Blade_of_Despair_Fragment.png",
+      "counters": [],
+      "counteredBy": [],
+      "synergiesHeroes": [],
+      "worksAgainstHeroes": [],
+      "recommendedFor": [],
+      "tags": [
+        "attack",
+        "legacy"
+      ],
+      "patchVersion": "2.2.23",
+      "status": "legacy"
+    },
+    {
+      "id": 9902,
+      "name": "Pirate's Dagger",
+      "slug": "pirates-dagger",
+      "category": "Attack",
+      "tier": "Tier 1",
+      "price": 0,
+      "sellPrice": 0,
+      "stats": [
+        "Legacy component"
+      ],
+      "statsDetailed": [
+        {
+          "stat": "Legacy",
+          "value": "Component"
+        }
+      ],
+      "passive": null,
+      "active": null,
+      "description": "Legacy component kept only because the original file's buildPath for Malefic Roar / Hunter Strike / Malefic Gun references it. Not purchasable in the current shop.",
+      "lore": "",
+      "buildPath": [],
+      "buildsInto": [],
+      "image": "items/9902.png",
+      "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/8/86/Pirate%27s_Dagger.png",
+      "fandomFile": "Pirate%27s_Dagger.png",
+      "counters": [],
+      "counteredBy": [],
+      "synergiesHeroes": [],
+      "worksAgainstHeroes": [],
+      "recommendedFor": [],
+      "tags": [
+        "attack",
+        "legacy"
+      ],
+      "patchVersion": "2.2.23",
+      "status": "legacy"
+    },
+    {
+      "id": 9903,
+      "name": "Mana Necklace",
+      "slug": "mana-necklace",
+      "category": "Magic",
+      "tier": "Tier 1",
+      "price": 120,
+      "sellPrice": 72,
+      "stats": [
+        "+2 Mana Regen"
+      ],
+      "statsDetailed": [
+        {
+          "stat": "Mana Regen",
+          "value": 2
+        }
+      ],
+      "passive": null,
+      "active": null,
+      "description": "Old name for Magic Necklace (2103). Same item, renamed. Kept as an alias entry so old buildPaths that say 'Mana Necklace' still resolve.",
+      "lore": "",
+      "buildPath": [],
+      "buildsInto": [],
+      "image": "items/9903.png",
+      "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/a/aa/Mana_Necklace.png",
+      "fandomFile": "Mana_Necklace.png",
+      "counters": [],
+      "counteredBy": [],
+      "synergiesHeroes": [],
+      "worksAgainstHeroes": [],
+      "recommendedFor": [],
+      "tags": [
+        "magic",
+        "legacy",
+        "alias"
+      ],
+      "patchVersion": "2.2.23",
+      "status": "legacy",
+      "alias": "Magic Necklace"
     }
   ]
 }
