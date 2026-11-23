@@ -1,6 +1,7 @@
 package com.mlbb.plus.ui.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -16,6 +17,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -24,8 +26,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -47,11 +47,15 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.mlbb.plus.ui.components.AppHeader
+import com.mlbb.plus.ui.components.AppIcons
+import com.mlbb.plus.ui.components.SectionLabel
+import com.mlbb.plus.ui.components.SearchField
 import com.mlbb.plus.ui.model.GameData
 import com.mlbb.plus.ui.model.Hero
 import com.mlbb.plus.ui.model.Item
 import com.mlbb.plus.ui.components.FilterPill
-import com.mlbb.plus.ui.theme.MLBBPlusColors
+import com.mlbb.plus.ui.theme.AppUiColors
 
 private enum class ItemTab { OVERVIEW, BUILD_PATH, MATCHUPS }
 private enum class ItemSort { RECOMMENDED, PRICE_LOW, PRICE_HIGH }
@@ -69,10 +73,10 @@ private fun tierRank(tier: String): Int {
 private fun tierColor(tier: String): Color {
     val t = tier.trim().uppercase()
     return when {
-        t.startsWith("S") -> MLBBPlusColors.TierS
-        t.startsWith("A") -> MLBBPlusColors.TierA
-        t.startsWith("B") -> MLBBPlusColors.TierB
-        else -> MLBBPlusColors.GithubSecondary
+        t.startsWith("S") -> AppUiColors.TierS
+        t.startsWith("A") -> AppUiColors.TierA
+        t.startsWith("B") -> AppUiColors.TierB
+        else -> AppUiColors.GithubSecondary
     }
 }
 
@@ -108,68 +112,28 @@ fun ItemsScreen(
         }
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MLBBPlusColors.GithubBg)
-            .padding(horizontal = 8.dp)
-    ) {
-        Text(
-            text = "ITEM EXPLORER",
-            color = MLBBPlusColors.GithubText,
-            fontSize = 20.sp,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(top = 16.dp, bottom = 4.dp)
-        )
-        Text(
-            text = "Patch ${GameData.patchNotes.displayVersion} item catalog",
-            color = MLBBPlusColors.GithubSecondary,
-            fontSize = 12.sp,
-            modifier = Modifier.padding(bottom = 12.dp)
-        )
-
-        OutlinedTextField(
-            value = query,
-            onValueChange = { query = it },
-            placeholder = { Text("Search by item name or category", color = MLBBPlusColors.GithubSecondary, fontSize = 13.sp) },
-            singleLine = true,
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedTextColor = MLBBPlusColors.GithubText,
-                unfocusedTextColor = MLBBPlusColors.GithubText,
-                focusedContainerColor = MLBBPlusColors.GithubCard,
-                unfocusedContainerColor = MLBBPlusColors.GithubCard,
-                focusedBorderColor = MLBBPlusColors.Gold,
-                unfocusedBorderColor = MLBBPlusColors.GithubBorder
-            ),
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        Text("Filter by category", color = MLBBPlusColors.GithubSecondary, fontSize = 12.sp)
+    Column(Modifier.fillMaxSize().background(AppUiColors.GithubBg)) {
+        AppHeader("ITEM EXPLORER", "Patch ${GameData.patchNotes.displayVersion} • ${filtered.size} active items", AppIcons.Apps)
+        Column(
+            Modifier.fillMaxSize().widthIn(max = 960.dp).align(Alignment.CenterHorizontally)
+                .padding(horizontal = 16.dp, vertical = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            SectionLabel("FIND AN ITEM")
+            SearchField(query, { query = it }, "Search by item name or category")
+        SectionLabel("FILTER BY CATEGORY")
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .horizontalScroll(rememberScrollState())
-                .padding(vertical = 8.dp),
+            modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(top = 8.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             categories.forEach { cat ->
-                val selected = cat == selectedCat
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(if (selected) MLBBPlusColors.GoldBg else MLBBPlusColors.GithubCard)
-                        .clickable { selectedCat = cat }
-                        .padding(horizontal = 14.dp, vertical = 8.dp)
-                ) {
-                    Text(cat, color = if (selected) MLBBPlusColors.Gold else MLBBPlusColors.GithubText, fontSize = 13.sp)
-                }
+                FilterPill(cat, cat == selectedCat, onClick = { selectedCat = cat })
             }
         }
 
+        SectionLabel("SORT ITEMS", Modifier.padding(top = 14.dp))
         Row(
-            modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+            modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(top = 8.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             listOf(
@@ -183,12 +147,12 @@ fun ItemsScreen(
 
         Text(
             text = "${filtered.size} of ${activeItems.size} active items",
-            color = MLBBPlusColors.GithubSecondary,
+            color = AppUiColors.GithubSecondary,
             fontSize = 12.sp,
-            modifier = Modifier.padding(vertical = 4.dp)
+            modifier = Modifier.padding(top = 10.dp, bottom = 6.dp)
         )
 
-        // Adaptive columns keep portraits readable on compact and wide screens
+        // Adaptive columns keep item portraits readable on compact and wide screens
         LazyVerticalGrid(
             columns = GridCells.Adaptive(minSize = 84.dp),
             contentPadding = PaddingValues(vertical = 8.dp),
@@ -207,8 +171,9 @@ fun ItemsScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .aspectRatio(1f)
-                            .clip(RoundedCornerShape(8.dp))
-                            .background(MLBBPlusColors.GithubCard)
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(AppUiColors.GithubCard)
+                            .border(1.dp, AppUiColors.GithubBorder, RoundedCornerShape(12.dp))
                     ) {
                         AssetImage(
                             item = item,
@@ -219,8 +184,9 @@ fun ItemsScreen(
                     }
                     Text(
                         text = item.name,
-                        color = MLBBPlusColors.GithubText,
-                        fontSize = 10.sp,
+                        color = AppUiColors.GithubText,
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.SemiBold,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         textAlign = TextAlign.Center,
@@ -228,7 +194,7 @@ fun ItemsScreen(
                     )
                     Text(
                         text = "${item.price} Gold",
-                        color = MLBBPlusColors.Gold,
+                        color = AppUiColors.Gold,
                         fontSize = 9.sp,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
@@ -236,6 +202,7 @@ fun ItemsScreen(
                     )
                 }
             }
+        }
         }
     }
 }
@@ -271,7 +238,7 @@ fun ItemDetailScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(MLBBPlusColors.GithubBg)
+            .background(AppUiColors.GithubBg)
             .verticalScroll(rememberScrollState())
             .padding(12.dp)
     ) {
@@ -280,14 +247,14 @@ fun ItemDetailScreen(
                 modifier = Modifier
                     .size(72.dp)
                     .clip(RoundedCornerShape(12.dp))
-                    .background(MLBBPlusColors.GithubCard)
+                    .background(AppUiColors.GithubCard)
             ) {
                 AssetImage(item = item, modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop, contentDescription = item.name)
             }
             Spacer(modifier = Modifier.width(12.dp))
             Column {
-                Text(item.name, color = MLBBPlusColors.GithubText, fontSize = 20.sp, fontWeight = FontWeight.Bold)
-                Text(item.category, color = MLBBPlusColors.GithubSecondary, fontSize = 13.sp)
+                Text(item.name, color = AppUiColors.GithubText, fontSize = 20.sp, fontWeight = FontWeight.Bold)
+                Text(item.category, color = AppUiColors.GithubSecondary, fontSize = 13.sp)
                 Text(
                     text = "Tier ${item.tier.trim().uppercase()} • ${item.price} Gold",
                     color = tierColor(item.tier),
@@ -308,11 +275,11 @@ fun ItemDetailScreen(
                     modifier = Modifier
                         .semantics { role = Role.Tab; this.selected = selected }
                         .clip(RoundedCornerShape(16.dp))
-                        .background(if (selected) MLBBPlusColors.GoldBg else MLBBPlusColors.GithubCard)
+                        .background(if (selected) AppUiColors.GoldBg else AppUiColors.GithubCard)
                         .clickable { selectedTab = tab }
                         .padding(horizontal = 14.dp, vertical = 8.dp)
                 ) {
-                    Text(if (tab == ItemTab.MATCHUPS) "HERO LINKS" else tab.name.replace("_", " "), color = if (selected) MLBBPlusColors.Gold else MLBBPlusColors.GithubText, fontSize = 13.sp, fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal)
+                    Text(if (tab == ItemTab.MATCHUPS) "HERO LINKS" else tab.name.replace("_", " "), color = if (selected) AppUiColors.Gold else AppUiColors.GithubText, fontSize = 13.sp, fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal)
                 }
             }
         }
@@ -322,15 +289,15 @@ fun ItemDetailScreen(
         when (selectedTab) {
             ItemTab.OVERVIEW -> {
                 if (item.statsDetailed.isNotEmpty()) {
-                    Text("Stats", color = MLBBPlusColors.GithubText, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                    Text("Stats", color = AppUiColors.GithubText, fontWeight = FontWeight.Bold, fontSize = 14.sp)
                     Spacer(modifier = Modifier.height(8.dp))
                     item.statsDetailed.forEach { stat ->
-                        Text("• ${stat.stat}: ${stat.value}", color = MLBBPlusColors.GithubText, fontSize = 13.sp)
+                        Text("• ${stat.stat}: ${stat.value}", color = AppUiColors.GithubText, fontSize = 13.sp)
                     }
                     Spacer(modifier = Modifier.height(12.dp))
                 }
                 if (relatedItems.isNotEmpty()) {
-                    Text("Related Items", color = MLBBPlusColors.GithubText, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                    Text("Related Items", color = AppUiColors.GithubText, fontWeight = FontWeight.Bold, fontSize = 14.sp)
                     Spacer(modifier = Modifier.height(8.dp))
                     LazyRow(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                         items(relatedItems, key = { it.id }) { rel ->
@@ -343,17 +310,17 @@ fun ItemDetailScreen(
                                 Box(modifier = Modifier.size(52.dp).clip(RoundedCornerShape(10.dp))) {
                                     AssetImage(item = rel, modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop, contentDescription = rel.name)
                                 }
-                                Text(rel.name, color = MLBBPlusColors.GithubText, fontSize = 10.sp, maxLines = 1, overflow = TextOverflow.Ellipsis, textAlign = TextAlign.Center)
+                                Text(rel.name, color = AppUiColors.GithubText, fontSize = 10.sp, maxLines = 1, overflow = TextOverflow.Ellipsis, textAlign = TextAlign.Center)
                             }
                         }
                     }
                 }
             }
             ItemTab.BUILD_PATH -> {
-                Text("Build Path", color = MLBBPlusColors.GithubText, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                Text("Build Path", color = AppUiColors.GithubText, fontWeight = FontWeight.Bold, fontSize = 14.sp)
                 Spacer(modifier = Modifier.height(8.dp))
                 if (buildPathItems.isEmpty()) {
-                    Text("No build path in items.json", color = MLBBPlusColors.GithubSecondary, fontSize = 13.sp)
+                    Text("No build path in items.json", color = AppUiColors.GithubSecondary, fontSize = 13.sp)
                 } else {
                     Row(
                         modifier = Modifier
@@ -372,20 +339,20 @@ fun ItemDetailScreen(
                                 Box(modifier = Modifier.size(52.dp).clip(RoundedCornerShape(10.dp))) {
                                     AssetImage(item = comp, modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop, contentDescription = comp.name)
                                 }
-                                Text(comp.name, color = MLBBPlusColors.GithubText, fontSize = 10.sp, maxLines = 1, overflow = TextOverflow.Ellipsis, textAlign = TextAlign.Center)
+                                Text(comp.name, color = AppUiColors.GithubText, fontSize = 10.sp, maxLines = 1, overflow = TextOverflow.Ellipsis, textAlign = TextAlign.Center)
                             }
                             if (index < buildPathItems.lastIndex) {
-                                Text("→", color = MLBBPlusColors.GithubSecondary, fontSize = 16.sp)
+                                Text("→", color = AppUiColors.GithubSecondary, fontSize = 16.sp)
                             }
                         }
                     }
                 }
             }
             ItemTab.MATCHUPS -> {
-                Text("Hero Synergies", color = MLBBPlusColors.GithubText, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                Text("Hero Synergies", color = AppUiColors.GithubText, fontWeight = FontWeight.Bold, fontSize = 14.sp)
                 Spacer(modifier = Modifier.height(8.dp))
                 if (synergyHeroes.isEmpty()) {
-                    Text("No hero synergy data for this item.", color = MLBBPlusColors.GithubSecondary, fontSize = 13.sp)
+                    Text("No hero synergy data for this item.", color = AppUiColors.GithubSecondary, fontSize = 13.sp)
                 } else {
                     LazyRow(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                         items(synergyHeroes, key = { it.id }) { hero ->
@@ -398,16 +365,16 @@ fun ItemDetailScreen(
                                 Box(modifier = Modifier.size(52.dp).clip(RoundedCornerShape(10.dp))) {
                                     AssetImage(hero = hero, modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop, contentDescription = hero.name)
                                 }
-                                Text(hero.name, color = MLBBPlusColors.GithubText, fontSize = 10.sp, maxLines = 1, overflow = TextOverflow.Ellipsis, textAlign = TextAlign.Center)
+                                Text(hero.name, color = AppUiColors.GithubText, fontSize = 10.sp, maxLines = 1, overflow = TextOverflow.Ellipsis, textAlign = TextAlign.Center)
                             }
                         }
                     }
                 }
                 Spacer(modifier = Modifier.height(16.dp))
-                Text("Effective Against", color = MLBBPlusColors.GithubText, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                Text("Effective Against", color = AppUiColors.GithubText, fontWeight = FontWeight.Bold, fontSize = 14.sp)
                 Spacer(modifier = Modifier.height(8.dp))
                 if (matchupHeroes.isEmpty()) {
-                    Text("No matchup data for this item.", color = MLBBPlusColors.GithubSecondary, fontSize = 13.sp)
+                    Text("No matchup data for this item.", color = AppUiColors.GithubSecondary, fontSize = 13.sp)
                 } else {
                     LazyRow(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                         items(matchupHeroes, key = { it.id }) { hero ->
@@ -418,7 +385,7 @@ fun ItemDetailScreen(
                                 Box(modifier = Modifier.size(52.dp).clip(RoundedCornerShape(10.dp))) {
                                     AssetImage(hero = hero, modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop, contentDescription = hero.name)
                                 }
-                                Text(hero.name, color = MLBBPlusColors.GithubText, fontSize = 10.sp, maxLines = 1, overflow = TextOverflow.Ellipsis, textAlign = TextAlign.Center)
+                                Text(hero.name, color = AppUiColors.GithubText, fontSize = 10.sp, maxLines = 1, overflow = TextOverflow.Ellipsis, textAlign = TextAlign.Center)
                             }
                         }
                     }
