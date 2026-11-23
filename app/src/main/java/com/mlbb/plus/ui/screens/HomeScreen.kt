@@ -73,6 +73,12 @@ fun HomeScreen(
     val roles = remember { RoleTypes.roles }
     val typeIds = remember(selectedRole) { RoleTypes.typesFor(selectedRole) }
     val patch = GameData.patchNotes.displayVersion
+    // Same short-patch rule as Heroes/Items: displayVersion can be
+    // "2.2.23-matchups-2026-11-21" — that wrapped the header to 2 lines.
+    // substringBefore("-") -> "2.2.23". Also fixes the stale-guide check
+    // below: guide.patch ("2.2.23") could never equal the long version.
+    val shortPatch = patch.substringBefore("-").ifBlank { patch }
+    val guidePatch = (guide?.patch?.ifBlank { null } ?: shortPatch).substringBefore("-").ifBlank { shortPatch }
     val guide = GameData.guides[selectedRole]
     val guideType = guide?.type(selectedRoleType) ?: guide?.types?.firstOrNull()
 
@@ -83,7 +89,7 @@ fun HomeScreen(
         ) {
             AppHeader(
                 title = "MLBB PLUS",
-                subtitle = "$selectedRole guide \u2022 patch ${guide?.patch?.ifBlank { null } ?: patch} \u2022 floating guide",
+                subtitle = "$selectedRole guide \u2022 patch $guidePatch \u2022 floating guide",
                 icon = AppIcons.Shield
             )
 
@@ -110,7 +116,7 @@ fun HomeScreen(
                 )
 
                 if (guide != null && guide.mechanics.isNotEmpty()) {
-                    SectionLabel("${selectedRole.uppercase()} MECHANICS \u2022 PATCH ${guide.patch.ifBlank { patch }}")
+                    SectionLabel("${selectedRole.uppercase()} MECHANICS \u2022 PATCH $guidePatch")
                     MechanicsCard(guide)
                 }
 
@@ -118,7 +124,7 @@ fun HomeScreen(
                     GameData.patchNotes.originalServer.heroChanges.filter { GameData.heroesById[it.heroId] != null }
                 }
                 if (movers.isNotEmpty()) {
-                    SectionLabel("PATCH $patch MOVERS")
+                    SectionLabel("PATCH $shortPatch MOVERS")
                     Row(
                         Modifier.horizontalScroll(rememberScrollState()),
                         horizontalArrangement = Arrangement.spacedBy(10.dp)
@@ -250,7 +256,7 @@ private fun RolePanel(
     onHeroClick: (Int) -> Unit,
 ) {
     val shape = RoundedCornerShape(18.dp)
-    val livePatch = GameData.patchNotes.displayVersion
+    val livePatch = GameData.patchNotes.displayVersion.substringBefore("-").ifBlank { GameData.patchNotes.displayVersion }
     // Guide files are versioned independently of the patch notes: flag a guide that is older.
     val guideStale = guide != null && guide.patch.isNotBlank() && guide.patch != livePatch
     Column(
@@ -572,7 +578,7 @@ private fun MetaHeroCard(hero: Hero, onClick: () -> Unit) {
                 modifier = Modifier
                     .size(58.dp)
                     .clip(CircleShape)
-                    .border(2.dp, Color.White.copy(alpha = 0.85f), CircleShape)
+                    .border(2.dp, AppUiColors.GithubText.copy(alpha = 0.85f), CircleShape) // theme near-white, not hardcoded white
             )
             TierBadge(hero.tier, Modifier.align(Alignment.TopEnd))
         }
@@ -598,7 +604,7 @@ private fun LaunchButton(enabledPermission: Boolean, onClick: () -> Unit, modifi
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        Icon(AppIcons.PlayArrow, contentDescription = null, tint = Color.Black, modifier = Modifier.size(24.dp))
-        Text(if (enabledPermission) "Launch Widget" else "Enable Widget", color = Color.Black, fontWeight = FontWeight.Bold, fontSize = 15.sp, letterSpacing = 0.5.sp)
+        Icon(AppIcons.PlayArrow, contentDescription = null, tint = Color(0xFF171717) // AppUiTheme onPrimary, not pure Black, modifier = Modifier.size(24.dp))
+        Text(if (enabledPermission) "Launch Widget" else "Enable Widget", color = Color(0xFF171717), fontWeight = FontWeight.Bold, fontSize = 15.sp, letterSpacing = 0.5.sp)
     }
 }

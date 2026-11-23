@@ -47,14 +47,19 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.material3.TextButton
 import com.mlbb.plus.ui.components.AppHeader
+import com.mlbb.plus.ui.components.BarDivider
+import com.mlbb.plus.ui.components.CompactDropdown
+import com.mlbb.plus.ui.components.CompactSearchBox
+import com.mlbb.plus.ui.components.FilterBarCount
+import com.mlbb.plus.ui.components.FilterBarLabel
+import com.mlbb.plus.ui.components.OneBarFilter
+import com.mlbb.plus.ui.components.SubHeading
 import com.mlbb.plus.ui.components.AppIcons
-import com.mlbb.plus.ui.components.SectionLabel
-import com.mlbb.plus.ui.components.SearchField
 import com.mlbb.plus.ui.model.GameData
 import com.mlbb.plus.ui.model.Hero
 import com.mlbb.plus.ui.model.Item
-import com.mlbb.plus.ui.components.FilterPill
 import com.mlbb.plus.ui.theme.AppUiColors
 
 private enum class ItemTab { OVERVIEW, BUILD_PATH, MATCHUPS }
@@ -112,52 +117,74 @@ fun ItemsScreen(
         }
     }
 
+    // Short patch — same rule as Heroes/Home: displayVersion can be
+    // "2.2.23-matchups-2026-11-21". substringBefore("-") -> "2.2.23".
+    val shortPatch = GameData.patchNotes.displayVersion.substringBefore("-").ifBlank { GameData.patchNotes.displayVersion }
+
     Column(Modifier.fillMaxSize().background(AppUiColors.GithubBg)) {
-        AppHeader("ITEM EXPLORER", "Patch ${GameData.patchNotes.displayVersion} • ${filtered.size} active items", AppIcons.Apps)
+        AppHeader("ITEM EXPLORER", "Patch $shortPatch • ${filtered.size} items", AppIcons.Apps)
         Column(
             Modifier.fillMaxSize().widthIn(max = 960.dp).align(Alignment.CenterHorizontally)
-                .padding(horizontal = 16.dp, vertical = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+                .padding(horizontal = 16.dp, vertical = 8.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
-            SectionLabel("FIND AN ITEM")
-            SearchField(query, { query = it }, "Search by item name or category")
-        SectionLabel("FILTER BY CATEGORY")
-        Row(
-            modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(top = 8.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            categories.forEach { cat ->
-                FilterPill(cat, cat == selectedCat, onClick = { selectedCat = cat })
-            }
-        }
-
-        SectionLabel("SORT ITEMS", Modifier.padding(top = 14.dp))
-        Row(
-            modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(top = 8.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            listOf(
+            // ONE BAR — search | Filter by [category] | Sort by [sort]
+            // Single 52dp container from UiKit.kt (ui/components).
+            // The Row INSIDE scrolls horizontally, so on a 360dp phone the bar
+            // is wider than the screen but nothing is clipped.
+            // Was: 160dp SearchField + 2 CompactDropdowns + ✕ Box in a bare Row.
+            val hasItemFilters = query.isNotBlank() || selectedCat != "All" ||
+                sort != ItemSort.RECOMMENDED
+            val sortLabels = mapOf(
                 ItemSort.RECOMMENDED to "Recommended",
                 ItemSort.PRICE_LOW to "Price: low to high",
                 ItemSort.PRICE_HIGH to "Price: high to low"
-            ).forEach { (option, label) ->
-                FilterPill(label, sort == option, onClick = { sort = option })
+            )
+            OneBarFilter {
+                    CompactSearchBox(query, { query = it }, "Search items", Modifier.width(130.dp))
+                    BarDivider()
+                    FilterBarLabel("Filter by")
+                    CompactDropdown(
+                        display = selectedCat,
+                        options = categories,
+                        displayFor = { it },
+                        onSelect = { selectedCat = it }
+                    )
+                    BarDivider()
+                    FilterBarLabel("Sort by")
+                    CompactDropdown(
+                        display = sortLabels[sort] ?: "Recommended",
+                        options = sortLabels.values.toList(),
+                        displayFor = { it },
+                        onSelect = { label ->
+                            sort = sortLabels.entries.first { it.value == label }.key
+                        }
+                    )
+                    if (hasItemFilters) {
+                        TextButton(
+                            onClick = {
+                                query = ""
+                                selectedCat = "All"
+                                sort = ItemSort.RECOMMENDED
+                            },
+                            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp),
+                            modifier = Modifier.height(40.dp)
+                        ) {
+                            Text("Clear", color = AppUiColors.Gold, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
+                        }
+                    }
             }
-        }
+            FilterBarCount("${filtered.size} of ${activeItems.size} items")
 
-        Text(
-            text = "${filtered.size} of ${activeItems.size} active items",
-            color = AppUiColors.GithubSecondary,
-            fontSize = 12.sp,
-            modifier = Modifier.padding(top = 10.dp, bottom = 6.dp)
-        )
-
-        // Adaptive columns keep item portraits readable on compact and wide screens
+        // PHONE-PROOF GRID — GridCells.Fixed(5), NEVER Adaptive.
+        // Adaptive gave 3 columns -> ~102dp portraits (screenshot).
+        // Fixed(5) -> ~62dp portraits on a 360dp phone. weight(1f) gives
+        // the grid ALL remaining height after the one-bar filter.
         LazyVerticalGrid(
-            columns = GridCells.Adaptive(minSize = 84.dp),
-            contentPadding = PaddingValues(vertical = 8.dp),
-            horizontalArrangement = Arrangement.spacedBy(6.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
+            columns = GridCells.Fixed(5),
+            contentPadding = PaddingValues(vertical = 4.dp),
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp),
             modifier = Modifier.fillMaxWidth().weight(1f)
         ) {
             items(filtered, key = { it.id }) { item ->
@@ -171,9 +198,9 @@ fun ItemsScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .aspectRatio(1f)
-                            .clip(RoundedCornerShape(12.dp))
+                            .clip(RoundedCornerShape(8.dp))
                             .background(AppUiColors.GithubCard)
-                            .border(1.dp, AppUiColors.GithubBorder, RoundedCornerShape(12.dp))
+                            .border(1.dp, AppUiColors.GithubBorder, RoundedCornerShape(8.dp))
                     ) {
                         AssetImage(
                             item = item,
@@ -185,17 +212,17 @@ fun ItemsScreen(
                     Text(
                         text = item.name,
                         color = AppUiColors.GithubText,
-                        fontSize = 11.sp,
+                        fontSize = 10.sp,
                         fontWeight = FontWeight.SemiBold,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         textAlign = TextAlign.Center,
-                        modifier = Modifier.padding(top = 3.dp)
+                        modifier = Modifier.padding(top = 2.dp)
                     )
                     Text(
                         text = "${item.price} Gold",
                         color = AppUiColors.Gold,
-                        fontSize = 9.sp,
+                        fontSize = 8.sp,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         textAlign = TextAlign.Center
@@ -289,7 +316,7 @@ fun ItemDetailScreen(
         when (selectedTab) {
             ItemTab.OVERVIEW -> {
                 if (item.statsDetailed.isNotEmpty()) {
-                    Text("Stats", color = AppUiColors.GithubText, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                    SubHeading("STATS")
                     Spacer(modifier = Modifier.height(8.dp))
                     item.statsDetailed.forEach { stat ->
                         Text("• ${stat.stat}: ${stat.value}", color = AppUiColors.GithubText, fontSize = 13.sp)
@@ -297,7 +324,7 @@ fun ItemDetailScreen(
                     Spacer(modifier = Modifier.height(12.dp))
                 }
                 if (relatedItems.isNotEmpty()) {
-                    Text("Related Items", color = AppUiColors.GithubText, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                    SubHeading("RELATED ITEMS")
                     Spacer(modifier = Modifier.height(8.dp))
                     LazyRow(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                         items(relatedItems, key = { it.id }) { rel ->
@@ -317,7 +344,7 @@ fun ItemDetailScreen(
                 }
             }
             ItemTab.BUILD_PATH -> {
-                Text("Build Path", color = AppUiColors.GithubText, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                SubHeading("BUILD PATH")
                 Spacer(modifier = Modifier.height(8.dp))
                 if (buildPathItems.isEmpty()) {
                     Text("No build path in items.json", color = AppUiColors.GithubSecondary, fontSize = 13.sp)
@@ -349,7 +376,7 @@ fun ItemDetailScreen(
                 }
             }
             ItemTab.MATCHUPS -> {
-                Text("Hero Synergies", color = AppUiColors.GithubText, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                SubHeading("HERO SYNERGIES")
                 Spacer(modifier = Modifier.height(8.dp))
                 if (synergyHeroes.isEmpty()) {
                     Text("No hero synergy data for this item.", color = AppUiColors.GithubSecondary, fontSize = 13.sp)
@@ -371,7 +398,7 @@ fun ItemDetailScreen(
                     }
                 }
                 Spacer(modifier = Modifier.height(16.dp))
-                Text("Effective Against", color = AppUiColors.GithubText, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                SubHeading("EFFECTIVE AGAINST")
                 Spacer(modifier = Modifier.height(8.dp))
                 if (matchupHeroes.isEmpty()) {
                     Text("No matchup data for this item.", color = AppUiColors.GithubSecondary, fontSize = 13.sp)
@@ -394,6 +421,7 @@ fun ItemDetailScreen(
         }
     }
 }
+
 
 @Composable
 fun ItemsScreenContent(onItemClick: (Item) -> Unit = {}) {

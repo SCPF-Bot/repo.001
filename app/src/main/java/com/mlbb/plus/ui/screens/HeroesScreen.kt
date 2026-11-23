@@ -49,13 +49,19 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.material3.TextButton
 import com.mlbb.plus.ui.components.AppHeader
+import com.mlbb.plus.ui.components.BarDivider
+import com.mlbb.plus.ui.components.CompactDropdown
+import com.mlbb.plus.ui.components.CompactSearchBox
+import com.mlbb.plus.ui.components.FilterBarCount
+import com.mlbb.plus.ui.components.FilterBarLabel
+import com.mlbb.plus.ui.components.OneBarFilter
+import com.mlbb.plus.ui.components.SubHeading
+import com.mlbb.plus.ui.components.TierBadge
 import com.mlbb.plus.ui.components.AppIcons
-import com.mlbb.plus.ui.components.SectionLabel
-import com.mlbb.plus.ui.components.SearchField
 import com.mlbb.plus.ui.model.GameData
 import com.mlbb.plus.ui.model.Hero
-import com.mlbb.plus.ui.components.FilterPill
 import com.mlbb.plus.ui.theme.AppUiColors
 
 private enum class HeroTab { OVERVIEW, COUNTERS, SYNERGIES }
@@ -135,63 +141,81 @@ fun HeroesScreen(
         }
     }
 
+    // Short patch — displayVersion can be "2.2.23-matchups-2026-11-21",
+    // which wrapped the subtitle to 2 lines. substringBefore("-") -> "2.2.23".
+    val shortPatch = GameData.patchNotes.displayVersion.substringBefore("-").ifBlank { GameData.patchNotes.displayVersion }
+
     Column(Modifier.fillMaxSize().background(AppUiColors.GithubBg)) {
-        AppHeader("HERO EXPLORER", "Patch ${GameData.patchNotes.displayVersion} • ${filtered.size} heroes available", AppIcons.Person)
+        AppHeader("HERO EXPLORER", "Patch $shortPatch • ${filtered.size} heroes", AppIcons.Person)
         Column(
             Modifier.fillMaxSize().widthIn(max = 960.dp).align(Alignment.CenterHorizontally)
-                .padding(horizontal = 16.dp, vertical = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+                .padding(horizontal = 16.dp, vertical = 8.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
-            SectionLabel("FIND YOUR HERO")
-            SearchField(query, { query = it }, "Search by hero, title, or role")
-        SectionLabel("FILTER BY ROLE")
-        Row(
-            modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(top = 8.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            roles.forEach { role ->
-                FilterPill(role, role == selectedRole, onClick = { selectedRole = role })
-            }
-        }
-
-        SectionLabel("FILTER BY TIER", Modifier.padding(top = 14.dp))
-        Row(
-            modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(top = 8.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            tiers.forEach { tier ->
-                val label = if (tier == "All") "All Tiers" else "Tier $tier"
-                FilterPill(label, tier == selectedTier, onClick = { selectedTier = tier })
-            }
-        }
-
-        SectionLabel("SORT HEROES", Modifier.padding(top = 14.dp))
-        Row(
-            modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(top = 8.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            listOf(
+            // ONE BAR — search | Filter by [role] [tier] | Sort by [sort]
+            // Single 52dp container from UiKit.kt (ui/components).
+            // The Row INSIDE scrolls horizontally, so on a 360dp phone the bar
+            // is wider than the screen but nothing is clipped.
+            // Was: 160dp SearchField + 3 CompactDropdowns + ✕ Box in a bare Row.
+            val hasHeroFilters = query.isNotBlank() || selectedRole != "All" ||
+                selectedTier != "All" || sort != HeroSort.RECOMMENDED
+            val sortLabels = mapOf(
                 HeroSort.RECOMMENDED to "Recommended",
                 HeroSort.WIN_RATE to "Win rate",
                 HeroSort.NAME to "Name"
-            ).forEach { (option, label) ->
-                FilterPill(label, sort == option, onClick = { sort = option })
+            )
+            OneBarFilter {
+                    CompactSearchBox(query, { query = it }, "Search heroes", Modifier.width(130.dp))
+                    BarDivider()
+                    FilterBarLabel("Filter by")
+                    CompactDropdown(
+                        display = selectedRole,
+                        options = roles,
+                        displayFor = { it },
+                        onSelect = { selectedRole = it }
+                    )
+                    CompactDropdown(
+                        display = selectedTier,
+                        options = tiers,
+                        displayFor = { it },
+                        onSelect = { selectedTier = it }
+                    )
+                    BarDivider()
+                    FilterBarLabel("Sort by")
+                    CompactDropdown(
+                        display = sortLabels[sort] ?: "Recommended",
+                        options = sortLabels.values.toList(),
+                        displayFor = { it },
+                        onSelect = { label ->
+                            sort = sortLabels.entries.first { it.value == label }.key
+                        }
+                    )
+                    if (hasHeroFilters) {
+                        TextButton(
+                            onClick = {
+                                query = ""
+                                selectedRole = "All"
+                                selectedTier = "All"
+                                sort = HeroSort.RECOMMENDED
+                            },
+                            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp),
+                            modifier = Modifier.height(40.dp)
+                        ) {
+                            Text("Clear", color = AppUiColors.Gold, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
+                        }
+                    }
             }
-        }
+            FilterBarCount("${filtered.size} of ${allHeroes.size} heroes")
 
-        Text(
-            text = "${filtered.size} of ${allHeroes.size} heroes",
-            color = AppUiColors.GithubSecondary,
-            fontSize = 12.sp,
-            modifier = Modifier.padding(top = 10.dp, bottom = 6.dp)
-        )
-
-        // Adaptive columns keep hero portraits readable across window sizes
+        // PHONE-PROOF GRID — GridCells.Fixed(5), NEVER Adaptive.
+        // Adaptive gave 3 columns -> ~102dp portraits (screenshot).
+        // Fixed(5) -> ~62dp portraits on a 360dp phone. weight(1f) gives
+        // the grid ALL remaining height after the one-bar filter.
         LazyVerticalGrid(
-            columns = GridCells.Adaptive(minSize = 84.dp),
-            contentPadding = PaddingValues(vertical = 8.dp),
-            horizontalArrangement = Arrangement.spacedBy(6.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
+            columns = GridCells.Fixed(5),
+            contentPadding = PaddingValues(vertical = 4.dp),
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp),
             modifier = Modifier.fillMaxWidth().weight(1f)
         ) {
             items(filtered, key = { it.id }) { hero ->
@@ -205,9 +229,9 @@ fun HeroesScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .aspectRatio(1f)
-                            .clip(RoundedCornerShape(12.dp))
+                            .clip(RoundedCornerShape(8.dp))
                             .background(AppUiColors.GithubCard)
-                            .border(1.dp, AppUiColors.GithubBorder, RoundedCornerShape(12.dp))
+                            .border(1.dp, AppUiColors.GithubBorder, RoundedCornerShape(8.dp))
                     ) {
                         AssetImage(
                             hero = hero,
@@ -215,32 +239,17 @@ fun HeroesScreen(
                             contentScale = ContentScale.Crop,
                             contentDescription = hero.name
                         )
-                        // Tier badge
-                        Box(
-                            modifier = Modifier
-                                .align(Alignment.TopStart)
-                                .padding(2.dp)
-                                .clip(RoundedCornerShape(4.dp))
-                                .background(tierColor(hero.tier))
-                                .padding(horizontal = 4.dp, vertical = 1.dp)
-                        ) {
-                            Text(
-                                text = normalizedTier(hero.tier),
-                                color = Color.Black,
-                                fontSize = 9.sp,
-                                fontWeight = FontWeight.Bold
-                            )
-                        }
+                        TierBadge(hero.tier, Modifier.align(Alignment.TopStart).padding(4.dp))
                     }
                     Text(
                         text = hero.name,
                         color = AppUiColors.GithubText,
-                        fontSize = 11.sp,
+                        fontSize = 10.sp,
                         fontWeight = FontWeight.SemiBold,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         textAlign = TextAlign.Center,
-                        modifier = Modifier.padding(top = 3.dp)
+                        modifier = Modifier.padding(top = 2.dp)
                     )
                 }
             }
@@ -322,7 +331,7 @@ fun HeroDetailScreen(
         when (selectedTab) {
             HeroTab.OVERVIEW -> {
                 if (hero.specialty.isNotEmpty()) {
-                    Text("Specialty", color = AppUiColors.GithubText, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                    SubHeading("SPECIALTY")
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -341,7 +350,7 @@ fun HeroDetailScreen(
                     }
                 }
                 if (hero.recommendedSpells.isNotEmpty()) {
-                    Text("Spells", color = AppUiColors.GithubText, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                    SubHeading("SPELLS")
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -360,7 +369,7 @@ fun HeroDetailScreen(
                     }
                 }
                 if (coreBuild.isNotEmpty()) {
-                    Text("Core Build", color = AppUiColors.GithubText, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                    SubHeading("CORE BUILD")
                     Spacer(modifier = Modifier.height(8.dp))
                     coreBuild.forEach { build ->
                         val item = GameData.itemsById[build.itemId]
@@ -390,7 +399,7 @@ fun HeroDetailScreen(
                 }
             }
             HeroTab.COUNTERS -> {
-                Text("Works Against", color = AppUiColors.GithubText, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                SubHeading("WORKS AGAINST")
                 Spacer(modifier = Modifier.height(8.dp))
                 if (counters.isEmpty()) {
                     Text("No counter data in heroes.json", color = AppUiColors.GithubSecondary, fontSize = 13.sp)
@@ -413,7 +422,7 @@ fun HeroDetailScreen(
                 }
             }
             HeroTab.SYNERGIES -> {
-                Text("Best Partners", color = AppUiColors.GithubText, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                SubHeading("BEST PARTNERS")
                 Spacer(modifier = Modifier.height(8.dp))
                 if (synergies.isNotEmpty()) {
                     LazyRow(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -461,6 +470,7 @@ fun HeroDetailScreen(
         }
     }
 }
+
 
 // Keep old name as alias if other files call it
 @Composable
