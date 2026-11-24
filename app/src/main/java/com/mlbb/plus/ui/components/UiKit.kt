@@ -229,3 +229,70 @@ fun FilterBarLabel(text: String) {
 fun FilterBarCount(text: String) {
     Text(text, color = AppUiColors.GithubSecondary, fontSize = 11.sp, modifier = Modifier.padding(top = 2.dp, bottom = 2.dp))
 }
+
+
+/** Compact screen title bar used by Settings and Patch Notes. */
+@Composable
+fun ScreenTitleBar(title: String, icon: ImageVector) {
+    Row(
+        modifier = Modifier.fillMaxWidth().background(AppUiColors.Header)
+            .border(width = 1.dp, color = AppUiColors.GithubBorder)
+            .padding(horizontal = 16.dp, vertical = 14.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
+        Icon(icon, contentDescription = null, tint = AppUiColors.Gold, modifier = Modifier.size(22.dp))
+        Text(title, color = AppUiColors.GithubText, fontSize = 15.sp, fontWeight = FontWeight.Bold, letterSpacing = 0.8.sp)
+    }
+}
+
+/** Shared title/subtitle header used by the Home, Heroes, and Items screens. */
+@Composable
+fun AppHeader(title: String, subtitle: String, icon: ImageVector) {
+    Row(
+        modifier = Modifier.fillMaxWidth().background(AppUiColors.Header)
+            .border(width = 1.dp, color = AppUiColors.GithubBorder)
+            .padding(horizontal = 16.dp, vertical = 14.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        Icon(icon, contentDescription = null, tint = AppUiColors.Gold, modifier = Modifier.size(26.dp))
+        androidx.compose.foundation.layout.Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
+            Text(title, color = AppUiColors.GithubText, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+            Text(subtitle, color = AppUiColors.GithubSecondary, fontSize = 11.sp, maxLines = 2, overflow = TextOverflow.Ellipsis)
+        }
+    }
+}
+
+/** Small uppercase subsection heading for detail panels. */
+@Composable
+fun SubHeading(text: String) {
+    Text(text, color = AppUiColors.Gold, fontSize = 11.sp, fontWeight = FontWeight.Bold, letterSpacing = 0.8.sp, maxLines = 1)
+}
+
+/** Consistent tier chip for hero cards, including the S+ meta tier. */
+@Composable
+fun TierBadge(tier: String, modifier: Modifier = Modifier) {
+    val normalized = tier.trim().uppercase().ifBlank { "—" }
+    val tint = when {
+        normalized.startsWith("S") -> AppUiColors.TierS
+        normalized.startsWith("A") -> AppUiColors.TierA
+        normalized.startsWith("B") -> AppUiColors.TierB
+        else -> AppUiColors.GithubSecondary
+    }
+    Box(modifier.clip(RoundedCornerShape(7.dp)).background(tint.copy(alpha = 0.16f))
+        .border(1.dp, tint.copy(alpha = 0.65f), RoundedCornerShape(7.dp)).padding(horizontal = 7.dp, vertical = 3.dp)) {
+        Text(normalized, color = tint, fontSize = 10.sp, fontWeight = FontWeight.ExtraBold, maxLines = 1)
+    }
+}
+
+/** Role-tinted fallback portrait background. */
+fun roleColor(role: String): androidx.compose.ui.graphics.Color = when (role.trim().lowercase()) {
+    "tank" -> androidx.compose.ui.graphics.Color(0xFF5B9BD5)
+    "fighter" -> androidx.compose.ui.graphics.Color(0xFFE07A5F)
+    "assassin" -> androidx.compose.ui.graphics.Color(0xFFB07AE5)
+    "mage" -> androidx.compose.ui.graphics.Color(0xFF8B7CF6)
+    "marksman" -> androidx.compose.ui.graphics.Color(0xFFE6A23C)
+    "support" -> androidx.compose.ui.graphics.Color(0xFF42BFA5)
+    else -> AppUiColors.Gold
+}
