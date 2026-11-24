@@ -78,8 +78,8 @@ fun HomeScreen(
     // substringBefore("-") -> "2.2.23". Also fixes the stale-guide check
     // below: guide.patch ("2.2.23") could never equal the long version.
     val shortPatch = patch.substringBefore("-").ifBlank { patch }
-    val guidePatch = (guide?.patch?.ifBlank { null } ?: shortPatch).substringBefore("-").ifBlank { shortPatch }
     val guide = GameData.guides[selectedRole]
+    val guidePatch = (guide?.patch?.ifBlank { null } ?: shortPatch).substringBefore("-").ifBlank { shortPatch }
     val guideType = guide?.type(selectedRoleType) ?: guide?.types?.firstOrNull()
 
     Box(Modifier.fillMaxSize().background(AppUiColors.GithubBg)) {
@@ -604,7 +604,12 @@ private fun LaunchButton(enabledPermission: Boolean, onClick: () -> Unit, modifi
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        Icon(AppIcons.PlayArrow, contentDescription = null, tint = Color(0xFF171717) // AppUiTheme onPrimary, not pure Black, modifier = Modifier.size(24.dp))
+        Icon(
+            AppIcons.PlayArrow,
+            contentDescription = null,
+            tint = Color(0xFF171717), // Theme onPrimary; avoid pure black.
+            modifier = Modifier.size(24.dp)
+        )
         Text(if (enabledPermission) "Launch Widget" else "Enable Widget", color = Color(0xFF171717), fontWeight = FontWeight.Bold, fontSize = 15.sp, letterSpacing = 0.5.sp)
     }
 }

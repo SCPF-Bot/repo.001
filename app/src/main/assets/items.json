@@ -1,6 +1,6 @@
 {
-  "version": "2.2.23",
-  "updated": "2026-11-21",
+  "version": "2.2.23-buildtree-2026-11-23",
+  "updated": "2026-11-23",
   "patchDate": "2026-11-11",
   "patchName": "Patch 2.2.23 — Popol and Kupa Revamp (Original Server)",
   "season": "Season 42 — Starward Decade",
@@ -42,7 +42,17 @@
     "patchVersion": "Patch version this entry reflects",
     "status": "active / removed (legacy)",
     "portrait": "Fandom portrait URL — static.wikia.nocookie.net/mobile-legends/images/...",
-    "fandomFile": "Fandom filename used to build portrait URL"
+    "fandomFile": "Fandom filename used to build portrait URL",
+    "buildPathIds": "Component item IDs used to assemble this item",
+    "buildsInto": "Finished item IDs that use this item as a component",
+    "goodAgainstHeroes": "Hero IDs this item is effective against",
+    "badAgainstHeroes": "Hero IDs that counter the item strategy",
+    "goodWithHeroes": "Hero IDs that synergize with the item",
+    "priceType": "shop for directly purchasable items; granted for blessing upgrades",
+    "priceNote": "Explanation when there is no standalone shop price",
+    "goodAgainst": "Item IDs this equipment counters",
+    "badAgainst": "Item IDs that counter this equipment",
+    "goodWith": "Hero IDs with synergy for this equipment"
   },
   "items": [
     {
@@ -109,7 +119,37 @@
       "patchVersion": "2.2.23",
       "status": "active",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/d/d5/Blade_of_Despair.png",
-      "fandomFile": "Blade_of_Despair.png"
+      "fandomFile": "Blade_of_Despair.png",
+      "priceType": "shop",
+      "priceNote": "",
+      "buildPathIds": [
+        1106
+      ],
+      "goodAgainstHeroes": [
+        15,
+        25,
+        61
+      ],
+      "badAgainstHeroes": [],
+      "goodWithHeroes": [
+        60,
+        31,
+        79
+      ],
+      "buildTreeVersion": "2.2.23",
+      "goodAgainst": [
+        3001,
+        3002
+      ],
+      "badAgainst": [
+        3001,
+        3003
+      ],
+      "goodWith": [
+        60,
+        31,
+        79
+      ]
     },
     {
       "id": 1002,
@@ -176,7 +216,39 @@
       "patchVersion": "2.2.23",
       "status": "active",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/1/1a/Demon_Hunter_Sword.png",
-      "fandomFile": "Demon_Hunter_Sword.png"
+      "fandomFile": "Demon_Hunter_Sword.png",
+      "priceType": "shop",
+      "priceNote": "",
+      "buildPathIds": [
+        1101,
+        1104
+      ],
+      "goodAgainstHeroes": [
+        70,
+        104,
+        117
+      ],
+      "badAgainstHeroes": [],
+      "goodWithHeroes": [
+        60,
+        87,
+        31
+      ],
+      "buildTreeVersion": "2.2.23",
+      "goodAgainst": [
+        3001,
+        3003
+      ],
+      "badAgainst": [
+        3002,
+        3003,
+        3004
+      ],
+      "goodWith": [
+        60,
+        87,
+        31
+      ]
     },
     {
       "id": 1003,
@@ -241,7 +313,32 @@
       "patchVersion": "2.2.23",
       "status": "active",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/6/6c/Berserker%27s_Fury.png",
-      "fandomFile": "Berserker%27s_Fury.png"
+      "fandomFile": "Berserker%27s_Fury.png",
+      "priceType": "shop",
+      "priceNote": "",
+      "buildPathIds": [
+        1103
+      ],
+      "goodAgainstHeroes": [
+        15,
+        25
+      ],
+      "badAgainstHeroes": [],
+      "goodWithHeroes": [
+        60,
+        13,
+        43
+      ],
+      "buildTreeVersion": "2.2.23",
+      "goodAgainst": [],
+      "badAgainst": [
+        3001
+      ],
+      "goodWith": [
+        60,
+        13,
+        43
+      ]
     },
     {
       "id": 1004,
@@ -308,7 +405,37 @@
       "patchVersion": "2.2.23",
       "status": "active",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/1/12/Malefic_Roar.png",
-      "fandomFile": "Malefic_Roar.png"
+      "fandomFile": "Malefic_Roar.png",
+      "priceType": "shop",
+      "priceNote": "",
+      "buildPathIds": [
+        1106
+      ],
+      "goodAgainstHeroes": [
+        70,
+        104,
+        41
+      ],
+      "badAgainstHeroes": [],
+      "goodWithHeroes": [
+        79,
+        65,
+        3
+      ],
+      "buildTreeVersion": "2.2.23",
+      "goodAgainst": [
+        3001,
+        3002,
+        3003
+      ],
+      "badAgainst": [
+        3006
+      ],
+      "goodWith": [
+        79,
+        65,
+        3
+      ]
     },
     {
       "id": 1005,
@@ -380,7 +507,35 @@
       "patchVersion": "2.2.23",
       "status": "active",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/e/e3/Wind_of_Nature.png",
-      "fandomFile": "Wind_of_Nature.png"
+      "fandomFile": "Wind_of_Nature.png",
+      "priceType": "shop",
+      "priceNote": "",
+      "buildPathIds": [
+        1101,
+        1104
+      ],
+      "goodAgainstHeroes": [
+        3,
+        21,
+        47
+      ],
+      "badAgainstHeroes": [],
+      "goodWithHeroes": [
+        60,
+        65,
+        40
+      ],
+      "buildTreeVersion": "2.2.23",
+      "goodAgainst": [],
+      "badAgainst": [
+        2001,
+        2003
+      ],
+      "goodWith": [
+        60,
+        65,
+        40
+      ]
     },
     {
       "id": 1006,
@@ -452,7 +607,34 @@
       "status": "active",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/e/ed/Blade_of_the_Heptaseas.png",
       "fandomFile": "Blade_of_the_Heptaseas.png",
-      "alias": "Blade of the Heptaseas (Fandom / in-game canonical)"
+      "alias": "Blade of the Heptaseas (Fandom / in-game canonical)",
+      "priceType": "shop",
+      "priceNote": "",
+      "buildPathIds": [
+        1106,
+        3101
+      ],
+      "goodAgainstHeroes": [
+        15,
+        25
+      ],
+      "badAgainstHeroes": [],
+      "goodWithHeroes": [
+        3,
+        24,
+        47
+      ],
+      "buildTreeVersion": "2.2.23",
+      "goodAgainst": [],
+      "badAgainst": [
+        3001,
+        3003
+      ],
+      "goodWith": [
+        3,
+        24,
+        47
+      ]
     },
     {
       "id": 1007,
@@ -522,7 +704,32 @@
       "patchVersion": "2.2.23",
       "status": "active",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/b/b9/Hunter_Strike.png",
-      "fandomFile": "Hunter_Strike.png"
+      "fandomFile": "Hunter_Strike.png",
+      "priceType": "shop",
+      "priceNote": "",
+      "buildPathIds": [
+        1106
+      ],
+      "goodAgainstHeroes": [
+        15,
+        25
+      ],
+      "badAgainstHeroes": [],
+      "goodWithHeroes": [
+        28,
+        16,
+        3
+      ],
+      "buildTreeVersion": "2.2.23",
+      "goodAgainst": [],
+      "badAgainst": [
+        3003
+      ],
+      "goodWith": [
+        28,
+        16,
+        3
+      ]
     },
     {
       "id": 1008,
@@ -603,7 +810,37 @@
       "patchVersion": "2.2.23",
       "status": "active",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/2/2b/Endless_Battle.png",
-      "fandomFile": "Endless_Battle.png"
+      "fandomFile": "Endless_Battle.png",
+      "priceType": "shop",
+      "priceNote": "",
+      "buildPathIds": [
+        1106,
+        3101,
+        2103
+      ],
+      "goodAgainstHeroes": [
+        70,
+        41
+      ],
+      "badAgainstHeroes": [],
+      "goodWithHeroes": [
+        39,
+        7,
+        11
+      ],
+      "buildTreeVersion": "2.2.23",
+      "goodAgainst": [
+        3001,
+        3003
+      ],
+      "badAgainst": [
+        3002
+      ],
+      "goodWith": [
+        39,
+        7,
+        11
+      ]
     },
     {
       "id": 1009,
@@ -673,7 +910,35 @@
       "patchVersion": "2.2.23",
       "status": "active",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/4/45/Windtalker.png",
-      "fandomFile": "Windtalker.png"
+      "fandomFile": "Windtalker.png",
+      "priceType": "shop",
+      "priceNote": "",
+      "buildPathIds": [
+        1101,
+        1103
+      ],
+      "goodAgainstHeroes": [
+        15,
+        25
+      ],
+      "badAgainstHeroes": [],
+      "goodWithHeroes": [
+        60,
+        65,
+        40,
+        1
+      ],
+      "buildTreeVersion": "2.2.23",
+      "goodAgainst": [],
+      "badAgainst": [
+        3001
+      ],
+      "goodWith": [
+        60,
+        65,
+        40,
+        1
+      ]
     },
     {
       "id": 1010,
@@ -741,7 +1006,36 @@
       "patchVersion": "2.2.23",
       "status": "active",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/7/72/Malefic_Gun.png",
-      "fandomFile": "Malefic_Gun.png"
+      "fandomFile": "Malefic_Gun.png",
+      "priceType": "shop",
+      "priceNote": "",
+      "buildPathIds": [
+        1101
+      ],
+      "goodAgainstHeroes": [
+        70,
+        41
+      ],
+      "badAgainstHeroes": [],
+      "goodWithHeroes": [
+        40,
+        31,
+        65,
+        94
+      ],
+      "buildTreeVersion": "2.2.23",
+      "goodAgainst": [
+        3003
+      ],
+      "badAgainst": [
+        3001
+      ],
+      "goodWith": [
+        40,
+        31,
+        65,
+        94
+      ]
     },
     {
       "id": 1011,
@@ -812,7 +1106,34 @@
       "patchVersion": "2.2.23",
       "status": "active",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/f/f3/Corrosion_Scythe.png",
-      "fandomFile": "Corrosion_Scythe.png"
+      "fandomFile": "Corrosion_Scythe.png",
+      "priceType": "shop",
+      "priceNote": "",
+      "buildPathIds": [
+        1101,
+        1104
+      ],
+      "goodAgainstHeroes": [
+        16,
+        22
+      ],
+      "badAgainstHeroes": [],
+      "goodWithHeroes": [
+        94,
+        40,
+        89
+      ],
+      "buildTreeVersion": "2.2.23",
+      "goodAgainst": [],
+      "badAgainst": [
+        3001,
+        3002
+      ],
+      "goodWith": [
+        94,
+        40,
+        89
+      ]
     },
     {
       "id": 1012,
@@ -876,7 +1197,33 @@
       "patchVersion": "2.2.23",
       "status": "active",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/8/80/Golden_Staff.png",
-      "fandomFile": "Golden_Staff.png"
+      "fandomFile": "Golden_Staff.png",
+      "priceType": "shop",
+      "priceNote": "",
+      "buildPathIds": [
+        1101,
+        1106
+      ],
+      "goodAgainstHeroes": [
+        70,
+        41
+      ],
+      "badAgainstHeroes": [],
+      "goodWithHeroes": [
+        40,
+        65,
+        31
+      ],
+      "buildTreeVersion": "2.2.23",
+      "goodAgainst": [],
+      "badAgainst": [
+        3001
+      ],
+      "goodWith": [
+        40,
+        65,
+        31
+      ]
     },
     {
       "id": 1013,
@@ -951,7 +1298,33 @@
       "status": "active",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/f/fd/Haas%27_Claws.png",
       "fandomFile": "Haas%27_Claws.png",
-      "alias": "Haas' Claws (Fandom)"
+      "alias": "Haas' Claws (Fandom)",
+      "priceType": "shop",
+      "priceNote": "",
+      "buildPathIds": [
+        1104,
+        1103
+      ],
+      "goodAgainstHeroes": [
+        15,
+        25
+      ],
+      "badAgainstHeroes": [],
+      "goodWithHeroes": [
+        12,
+        79,
+        60
+      ],
+      "buildTreeVersion": "2.2.23",
+      "goodAgainst": [],
+      "badAgainst": [
+        3002
+      ],
+      "goodWith": [
+        12,
+        79,
+        60
+      ]
     },
     {
       "id": 1014,
@@ -1027,7 +1400,35 @@
       "patchVersion": "2.2.23",
       "status": "active",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/7/70/War_Axe.png",
-      "fandomFile": "War_Axe.png"
+      "fandomFile": "War_Axe.png",
+      "priceType": "shop",
+      "priceNote": "",
+      "buildPathIds": [
+        1106,
+        3101,
+        1104
+      ],
+      "goodAgainstHeroes": [
+        70,
+        41
+      ],
+      "badAgainstHeroes": [],
+      "goodWithHeroes": [
+        95,
+        127,
+        103
+      ],
+      "buildTreeVersion": "2.2.23",
+      "goodAgainst": [],
+      "badAgainst": [
+        3002,
+        3003
+      ],
+      "goodWith": [
+        95,
+        127,
+        103
+      ]
     },
     {
       "id": 1015,
@@ -1093,7 +1494,34 @@
       "patchVersion": "2.2.23",
       "status": "active",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/8/83/Sea_Halberd.png",
-      "fandomFile": "Sea_Halberd.png"
+      "fandomFile": "Sea_Halberd.png",
+      "priceType": "shop",
+      "priceNote": "",
+      "buildPathIds": [
+        1106,
+        1101
+      ],
+      "goodAgainstHeroes": [
+        34,
+        14,
+        95
+      ],
+      "badAgainstHeroes": [],
+      "goodWithHeroes": [
+        60,
+        65,
+        40
+      ],
+      "buildTreeVersion": "2.2.23",
+      "goodAgainst": [],
+      "badAgainst": [
+        3001
+      ],
+      "goodWith": [
+        60,
+        65,
+        40
+      ]
     },
     {
       "id": 1016,
@@ -1157,7 +1585,32 @@
       "patchVersion": "2.2.23",
       "status": "active",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/4/4f/Sky_Piercer.png",
-      "fandomFile": "Sky_Piercer.png"
+      "fandomFile": "Sky_Piercer.png",
+      "priceType": "shop",
+      "priceNote": "",
+      "buildPathIds": [
+        5101
+      ],
+      "goodAgainstHeroes": [
+        15,
+        25
+      ],
+      "badAgainstHeroes": [],
+      "goodWithHeroes": [
+        3,
+        47,
+        21
+      ],
+      "buildTreeVersion": "2.2.23",
+      "goodAgainst": [],
+      "badAgainst": [
+        3006
+      ],
+      "goodWith": [
+        3,
+        47,
+        21
+      ]
     },
     {
       "id": 2001,
@@ -1225,7 +1678,35 @@
       "patchVersion": "2.2.23",
       "status": "active",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/e/ee/Lightning_Truncheon.png",
-      "fandomFile": "Lightning_Truncheon.png"
+      "fandomFile": "Lightning_Truncheon.png",
+      "priceType": "shop",
+      "priceNote": "",
+      "buildPathIds": [
+        2105
+      ],
+      "goodAgainstHeroes": [
+        60,
+        65
+      ],
+      "badAgainstHeroes": [],
+      "goodWithHeroes": [
+        115,
+        68,
+        25
+      ],
+      "buildTreeVersion": "2.2.23",
+      "goodAgainst": [
+        3004,
+        3005
+      ],
+      "badAgainst": [
+        3004
+      ],
+      "goodWith": [
+        115,
+        68,
+        25
+      ]
     },
     {
       "id": 2002,
@@ -1285,7 +1766,38 @@
       "patchVersion": "2.2.23",
       "status": "active",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/6/64/Holy_Crystal.png",
-      "fandomFile": "Holy_Crystal.png"
+      "fandomFile": "Holy_Crystal.png",
+      "priceType": "shop",
+      "priceNote": "",
+      "buildPathIds": [
+        2105,
+        2101
+      ],
+      "goodAgainstHeroes": [
+        60,
+        65
+      ],
+      "badAgainstHeroes": [],
+      "goodWithHeroes": [
+        115,
+        68,
+        61,
+        25
+      ],
+      "buildTreeVersion": "2.2.23",
+      "goodAgainst": [
+        3004
+      ],
+      "badAgainst": [
+        3004,
+        3005
+      ],
+      "goodWith": [
+        115,
+        68,
+        61,
+        25
+      ]
     },
     {
       "id": 2003,
@@ -1353,7 +1865,36 @@
       "patchVersion": "2.2.23",
       "status": "active",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/2/20/Genius_Wand.png",
-      "fandomFile": "Genius_Wand.png"
+      "fandomFile": "Genius_Wand.png",
+      "priceType": "shop",
+      "priceNote": "",
+      "buildPathIds": [
+        2105,
+        5101
+      ],
+      "goodAgainstHeroes": [
+        70,
+        41
+      ],
+      "badAgainstHeroes": [],
+      "goodWithHeroes": [
+        115,
+        68,
+        61
+      ],
+      "buildTreeVersion": "2.2.23",
+      "goodAgainst": [
+        3004,
+        3005
+      ],
+      "badAgainst": [
+        3004
+      ],
+      "goodWith": [
+        115,
+        68,
+        61
+      ]
     },
     {
       "id": 2004,
@@ -1423,7 +1964,34 @@
       "patchVersion": "2.2.23",
       "status": "active",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/7/7a/Glowing_Wand.png",
-      "fandomFile": "Glowing_Wand.png"
+      "fandomFile": "Glowing_Wand.png",
+      "priceType": "shop",
+      "priceNote": "",
+      "buildPathIds": [
+        2105,
+        3101
+      ],
+      "goodAgainstHeroes": [
+        34,
+        95
+      ],
+      "badAgainstHeroes": [],
+      "goodWithHeroes": [
+        57,
+        86,
+        61
+      ],
+      "buildTreeVersion": "2.2.23",
+      "goodAgainst": [],
+      "badAgainst": [
+        3004,
+        3005
+      ],
+      "goodWith": [
+        57,
+        86,
+        61
+      ]
     },
     {
       "id": 2005,
@@ -1482,7 +2050,33 @@
       "patchVersion": "2.2.23",
       "status": "active",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/4/44/Blood_Wings.png",
-      "fandomFile": "Blood_Wings.png"
+      "fandomFile": "Blood_Wings.png",
+      "priceType": "shop",
+      "priceNote": "",
+      "buildPathIds": [
+        2105,
+        2101
+      ],
+      "goodAgainstHeroes": [
+        3,
+        21
+      ],
+      "badAgainstHeroes": [],
+      "goodWithHeroes": [
+        115,
+        68,
+        91
+      ],
+      "buildTreeVersion": "2.2.23",
+      "goodAgainst": [],
+      "badAgainst": [
+        2003
+      ],
+      "goodWith": [
+        115,
+        68,
+        91
+      ]
     },
     {
       "id": 2006,
@@ -1552,7 +2146,33 @@
       "patchVersion": "2.2.23",
       "status": "active",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/9/9d/Winter_Crown.png",
-      "fandomFile": "Winter_Crown.png"
+      "fandomFile": "Winter_Crown.png",
+      "priceType": "shop",
+      "priceNote": "",
+      "buildPathIds": [
+        2105,
+        3101
+      ],
+      "goodAgainstHeroes": [
+        3,
+        47
+      ],
+      "badAgainstHeroes": [],
+      "goodWithHeroes": [
+        115,
+        68,
+        25,
+        91
+      ],
+      "buildTreeVersion": "2.2.23",
+      "goodAgainst": [],
+      "badAgainst": [],
+      "goodWith": [
+        115,
+        68,
+        25,
+        91
+      ]
     },
     {
       "id": 3001,
@@ -1620,7 +2240,35 @@
       "patchVersion": "2.2.23",
       "status": "active",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/d/d9/Blade_Armor.png",
-      "fandomFile": "Blade_Armor.png"
+      "fandomFile": "Blade_Armor.png",
+      "priceType": "shop",
+      "priceNote": "",
+      "buildPathIds": [
+        3106,
+        3102
+      ],
+      "goodAgainstHeroes": [
+        60,
+        65,
+        12
+      ],
+      "badAgainstHeroes": [],
+      "goodWithHeroes": [
+        6,
+        78,
+        41
+      ],
+      "buildTreeVersion": "2.2.23",
+      "goodAgainst": [],
+      "badAgainst": [
+        1004,
+        1010
+      ],
+      "goodWith": [
+        6,
+        78,
+        41
+      ]
     },
     {
       "id": 3002,
@@ -1694,7 +2342,36 @@
       "patchVersion": "2.2.23",
       "status": "active",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/e/e3/Dominance_Ice.png",
-      "fandomFile": "Dominance_Ice.png"
+      "fandomFile": "Dominance_Ice.png",
+      "priceType": "shop",
+      "priceNote": "",
+      "buildPathIds": [
+        3106,
+        2103
+      ],
+      "goodAgainstHeroes": [
+        60,
+        65,
+        34
+      ],
+      "badAgainstHeroes": [],
+      "goodWithHeroes": [
+        6,
+        78,
+        41,
+        104
+      ],
+      "buildTreeVersion": "2.2.23",
+      "goodAgainst": [],
+      "badAgainst": [
+        1004
+      ],
+      "goodWith": [
+        6,
+        78,
+        41,
+        104
+      ]
     },
     {
       "id": 3003,
@@ -1767,7 +2444,34 @@
       "status": "active",
       "patchChange": "BUFFED: Deter 6% -> 8% per stack",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/4/40/Antique_Cuirass.png",
-      "fandomFile": "Antique_Cuirass.png"
+      "fandomFile": "Antique_Cuirass.png",
+      "priceType": "shop",
+      "priceNote": "",
+      "buildPathIds": [
+        3101,
+        3106
+      ],
+      "goodAgainstHeroes": [
+        3,
+        47,
+        103
+      ],
+      "badAgainstHeroes": [],
+      "goodWithHeroes": [
+        6,
+        78,
+        41
+      ],
+      "buildTreeVersion": "2.2.23",
+      "goodAgainst": [],
+      "badAgainst": [
+        1004
+      ],
+      "goodWith": [
+        6,
+        78,
+        41
+      ]
     },
     {
       "id": 3004,
@@ -1808,7 +2512,7 @@
         "Magic Necklace"
       ],
       "buildsInto": [],
-      "image": "items/3004.webp",
+      "image": "https://static.wikia.nocookie.net/mobile-legends/images/1/15/Athena%27s_Shield.png",
       "counters": [
         115,
         68,
@@ -1841,7 +2545,34 @@
       "status": "active",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/1/15/Athena%27s_Shield.png",
       "fandomFile": "Athena%27s_Shield.png",
-      "alias": "Valkyrie's Shield (renamed version, see id 3015)"
+      "alias": "Valkyrie's Shield (renamed version, see id 3015)",
+      "priceType": "shop",
+      "priceNote": "",
+      "buildPathIds": [
+        3101,
+        2103
+      ],
+      "goodAgainstHeroes": [
+        115,
+        68,
+        15
+      ],
+      "badAgainstHeroes": [],
+      "goodWithHeroes": [
+        6,
+        78,
+        41
+      ],
+      "buildTreeVersion": "2.2.23",
+      "goodAgainst": [],
+      "badAgainst": [
+        2003
+      ],
+      "goodWith": [
+        6,
+        78,
+        41
+      ]
     },
     {
       "id": 3005,
@@ -1913,7 +2644,34 @@
       "patchVersion": "2.2.23",
       "status": "active",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/d/d8/Radiant_Armor.png",
-      "fandomFile": "Radiant_Armor.png"
+      "fandomFile": "Radiant_Armor.png",
+      "priceType": "shop",
+      "priceNote": "",
+      "buildPathIds": [
+        3101,
+        2103
+      ],
+      "goodAgainstHeroes": [
+        61,
+        86,
+        57
+      ],
+      "badAgainstHeroes": [],
+      "goodWithHeroes": [
+        6,
+        78,
+        41
+      ],
+      "buildTreeVersion": "2.2.23",
+      "goodAgainst": [],
+      "badAgainst": [
+        2003
+      ],
+      "goodWith": [
+        6,
+        78,
+        41
+      ]
     },
     {
       "id": 3006,
@@ -1980,7 +2738,35 @@
       "patchVersion": "2.2.23",
       "status": "active",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/8/84/Immortality.png",
-      "fandomFile": "Immortality.png"
+      "fandomFile": "Immortality.png",
+      "priceType": "shop",
+      "priceNote": "",
+      "buildPathIds": [
+        3101,
+        3106
+      ],
+      "goodAgainstHeroes": [
+        3,
+        47
+      ],
+      "badAgainstHeroes": [],
+      "goodWithHeroes": [
+        6,
+        78,
+        41,
+        26
+      ],
+      "buildTreeVersion": "2.2.23",
+      "goodAgainst": [],
+      "badAgainst": [
+        1016
+      ],
+      "goodWith": [
+        6,
+        78,
+        41,
+        26
+      ]
     },
     {
       "id": 3008,
@@ -2045,7 +2831,33 @@
       "patchVersion": "2.2.23",
       "status": "active",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/a/a3/Guardian_Helmet.png",
-      "fandomFile": "Guardian_Helmet.png"
+      "fandomFile": "Guardian_Helmet.png",
+      "priceType": "shop",
+      "priceNote": "",
+      "buildPathIds": [
+        3101
+      ],
+      "goodAgainstHeroes": [
+        15,
+        25
+      ],
+      "badAgainstHeroes": [],
+      "goodWithHeroes": [
+        49,
+        70,
+        104
+      ],
+      "buildTreeVersion": "2.2.23",
+      "goodAgainst": [],
+      "badAgainst": [
+        1002,
+        1004
+      ],
+      "goodWith": [
+        49,
+        70,
+        104
+      ]
     },
     {
       "id": 3009,
@@ -2115,7 +2927,37 @@
       "status": "active",
       "patchChange": "NERFED: Chastise 75% -> 80% (attackers keep more Attack Speed)",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/2/2f/Chastise_Pauldron.png",
-      "fandomFile": "Chastise_Pauldron.png"
+      "fandomFile": "Chastise_Pauldron.png",
+      "priceType": "shop",
+      "priceNote": "",
+      "buildPathIds": [
+        3101,
+        3106
+      ],
+      "goodAgainstHeroes": [
+        60,
+        65,
+        1
+      ],
+      "badAgainstHeroes": [],
+      "goodWithHeroes": [
+        6,
+        78,
+        41,
+        104
+      ],
+      "buildTreeVersion": "2.2.23",
+      "goodAgainst": [],
+      "badAgainst": [
+        1004,
+        3003
+      ],
+      "goodWith": [
+        6,
+        78,
+        41,
+        104
+      ]
     },
     {
       "id": 4001,
@@ -2179,7 +3021,30 @@
       "patchVersion": "2.2.23",
       "status": "active",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/7/71/Fleeting_Time.png",
-      "fandomFile": "Fleeting_Time.png"
+      "fandomFile": "Fleeting_Time.png",
+      "priceType": "shop",
+      "priceNote": "",
+      "buildPathIds": [
+        2105,
+        3101
+      ],
+      "goodAgainstHeroes": [],
+      "badAgainstHeroes": [],
+      "goodWithHeroes": [
+        34,
+        55,
+        102,
+        6
+      ],
+      "buildTreeVersion": "2.2.23",
+      "goodAgainst": [],
+      "badAgainst": [],
+      "goodWith": [
+        34,
+        55,
+        102,
+        6
+      ]
     },
     {
       "id": 4002,
@@ -2252,7 +3117,33 @@
       "patchVersion": "2.2.23",
       "status": "active",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/c/c5/Flask_of_the_Oasis.png",
-      "fandomFile": "Flask_of_the_Oasis.png"
+      "fandomFile": "Flask_of_the_Oasis.png",
+      "priceType": "shop",
+      "priceNote": "",
+      "buildPathIds": [
+        2105,
+        3101
+      ],
+      "goodAgainstHeroes": [],
+      "badAgainstHeroes": [],
+      "goodWithHeroes": [
+        34,
+        112,
+        14,
+        55
+      ],
+      "buildTreeVersion": "2.2.23",
+      "goodAgainst": [],
+      "badAgainst": [
+        1015,
+        2004
+      ],
+      "goodWith": [
+        34,
+        112,
+        14,
+        55
+      ]
     },
     {
       "id": 4003,
@@ -2315,7 +3206,29 @@
       "patchVersion": "2.2.23",
       "status": "active",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/2/20/Courage_Mask.png",
-      "fandomFile": "Courage_Mask.png"
+      "fandomFile": "Courage_Mask.png",
+      "priceType": "shop",
+      "priceNote": "",
+      "buildPathIds": [
+        4111
+      ],
+      "goodAgainstHeroes": [],
+      "badAgainstHeroes": [],
+      "goodWithHeroes": [
+        6,
+        78,
+        41,
+        102
+      ],
+      "buildTreeVersion": "2.2.23",
+      "goodAgainst": [],
+      "badAgainst": [],
+      "goodWith": [
+        6,
+        78,
+        41,
+        102
+      ]
     },
     {
       "id": 4004,
@@ -2352,7 +3265,7 @@
         "Blessing: Favor"
       ],
       "buildsInto": [],
-      "image": "items/4004.webp",
+      "image": "https://static.wikia.nocookie.net/mobile-legends/images/0/00/Favor.png",
       "counters": [],
       "counteredBy": [
         1015,
@@ -2377,7 +3290,32 @@
       "patchVersion": "2.2.23",
       "status": "active",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/0/00/Favor.png",
-      "fandomFile": "Favor.png"
+      "fandomFile": "Favor.png",
+      "priceType": "shop",
+      "priceNote": "",
+      "buildPathIds": [
+        4112
+      ],
+      "goodAgainstHeroes": [],
+      "badAgainstHeroes": [],
+      "goodWithHeroes": [
+        34,
+        112,
+        14,
+        55
+      ],
+      "buildTreeVersion": "2.2.23",
+      "goodAgainst": [],
+      "badAgainst": [
+        1015,
+        2004
+      ],
+      "goodWith": [
+        34,
+        112,
+        14,
+        55
+      ]
     },
     {
       "id": 5001,
@@ -2430,7 +3368,29 @@
       "patchVersion": "2.2.23",
       "status": "active",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/0/07/Swift_Boots.png",
-      "fandomFile": "Swift_Boots.png"
+      "fandomFile": "Swift_Boots.png",
+      "priceType": "shop",
+      "priceNote": "",
+      "buildPathIds": [
+        5101
+      ],
+      "goodAgainstHeroes": [],
+      "badAgainstHeroes": [],
+      "goodWithHeroes": [
+        60,
+        65,
+        40
+      ],
+      "buildTreeVersion": "2.2.23",
+      "goodAgainst": [],
+      "badAgainst": [
+        3001
+      ],
+      "goodWith": [
+        60,
+        65,
+        40
+      ]
     },
     {
       "id": 5002,
@@ -2493,7 +3453,32 @@
       "patchVersion": "2.2.23",
       "status": "active",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/4/4b/Warrior_Boots.png",
-      "fandomFile": "Warrior_Boots.png"
+      "fandomFile": "Warrior_Boots.png",
+      "priceType": "shop",
+      "priceNote": "",
+      "buildPathIds": [
+        5101
+      ],
+      "goodAgainstHeroes": [
+        60,
+        65
+      ],
+      "badAgainstHeroes": [],
+      "goodWithHeroes": [
+        6,
+        78,
+        41
+      ],
+      "buildTreeVersion": "2.2.23",
+      "goodAgainst": [],
+      "badAgainst": [
+        2003
+      ],
+      "goodWith": [
+        6,
+        78,
+        41
+      ]
     },
     {
       "id": 5003,
@@ -2560,7 +3545,34 @@
       "patchVersion": "2.2.23",
       "status": "active",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/8/89/Tough_Boots.png",
-      "fandomFile": "Tough_Boots.png"
+      "fandomFile": "Tough_Boots.png",
+      "priceType": "shop",
+      "priceNote": "",
+      "buildPathIds": [
+        5101
+      ],
+      "goodAgainstHeroes": [
+        15,
+        25
+      ],
+      "badAgainstHeroes": [],
+      "goodWithHeroes": [
+        6,
+        78,
+        41,
+        26
+      ],
+      "buildTreeVersion": "2.2.23",
+      "goodAgainst": [],
+      "badAgainst": [
+        1004
+      ],
+      "goodWith": [
+        6,
+        78,
+        41,
+        26
+      ]
     },
     {
       "id": 5004,
@@ -2613,7 +3625,29 @@
       "patchVersion": "2.2.23",
       "status": "active",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/5/5a/Magic_Shoes.png",
-      "fandomFile": "Magic_Shoes.png"
+      "fandomFile": "Magic_Shoes.png",
+      "priceType": "shop",
+      "priceNote": "",
+      "buildPathIds": [
+        5101
+      ],
+      "goodAgainstHeroes": [],
+      "badAgainstHeroes": [],
+      "goodWithHeroes": [
+        115,
+        68,
+        25,
+        34
+      ],
+      "buildTreeVersion": "2.2.23",
+      "goodAgainst": [],
+      "badAgainst": [],
+      "goodWith": [
+        115,
+        68,
+        25,
+        34
+      ]
     },
     {
       "id": 5005,
@@ -2675,7 +3709,29 @@
       "patchVersion": "2.2.23",
       "status": "active",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/a/a4/Rapid_Boots.png",
-      "fandomFile": "Rapid_Boots.png"
+      "fandomFile": "Rapid_Boots.png",
+      "priceType": "shop",
+      "priceNote": "",
+      "buildPathIds": [
+        5101
+      ],
+      "goodAgainstHeroes": [],
+      "badAgainstHeroes": [],
+      "goodWithHeroes": [
+        6,
+        78,
+        102,
+        10
+      ],
+      "buildTreeVersion": "2.2.23",
+      "goodAgainst": [],
+      "badAgainst": [],
+      "goodWith": [
+        6,
+        78,
+        102,
+        10
+      ]
     },
     {
       "id": 6001,
@@ -2751,7 +3807,38 @@
       "patchVersion": "2.2.23",
       "status": "active",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/2/26/Starlium_Scythe.png",
-      "fandomFile": "Starlium_Scythe.png"
+      "fandomFile": "Starlium_Scythe.png",
+      "priceType": "shop",
+      "priceNote": "",
+      "buildPathIds": [
+        2105,
+        2103
+      ],
+      "goodAgainstHeroes": [
+        60,
+        65
+      ],
+      "badAgainstHeroes": [],
+      "goodWithHeroes": [
+        73,
+        68,
+        116,
+        80
+      ],
+      "buildTreeVersion": "2.2.23",
+      "goodAgainst": [
+        3004
+      ],
+      "badAgainst": [
+        3004,
+        3005
+      ],
+      "goodWith": [
+        73,
+        68,
+        116,
+        80
+      ]
     },
     {
       "id": 1017,
@@ -2810,7 +3897,21 @@
         "cdr"
       ],
       "patchVersion": "2.2.23",
-      "status": "active"
+      "status": "active",
+      "priceType": "shop",
+      "priceNote": "",
+      "buildPathIds": [
+        1106,
+        1105,
+        1103
+      ],
+      "goodAgainstHeroes": [],
+      "badAgainstHeroes": [],
+      "goodWithHeroes": [],
+      "buildTreeVersion": "2.2.23",
+      "goodAgainst": [],
+      "badAgainst": [],
+      "goodWith": []
     },
     {
       "id": 1018,
@@ -2868,7 +3969,20 @@
         "shield"
       ],
       "patchVersion": "2.2.23",
-      "status": "active"
+      "status": "active",
+      "priceType": "shop",
+      "priceNote": "",
+      "buildPathIds": [
+        1112,
+        1102
+      ],
+      "goodAgainstHeroes": [],
+      "badAgainstHeroes": [],
+      "goodWithHeroes": [],
+      "buildTreeVersion": "2.2.23",
+      "goodAgainst": [],
+      "badAgainst": [],
+      "goodWith": []
     },
     {
       "id": 1101,
@@ -2894,7 +4008,21 @@
       "buildPath": [
         "Dagger"
       ],
-      "buildsInto": [],
+      "buildsInto": [
+        1002,
+        1005,
+        1009,
+        1010,
+        1011,
+        1012,
+        1015,
+        1101,
+        1106,
+        1107,
+        1108,
+        1109,
+        1112
+      ],
       "image": "items/1101.webp",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/4/45/Dagger.png",
       "fandomFile": "Dagger.png",
@@ -2908,7 +4036,19 @@
         "component"
       ],
       "patchVersion": "2.2.23",
-      "status": "active"
+      "status": "active",
+      "priceType": "shop",
+      "priceNote": "",
+      "buildPathIds": [
+        1101
+      ],
+      "goodAgainstHeroes": [],
+      "badAgainstHeroes": [],
+      "goodWithHeroes": [],
+      "buildTreeVersion": "2.2.23",
+      "goodAgainst": [],
+      "badAgainst": [],
+      "goodWith": []
     },
     {
       "id": 1102,
@@ -2932,7 +4072,12 @@
       "description": "Basic Attack Speed component. Builds into Regular Spear, Rogue Meteor, Swift Crossbow and more.",
       "lore": "",
       "buildPath": [],
-      "buildsInto": [],
+      "buildsInto": [
+        1018,
+        1107,
+        1110,
+        1111
+      ],
       "image": "items/1102.webp",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/5/58/Knife.png",
       "fandomFile": "Knife.png",
@@ -2946,7 +4091,17 @@
         "component"
       ],
       "patchVersion": "2.2.23",
-      "status": "active"
+      "status": "active",
+      "priceType": "shop",
+      "priceNote": "",
+      "buildPathIds": [],
+      "goodAgainstHeroes": [],
+      "badAgainstHeroes": [],
+      "goodWithHeroes": [],
+      "buildTreeVersion": "2.2.23",
+      "goodAgainst": [],
+      "badAgainst": [],
+      "goodWith": []
     },
     {
       "id": 1103,
@@ -2970,7 +4125,13 @@
       "description": "Basic Crit component. Builds into Rogue Meteor and crit items.",
       "lore": "",
       "buildPath": [],
-      "buildsInto": [],
+      "buildsInto": [
+        1003,
+        1009,
+        1013,
+        1017,
+        1110
+      ],
       "image": "items/1103.webp",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/1/1d/Javelin.png",
       "fandomFile": "Javelin.png",
@@ -2984,7 +4145,17 @@
         "component"
       ],
       "patchVersion": "2.2.23",
-      "status": "active"
+      "status": "active",
+      "priceType": "shop",
+      "priceNote": "",
+      "buildPathIds": [],
+      "goodAgainstHeroes": [],
+      "badAgainstHeroes": [],
+      "goodWithHeroes": [],
+      "buildTreeVersion": "2.2.23",
+      "goodAgainst": [],
+      "badAgainst": [],
+      "goodWith": []
     },
     {
       "id": 1104,
@@ -3013,7 +4184,14 @@
       "description": "Starter lifesteal component. Builds into Demon Hunter Sword, Wind of Nature, Haas's Claws and other lifesteal items.",
       "lore": "",
       "buildPath": [],
-      "buildsInto": [],
+      "buildsInto": [
+        1002,
+        1005,
+        1011,
+        1013,
+        1014,
+        1112
+      ],
       "image": "items/1104.webp",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/f/f9/Vampire_Mallet.png",
       "fandomFile": "Vampire_Mallet.png",
@@ -3028,7 +4206,17 @@
         "component"
       ],
       "patchVersion": "2.2.23",
-      "status": "active"
+      "status": "active",
+      "priceType": "shop",
+      "priceNote": "",
+      "buildPathIds": [],
+      "goodAgainstHeroes": [],
+      "badAgainstHeroes": [],
+      "goodWithHeroes": [],
+      "buildTreeVersion": "2.2.23",
+      "goodAgainst": [],
+      "badAgainst": [],
+      "goodWith": []
     },
     {
       "id": 1105,
@@ -3057,7 +4245,9 @@
       "description": "Early CDR + Attack component. Builds into Endless Battle, Hunter Strike, War Axe and Great Dragon Spear.",
       "lore": "",
       "buildPath": [],
-      "buildsInto": [],
+      "buildsInto": [
+        1017
+      ],
       "image": "items/1105.webp",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/b/be/Iron_Hunting_Bow.png",
       "fandomFile": "Iron_Hunting_Bow.png",
@@ -3072,7 +4262,17 @@
         "component"
       ],
       "patchVersion": "2.2.23",
-      "status": "active"
+      "status": "active",
+      "priceType": "shop",
+      "priceNote": "",
+      "buildPathIds": [],
+      "goodAgainstHeroes": [],
+      "badAgainstHeroes": [],
+      "goodWithHeroes": [],
+      "buildTreeVersion": "2.2.23",
+      "goodAgainst": [],
+      "badAgainst": [],
+      "goodWith": []
     },
     {
       "id": 1106,
@@ -3099,7 +4299,17 @@
         "Dagger",
         "Dagger"
       ],
-      "buildsInto": [],
+      "buildsInto": [
+        1001,
+        1004,
+        1006,
+        1007,
+        1008,
+        1012,
+        1014,
+        1015,
+        1017
+      ],
       "image": "items/1106.webp",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/1/1e/Legion_Sword.png",
       "fandomFile": "Legion_Sword.png",
@@ -3113,7 +4323,19 @@
         "component"
       ],
       "patchVersion": "2.2.23",
-      "status": "active"
+      "status": "active",
+      "priceType": "shop",
+      "priceNote": "",
+      "buildPathIds": [
+        1101
+      ],
+      "goodAgainstHeroes": [],
+      "badAgainstHeroes": [],
+      "goodWithHeroes": [],
+      "buildTreeVersion": "2.2.23",
+      "goodAgainst": [],
+      "badAgainst": [],
+      "goodWith": []
     },
     {
       "id": 1107,
@@ -3159,7 +4381,20 @@
         "component"
       ],
       "patchVersion": "2.2.23",
-      "status": "active"
+      "status": "active",
+      "priceType": "shop",
+      "priceNote": "",
+      "buildPathIds": [
+        1102,
+        1101
+      ],
+      "goodAgainstHeroes": [],
+      "badAgainstHeroes": [],
+      "goodWithHeroes": [],
+      "buildTreeVersion": "2.2.23",
+      "goodAgainst": [],
+      "badAgainst": [],
+      "goodWith": []
     },
     {
       "id": 1108,
@@ -3206,7 +4441,20 @@
         "component"
       ],
       "patchVersion": "2.2.23",
-      "status": "active"
+      "status": "active",
+      "priceType": "shop",
+      "priceNote": "",
+      "buildPathIds": [
+        1101,
+        3101
+      ],
+      "goodAgainstHeroes": [],
+      "badAgainstHeroes": [],
+      "goodWithHeroes": [],
+      "buildTreeVersion": "2.2.23",
+      "goodAgainst": [],
+      "badAgainst": [],
+      "goodWith": []
     },
     {
       "id": 1109,
@@ -3252,7 +4500,19 @@
         "component"
       ],
       "patchVersion": "2.2.23",
-      "status": "active"
+      "status": "active",
+      "priceType": "shop",
+      "priceNote": "",
+      "buildPathIds": [
+        1101
+      ],
+      "goodAgainstHeroes": [],
+      "badAgainstHeroes": [],
+      "goodWithHeroes": [],
+      "buildTreeVersion": "2.2.23",
+      "goodAgainst": [],
+      "badAgainst": [],
+      "goodWith": []
     },
     {
       "id": 1110,
@@ -3299,7 +4559,20 @@
         "component"
       ],
       "patchVersion": "2.2.23",
-      "status": "active"
+      "status": "active",
+      "priceType": "shop",
+      "priceNote": "",
+      "buildPathIds": [
+        1102,
+        1103
+      ],
+      "goodAgainstHeroes": [],
+      "badAgainstHeroes": [],
+      "goodWithHeroes": [],
+      "buildTreeVersion": "2.2.23",
+      "goodAgainst": [],
+      "badAgainst": [],
+      "goodWith": []
     },
     {
       "id": 1111,
@@ -3329,7 +4602,9 @@
         "Knife",
         "Knife"
       ],
-      "buildsInto": [],
+      "buildsInto": [
+        2012
+      ],
       "image": "items/1111.webp",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/a/a1/Swift_Crossbow.png",
       "fandomFile": "Swift_Crossbow.png",
@@ -3344,7 +4619,19 @@
         "component"
       ],
       "patchVersion": "2.2.23",
-      "status": "active"
+      "status": "active",
+      "priceType": "shop",
+      "priceNote": "",
+      "buildPathIds": [
+        1102
+      ],
+      "goodAgainstHeroes": [],
+      "badAgainstHeroes": [],
+      "goodWithHeroes": [],
+      "buildTreeVersion": "2.2.23",
+      "goodAgainst": [],
+      "badAgainst": [],
+      "goodWith": []
     },
     {
       "id": 1112,
@@ -3379,7 +4666,9 @@
         "Dagger",
         "Vampire Mallet"
       ],
-      "buildsInto": [],
+      "buildsInto": [
+        1018
+      ],
       "image": "items/1112.webp",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/a/ae/Magic_Blade.png",
       "fandomFile": "Magic_Blade.png",
@@ -3395,7 +4684,20 @@
         "component"
       ],
       "patchVersion": "2.2.23",
-      "status": "active"
+      "status": "active",
+      "priceType": "shop",
+      "priceNote": "",
+      "buildPathIds": [
+        1101,
+        1104
+      ],
+      "goodAgainstHeroes": [],
+      "badAgainstHeroes": [],
+      "goodWithHeroes": [],
+      "buildTreeVersion": "2.2.23",
+      "goodAgainst": [],
+      "badAgainst": [],
+      "goodWith": []
     },
     {
       "id": 2007,
@@ -3452,7 +4754,21 @@
         "anti-tank"
       ],
       "patchVersion": "2.2.23",
-      "status": "active"
+      "status": "active",
+      "priceType": "shop",
+      "priceNote": "",
+      "buildPathIds": [
+        2105,
+        2104,
+        2102
+      ],
+      "goodAgainstHeroes": [],
+      "badAgainstHeroes": [],
+      "goodWithHeroes": [],
+      "buildTreeVersion": "2.2.23",
+      "goodAgainst": [],
+      "badAgainst": [],
+      "goodWith": []
     },
     {
       "id": 2008,
@@ -3515,7 +4831,21 @@
         "slow"
       ],
       "patchVersion": "2.2.23",
-      "status": "active"
+      "status": "active",
+      "priceType": "shop",
+      "priceNote": "",
+      "buildPathIds": [
+        2107,
+        2106,
+        2101
+      ],
+      "goodAgainstHeroes": [],
+      "badAgainstHeroes": [],
+      "goodWithHeroes": [],
+      "buildTreeVersion": "2.2.23",
+      "goodAgainst": [],
+      "badAgainst": [],
+      "goodWith": []
     },
     {
       "id": 2009,
@@ -3567,7 +4897,21 @@
         "sustain"
       ],
       "patchVersion": "2.2.23",
-      "status": "active"
+      "status": "active",
+      "priceType": "shop",
+      "priceNote": "",
+      "buildPathIds": [
+        2107,
+        2105,
+        3101
+      ],
+      "goodAgainstHeroes": [],
+      "badAgainstHeroes": [],
+      "goodWithHeroes": [],
+      "buildTreeVersion": "2.2.23",
+      "goodAgainst": [],
+      "badAgainst": [],
+      "goodWith": []
     },
     {
       "id": 2010,
@@ -3629,7 +4973,20 @@
         "tank"
       ],
       "patchVersion": "2.2.23",
-      "status": "active"
+      "status": "active",
+      "priceType": "shop",
+      "priceNote": "",
+      "buildPathIds": [
+        2109,
+        2104
+      ],
+      "goodAgainstHeroes": [],
+      "badAgainstHeroes": [],
+      "goodWithHeroes": [],
+      "buildTreeVersion": "2.2.23",
+      "goodAgainst": [],
+      "badAgainst": [],
+      "goodWith": []
     },
     {
       "id": 2011,
@@ -3688,7 +5045,21 @@
         "mana"
       ],
       "patchVersion": "2.2.23",
-      "status": "active"
+      "status": "active",
+      "priceType": "shop",
+      "priceNote": "",
+      "buildPathIds": [
+        2108,
+        2103,
+        2105
+      ],
+      "goodAgainstHeroes": [],
+      "badAgainstHeroes": [],
+      "goodWithHeroes": [],
+      "buildTreeVersion": "2.2.23",
+      "goodAgainst": [],
+      "badAgainst": [],
+      "goodWith": []
     },
     {
       "id": 2012,
@@ -3750,7 +5121,20 @@
         "basic-attack"
       ],
       "patchVersion": "2.2.23",
-      "status": "active"
+      "status": "active",
+      "priceType": "shop",
+      "priceNote": "",
+      "buildPathIds": [
+        1111,
+        2104
+      ],
+      "goodAgainstHeroes": [],
+      "badAgainstHeroes": [],
+      "goodWithHeroes": [],
+      "buildTreeVersion": "2.2.23",
+      "goodAgainst": [],
+      "badAgainst": [],
+      "goodWith": []
     },
     {
       "id": 2013,
@@ -3800,7 +5184,19 @@
         "penetration"
       ],
       "patchVersion": "2.2.23",
-      "status": "active"
+      "status": "active",
+      "priceType": "shop",
+      "priceNote": "",
+      "buildPathIds": [
+        2105
+      ],
+      "goodAgainstHeroes": [],
+      "badAgainstHeroes": [],
+      "goodWithHeroes": [],
+      "buildTreeVersion": "2.2.23",
+      "goodAgainst": [],
+      "badAgainst": [],
+      "goodWith": []
     },
     {
       "id": 2101,
@@ -3824,7 +5220,15 @@
       "description": "Basic Magic Power component. Builds into Magic Wand, Exotic Veil and Mystic Container.",
       "lore": "",
       "buildPath": [],
-      "buildsInto": [],
+      "buildsInto": [
+        2002,
+        2005,
+        2008,
+        2105,
+        2106,
+        2107,
+        5006
+      ],
       "image": "items/2101.webp",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/2/2c/Mystery_Codex.png",
       "fandomFile": "Mystery_Codex.png",
@@ -3838,7 +5242,17 @@
         "component"
       ],
       "patchVersion": "2.2.23",
-      "status": "active"
+      "status": "active",
+      "priceType": "shop",
+      "priceNote": "",
+      "buildPathIds": [],
+      "goodAgainstHeroes": [],
+      "badAgainstHeroes": [],
+      "goodWithHeroes": [],
+      "buildTreeVersion": "2.2.23",
+      "goodAgainst": [],
+      "badAgainst": [],
+      "goodWith": []
     },
     {
       "id": 2102,
@@ -3862,7 +5276,10 @@
       "description": "Basic Mana component. Builds into Elegant Gem, Lightning Truncheon and Wishing Lantern.",
       "lore": "",
       "buildPath": [],
-      "buildsInto": [],
+      "buildsInto": [
+        2007,
+        2109
+      ],
       "image": "items/2102.webp",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/f/fd/Power_Crystal.png",
       "fandomFile": "Power_Crystal.png",
@@ -3877,7 +5294,17 @@
         "component"
       ],
       "patchVersion": "2.2.23",
-      "status": "active"
+      "status": "active",
+      "priceType": "shop",
+      "priceNote": "",
+      "buildPathIds": [],
+      "goodAgainstHeroes": [],
+      "badAgainstHeroes": [],
+      "goodWithHeroes": [],
+      "buildTreeVersion": "2.2.23",
+      "goodAgainst": [],
+      "badAgainst": [],
+      "goodWith": []
     },
     {
       "id": 2103,
@@ -3901,7 +5328,17 @@
       "description": "Basic Mana Regen component. Called Mana Necklace in older versions — same item, renamed. Builds into Tome of Evil, Azure Blade, Demon Shoes and Enchanted Talisman.",
       "lore": "",
       "buildPath": [],
-      "buildsInto": [],
+      "buildsInto": [
+        1008,
+        3002,
+        3004,
+        3005,
+        6001,
+        2011,
+        2108,
+        2110,
+        5007
+      ],
       "image": "items/2103.webp",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/c/cd/Magic_Necklace.png",
       "fandomFile": "Magic_Necklace.png",
@@ -3917,7 +5354,17 @@
       ],
       "patchVersion": "2.2.23",
       "status": "active",
-      "alias": "Mana Necklace (old name)"
+      "alias": "Mana Necklace (old name)",
+      "priceType": "shop",
+      "priceNote": "",
+      "buildPathIds": [],
+      "goodAgainstHeroes": [],
+      "badAgainstHeroes": [],
+      "goodWithHeroes": [],
+      "buildTreeVersion": "2.2.23",
+      "goodAgainst": [],
+      "badAgainst": [],
+      "goodWith": []
     },
     {
       "id": 2104,
@@ -3946,7 +5393,12 @@
       "description": "Magic Power + CDR component. Builds into Tome of Evil, Clock of Destiny, Feather of Heaven and more.",
       "lore": "",
       "buildPath": [],
-      "buildsInto": [],
+      "buildsInto": [
+        2007,
+        2010,
+        2012,
+        2108
+      ],
       "image": "items/2104.webp",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/3/35/Book_of_Sages.png",
       "fandomFile": "Book_of_Sages.png",
@@ -3961,7 +5413,17 @@
         "component"
       ],
       "patchVersion": "2.2.23",
-      "status": "active"
+      "status": "active",
+      "priceType": "shop",
+      "priceNote": "",
+      "buildPathIds": [],
+      "goodAgainstHeroes": [],
+      "badAgainstHeroes": [],
+      "goodWithHeroes": [],
+      "buildTreeVersion": "2.2.23",
+      "goodAgainst": [],
+      "badAgainst": [],
+      "goodWith": []
     },
     {
       "id": 2105,
@@ -3987,7 +5449,21 @@
       "buildPath": [
         "Mystery Codex"
       ],
-      "buildsInto": [],
+      "buildsInto": [
+        2001,
+        2002,
+        2003,
+        2004,
+        2005,
+        2006,
+        4001,
+        4002,
+        6001,
+        2007,
+        2009,
+        2011,
+        2013
+      ],
       "image": "items/2105.webp",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/b/bc/Magic_Wand.png",
       "fandomFile": "Magic_Wand.png",
@@ -4001,7 +5477,19 @@
         "component"
       ],
       "patchVersion": "2.2.23",
-      "status": "active"
+      "status": "active",
+      "priceType": "shop",
+      "priceNote": "",
+      "buildPathIds": [
+        2101
+      ],
+      "goodAgainstHeroes": [],
+      "badAgainstHeroes": [],
+      "goodWithHeroes": [],
+      "buildTreeVersion": "2.2.23",
+      "goodAgainst": [],
+      "badAgainst": [],
+      "goodWith": []
     },
     {
       "id": 2106,
@@ -4032,7 +5520,9 @@
       "buildPath": [
         "Mystery Codex"
       ],
-      "buildsInto": [],
+      "buildsInto": [
+        2008
+      ],
       "image": "items/2106.webp",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/e/e9/Exotic_Veil.png",
       "fandomFile": "Exotic_Veil.png",
@@ -4046,7 +5536,19 @@
         "component"
       ],
       "patchVersion": "2.2.23",
-      "status": "active"
+      "status": "active",
+      "priceType": "shop",
+      "priceNote": "",
+      "buildPathIds": [
+        2101
+      ],
+      "goodAgainstHeroes": [],
+      "badAgainstHeroes": [],
+      "goodWithHeroes": [],
+      "buildTreeVersion": "2.2.23",
+      "goodAgainst": [],
+      "badAgainst": [],
+      "goodWith": []
     },
     {
       "id": 2107,
@@ -4077,7 +5579,10 @@
       "buildPath": [
         "Mystery Codex"
       ],
-      "buildsInto": [],
+      "buildsInto": [
+        2008,
+        2009
+      ],
       "image": "items/2107.webp",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/2/23/Mystic_Container.png",
       "fandomFile": "Mystic_Container.png",
@@ -4092,7 +5597,19 @@
         "component"
       ],
       "patchVersion": "2.2.23",
-      "status": "active"
+      "status": "active",
+      "priceType": "shop",
+      "priceNote": "",
+      "buildPathIds": [
+        2101
+      ],
+      "goodAgainstHeroes": [],
+      "badAgainstHeroes": [],
+      "goodWithHeroes": [],
+      "buildTreeVersion": "2.2.23",
+      "goodAgainst": [],
+      "badAgainst": [],
+      "goodWith": []
     },
     {
       "id": 2108,
@@ -4129,7 +5646,9 @@
         "Magic Necklace",
         "Book of Sages"
       ],
-      "buildsInto": [],
+      "buildsInto": [
+        2011
+      ],
       "image": "items/2108.webp",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/0/0a/Tome_of_Evil.png",
       "fandomFile": "Tome_of_Evil.png",
@@ -4144,7 +5663,20 @@
         "component"
       ],
       "patchVersion": "2.2.23",
-      "status": "active"
+      "status": "active",
+      "priceType": "shop",
+      "priceNote": "",
+      "buildPathIds": [
+        2103,
+        2104
+      ],
+      "goodAgainstHeroes": [],
+      "badAgainstHeroes": [],
+      "goodWithHeroes": [],
+      "buildTreeVersion": "2.2.23",
+      "goodAgainst": [],
+      "badAgainst": [],
+      "goodWith": []
     },
     {
       "id": 2109,
@@ -4179,7 +5711,9 @@
         "Power Crystal",
         "Vitality Crystal"
       ],
-      "buildsInto": [],
+      "buildsInto": [
+        2010
+      ],
       "image": "items/2109.webp",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/d/d4/Elegant_Gem.png",
       "fandomFile": "Elegant_Gem.png",
@@ -4195,7 +5729,20 @@
         "component"
       ],
       "patchVersion": "2.2.23",
-      "status": "active"
+      "status": "active",
+      "priceType": "shop",
+      "priceNote": "",
+      "buildPathIds": [
+        2102,
+        3101
+      ],
+      "goodAgainstHeroes": [],
+      "badAgainstHeroes": [],
+      "goodWithHeroes": [],
+      "buildTreeVersion": "2.2.23",
+      "goodAgainst": [],
+      "badAgainst": [],
+      "goodWith": []
     },
     {
       "id": 2110,
@@ -4244,7 +5791,19 @@
         "component"
       ],
       "patchVersion": "2.2.23",
-      "status": "active"
+      "status": "active",
+      "priceType": "shop",
+      "priceNote": "",
+      "buildPathIds": [
+        2103
+      ],
+      "goodAgainstHeroes": [],
+      "badAgainstHeroes": [],
+      "goodWithHeroes": [],
+      "buildTreeVersion": "2.2.23",
+      "goodAgainst": [],
+      "badAgainst": [],
+      "goodWith": []
     },
     {
       "id": 3010,
@@ -4307,7 +5866,21 @@
         "sustain"
       ],
       "patchVersion": "2.2.23",
-      "status": "active"
+      "status": "active",
+      "priceType": "shop",
+      "priceNote": "",
+      "buildPathIds": [
+        3107,
+        3105,
+        6101
+      ],
+      "goodAgainstHeroes": [],
+      "badAgainstHeroes": [],
+      "goodWithHeroes": [],
+      "buildTreeVersion": "2.2.23",
+      "goodAgainst": [],
+      "badAgainst": [],
+      "goodWith": []
     },
     {
       "id": 3011,
@@ -4370,7 +5943,21 @@
         "true-damage"
       ],
       "patchVersion": "2.2.23",
-      "status": "active"
+      "status": "active",
+      "priceType": "shop",
+      "priceNote": "",
+      "buildPathIds": [
+        3107,
+        3102,
+        3103
+      ],
+      "goodAgainstHeroes": [],
+      "badAgainstHeroes": [],
+      "goodWithHeroes": [],
+      "buildTreeVersion": "2.2.23",
+      "goodAgainst": [],
+      "badAgainst": [],
+      "goodWith": []
     },
     {
       "id": 3012,
@@ -4422,7 +6009,21 @@
         "burn"
       ],
       "patchVersion": "2.2.23",
-      "status": "active"
+      "status": "active",
+      "priceType": "shop",
+      "priceNote": "",
+      "buildPathIds": [
+        3108,
+        3107,
+        3103
+      ],
+      "goodAgainstHeroes": [],
+      "badAgainstHeroes": [],
+      "goodWithHeroes": [],
+      "buildTreeVersion": "2.2.23",
+      "goodAgainst": [],
+      "badAgainst": [],
+      "goodWith": []
     },
     {
       "id": 3013,
@@ -4485,7 +6086,20 @@
         "shield"
       ],
       "patchVersion": "2.2.23",
-      "status": "active"
+      "status": "active",
+      "priceType": "shop",
+      "priceNote": "",
+      "buildPathIds": [
+        3105,
+        3101
+      ],
+      "goodAgainstHeroes": [],
+      "badAgainstHeroes": [],
+      "goodWithHeroes": [],
+      "buildTreeVersion": "2.2.23",
+      "goodAgainst": [],
+      "badAgainst": [],
+      "goodWith": []
     },
     {
       "id": 3014,
@@ -4543,7 +6157,21 @@
         "fighter"
       ],
       "patchVersion": "2.2.23",
-      "status": "active"
+      "status": "active",
+      "priceType": "shop",
+      "priceNote": "",
+      "buildPathIds": [
+        3107,
+        3105,
+        3102
+      ],
+      "goodAgainstHeroes": [],
+      "badAgainstHeroes": [],
+      "goodWithHeroes": [],
+      "buildTreeVersion": "2.2.23",
+      "goodAgainst": [],
+      "badAgainst": [],
+      "goodWith": []
     },
     {
       "id": 3015,
@@ -4599,7 +6227,20 @@
       ],
       "patchVersion": "2.2.23",
       "status": "active",
-      "alias": "Athena's Shield (renamed version)"
+      "alias": "Athena's Shield (renamed version)",
+      "priceType": "shop",
+      "priceNote": "",
+      "buildPathIds": [
+        3111,
+        3101
+      ],
+      "goodAgainstHeroes": [],
+      "badAgainstHeroes": [],
+      "goodWithHeroes": [],
+      "buildTreeVersion": "2.2.23",
+      "goodAgainst": [],
+      "badAgainst": [],
+      "goodWith": []
     },
     {
       "id": 3101,
@@ -4623,7 +6264,29 @@
       "description": "Basic HP component. Builds into Ares Belt, Molten Essence, Elegant Gem, Silence Robe and almost every HP item.",
       "lore": "",
       "buildPath": [],
-      "buildsInto": [],
+      "buildsInto": [
+        1006,
+        1008,
+        1014,
+        2004,
+        2006,
+        3003,
+        3004,
+        3005,
+        3006,
+        3008,
+        3009,
+        4001,
+        4002,
+        1108,
+        2009,
+        2109,
+        3013,
+        3015,
+        3107,
+        3108,
+        3111
+      ],
       "image": "items/3101.webp",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/e/ea/Vitality_Crystal.png",
       "fandomFile": "Vitality_Crystal.png",
@@ -4638,7 +6301,17 @@
         "component"
       ],
       "patchVersion": "2.2.23",
-      "status": "active"
+      "status": "active",
+      "priceType": "shop",
+      "priceNote": "",
+      "buildPathIds": [],
+      "goodAgainstHeroes": [],
+      "badAgainstHeroes": [],
+      "goodWithHeroes": [],
+      "buildTreeVersion": "2.2.23",
+      "goodAgainst": [],
+      "badAgainst": [],
+      "goodWith": []
     },
     {
       "id": 3102,
@@ -4662,7 +6335,14 @@
       "description": "Basic Physical Defense component. Builds into Steel Legplates, Dreadnaught Armor, Black Ice Shield and more.",
       "lore": "",
       "buildPath": [],
-      "buildsInto": [],
+      "buildsInto": [
+        3001,
+        3011,
+        3014,
+        3106,
+        3109,
+        3110
+      ],
       "image": "items/3102.webp",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/5/58/Leather_Jerkin.png",
       "fandomFile": "Leather_Jerkin.png",
@@ -4676,7 +6356,17 @@
         "component"
       ],
       "patchVersion": "2.2.23",
-      "status": "active"
+      "status": "active",
+      "priceType": "shop",
+      "priceNote": "",
+      "buildPathIds": [],
+      "goodAgainstHeroes": [],
+      "badAgainstHeroes": [],
+      "goodWithHeroes": [],
+      "buildTreeVersion": "2.2.23",
+      "goodAgainst": [],
+      "badAgainst": [],
+      "goodWith": []
     },
     {
       "id": 3103,
@@ -4700,7 +6390,12 @@
       "description": "Basic Magic Defense component. Builds into Black Ice Shield, Silence Robe, Thunder Belt and more.",
       "lore": "",
       "buildPath": [],
-      "buildsInto": [],
+      "buildsInto": [
+        3011,
+        3012,
+        3110,
+        3111
+      ],
       "image": "items/3103.webp",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/4/4c/Magic_Resist_Cloak.png",
       "fandomFile": "Magic_Resist_Cloak.png",
@@ -4714,7 +6409,17 @@
         "component"
       ],
       "patchVersion": "2.2.23",
-      "status": "active"
+      "status": "active",
+      "priceType": "shop",
+      "priceNote": "",
+      "buildPathIds": [],
+      "goodAgainstHeroes": [],
+      "badAgainstHeroes": [],
+      "goodWithHeroes": [],
+      "buildTreeVersion": "2.2.23",
+      "goodAgainst": [],
+      "badAgainst": [],
+      "goodWith": []
     },
     {
       "id": 3104,
@@ -4753,7 +6458,17 @@
         "component"
       ],
       "patchVersion": "2.2.23",
-      "status": "active"
+      "status": "active",
+      "priceType": "shop",
+      "priceNote": "",
+      "buildPathIds": [],
+      "goodAgainstHeroes": [],
+      "badAgainstHeroes": [],
+      "goodWithHeroes": [],
+      "buildTreeVersion": "2.2.23",
+      "goodAgainst": [],
+      "badAgainst": [],
+      "goodWith": []
     },
     {
       "id": 3105,
@@ -4782,7 +6497,11 @@
       "description": "HP + CDR component. Builds into War Axe, Queen's Wings, Brute Force Breastplate, Oracle, Magic Shoes and Fleeting Time.",
       "lore": "",
       "buildPath": [],
-      "buildsInto": [],
+      "buildsInto": [
+        3010,
+        3013,
+        3014
+      ],
       "image": "items/3105.webp",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/9/91/Hero%27s_Ring.png",
       "fandomFile": "Hero%27s_Ring.png",
@@ -4797,7 +6516,17 @@
         "component"
       ],
       "patchVersion": "2.2.23",
-      "status": "active"
+      "status": "active",
+      "priceType": "shop",
+      "priceNote": "",
+      "buildPathIds": [],
+      "goodAgainstHeroes": [],
+      "badAgainstHeroes": [],
+      "goodWithHeroes": [],
+      "buildTreeVersion": "2.2.23",
+      "goodAgainst": [],
+      "badAgainst": [],
+      "goodWith": []
     },
     {
       "id": 3106,
@@ -4823,7 +6552,13 @@
       "buildPath": [
         "Leather Jerkin"
       ],
-      "buildsInto": [],
+      "buildsInto": [
+        3001,
+        3002,
+        3003,
+        3006,
+        3009
+      ],
       "image": "items/3106.webp",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/3/3c/Steel_Legplates.png",
       "fandomFile": "Steel_Legplates.png",
@@ -4837,7 +6572,19 @@
         "component"
       ],
       "patchVersion": "2.2.23",
-      "status": "active"
+      "status": "active",
+      "priceType": "shop",
+      "priceNote": "",
+      "buildPathIds": [
+        3102
+      ],
+      "goodAgainstHeroes": [],
+      "badAgainstHeroes": [],
+      "goodWithHeroes": [],
+      "buildTreeVersion": "2.2.23",
+      "goodAgainst": [],
+      "badAgainst": [],
+      "goodWith": []
     },
     {
       "id": 3107,
@@ -4863,7 +6610,12 @@
       "buildPath": [
         "Vitality Crystal"
       ],
-      "buildsInto": [],
+      "buildsInto": [
+        3010,
+        3011,
+        3012,
+        3014
+      ],
       "image": "items/3107.webp",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/0/04/Ares_Belt.png",
       "fandomFile": "Ares_Belt.png",
@@ -4878,7 +6630,19 @@
         "component"
       ],
       "patchVersion": "2.2.23",
-      "status": "active"
+      "status": "active",
+      "priceType": "shop",
+      "priceNote": "",
+      "buildPathIds": [
+        3101
+      ],
+      "goodAgainstHeroes": [],
+      "badAgainstHeroes": [],
+      "goodWithHeroes": [],
+      "buildTreeVersion": "2.2.23",
+      "goodAgainst": [],
+      "badAgainst": [],
+      "goodWith": []
     },
     {
       "id": 3108,
@@ -4907,7 +6671,9 @@
       "buildPath": [
         "Vitality Crystal"
       ],
-      "buildsInto": [],
+      "buildsInto": [
+        3012
+      ],
       "image": "items/3108.webp",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/8/8c/Molten_Essence.png",
       "fandomFile": "Molten_Essence.png",
@@ -4926,7 +6692,19 @@
         "component"
       ],
       "patchVersion": "2.2.23",
-      "status": "active"
+      "status": "active",
+      "priceType": "shop",
+      "priceNote": "",
+      "buildPathIds": [
+        3101
+      ],
+      "goodAgainstHeroes": [],
+      "badAgainstHeroes": [],
+      "goodWithHeroes": [],
+      "buildTreeVersion": "2.2.23",
+      "goodAgainst": [],
+      "badAgainst": [],
+      "goodWith": []
     },
     {
       "id": 3109,
@@ -4969,7 +6747,19 @@
         "component"
       ],
       "patchVersion": "2.2.23",
-      "status": "active"
+      "status": "active",
+      "priceType": "shop",
+      "priceNote": "",
+      "buildPathIds": [
+        3102
+      ],
+      "goodAgainstHeroes": [],
+      "badAgainstHeroes": [],
+      "goodWithHeroes": [],
+      "buildTreeVersion": "2.2.23",
+      "goodAgainst": [],
+      "badAgainst": [],
+      "goodWith": []
     },
     {
       "id": 3110,
@@ -5019,7 +6809,20 @@
         "component"
       ],
       "patchVersion": "2.2.23",
-      "status": "active"
+      "status": "active",
+      "priceType": "shop",
+      "priceNote": "",
+      "buildPathIds": [
+        3102,
+        3103
+      ],
+      "goodAgainstHeroes": [],
+      "badAgainstHeroes": [],
+      "goodWithHeroes": [],
+      "buildTreeVersion": "2.2.23",
+      "goodAgainst": [],
+      "badAgainst": [],
+      "goodWith": []
     },
     {
       "id": 3111,
@@ -5051,7 +6854,9 @@
         "Vitality Crystal",
         "Magic Resist Cloak"
       ],
-      "buildsInto": [],
+      "buildsInto": [
+        3015
+      ],
       "image": "items/3111.webp",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/a/a4/Silence_Robe.png",
       "fandomFile": "Silence_Robe.png",
@@ -5065,7 +6870,20 @@
         "component"
       ],
       "patchVersion": "2.2.23",
-      "status": "active"
+      "status": "active",
+      "priceType": "shop",
+      "priceNote": "",
+      "buildPathIds": [
+        3101,
+        3103
+      ],
+      "goodAgainstHeroes": [],
+      "badAgainstHeroes": [],
+      "goodWithHeroes": [],
+      "buildTreeVersion": "2.2.23",
+      "goodAgainst": [],
+      "badAgainst": [],
+      "goodWith": []
     },
     {
       "id": 4106,
@@ -5073,7 +6891,7 @@
       "slug": "conceal",
       "category": "Roam",
       "tier": "Blessing",
-      "price": 0,
+      "price": null,
       "sellPrice": 0,
       "stats": [
         "Conceal Blessing"
@@ -5110,7 +6928,17 @@
         "active"
       ],
       "patchVersion": "2.2.23",
-      "status": "active"
+      "status": "active",
+      "priceType": "granted",
+      "priceNote": "Granted by the corresponding Roam/Jungle blessing; not purchased as a standalone shop item.",
+      "buildPathIds": [],
+      "goodAgainstHeroes": [],
+      "badAgainstHeroes": [],
+      "goodWithHeroes": [],
+      "buildTreeVersion": "2.2.23",
+      "goodAgainst": [],
+      "badAgainst": [],
+      "goodWith": []
     },
     {
       "id": 4107,
@@ -5118,7 +6946,7 @@
       "slug": "dire-hit",
       "category": "Roam",
       "tier": "Blessing",
-      "price": 0,
+      "price": null,
       "sellPrice": 0,
       "stats": [
         "Dire Hit Blessing"
@@ -5151,7 +6979,17 @@
         "blessing"
       ],
       "patchVersion": "2.2.23",
-      "status": "active"
+      "status": "active",
+      "priceType": "granted",
+      "priceNote": "Granted by the corresponding Roam/Jungle blessing; not purchased as a standalone shop item.",
+      "buildPathIds": [],
+      "goodAgainstHeroes": [],
+      "badAgainstHeroes": [],
+      "goodWithHeroes": [],
+      "buildTreeVersion": "2.2.23",
+      "goodAgainst": [],
+      "badAgainst": [],
+      "goodWith": []
     },
     {
       "id": 4108,
@@ -5159,7 +6997,7 @@
       "slug": "flame-retribution",
       "category": "Jungle",
       "tier": "Blessing",
-      "price": 0,
+      "price": null,
       "sellPrice": 0,
       "stats": [
         "Flame Retribution"
@@ -5192,7 +7030,17 @@
         "blessing"
       ],
       "patchVersion": "2.2.23",
-      "status": "active"
+      "status": "active",
+      "priceType": "granted",
+      "priceNote": "Granted by the corresponding Roam/Jungle blessing; not purchased as a standalone shop item.",
+      "buildPathIds": [],
+      "goodAgainstHeroes": [],
+      "badAgainstHeroes": [],
+      "goodWithHeroes": [],
+      "buildTreeVersion": "2.2.23",
+      "goodAgainst": [],
+      "badAgainst": [],
+      "goodWith": []
     },
     {
       "id": 4109,
@@ -5200,7 +7048,7 @@
       "slug": "ice-retribution",
       "category": "Jungle",
       "tier": "Blessing",
-      "price": 0,
+      "price": null,
       "sellPrice": 0,
       "stats": [
         "Ice Retribution"
@@ -5233,7 +7081,17 @@
         "blessing"
       ],
       "patchVersion": "2.2.23",
-      "status": "active"
+      "status": "active",
+      "priceType": "granted",
+      "priceNote": "Granted by the corresponding Roam/Jungle blessing; not purchased as a standalone shop item.",
+      "buildPathIds": [],
+      "goodAgainstHeroes": [],
+      "badAgainstHeroes": [],
+      "goodWithHeroes": [],
+      "buildTreeVersion": "2.2.23",
+      "goodAgainst": [],
+      "badAgainst": [],
+      "goodWith": []
     },
     {
       "id": 4110,
@@ -5241,7 +7099,7 @@
       "slug": "bloody-retribution",
       "category": "Jungle",
       "tier": "Blessing",
-      "price": 0,
+      "price": null,
       "sellPrice": 0,
       "stats": [
         "Bloody Retribution"
@@ -5274,7 +7132,17 @@
         "blessing"
       ],
       "patchVersion": "2.2.23",
-      "status": "active"
+      "status": "active",
+      "priceType": "granted",
+      "priceNote": "Granted by the corresponding Roam/Jungle blessing; not purchased as a standalone shop item.",
+      "buildPathIds": [],
+      "goodAgainstHeroes": [],
+      "badAgainstHeroes": [],
+      "goodWithHeroes": [],
+      "buildTreeVersion": "2.2.23",
+      "goodAgainst": [],
+      "badAgainst": [],
+      "goodWith": []
     },
     {
       "id": 4111,
@@ -5282,7 +7150,7 @@
       "slug": "blessing-encourage",
       "category": "Roam",
       "tier": "Blessing",
-      "price": 0,
+      "price": null,
       "sellPrice": 0,
       "stats": [
         "Encourage Blessing"
@@ -5301,7 +7169,9 @@
       "description": "Roam Blessing component for Courage Mask. Hybrid Defense aura for team.",
       "lore": "",
       "buildPath": [],
-      "buildsInto": [],
+      "buildsInto": [
+        4003
+      ],
       "image": "items/4111.webp",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/8/86/Passive_-_Encourage.png",
       "fandomFile": "Passive_-_Encourage.png",
@@ -5315,7 +7185,17 @@
         "blessing"
       ],
       "patchVersion": "2.2.23",
-      "status": "active"
+      "status": "active",
+      "priceType": "granted",
+      "priceNote": "Granted by the corresponding Roam/Jungle blessing; not purchased as a standalone shop item.",
+      "buildPathIds": [],
+      "goodAgainstHeroes": [],
+      "badAgainstHeroes": [],
+      "goodWithHeroes": [],
+      "buildTreeVersion": "2.2.23",
+      "goodAgainst": [],
+      "badAgainst": [],
+      "goodWith": []
     },
     {
       "id": 4112,
@@ -5323,7 +7203,7 @@
       "slug": "blessing-favor",
       "category": "Roam",
       "tier": "Blessing",
-      "price": 0,
+      "price": null,
       "sellPrice": 0,
       "stats": [
         "Favor Blessing"
@@ -5342,7 +7222,9 @@
       "description": "Roam Blessing component for Favor. Extra heal / shield for lowest-HP ally.",
       "lore": "",
       "buildPath": [],
-      "buildsInto": [],
+      "buildsInto": [
+        4004
+      ],
       "image": "items/4112.webp",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/a/a0/Passive_-_Favor.png",
       "fandomFile": "Passive_-_Favor.png",
@@ -5356,7 +7238,17 @@
         "blessing"
       ],
       "patchVersion": "2.2.23",
-      "status": "active"
+      "status": "active",
+      "priceType": "granted",
+      "priceNote": "Granted by the corresponding Roam/Jungle blessing; not purchased as a standalone shop item.",
+      "buildPathIds": [],
+      "goodAgainstHeroes": [],
+      "badAgainstHeroes": [],
+      "goodWithHeroes": [],
+      "buildTreeVersion": "2.2.23",
+      "goodAgainst": [],
+      "badAgainst": [],
+      "goodWith": []
     },
     {
       "id": 5006,
@@ -5409,7 +7301,20 @@
         "magic-pen"
       ],
       "patchVersion": "2.2.23",
-      "status": "active"
+      "status": "active",
+      "priceType": "shop",
+      "priceNote": "",
+      "buildPathIds": [
+        5101,
+        2101
+      ],
+      "goodAgainstHeroes": [],
+      "badAgainstHeroes": [],
+      "goodWithHeroes": [],
+      "buildTreeVersion": "2.2.23",
+      "goodAgainst": [],
+      "badAgainst": [],
+      "goodWith": []
     },
     {
       "id": 5007,
@@ -5461,7 +7366,20 @@
         "mana"
       ],
       "patchVersion": "2.2.23",
-      "status": "active"
+      "status": "active",
+      "priceType": "shop",
+      "priceNote": "",
+      "buildPathIds": [
+        5101,
+        2103
+      ],
+      "goodAgainstHeroes": [],
+      "badAgainstHeroes": [],
+      "goodWithHeroes": [],
+      "buildTreeVersion": "2.2.23",
+      "goodAgainst": [],
+      "badAgainst": [],
+      "goodWith": []
     },
     {
       "id": 5101,
@@ -5485,7 +7403,17 @@
       "description": "Base boots. Builds into all Tier 2 boots: Swift, Warrior, Tough, Magic Shoes, Rapid, Arcane and Demon Shoes.",
       "lore": "",
       "buildPath": [],
-      "buildsInto": [],
+      "buildsInto": [
+        1016,
+        2003,
+        5001,
+        5002,
+        5003,
+        5004,
+        5005,
+        5006,
+        5007
+      ],
       "image": "items/5101.webp",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/5/59/Boots.png",
       "fandomFile": "Boots.png",
@@ -5499,7 +7427,17 @@
         "component"
       ],
       "patchVersion": "2.2.23",
-      "status": "active"
+      "status": "active",
+      "priceType": "shop",
+      "priceNote": "",
+      "buildPathIds": [],
+      "goodAgainstHeroes": [],
+      "badAgainstHeroes": [],
+      "goodWithHeroes": [],
+      "buildTreeVersion": "2.2.23",
+      "goodAgainst": [],
+      "badAgainst": [],
+      "goodWith": []
     },
     {
       "id": 6101,
@@ -5523,7 +7461,9 @@
       "description": "Adaptive Attack component. Builds into Sky Piercer, Winter Crown, Fleeting Time and Queen's Wings.",
       "lore": "",
       "buildPath": [],
-      "buildsInto": [],
+      "buildsInto": [
+        3010
+      ],
       "image": "items/6101.webp",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/1/13/Expert_Gloves.png",
       "fandomFile": "Expert_Gloves.png",
@@ -5537,7 +7477,17 @@
         "component"
       ],
       "patchVersion": "2.2.23",
-      "status": "active"
+      "status": "active",
+      "priceType": "shop",
+      "priceNote": "",
+      "buildPathIds": [],
+      "goodAgainstHeroes": [],
+      "badAgainstHeroes": [],
+      "goodWithHeroes": [],
+      "buildTreeVersion": "2.2.23",
+      "goodAgainst": [],
+      "badAgainst": [],
+      "goodWith": []
     },
     {
       "id": 9101,
@@ -5584,7 +7534,17 @@
         "consumable"
       ],
       "patchVersion": "2.2.23",
-      "status": "active"
+      "status": "active",
+      "priceType": "shop",
+      "priceNote": "",
+      "buildPathIds": [],
+      "goodAgainstHeroes": [],
+      "badAgainstHeroes": [],
+      "goodWithHeroes": [],
+      "buildTreeVersion": "2.2.23",
+      "goodAgainst": [],
+      "badAgainst": [],
+      "goodWith": []
     },
     {
       "id": 9102,
@@ -5631,7 +7591,17 @@
         "consumable"
       ],
       "patchVersion": "2.2.23",
-      "status": "active"
+      "status": "active",
+      "priceType": "shop",
+      "priceNote": "",
+      "buildPathIds": [],
+      "goodAgainstHeroes": [],
+      "badAgainstHeroes": [],
+      "goodWithHeroes": [],
+      "buildTreeVersion": "2.2.23",
+      "goodAgainst": [],
+      "badAgainst": [],
+      "goodWith": []
     },
     {
       "id": 9103,
@@ -5678,7 +7648,22 @@
         "consumable"
       ],
       "patchVersion": "2.2.23",
-      "status": "active"
+      "status": "active",
+      "priceType": "shop",
+      "priceNote": "",
+      "buildPathIds": [],
+      "goodAgainstHeroes": [],
+      "badAgainstHeroes": [],
+      "goodWithHeroes": [],
+      "buildTreeVersion": "2.2.23",
+      "goodAgainst": [],
+      "badAgainst": [],
+      "goodWith": []
     }
-  ]
+  ],
+  "buildTreeMetadata": {
+    "patch": "2.2.23",
+    "updated": "2026-11-23",
+    "method": "buildsInto is the reverse of buildPathIds; component links resolve by stable item ID."
+  }
 }

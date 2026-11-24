@@ -38,11 +38,22 @@ if isinstance(items_root, dict):
     declared_active = items_root.get("totalActiveItems")
     if declared_active is not None and declared_active != len(active):
         errors.append(f"items.json: totalActiveItems={declared_active}, actual={len(active)}")
+    item_id_set = set(ids)
     for item in items:
         if not isinstance(item, dict):
             continue
+        for field in ("buildPathIds", "buildsInto", "goodAgainst", "badAgainst"):
+            missing = sorted(set(item.get(field, []) or []) - item_id_set)
+            if missing:
+                errors.append(f"item {item.get('id')}: {field} has unknown item IDs {missing}")
+        for component_id in item.get("buildPathIds", []) or []:
+            component = next((candidate for candidate in items if isinstance(candidate, dict) and candidate.get("id") == component_id), None)
+            if component is not None and item.get("id") not in (component.get("buildsInto") or []):
+                errors.append(f"item {item.get('id')}: build edge from component {component_id} is not reciprocal")
         image = item.get("image")
         if image:
+            if image.startswith(("https://", "http://")):
+                continue
             path = ASSETS / image
             if not path.is_file():
                 errors.append(f"item {item.get('id')} ({item.get('name')}): missing portrait {image}")
@@ -57,9 +68,24 @@ if isinstance(heroes_root, dict):
     ids = [hero.get("id") for hero in heroes if isinstance(hero, dict)]
     if len(ids) != len(set(ids)):
         errors.append("heroes.json: duplicate hero IDs")
+    hero_id_set = set(ids)
+    valid_tiers = {"S+", "S", "A", "B", "C"}
+    tier_snapshot = heroes_root.get("tierSnapshot", {})
+    if tier_snapshot.get("counts"):
+        actual_counts = {tier: sum(1 for hero in heroes if isinstance(hero, dict) and hero.get("tier") == tier) for tier in valid_tiers}
+        if actual_counts != tier_snapshot["counts"]:
+            errors.append(f"heroes.json: tierSnapshot counts mismatch: {actual_counts}")
     for hero in heroes:
         if not isinstance(hero, dict):
             continue
+        if hero.get("tier") not in valid_tiers:
+            errors.append(f"hero {hero.get('id')}: invalid tier {hero.get('tier')!r}")
+        if not hero.get("loreFirstParagraph"):
+            errors.append(f"hero {hero.get('id')}: missing loreFirstParagraph")
+        for field in ("goodAgainst", "badAgainst", "goodWith"):
+            missing = sorted(set(hero.get(field, []) or []) - hero_id_set)
+            if missing:
+                errors.append(f"hero {hero.get('id')}: {field} has unknown hero IDs {missing}")
         image = hero.get("image") or hero.get("portrait")
         if image:
             path = ASSETS / image

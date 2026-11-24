@@ -80,6 +80,7 @@ private fun tierColor(tier: String): Color {
 private fun normalizedTier(tier: String): String {
     val t = tier.trim().uppercase()
     return when {
+        t.startsWith("S+") -> "S+"
         t.startsWith("S") -> "S"
         t.startsWith("A") -> "A"
         t.startsWith("B") -> "B"
@@ -89,10 +90,11 @@ private fun normalizedTier(tier: String): String {
 
 private fun tierRank(tier: String): Int {
     return when (normalizedTier(tier)) {
-        "S" -> 0
-        "A" -> 1
-        "B" -> 2
-        else -> 3
+        "S+" -> 0
+        "S" -> 1
+        "A" -> 2
+        "B" -> 3
+        else -> 4
     }
 }
 
@@ -116,7 +118,7 @@ fun HeroesScreen(
             .sorted()
         listOf("All") + heroRoles
     }
-    val tiers = remember { listOf("All", "S", "A", "B") }
+    val tiers = remember { listOf("All", "S+", "S", "A", "B", "C") }
 
     val filtered = remember(query, selectedRole, selectedTier, sort, allHeroes) {
         val q = query.trim().lowercase()
@@ -269,10 +271,11 @@ fun HeroDetailScreen(
     var selectedTab by remember(hero.id) { mutableStateOf(HeroTab.OVERVIEW) }
 
     val counters = remember(hero.id) {
-        hero.counters.mapNotNull { GameData.heroesById[it] }
+        hero.goodAgainst.mapNotNull { GameData.heroesById[it] }
     }
+    val badMatchups = remember(hero.id) { hero.badAgainst.mapNotNull { GameData.heroesById[it] } }
     val synergies = remember(hero.id) {
-        hero.synergies.mapNotNull { GameData.heroesById[it] }
+        hero.goodWith.mapNotNull { GameData.heroesById[it] }
     }
     val coreBuild = remember(hero.id, hero.coreItems) {
         hero.coreItems.filter { buildItem -> buildItem.itemId != 0 }
@@ -302,6 +305,9 @@ fun HeroDetailScreen(
                     color = tierColor(hero.tier),
                     fontSize = 12.sp
                 )
+                if (hero.tierUpdated.isNotBlank()) {
+                    Text("Meta snapshot ${hero.tierUpdated}", color = AppUiColors.GithubSecondary, fontSize = 10.sp)
+                }
             }
         }
 
@@ -330,6 +336,14 @@ fun HeroDetailScreen(
 
         when (selectedTab) {
             HeroTab.OVERVIEW -> {
+                val loreText = hero.loreFirstParagraph.ifBlank { hero.lore }
+                if (loreText.isNotBlank()) {
+                    SubHeading("HERO LORE")
+                    Spacer(modifier = Modifier.height(6.dp))
+                    Text(loreText, color = AppUiColors.GithubText, fontSize = 12.sp, lineHeight = 18.sp)
+                    Text("Source: Mobile Legends Wiki (Fandom)", color = AppUiColors.GithubSecondary, fontSize = 10.sp)
+                    Spacer(modifier = Modifier.height(12.dp))
+                }
                 if (hero.specialty.isNotEmpty()) {
                     SubHeading("SPECIALTY")
                     Row(
@@ -412,6 +426,23 @@ fun HeroDetailScreen(
                                     .clickable { onHeroClick(counter) },
                                 horizontalAlignment = Alignment.CenterHorizontally
                             ) {
+                                Box(modifier = Modifier.size(52.dp).clip(RoundedCornerShape(10.dp))) {
+                                    AssetImage(hero = counter, modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop, contentDescription = counter.name)
+                                }
+                                Text(counter.name, color = AppUiColors.GithubText, fontSize = 10.sp, maxLines = 1, overflow = TextOverflow.Ellipsis, textAlign = TextAlign.Center)
+                            }
+                        }
+                    }
+                }
+                Spacer(modifier = Modifier.height(14.dp))
+                SubHeading("BAD AGAINST")
+                Spacer(modifier = Modifier.height(8.dp))
+                if (badMatchups.isEmpty()) {
+                    Text("No bad-matchup data in heroes.json", color = AppUiColors.GithubSecondary, fontSize = 13.sp)
+                } else {
+                    LazyRow(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                        items(badMatchups, key = { it.id }) { counter ->
+                            Column(modifier = Modifier.width(56.dp).clickable { onHeroClick(counter) }, horizontalAlignment = Alignment.CenterHorizontally) {
                                 Box(modifier = Modifier.size(52.dp).clip(RoundedCornerShape(10.dp))) {
                                     AssetImage(hero = counter, modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop, contentDescription = counter.name)
                                 }

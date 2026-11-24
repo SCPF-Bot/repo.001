@@ -111,9 +111,9 @@ fun ItemsScreen(
             matchesQuery && matchesCat
         }
         when (sort) {
-            ItemSort.PRICE_LOW -> base.sortedBy { it.price }
-            ItemSort.PRICE_HIGH -> base.sortedByDescending { it.price }
-            ItemSort.RECOMMENDED -> base.sortedWith(compareBy({ tierRank(it.tier) }, { it.price }))
+            ItemSort.PRICE_LOW -> base.sortedWith(compareBy({ it.priceType == "granted" }, { it.price }))
+            ItemSort.PRICE_HIGH -> base.sortedWith(compareBy({ it.priceType == "granted" }, { -it.price }))
+            ItemSort.RECOMMENDED -> base.sortedWith(compareBy({ tierRank(it.tier) }, { it.priceType == "granted" }, { it.price }))
         }
     }
 
@@ -220,7 +220,7 @@ fun ItemsScreen(
                         modifier = Modifier.padding(top = 2.dp)
                     )
                     Text(
-                        text = "${item.price} Gold",
+                        text = if (item.priceType == "granted") "Granted" else "${item.price} Gold",
                         color = AppUiColors.Gold,
                         fontSize = 8.sp,
                         maxLines = 1,
@@ -245,22 +245,22 @@ fun ItemDetailScreen(
     var selectedTab by remember(item.id) { mutableStateOf(ItemTab.OVERVIEW) }
 
     val buildPathItems = remember(item.id) {
-        item.buildPath.mapNotNull { comp ->
+        val byIds = item.buildPathIds.mapNotNull { GameData.itemsById[it] }
+        if (byIds.isNotEmpty()) byIds else item.buildPath.mapNotNull { comp ->
             GameData.items.firstOrNull { it.name.equals(comp.trim(), ignoreCase = true) }
         }
     }
-    val relatedItems = remember(item.id) {
-        (item.counters + item.counteredBy).distinct()
-            .filter { it != item.id }
-            .mapNotNull { GameData.itemsById[it] }
-            .filter { it.status == "active" }
-    }
+    val buildsIntoItems = remember(item.id) { item.buildsInto.mapNotNull { GameData.itemsById[it] }.filter { it.status == "active" } }
+    val goodAgainstItems = remember(item.id) { item.goodAgainstItemIds.mapNotNull { GameData.itemsById[it] }.filter { it.status == "active" } }
+    val badAgainstItems = remember(item.id) { item.badAgainstItemIds.mapNotNull { GameData.itemsById[it] }.filter { it.status == "active" } }
+    val relatedItems = remember(item.id) { (goodAgainstItems + badAgainstItems).distinctBy { it.id } }
     val synergyHeroes = remember(item.id) {
-        item.synergiesHeroes.mapNotNull { GameData.heroesById[it] }
+        item.goodWithHeroes.mapNotNull { GameData.heroesById[it] }
     }
     val matchupHeroes = remember(item.id) {
-        item.worksAgainstHeroes.mapNotNull { GameData.heroesById[it] }
+        item.goodAgainstHeroes.mapNotNull { GameData.heroesById[it] }
     }
+    val badMatchupHeroes = remember(item.id) { item.badAgainstHeroes.mapNotNull { GameData.heroesById[it] } }
 
     Column(
         modifier = Modifier
@@ -283,10 +283,11 @@ fun ItemDetailScreen(
                 Text(item.name, color = AppUiColors.GithubText, fontSize = 20.sp, fontWeight = FontWeight.Bold)
                 Text(item.category, color = AppUiColors.GithubSecondary, fontSize = 13.sp)
                 Text(
-                    text = "Tier ${item.tier.trim().uppercase()} • ${item.price} Gold",
+                    text = if (item.priceType == "granted") "Granted upgrade" else "Tier ${item.tier.trim().uppercase()} • ${item.price} Gold",
                     color = tierColor(item.tier),
                     fontSize = 12.sp
                 )
+                if (item.priceNote.isNotBlank()) Text(item.priceNote, color = AppUiColors.GithubSecondary, fontSize = 10.sp)
             }
         }
 
@@ -374,6 +375,21 @@ fun ItemDetailScreen(
                         }
                     }
                 }
+                if (buildsIntoItems.isNotEmpty()) {
+                    Spacer(modifier = Modifier.height(16.dp))
+                    SubHeading("BUILDS INTO")
+                    Spacer(modifier = Modifier.height(8.dp))
+                    LazyRow(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                        items(buildsIntoItems, key = { it.id }) { target ->
+                            Column(modifier = Modifier.width(64.dp).clickable { onItemClick(target) }, horizontalAlignment = Alignment.CenterHorizontally) {
+                                Box(modifier = Modifier.size(52.dp).clip(RoundedCornerShape(10.dp))) {
+                                    AssetImage(item = target, modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop, contentDescription = target.name)
+                                }
+                                Text(target.name, color = AppUiColors.GithubText, fontSize = 10.sp, maxLines = 2, overflow = TextOverflow.Ellipsis, textAlign = TextAlign.Center)
+                            }
+                        }
+                    }
+                }
             }
             ItemTab.MATCHUPS -> {
                 SubHeading("HERO SYNERGIES")
@@ -413,6 +429,45 @@ fun ItemDetailScreen(
                                     AssetImage(hero = hero, modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop, contentDescription = hero.name)
                                 }
                                 Text(hero.name, color = AppUiColors.GithubText, fontSize = 10.sp, maxLines = 1, overflow = TextOverflow.Ellipsis, textAlign = TextAlign.Center)
+                            }
+                        }
+                    }
+                }
+                if (badMatchupHeroes.isNotEmpty()) {
+                    Spacer(modifier = Modifier.height(16.dp))
+                    SubHeading("BAD AGAINST HEROES")
+                    Spacer(modifier = Modifier.height(8.dp))
+                    LazyRow(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                        items(badMatchupHeroes, key = { it.id }) { hero ->
+                            Column(modifier = Modifier.width(56.dp).clickable { onHeroClick(hero) }, horizontalAlignment = Alignment.CenterHorizontally) {
+                                Box(modifier = Modifier.size(48.dp).clip(RoundedCornerShape(9.dp))) { AssetImage(hero = hero, modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop, contentDescription = hero.name) }
+                                Text(hero.name, color = AppUiColors.GithubText, fontSize = 10.sp, maxLines = 2, overflow = TextOverflow.Ellipsis, textAlign = TextAlign.Center)
+                            }
+                        }
+                    }
+                }
+                if (goodAgainstItems.isNotEmpty()) {
+                    Spacer(modifier = Modifier.height(16.dp))
+                    SubHeading("GOOD AGAINST ITEMS")
+                    Spacer(modifier = Modifier.height(8.dp))
+                    LazyRow(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                        items(goodAgainstItems, key = { it.id }) { linked ->
+                            Column(modifier = Modifier.width(60.dp).clickable { onItemClick(linked) }, horizontalAlignment = Alignment.CenterHorizontally) {
+                                Box(modifier = Modifier.size(48.dp).clip(RoundedCornerShape(9.dp))) { AssetImage(item = linked, modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop, contentDescription = linked.name) }
+                                Text(linked.name, color = AppUiColors.GithubText, fontSize = 10.sp, maxLines = 2, overflow = TextOverflow.Ellipsis, textAlign = TextAlign.Center)
+                            }
+                        }
+                    }
+                }
+                if (badAgainstItems.isNotEmpty()) {
+                    Spacer(modifier = Modifier.height(16.dp))
+                    SubHeading("BAD AGAINST ITEMS")
+                    Spacer(modifier = Modifier.height(8.dp))
+                    LazyRow(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                        items(badAgainstItems, key = { it.id }) { linked ->
+                            Column(modifier = Modifier.width(60.dp).clickable { onItemClick(linked) }, horizontalAlignment = Alignment.CenterHorizontally) {
+                                Box(modifier = Modifier.size(48.dp).clip(RoundedCornerShape(9.dp))) { AssetImage(item = linked, modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop, contentDescription = linked.name) }
+                                Text(linked.name, color = AppUiColors.GithubText, fontSize = 10.sp, maxLines = 2, overflow = TextOverflow.Ellipsis, textAlign = TextAlign.Center)
                             }
                         }
                     }
