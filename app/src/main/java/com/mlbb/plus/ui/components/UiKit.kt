@@ -20,6 +20,19 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Apps
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.LocalFireDepartment
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Shield
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -38,6 +51,34 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.mlbb.plus.ui.theme.AppUiColors
+
+/** Central icon set shared by app navigation and screens. */
+object AppIcons {
+    val Apps: ImageVector = Icons.Filled.Apps
+    val ChevronRight: ImageVector = Icons.Filled.ChevronRight
+    val Close: ImageVector = Icons.Filled.Close
+    val Fire: ImageVector = Icons.Filled.LocalFireDepartment
+    val History: ImageVector = Icons.Filled.History
+    val Home: ImageVector = Icons.Filled.Home
+    val Person: ImageVector = Icons.Filled.Person
+    val PlayArrow: ImageVector = Icons.Filled.PlayArrow
+    val Search: ImageVector = Icons.Filled.Search
+    val Settings: ImageVector = Icons.Filled.Settings
+    val Shield: ImageVector = Icons.Filled.Shield
+}
+
+/** Consistent small section heading used throughout the screens. */
+@Composable
+fun SectionLabel(text: String) {
+    Text(
+        text = text,
+        color = AppUiColors.GithubSecondary,
+        fontSize = 11.sp,
+        fontWeight = FontWeight.Bold,
+        letterSpacing = 0.8.sp,
+        maxLines = 1
+    )
+}
 
 // APPEND THIS BLOCK to components/UiKit.kt — do NOT keep it as a separate
 // FilterBar.kt file. structure.md shows components/ holding only UiKit.kt,
