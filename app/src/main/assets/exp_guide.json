@@ -4,6 +4,7 @@
     "title": "EXP Timeframe Table — Enhanced",
     "version": "1.0 - Enemy spell tracker (EXP/JG/MID/GOLD/ROAM) + battle spells CD",
     "patch": "2.2.23",
+    "latest": true,
     "season": "Season 42 — Starward Decade",
     "updated": "2026-11-20",
     "based_on": "Same timeframe structure as Roam guide (0:00-18:00, 11 steps) + online verification for Season 42 Patch 2.2.23 live 11 Nov 2026. Patch 2.2.23 supersedes 2.2.16a: Popol and Kupa revamp, Gloo/Masha/Atlas nerfed, Xavier/Lunox/Freya/Aldous/Kaja/Melissa buffed, Sprint 100s->75s, Chastise Pauldron weaker, Antique Cuirass stronger, Concussive Blast 50% less damage to minions.",

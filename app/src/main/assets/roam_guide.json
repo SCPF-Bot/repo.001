@@ -4,6 +4,7 @@
     "title": "Roam Timeframe Table — Enhanced",
     "version": "3.2 - Enemy spell tracker (EXP/JG/MID/GOLD/ROAM) + battle spells CD",
     "patch": "2.2.16a",
+    "latest": true,
     "season": "Season 42 — Starward Decade",
     "updated": "2026-11-18",
     "based_on": "Original timeframe JSON (5 roam archetypes, 0:00-18:00) + online verification for Season 42",

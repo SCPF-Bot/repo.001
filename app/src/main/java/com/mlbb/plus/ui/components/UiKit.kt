@@ -10,9 +10,14 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.automirrored.filled.OpenInNew
+import androidx.compose.material.icons.filled.Book
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
@@ -34,6 +39,7 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Shield
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -41,6 +47,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
@@ -55,6 +64,10 @@ import com.mlbb.plus.ui.theme.AppUiColors
 /** Central icon set shared by app navigation and screens. */
 object AppIcons {
     val Apps: ImageVector = Icons.Filled.Apps
+    val ArrowBack: ImageVector = Icons.AutoMirrored.Filled.ArrowBack
+    val ArrowForward: ImageVector = Icons.AutoMirrored.Filled.ArrowForward
+    val Book: ImageVector = Icons.Filled.Book
+    val OpenInNew: ImageVector = Icons.AutoMirrored.Filled.OpenInNew
     val ChevronRight: ImageVector = Icons.Filled.ChevronRight
     val Close: ImageVector = Icons.Filled.Close
     val Fire: ImageVector = Icons.Filled.LocalFireDepartment
@@ -119,12 +132,46 @@ fun CompactSearchBox(
     placeholder: String,
     modifier: Modifier = Modifier
 ) {
+    var expanded by remember { mutableStateOf(query.isNotEmpty()) }
+    var isFocused by remember { mutableStateOf(false) }
+    val focusRequester = remember { FocusRequester() }
+    val isOpen = expanded || query.isNotEmpty()
+
+    LaunchedEffect(expanded) {
+        if (expanded) {
+            focusRequester.requestFocus()
+        }
+    }
+
+    LaunchedEffect(query) {
+        if (query.isEmpty() && !isFocused) {
+            expanded = false
+        }
+    }
+
+    if (!isOpen) {
+        Box(
+            modifier
+                .size(40.dp)
+                .clip(RoundedCornerShape(10.dp))
+                .background(AppUiColors.GithubSurface)
+                .border(1.dp, AppUiColors.GithubBorder, RoundedCornerShape(10.dp))
+                .semantics { role = Role.Button }
+                .clickable { expanded = true },
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(AppIcons.Search, contentDescription = placeholder, tint = AppUiColors.Gold, modifier = Modifier.size(18.dp))
+        }
+        return
+    }
+
     Box(
         modifier
+            .width(160.dp)
             .height(40.dp)
             .clip(RoundedCornerShape(10.dp))
             .background(AppUiColors.GithubSurface)
-            .border(1.dp, AppUiColors.GithubBorder, RoundedCornerShape(10.dp))
+            .border(1.dp, AppUiColors.Gold.copy(alpha = 0.7f), RoundedCornerShape(10.dp))
             .padding(horizontal = 10.dp),
         contentAlignment = Alignment.Center
     ) {
@@ -148,15 +195,26 @@ fun CompactSearchBox(
                             inner()
                         }
                     },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .focusRequester(focusRequester)
+                        .onFocusChanged { state ->
+                            isFocused = state.isFocused
+                            if (!state.isFocused && query.isEmpty()) {
+                                expanded = false
+                            }
+                        }
                 )
             }
-            if (query.isNotEmpty()) {
-                Icon(
-                    AppIcons.Close, contentDescription = "Clear search", tint = AppUiColors.GithubSecondary,
-                    modifier = Modifier.size(16.dp).clickable { onQueryChange("") }
-                )
-            }
+            Icon(
+                AppIcons.Close,
+                contentDescription = "Close search",
+                tint = AppUiColors.GithubSecondary,
+                modifier = Modifier.size(16.dp).clickable {
+                    onQueryChange("")
+                    expanded = false
+                }
+            )
         }
     }
 }
@@ -168,19 +226,20 @@ fun CompactDropdown(
     display: String,
     options: List<String>,
     displayFor: (String) -> String,
-    onSelect: (String) -> Unit
+    onSelect: (String) -> Unit,
+    compact: Boolean = false
 ) {
     var expanded by remember { mutableStateOf(false) }
     Box {
         Box(
             Modifier
-                .height(40.dp)
+                .height(if (compact) 32.dp else 40.dp)
                 .clip(RoundedCornerShape(10.dp))
                 .background(AppUiColors.GithubSurface)
                 .border(1.dp, AppUiColors.GithubBorder, RoundedCornerShape(10.dp))
                 .semantics { role = Role.DropdownList }
                 .clickable { expanded = true }
-                .padding(horizontal = 9.dp),
+                .padding(horizontal = if (compact) 8.dp else 9.dp),
             contentAlignment = Alignment.Center
         ) {
             Row(
@@ -295,4 +354,43 @@ fun roleColor(role: String): androidx.compose.ui.graphics.Color = when (role.tri
     "marksman" -> androidx.compose.ui.graphics.Color(0xFFE6A23C)
     "support" -> androidx.compose.ui.graphics.Color(0xFF42BFA5)
     else -> AppUiColors.Gold
+}
+
+
+/** Top navigation bar with Back button for sub-views. */
+@Composable
+fun DetailBackBar(label: String, onBack: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(AppUiColors.Header)
+            .border(width = 1.dp, color = AppUiColors.GithubBorder)
+            .padding(horizontal = 12.dp, vertical = 10.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .clip(RoundedCornerShape(8.dp))
+                .background(AppUiColors.GithubSurface)
+                .border(1.dp, AppUiColors.GithubBorder, RoundedCornerShape(8.dp))
+                .semantics { role = Role.Button }
+                .clickable { onBack() }
+                .heightIn(min = 36.dp)
+                .padding(horizontal = 10.dp, vertical = 6.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            Icon(AppIcons.ArrowBack, contentDescription = "Back", tint = AppUiColors.Gold, modifier = Modifier.size(16.dp))
+            Text("Back", color = AppUiColors.GithubText, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
+        }
+        Text(
+            text = label,
+            color = AppUiColors.GithubSecondary,
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Medium,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+    }
 }

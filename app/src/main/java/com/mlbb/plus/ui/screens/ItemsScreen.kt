@@ -141,7 +141,7 @@ fun ItemsScreen(
                 ItemSort.PRICE_HIGH to "Price: high to low"
             )
             OneBarFilter {
-                    CompactSearchBox(query, { query = it }, "Search items", Modifier.width(130.dp))
+                    CompactSearchBox(query, { query = it }, "Search items")
                     BarDivider()
                     FilterBarLabel("Filter by")
                     CompactDropdown(
@@ -149,16 +149,6 @@ fun ItemsScreen(
                         options = categories,
                         displayFor = { it },
                         onSelect = { selectedCat = it }
-                    )
-                    BarDivider()
-                    FilterBarLabel("Sort by")
-                    CompactDropdown(
-                        display = sortLabels[sort] ?: "Recommended",
-                        options = sortLabels.values.toList(),
-                        displayFor = { it },
-                        onSelect = { label ->
-                            sort = sortLabels.entries.first { it.value == label }.key
-                        }
                     )
                     if (hasItemFilters) {
                         TextButton(
@@ -174,7 +164,28 @@ fun ItemsScreen(
                         }
                     }
             }
-            FilterBarCount("${filtered.size} of ${activeItems.size} items")
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                FilterBarCount("${filtered.size} of ${activeItems.size} items")
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    FilterBarLabel("Sort by")
+                    CompactDropdown(
+                        display = sortLabels[sort] ?: "Recommended",
+                        options = sortLabels.values.toList(),
+                        displayFor = { it },
+                        compact = true,
+                        onSelect = { label ->
+                            sort = sortLabels.entries.first { it.value == label }.key
+                        }
+                    )
+                }
+            }
 
         // PHONE-PROOF GRID — GridCells.Fixed(5), NEVER Adaptive.
         // Adaptive gave 3 columns -> ~102dp portraits (screenshot).

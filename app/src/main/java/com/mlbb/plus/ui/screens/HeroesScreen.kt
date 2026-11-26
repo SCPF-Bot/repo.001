@@ -167,7 +167,7 @@ fun HeroesScreen(
                 HeroSort.NAME to "Name"
             )
             OneBarFilter {
-                    CompactSearchBox(query, { query = it }, "Search heroes", Modifier.width(130.dp))
+                    CompactSearchBox(query, { query = it }, "Search heroes")
                     BarDivider()
                     FilterBarLabel("Filter by")
                     CompactDropdown(
@@ -181,16 +181,6 @@ fun HeroesScreen(
                         options = tiers,
                         displayFor = { it },
                         onSelect = { selectedTier = it }
-                    )
-                    BarDivider()
-                    FilterBarLabel("Sort by")
-                    CompactDropdown(
-                        display = sortLabels[sort] ?: "Recommended",
-                        options = sortLabels.values.toList(),
-                        displayFor = { it },
-                        onSelect = { label ->
-                            sort = sortLabels.entries.first { it.value == label }.key
-                        }
                     )
                     if (hasHeroFilters) {
                         TextButton(
@@ -207,7 +197,28 @@ fun HeroesScreen(
                         }
                     }
             }
-            FilterBarCount("${filtered.size} of ${allHeroes.size} heroes")
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                FilterBarCount("${filtered.size} of ${allHeroes.size} heroes")
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    FilterBarLabel("Sort by")
+                    CompactDropdown(
+                        display = sortLabels[sort] ?: "Recommended",
+                        options = sortLabels.values.toList(),
+                        displayFor = { it },
+                        compact = true,
+                        onSelect = { label ->
+                            sort = sortLabels.entries.first { it.value == label }.key
+                        }
+                    )
+                }
+            }
 
         // PHONE-PROOF GRID — GridCells.Fixed(5), NEVER Adaptive.
         // Adaptive gave 3 columns -> ~102dp portraits (screenshot).

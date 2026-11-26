@@ -358,7 +358,10 @@ private fun MLBBPlusApp(onLaunchWidget: (String, String) -> Unit) {
                             autoStartLastRole = value
                             ctx.getSharedPreferences("mlbb_plus_prefs", Context.MODE_PRIVATE)
                                 .edit().putBoolean("auto_start_last_role", value).apply()
-                        }
+                        },
+                        onOpenHeroes = { selectTab(Tab.HEROES) },
+                        onOpenItems = { selectTab(Tab.ITEMS) },
+                        onOpenPatchNotes = { selectTab(Tab.PATCH) }
                     )
                 }
                         }

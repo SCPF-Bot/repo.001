@@ -1,13 +1,15 @@
 {
   "version": "2.2.23-buildtree-2026-11-23",
-  "updated": "2026-11-23",
+  "latest": true,
+  "updated": "2026-11-26",
   "patchDate": "2026-11-11",
   "patchName": "Patch 2.2.23 — Popol and Kupa Revamp (Original Server)",
   "season": "Season 42 — Starward Decade",
   "source": "https://mobile-legends.fandom.com/wiki/Equipment",
-  "totalItems": 102,
-  "totalActiveItems": 102,
+  "totalItems": 99,
+  "totalActiveItems": 99,
   "patchChanges": [
+    "Removed unavailable legacy/duplicate items as of Nov 26, 2026: Courage Mask (4003, replaced by Blessing: Encourage), legacy shop Favor (4004, replaced by Blessing: Favor), and Athena’s Shield (3004, renamed to Valkyrie’s Shield 3015).",
     "Chastise Pauldron (3009) NERFED: Chastise 75% -> 80% (attackers keep more Attack Speed)",
     "Antique Cuirass (3003) BUFFED: Deter 6% -> 8% per stack",
     "Twilight Armor (3007) REMOVED — replaced by Chastise Pauldron",
@@ -193,7 +195,7 @@
       "counteredBy": [
         3002,
         3003,
-        3004
+        3015
       ],
       "synergiesHeroes": [
         60,
@@ -242,7 +244,7 @@
       "badAgainst": [
         3002,
         3003,
-        3004
+        3015
       ],
       "goodWith": [
         60,
@@ -1653,11 +1655,11 @@
       "buildsInto": [],
       "image": "items/2001.webp",
       "counters": [
-        3004,
+        3015,
         3005
       ],
       "counteredBy": [
-        3004
+        3015
       ],
       "synergiesHeroes": [
         115,
@@ -1696,11 +1698,11 @@
       ],
       "buildTreeVersion": "2.2.23",
       "goodAgainst": [
-        3004,
+        3015,
         3005
       ],
       "badAgainst": [
-        3004
+        3015
       ],
       "goodWith": [
         115,
@@ -1739,10 +1741,10 @@
       "buildsInto": [],
       "image": "items/2002.webp",
       "counters": [
-        3004
+        3015
       ],
       "counteredBy": [
-        3004,
+        3015,
         3005
       ],
       "synergiesHeroes": [
@@ -1786,10 +1788,10 @@
       ],
       "buildTreeVersion": "2.2.23",
       "goodAgainst": [
-        3004
+        3015
       ],
       "badAgainst": [
-        3004,
+        3015,
         3005
       ],
       "goodWith": [
@@ -1840,11 +1842,11 @@
       "buildsInto": [],
       "image": "items/2003.webp",
       "counters": [
-        3004,
+        3015,
         3005
       ],
       "counteredBy": [
-        3004
+        3015
       ],
       "synergiesHeroes": [
         115,
@@ -1884,11 +1886,11 @@
       ],
       "buildTreeVersion": "2.2.23",
       "goodAgainst": [
-        3004,
+        3015,
         3005
       ],
       "badAgainst": [
-        3004
+        3015
       ],
       "goodWith": [
         115,
@@ -1941,7 +1943,7 @@
         14
       ],
       "counteredBy": [
-        3004,
+        3015,
         3005
       ],
       "synergiesHeroes": [
@@ -1984,7 +1986,7 @@
       "buildTreeVersion": "2.2.23",
       "goodAgainst": [],
       "badAgainst": [
-        3004,
+        3015,
         3005
       ],
       "goodWith": [
@@ -2466,107 +2468,6 @@
       "goodAgainst": [],
       "badAgainst": [
         1004
-      ],
-      "goodWith": [
-        6,
-        78,
-        41
-      ]
-    },
-    {
-      "id": 3004,
-      "name": "Athena's Shield",
-      "slug": "athenas-shield",
-      "category": "Defense",
-      "tier": "S",
-      "price": 2150,
-      "sellPrice": 1290,
-      "stats": [
-        "+900 HP",
-        "+48 Magic Defense",
-        "+2 HP Regen"
-      ],
-      "statsDetailed": [
-        {
-          "stat": "HP",
-          "value": 900
-        },
-        {
-          "stat": "Magic Defense",
-          "value": 48
-        },
-        {
-          "stat": "HP Regen",
-          "value": 2
-        }
-      ],
-      "passive": {
-        "name": "Shield",
-        "description": "Upon taking Magic Damage from enemy hero skills or Basic Attacks, reduces Magic Damage taken by 25% for 3 seconds (including the damage that triggers the effect). Regains this effect 5 seconds after leaving combat."
-      },
-      "active": null,
-      "description": "Core magic defense vs burst mages. The 25% Magic Damage reduction on first hit blunts Eudora, Xavier, Lunox and Kagura burst. Build it when enemy mage is fed.",
-      "lore": "Shield of Athena, guardian against magic.",
-      "buildPath": [
-        "Vitality Crystal",
-        "Magic Necklace"
-      ],
-      "buildsInto": [],
-      "image": "https://static.wikia.nocookie.net/mobile-legends/images/1/15/Athena%27s_Shield.png",
-      "counters": [
-        115,
-        68,
-        15
-      ],
-      "counteredBy": [
-        2003
-      ],
-      "synergiesHeroes": [
-        6,
-        78,
-        41
-      ],
-      "worksAgainstHeroes": [
-        115,
-        68,
-        15
-      ],
-      "recommendedFor": [
-        "Tank",
-        "Fighter",
-        "Marksman"
-      ],
-      "tags": [
-        "defense",
-        "anti-magic",
-        "burst"
-      ],
-      "patchVersion": "2.2.23",
-      "status": "active",
-      "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/1/15/Athena%27s_Shield.png",
-      "fandomFile": "Athena%27s_Shield.png",
-      "alias": "Valkyrie's Shield (renamed version, see id 3015)",
-      "priceType": "shop",
-      "priceNote": "",
-      "buildPathIds": [
-        3101,
-        2103
-      ],
-      "goodAgainstHeroes": [
-        115,
-        68,
-        15
-      ],
-      "badAgainstHeroes": [],
-      "goodWithHeroes": [
-        6,
-        78,
-        41
-      ],
-      "buildTreeVersion": "2.2.23",
-      "goodAgainst": [],
-      "badAgainst": [
-        2003
       ],
       "goodWith": [
         6,
@@ -3146,178 +3047,6 @@
       ]
     },
     {
-      "id": 4003,
-      "name": "Courage Mask",
-      "slug": "courage-mask",
-      "category": "Roam",
-      "tier": "A",
-      "price": 1800,
-      "sellPrice": 1080,
-      "stats": [
-        "Roam Blessing — Encourage",
-        "+700 HP (via Roam item progression)",
-        "+10% Cooldown Reduction"
-      ],
-      "statsDetailed": [
-        {
-          "stat": "HP",
-          "value": 700
-        },
-        {
-          "stat": "Cooldown Reduction",
-          "value": "10%"
-        }
-      ],
-      "passive": {
-        "name": "Thriving / Devotion",
-        "description": "Roam Blessing item. Heroes with this Blessing gain EXP and Gold by dealing damage to enemy heroes or revealing enemies. Unlocks Encourage active after accumulating 1000 Gold from Thriving and Devotion."
-      },
-      "active": {
-        "name": "Encourage",
-        "description": "Grants nearby allied heroes bonus Adaptive Attack and Movement Speed for a short duration. Use before engaging to boost your team's damage."
-      },
-      "description": "Roam Blessing — Encourage. Team buff active for Roamers who want to boost their team's damage on engage. Pick Encourage when your team has 2+ damage dealers who benefit from the Attack buff. In-game this is a Roam Blessing, not a standalone shop item — you pick it via the Roam boots path.",
-      "lore": "Courage for the whole team.",
-      "buildPath": [
-        "Roam Boots",
-        "Blessing: Encourage"
-      ],
-      "buildsInto": [],
-      "image": "items/4003.webp",
-      "counters": [],
-      "counteredBy": [],
-      "synergiesHeroes": [
-        6,
-        78,
-        41,
-        102
-      ],
-      "worksAgainstHeroes": [],
-      "recommendedFor": [
-        "Tank",
-        "Support"
-      ],
-      "tags": [
-        "roam",
-        "blessing",
-        "encourage",
-        "team-buff"
-      ],
-      "patchVersion": "2.2.23",
-      "status": "active",
-      "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/2/20/Courage_Mask.png",
-      "fandomFile": "Courage_Mask.png",
-      "priceType": "shop",
-      "priceNote": "",
-      "buildPathIds": [
-        4111
-      ],
-      "goodAgainstHeroes": [],
-      "badAgainstHeroes": [],
-      "goodWithHeroes": [
-        6,
-        78,
-        41,
-        102
-      ],
-      "buildTreeVersion": "2.2.23",
-      "goodAgainst": [],
-      "badAgainst": [],
-      "goodWith": [
-        6,
-        78,
-        41,
-        102
-      ]
-    },
-    {
-      "id": 4004,
-      "name": "Favor",
-      "slug": "favor",
-      "category": "Roam",
-      "tier": "A",
-      "price": 1800,
-      "sellPrice": 1080,
-      "stats": [
-        "Roam Blessing — Favor",
-        "+700 HP (via Roam item progression)",
-        "+12% Cooldown Reduction"
-      ],
-      "statsDetailed": [
-        {
-          "stat": "HP",
-          "value": 700
-        },
-        {
-          "stat": "Cooldown Reduction",
-          "value": "12%"
-        }
-      ],
-      "passive": {
-        "name": "Favor",
-        "description": "Every 15 seconds, the next healing or shield skill recovers an extra 400 HP for the allied hero with the lowest HP (including self) within 5 units. Skills that only take effect on self cannot trigger this effect. Heroes with this Blessing can gain 35% EXP and Gold from minions and creeps when allied heroes are nearby or by revealing enemy vision. Unlocks after accumulating 1000 Gold from Thriving and Devotion."
-      },
-      "active": null,
-      "description": "Passive heal Roam Blessing. Best for healers and shielders — Estes, Floryn, Rafaela, Angela, Mathilda. The periodic 400 HP heal adds up in lane and teamfights.",
-      "lore": "Favor of the team, healing for all.",
-      "buildPath": [
-        "Roam Boots",
-        "Blessing: Favor"
-      ],
-      "buildsInto": [],
-      "image": "https://static.wikia.nocookie.net/mobile-legends/images/0/00/Favor.png",
-      "counters": [],
-      "counteredBy": [
-        1015,
-        2004
-      ],
-      "synergiesHeroes": [
-        34,
-        112,
-        14,
-        55
-      ],
-      "worksAgainstHeroes": [],
-      "recommendedFor": [
-        "Support"
-      ],
-      "tags": [
-        "roam",
-        "blessing",
-        "favor",
-        "heal"
-      ],
-      "patchVersion": "2.2.23",
-      "status": "active",
-      "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/0/00/Favor.png",
-      "fandomFile": "Favor.png",
-      "priceType": "shop",
-      "priceNote": "",
-      "buildPathIds": [
-        4112
-      ],
-      "goodAgainstHeroes": [],
-      "badAgainstHeroes": [],
-      "goodWithHeroes": [
-        34,
-        112,
-        14,
-        55
-      ],
-      "buildTreeVersion": "2.2.23",
-      "goodAgainst": [],
-      "badAgainst": [
-        1015,
-        2004
-      ],
-      "goodWith": [
-        34,
-        112,
-        14,
-        55
-      ]
-    },
-    {
       "id": 5001,
       "name": "Swift Boots",
       "slug": "swift-boots",
@@ -3779,10 +3508,10 @@
       "buildsInto": [],
       "image": "items/6001.webp",
       "counters": [
-        3004
+        3015
       ],
       "counteredBy": [
-        3004,
+        3015,
         3005
       ],
       "synergiesHeroes": [
@@ -3827,10 +3556,10 @@
       ],
       "buildTreeVersion": "2.2.23",
       "goodAgainst": [
-        3004
+        3015
       ],
       "badAgainst": [
-        3004,
+        3015,
         3005
       ],
       "goodWith": [
@@ -5331,7 +5060,6 @@
       "buildsInto": [
         1008,
         3002,
-        3004,
         3005,
         6001,
         2011,
@@ -6205,7 +5933,7 @@
         "description": "Upon taking Magic Damage from enemy hero skills or Basic Attacks, reduces Magic Damage taken by 25% for 3 seconds (including the damage that triggers the effect). Regains this effect 5 seconds after leaving combat."
       },
       "active": null,
-      "description": "Anti-burst Magic Defense item. In this file Athena's Shield (3004) is the same effect — Valkyrie's Shield is the renamed version used in some patches / regions. Kept as a separate entry so both names resolve.",
+      "description": "Anti-burst Magic Defense item (formerly named Athena’s Shield). Reduces incoming Magic Damage by 25% for 3 seconds when triggered.",
       "lore": "",
       "buildPath": [
         "Silence Robe",
@@ -6216,10 +5944,24 @@
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/2/21/Valkyrie%27s_Shield.png",
       "fandomFile": "Valkyrie%27s_Shield.png",
       "counters": [],
-      "counteredBy": [],
-      "synergiesHeroes": [],
-      "worksAgainstHeroes": [],
-      "recommendedFor": [],
+      "counteredBy": [
+        2003
+      ],
+      "synergiesHeroes": [
+        6,
+        78,
+        41
+      ],
+      "worksAgainstHeroes": [
+        115,
+        68,
+        15
+      ],
+      "recommendedFor": [
+        "Tank",
+        "Fighter",
+        "Marksman"
+      ],
       "tags": [
         "defense",
         "magic-defense",
@@ -6227,19 +5969,28 @@
       ],
       "patchVersion": "2.2.23",
       "status": "active",
-      "alias": "Athena's Shield (renamed version)",
       "priceType": "shop",
       "priceNote": "",
       "buildPathIds": [
         3111,
         3101
       ],
-      "goodAgainstHeroes": [],
+      "goodAgainstHeroes": [
+        115,
+        68,
+        15
+      ],
       "badAgainstHeroes": [],
-      "goodWithHeroes": [],
+      "goodWithHeroes": [
+        6,
+        78,
+        41
+      ],
       "buildTreeVersion": "2.2.23",
       "goodAgainst": [],
-      "badAgainst": [],
+      "badAgainst": [
+        2003
+      ],
       "goodWith": []
     },
     {
@@ -6271,7 +6022,6 @@
         2004,
         2006,
         3003,
-        3004,
         3005,
         3006,
         3008,
@@ -7166,12 +6916,10 @@
         "description": "Grants you and nearby allied heroes 20 extra Hybrid Defense. When near allied heroes, you gain 30% EXP and Gold from minions and creeps. Can only be unlocked after accumulating 1000 Gold from Thriving."
       },
       "active": null,
-      "description": "Roam Blessing component for Courage Mask. Hybrid Defense aura for team.",
+      "description": "Roam Blessing — Hybrid Defense aura for team.",
       "lore": "",
       "buildPath": [],
-      "buildsInto": [
-        4003
-      ],
+      "buildsInto": [],
       "image": "items/4111.webp",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/8/86/Passive_-_Encourage.png",
       "fandomFile": "Passive_-_Encourage.png",
@@ -7219,12 +6967,10 @@
         "description": "Every 15 seconds, your next healing or shield skill recovers 400 extra HP to the lowest-HP allied hero within 5 units (including yourself). Skills that only take effect on yourself cannot trigger this effect. When near allied heroes, you gain 30% EXP and Gold from minions and creeps. Can only be unlocked after accumulating 1000 Gold from Thriving."
       },
       "active": null,
-      "description": "Roam Blessing component for Favor. Extra heal / shield for lowest-HP ally.",
+      "description": "Roam Blessing — Extra heal / shield for lowest-HP ally.",
       "lore": "",
       "buildPath": [],
-      "buildsInto": [
-        4004
-      ],
+      "buildsInto": [],
       "image": "items/4112.webp",
       "portrait": "https://static.wikia.nocookie.net/mobile-legends/images/a/a0/Passive_-_Favor.png",
       "fandomFile": "Passive_-_Favor.png",

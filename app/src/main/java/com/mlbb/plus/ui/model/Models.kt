@@ -266,6 +266,7 @@ data class PatchData(
 
 data class PatchNotesFile(
     val version: String = "",
+    val latest: Boolean = false,
     val updated: String = "",
     val originalServer: PatchData = PatchData(),
     val advancedServer: PatchData = PatchData(),
@@ -508,7 +509,8 @@ object JsonLoader {
             val nov01Orig = if (nov01.has("originalServer")) nov01.getJSONObject("originalServer") else JSONObject()
             val nov01Adv = if (nov01.has("advancedServer")) parsePatchData(nov01.getJSONObject("advancedServer")) else PatchData()
             val fileNotes = PatchNotesFile(
-                version = root.optStr("version"), updated = root.optStr("updated").ifBlank { root.optStr("date") },
+                version = root.optStr("version"), latest = root.optBoolean("latest", false),
+                updated = root.optStr("updated").ifBlank { root.optStr("date") },
                 originalServer = orig, advancedServer = adv,
                 nov01OriginalEvent = if (nov01Orig.has("details")) nov01Orig.getJSONArray("details").toStringList() else emptyList(),
                 nov01Advanced = nov01Adv, nov01LivePatch = nov01Orig.optStr("livePatchOnNov01")
@@ -561,6 +563,10 @@ object GameData {
     @Volatile var patchNotes: PatchNotesFile = PatchNotesFile()
         private set
     @Volatile var guides: Map<String, GuideFile> = emptyMap()
+        private set
+    @Volatile var heroesLatest: Boolean = false
+        private set
+    @Volatile var itemsLatest: Boolean = false
         private set
     @Volatile var isLoaded: Boolean = false
         private set
@@ -625,6 +631,12 @@ object GameData {
         }
         items = it
         patchNotes = p
+        heroesLatest = runCatching {
+            JSONObject(appContext.assets.open("heroes.json").bufferedReader().use { r -> r.readText() }).optBoolean("latest", false)
+        }.getOrDefault(false)
+        itemsLatest = runCatching {
+            JSONObject(appContext.assets.open("items.json").bufferedReader().use { r -> r.readText() }).optBoolean("latest", false)
+        }.getOrDefault(false)
         cachedHeroesById = heroes.associateBy { hero -> hero.id }
         cachedItemsById = items.associateBy { item -> item.id }
         guides = GuideLoader.loadAll(appContext, heroes)
