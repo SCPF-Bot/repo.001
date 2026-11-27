@@ -11,7 +11,7 @@ import org.junit.Test
  * State transitions of the Voice Guide coach.
  *
  * [VoiceGuideManager] itself needs a Context (SharedPreferences, AudioManager,
- * AccessibilityManager, ConnectivityManager), so the decisions that drive its
+ * AccessibilityManager), so the decisions that drive its
  * state live in the pure [VoiceGuideTransitions] table and are tested here on a
  * plain JVM. The manager and the overlay widget both call that table, which is
  * what keeps the on-screen button, the notification action and these tests

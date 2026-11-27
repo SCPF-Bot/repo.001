@@ -25,8 +25,9 @@ import kotlinx.coroutines.withContext
  * On-device neural TTS through sherpa-onnx. Kokoro is the primary voice, Piper
  * the lighter fallback, exactly as the feature spec asks.
  *
- * Everything runs offline: the model files come from [VoiceModelDownloader]
- * (`filesDir/tts/`), synthesis happens on a background thread, and audio goes
+ * Everything runs offline: the model files are unpacked from the APK bundle by
+ * [VoiceModelInstaller] (`filesDir/tts/`), synthesis happens on a background
+ * thread, and audio goes
  * out through a streaming [AudioTrack] so the first sentence starts playing
  * while the rest is still being generated.
  *
@@ -41,7 +42,7 @@ import kotlinx.coroutines.withContext
  */
 class SherpaOnnxVoiceEngine(
     private val context: Context,
-    private val downloader: VoiceModelDownloader
+    private val installer: VoiceModelInstaller
 ) : VoiceEngine {
 
     override val name: String
@@ -88,9 +89,9 @@ class SherpaOnnxVoiceEngine(
      */
     override suspend fun prepare(): Boolean = loadLock.withLock {
         if (tts != null && track != null) return@withLock true
-        val wanted = VoiceModelDownloader.forVoice(VoiceGuideSettings.voice(context))
-        val chain = if (wanted != null) VoiceModelDownloader.fallbackChain(wanted) else VoiceModelDownloader.MODELS
-        val model = chain.firstOrNull { downloader.isInstalled(it) }
+        val wanted = installer.forVoice(VoiceGuideSettings.voice(context))
+        val chain = if (wanted != null) installer.fallbackChain(wanted) else installer.models
+        val model = chain.firstOrNull { installer.isInstalled(it) }
         if (model == null) {
             Log.i(TAG, "no voice pack installed yet")
             return@withLock false
@@ -105,7 +106,7 @@ class SherpaOnnxVoiceEngine(
 
     private suspend fun load(model: VoiceModel): Boolean = withContext(Dispatchers.IO) {
         releaseInternal()
-        val dir = downloader.modelDir(model)
+        val dir = installer.modelDir(model)
         val onnx = model.resolveModelFile(dir)
         if (onnx == null) {
             Log.e(TAG, "${model.id}: no .onnx graph found in $dir")

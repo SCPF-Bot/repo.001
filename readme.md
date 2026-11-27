@@ -13,12 +13,13 @@ Requirements: JDK 17, Android SDK Platform 37, Android Gradle Plugin / Gradle ve
 
 The first build requires Gradle and Android dependencies to be available from their configured repositories.
 
-The optional Voice Guide needs the sherpa-onnx AAR, which is **not** on Google Maven. A
-`downloadSherpaAar` task fetches `sherpa-onnx-1.13.8.aar` into `app/libs/` and verifies its sha256;
-it runs automatically as part of `assembleDebug` / `assembleRelease`, so the first build needs
-network access once (or commit the AAR yourself and the task does nothing). Voice **models** are
-never bundled: they are downloaded in-app on demand into `filesDir/tts/`. See
-[`TTS_IMPLEMENTATION.md`](TTS_IMPLEMENTATION.md).
+The optional Voice Guide needs the sherpa-onnx AAR, which is **not** on Google Maven, plus three
+TTS voice packs. A `downloadSherpaAar` task fetches `sherpa-onnx-1.13.8.aar` into `app/libs/` and a
+`bundleTtsModels` task fetches the voice packs into `app/tts-models-cache/`; both verify sha256 and
+run automatically as part of `assembleDebug` / `assembleRelease`, so the first build needs network
+access once (or place the files yourself and the tasks do nothing). The voice packs are **compiled
+into the APK** and unpacked into `filesDir/tts/` on first use, so speech is fully offline at
+runtime. See [`TTS_IMPLEMENTATION.md`](TTS_IMPLEMENTATION.md).
 
 Before building, validate local data and portraits:
 

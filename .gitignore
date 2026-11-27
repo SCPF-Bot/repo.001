@@ -12,11 +12,13 @@ local.properties
 *.apk
 *.aab
 
-# Voice Guide: the sherpa-onnx AAR is fetched by the downloadSherpaAar Gradle
-# task (50 MB, checksum-verified). Models themselves are downloaded to the
-# device's filesDir/tts and never live in the repo - these patterns only stop a
-# local experiment from being committed.
+# Voice Guide: the sherpa-onnx AAR and the TTS voice pack archives are fetched
+# by Gradle at build time (downloadSherpaAar into app/libs, bundleTtsModels
+# into app/tts-models-cache) and compiled into the APK - checksum-verified and
+# never committed. The extracted models on a device live in filesDir/tts - these
+# patterns only stop a local experiment from being committed.
 app/libs/*.aar
+app/tts-models-cache/
 *.onnx
 *.tar.bz2
 voices.bin
@@ -26,3 +28,6 @@ lexicon-*.txt
 # OS/editor files
 .DS_Store
 Thumbs.db
+
+# Python bytecode from running the repo scripts
+__pycache__/

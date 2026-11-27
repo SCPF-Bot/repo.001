@@ -35,7 +35,7 @@ import androidx.compose.ui.unit.sp
 import com.mlbb.plus.tts.VoiceGuideManager
 import com.mlbb.plus.tts.VoiceGuideSettings
 import com.mlbb.plus.tts.VoiceModel
-import com.mlbb.plus.tts.VoiceModelDownloader
+import com.mlbb.plus.tts.VoiceModelInstaller
 import com.mlbb.plus.ui.components.AppIcons
 import com.mlbb.plus.ui.components.DetailBackBar
 import com.mlbb.plus.ui.components.ScreenTitleBar
@@ -584,23 +584,23 @@ private fun VoiceGuideSection() {
     val rate = remember(revision) { VoiceGuideSettings.rate(context) }
     val autoSpeak = remember(revision) { VoiceGuideSettings.autoSpeak(context) }
     val announceSpells = remember(revision) { VoiceGuideSettings.announceSpells(context) }
-    val downloader = remember { VoiceModelDownloader(context) }
+    val installer = remember { VoiceModelInstaller(context) }
 
     // Storage checks touch the disk, so they run off the main thread and are
-    // recomputed when a setting changes or a download finishes.
-    val installedIds by produceState<Set<String>>(emptySet(), revision, state.downloading, state.modelLabel) {
+    // recomputed when a setting changes or an install finishes.
+    val installedIds by produceState<Set<String>>(emptySet(), revision, state.installing, state.modelLabel) {
         value = withContext(Dispatchers.IO) {
-            VoiceModelDownloader.MODELS.filter { downloader.isInstalled(it) }.map { it.id }.toSet()
+            installer.models.filter { installer.isInstalled(it) }.map { it.id }.toSet()
         }
     }
-    val selectedModel = VoiceModelDownloader.forVoice(voiceId)
+    val selectedModel = installer.forVoice(voiceId)
     val selectedInstalled = selectedModel != null && selectedModel.id in installedIds
 
     SectionLabel("VOICE GUIDE")
 
     SettingsRow(
         title = "Voice Guide",
-        subtitle = "Hear the current step through the floating guide. Nothing is spoken, downloaded or " +
+        subtitle = "Hear the current step through the floating guide. Nothing is spoken or " +
             "focused until you switch this on.",
         checked = enabled,
         onChecked = { manager.setEnabled(it) }
@@ -628,7 +628,7 @@ private fun VoiceGuideSection() {
             Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            VoiceModelDownloader.MODELS.forEach { model ->
+            installer.models.forEach { model ->
                 model.speakers.keys.forEach { id ->
                     VoiceOptionChip(
                         label = voiceLabel(id, model),
@@ -672,7 +672,7 @@ private fun VoiceGuideSection() {
             VoiceOptionChip(
                 label = "Neural (offline)",
                 selected = engine == VoiceGuideSettings.ENGINE_SHERPA,
-                trailing = "needs a download",
+                trailing = "bundled model",
                 onClick = {
                     VoiceGuideSettings.setEngine(context, VoiceGuideSettings.ENGINE_SHERPA)
                     manager.onSettingsChanged()
@@ -681,7 +681,7 @@ private fun VoiceGuideSection() {
             VoiceOptionChip(
                 label = "System voice",
                 selected = engine == VoiceGuideSettings.ENGINE_SYSTEM,
-                trailing = "no download",
+                trailing = "no model needed",
                 onClick = {
                     VoiceGuideSettings.setEngine(context, VoiceGuideSettings.ENGINE_SYSTEM)
                     manager.onSettingsChanged()
@@ -692,19 +692,19 @@ private fun VoiceGuideSection() {
         VoiceSettingLabel("VOICE MODEL ON THIS DEVICE")
         if (installedIds.isEmpty()) {
             Text(
-                "Nothing downloaded yet. Models are fetched on demand into the app's private folder - " +
-                    "never bundled inside the APK.",
+                "Nothing installed yet. The voice packs ship inside the APK and are unpacked into the " +
+                    "app's private folder on first use - no network needed.",
                 color = AppUiColors.GithubSecondary,
                 fontSize = 12.sp,
                 lineHeight = 17.sp
             )
         } else {
-            VoiceModelDownloader.MODELS.filter { it.id in installedIds }.forEach { model ->
+            installer.models.filter { it.id in installedIds }.forEach { model ->
                 VoiceModelRow(model = model, onDelete = { manager.deleteModel(model) })
             }
         }
 
-        if (state.downloading) {
+        if (state.installing) {
             Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 LinearProgressIndicator(
                     progress = { state.progress },
@@ -713,19 +713,19 @@ private fun VoiceGuideSection() {
                     trackColor = AppUiColors.GithubBorder
                 )
                 Text(
-                    state.progressLabel.ifBlank { "Preparing download" },
+                    state.progressLabel.ifBlank { "Preparing install" },
                     color = AppUiColors.GithubSecondary,
                     fontSize = 11.sp
                 )
                 OutlinedButton(
-                    onClick = { manager.cancelDownload() },
+                    onClick = { manager.cancelInstall() },
                     modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),
                     shape = RoundedCornerShape(12.dp)
-                ) { Text("Cancel download", fontWeight = FontWeight.SemiBold) }
+                ) { Text("Cancel install", fontWeight = FontWeight.SemiBold) }
             }
         } else if (selectedModel != null) {
             Button(
-                onClick = { manager.downloadSelectedModel() },
+                onClick = { manager.installSelectedModel() },
                 modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = AppUiColors.Gold,
@@ -735,9 +735,9 @@ private fun VoiceGuideSection() {
             ) {
                 Text(
                     if (selectedInstalled) {
-                        "Re-download voice \u2022 ${selectedModel.sizeLabel}"
+                        "Reinstall voice \u2022 ${selectedModel.sizeLabel}"
                     } else {
-                        "Download voice \u2022 ${selectedModel.sizeLabel}"
+                        "Install voice \u2022 ${selectedModel.sizeLabel}"
                     },
                     fontWeight = FontWeight.Bold
                 )
@@ -771,11 +771,10 @@ private fun VoiceGuideSection() {
         }
 
         Text(
-            "Kokoro ${VoiceModelDownloader.KOKORO.sizeLabel} and about " +
-                "${VoiceModelDownloader.KOKORO.uncompressedBytes / 1_000_000} MB unpacked; Piper " +
-                "${VoiceModelDownloader.PIPER_LESSAC.sizeLabel}. Synthesis is fully offline once unpacked: " +
-                "no audio is ever sent to a server. Game audio is ducked, not paused, and an incoming call " +
-                "stops the coach.",
+            "Voice packs ship inside the APK and unpack into the app's private folder on first use (" +
+                installer.models.joinToString(", ") { "${it.uncompressedBytes / 1_000_000} MB" } +
+                " on disk). Synthesis is fully offline: no audio is ever sent to a server. Game audio is " +
+                "ducked, not paused, and an incoming call stops the coach.",
             color = AppUiColors.GithubSecondary,
             fontSize = 11.sp,
             lineHeight = 16.sp

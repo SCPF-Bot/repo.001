@@ -13,19 +13,20 @@ import androidx.compose.runtime.mutableIntStateOf
  * process death and a device restart, so the overlay comes back with the same
  * engine, voice and rate.
  *
- * IMPORTANT: [isEnabled] defaults to false. Nothing is ever spoken, downloaded
- * or focus-requested until the player turns Voice Guide on in Settings, or taps
- * the Speaker control in the overlay. That first tap is the consent moment.
+ * IMPORTANT: [isEnabled] defaults to false. Nothing is ever spoken,
+ * focus-requested or unpacked until the player turns Voice Guide on in
+ * Settings, or taps the Speaker control in the overlay. That first tap is the
+ * consent moment.
  */
 object VoiceGuideSettings {
 
     /** Engine preference: let the manager pick the best available one. */
     const val ENGINE_AUTO = "auto"
 
-    /** Force sherpa-onnx (Kokoro, then Piper). Needs a downloaded model. */
+    /** Force sherpa-onnx (Kokoro, then Piper). Needs an installed voice pack. */
     const val ENGINE_SHERPA = "sherpa"
 
-    /** Force the platform TextToSpeech service. Needs no download. */
+    /** Force the platform TextToSpeech service. Needs no voice pack. */
     const val ENGINE_SYSTEM = "system"
 
     /** Kokoro v0_19 speaker ids (female / male). */
@@ -129,11 +130,11 @@ object VoiceGuideSettings {
     }
 
     // ---------------------------------------------------------------
-    // Downloaded model bookkeeping
+    // Installed model bookkeeping
     // ---------------------------------------------------------------
 
     /** Id of the voice pack currently on disk, or "" when nothing is installed.
-     *  See [VoiceModelDownloader.MODELS] for the valid ids. */
+     *  See [VoiceModelInstaller.models] for the valid ids. */
     fun installedModel(context: Context): String = prefs(context).getString(KEY_MODEL, "") ?: ""
 
     fun setInstalledModel(context: Context, modelId: String) {
@@ -154,7 +155,7 @@ object VoiceGuideSettings {
         prefs(context).edit().remove(KEY_NOTICE).apply()
     }
 
-    /** Wipes the model pointer (the files themselves go via [VoiceModelDownloader.delete]). */
+    /** Wipes the model pointer (the files themselves go via [VoiceModelInstaller.delete]). */
     fun resetModel(context: Context) {
         prefs(context).edit().remove(KEY_MODEL).apply()
         bump()

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Stop glyph for the notification's "Stop voice" action. The framework's
+     android.R.drawable.ic_media_stop was pruned from recent SDKs (it is gone
+     from android-37's public android.R.drawable), so the coach ships its own. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M6,6h12v12H6z" />
+</vector>

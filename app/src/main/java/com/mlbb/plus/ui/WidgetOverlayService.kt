@@ -262,7 +262,7 @@ class WidgetOverlayService : Service() {
                     if (speaking) "Pause voice" else "Play voice",
                     toggleIntent
                 )
-                .addAction(android.R.drawable.ic_media_stop, "Stop voice", voiceStopIntent)
+                .addAction(com.mlbb.plus.R.drawable.ic_voice_stop, "Stop voice", voiceStopIntent)
         }
 
         return builder

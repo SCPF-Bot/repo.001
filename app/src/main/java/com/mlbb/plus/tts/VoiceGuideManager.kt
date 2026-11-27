@@ -4,8 +4,6 @@ import android.content.Context
 import android.media.AudioAttributes
 import android.media.AudioFocusRequest
 import android.media.AudioManager
-import android.net.ConnectivityManager
-import android.net.NetworkCapabilities
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
@@ -30,7 +28,7 @@ import kotlinx.coroutines.launch
  *
  * The single owner of "what is being spoken right now". The overlay widget and
  * [com.mlbb.plus.ui.WidgetOverlayService] only ever talk to this class plus
- * [VoiceUiState]; they never see an engine, an AudioTrack or a download.
+ * [VoiceUiState]; they never see an engine, an AudioTrack or a model install.
  *
  * Rules this class enforces (feature spec §3, §4, §6):
  *  - Nothing happens until Voice Guide is on. The overlay's Speaker tap is the
@@ -48,7 +46,7 @@ import kotlinx.coroutines.launch
  *
  * Threading: every public method is called from the main thread (Compose
  * callbacks and the service). The scope uses [Dispatchers.Main.immediate];
- * engines and the downloader move their own heavy work to IO.
+ * engines and the installer move their own heavy work to IO.
  */
 class VoiceGuideManager(private val context: Context) {
 
@@ -66,7 +64,7 @@ class VoiceGuideManager(private val context: Context) {
         val modelInstalled: Boolean = false,
         val modelLabel: String = "",
         val supportsPause: Boolean = false,
-        val downloading: Boolean = false
+        val installing: Boolean = false
     )
 
     enum class Phase { IDLE, PREPARING, DOWNLOADING, SPEAKING, PAUSED, ERROR, UNAVAILABLE }
@@ -78,9 +76,8 @@ class VoiceGuideManager(private val context: Context) {
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     private val mainHandler = Handler(Looper.getMainLooper())
-    private val downloader = VoiceModelDownloader(context)
+    private val installer = VoiceModelInstaller(context)
     private val audioManager = context.getSystemService(AudioManager::class.java)
-    private val connectivity = context.getSystemService(ConnectivityManager::class.java)
     private val accessibility = context.getSystemService(AccessibilityManager::class.java)
 
     private var sherpa: SherpaOnnxVoiceEngine? = null
@@ -88,11 +85,10 @@ class VoiceGuideManager(private val context: Context) {
     private var active: VoiceEngine? = null
     private var speakJob: Job? = null
     private var idleJob: Job? = null
-    private var downloadJob: Job? = null
+    private var installJob: Job? = null
     private var focusHeld = false
     private var lastSpokenKey: String = ""
     private var lastStep: SpokenStep? = null
-    private var awaitingDownloadConsent = false
     private val spellCooldowns = HashMap<String, Long>()
 
     /** Declared before [init] on purpose: init registers it. */
@@ -177,7 +173,7 @@ class VoiceGuideManager(private val context: Context) {
     /** Notification Stop Voice: silence the coach, keep the overlay running. */
     fun stopFromNotification() = stop()
 
-    /** Speaker tap: speak [step] now, starting the model download if needed. */
+    /** Speaker tap: speak [step] now, unpacking the voice pack from the APK if needed. */
     fun speak(step: SpokenStep) {
         lastStep = step
         speakInternal(step, forceRepeat = true)
@@ -226,8 +222,8 @@ class VoiceGuideManager(private val context: Context) {
     fun stop() {
         speakJob?.cancel()
         speakJob = null
-        downloader.cancel()
-        downloadJob = null
+        installer.cancel()
+        installJob = null
         active?.stop()
         abandonFocus()
         state = state.copy(
@@ -236,7 +232,7 @@ class VoiceGuideManager(private val context: Context) {
             progressLabel = "",
             speakingKey = "",
             message = "",
-            downloading = false
+            installing = false
         )
         scheduleIdleRelease()
     }
@@ -292,31 +288,31 @@ class VoiceGuideManager(private val context: Context) {
         )
     }
 
-    /** Downloads the pack for the selected voice, reporting progress into [state]. */
-    fun downloadSelectedModel(onFinished: ((Boolean) -> Unit)? = null) {
-        val model = VoiceModelDownloader.forVoice(VoiceGuideSettings.voice(context))
+    /** Unpacks the pack for the selected voice from the APK, reporting progress into [state]. */
+    fun installSelectedModel(onFinished: ((Boolean) -> Unit)? = null) {
+        val model = installer.forVoice(VoiceGuideSettings.voice(context))
         if (model == null) {
-            state = state.copy(message = "The system voice needs no download.")
+            state = state.copy(message = "The system voice needs no voice pack.")
             onFinished?.invoke(true)
             return
         }
-        if (downloader.isInstalled(model)) {
+        if (installer.isInstalled(model)) {
             refreshFromPrefs()
             onFinished?.invoke(true)
             return
         }
-        downloadJob?.cancel()
-        downloader.resetCancel()
-        state = state.copy(downloading = true)
-        downloadJob = scope.launch {
-            val result = downloader.download(model) { publish(it) }
-            val ok = result is VoiceModelDownloader.Progress.Done
+        installJob?.cancel()
+        installer.resetCancel()
+        state = state.copy(installing = true)
+        installJob = scope.launch {
+            val result = installer.install(model) { publish(it) }
+            val ok = result is VoiceModelInstaller.Progress.Done
             refreshFromPrefs()
             state = state.copy(
-                downloading = false,
+                installing = false,
                 message = when {
                     ok -> "${model.label} installed."
-                    result is VoiceModelDownloader.Progress.Cancelled -> "Download cancelled."
+                    result is VoiceModelInstaller.Progress.Cancelled -> "Install cancelled."
                     else -> state.message
                 }
             )
@@ -325,8 +321,8 @@ class VoiceGuideManager(private val context: Context) {
         }
     }
 
-    fun cancelDownload() {
-        downloader.cancel()
+    fun cancelInstall() {
+        installer.cancel()
     }
 
     /** Frees an installed pack; the next line falls back down the chain. */
@@ -334,12 +330,12 @@ class VoiceGuideManager(private val context: Context) {
         scope.launch {
             stop()
             releaseEngines()
-            downloader.delete(model)
+            installer.delete(model)
             if (VoiceGuideSettings.installedModel(context) == model.id) {
                 VoiceGuideSettings.resetModel(context)
             }
             refreshFromPrefs()
-            val remaining = VoiceModelDownloader.MODELS.firstOrNull { downloader.isInstalled(it) }
+            val remaining = installer.models.firstOrNull { installer.isInstalled(it) }
             state = state.copy(
                 message = if (remaining != null) {
                     "${model.label} removed. Falling back to ${remaining.label}."
@@ -370,7 +366,7 @@ class VoiceGuideManager(private val context: Context) {
         }
         releaseEngines()
         idleJob?.cancel()
-        downloadJob?.cancel()
+        installJob?.cancel()
         scope.cancel()
     }
 
@@ -418,7 +414,7 @@ class VoiceGuideManager(private val context: Context) {
         idleJob = null
         active?.stop()
         speakJob = scope.launch {
-            startDownloadIfNeeded()
+            startInstallIfNeeded()
             val engine = resolveEngine()
             if (engine == null) {
                 abandonFocus()
@@ -435,7 +431,7 @@ class VoiceGuideManager(private val context: Context) {
                 return@launch
             }
             engine.setSpeechRate(VoiceGuideSettings.rate(context))
-            val keepMessage = if (downloadJob?.isActive == true) state.message else ""
+            val keepMessage = if (installJob?.isActive == true) state.message else ""
             state = state.copy(
                 phase = Phase.SPEAKING,
                 spokenText = text,
@@ -455,40 +451,18 @@ class VoiceGuideManager(private val context: Context) {
     }
 
     /**
-     * First-tap download flow. On unmetered (Wi-Fi) the pack starts downloading
-     * immediately; on mobile data the player confirms with a second tap, because
-     * the real Kokoro archive is 103 MB - not the 82 MB the feature brief
-     * assumed. Either way speech is instant: the platform voice carries the
-     * lines until the neural pack is installed.
+     * First-tap install flow. The voice packs ship inside the APK, so there is
+     * nothing to consent to and no metered-network surprise: the selected pack
+     * simply starts unpacking. Speech is instant either way - the platform
+     * voice carries the lines until the neural pack is ready.
      */
-    private fun startDownloadIfNeeded() {
+    private fun startInstallIfNeeded() {
         if (VoiceGuideSettings.engine(context) == VoiceGuideSettings.ENGINE_SYSTEM) return
-        if (downloadJob?.isActive == true) return
-        val model = VoiceModelDownloader.forVoice(VoiceGuideSettings.voice(context)) ?: return
-        if (downloader.isInstalled(model)) return
-        val sizeMb = model.sizeBytes / MB
-        if (!awaitingDownloadConsent && !isUnmetered()) {
-            awaitingDownloadConsent = true
-            state = state.copy(
-                message = "Download $sizeMb MB for the natural voice? Tap the speaker again to start."
-            )
-            return
-        }
-        awaitingDownloadConsent = false
-        state = state.copy(message = "Downloading ${model.label} ($sizeMb MB).")
-        downloadSelectedModel()
-    }
-
-    /** Needs ACCESS_NETWORK_STATE (a normal, non-runtime permission). */
-    private fun isUnmetered(): Boolean {
-        val cm = connectivity ?: return false
-        return try {
-            val caps = cm.getNetworkCapabilities(cm.activeNetwork) ?: return false
-            caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED)
-        } catch (t: Throwable) {
-            Log.w(TAG, "connectivity check failed", t)
-            false
-        }
+        if (installJob?.isActive == true) return
+        val model = installer.forVoice(VoiceGuideSettings.voice(context)) ?: return
+        if (installer.isInstalled(model)) return
+        state = state.copy(message = "Unpacking ${model.label} from the app bundle.")
+        installSelectedModel()
     }
 
     /**
@@ -500,7 +474,7 @@ class VoiceGuideManager(private val context: Context) {
         val preference = VoiceGuideSettings.engine(context)
         if (preference == VoiceGuideSettings.ENGINE_SYSTEM) return systemEngine()
 
-        val installed = VoiceModelDownloader.MODELS.firstOrNull { downloader.isInstalled(it) }
+        val installed = installer.models.firstOrNull { installer.isInstalled(it) }
         if (installed != null) {
             state = state.copy(phase = Phase.PREPARING, progressLabel = "Loading voice model")
             val engine = sherpaEngine()
@@ -522,7 +496,7 @@ class VoiceGuideManager(private val context: Context) {
         // Guarded: without the sherpa-onnx AAR, or on an ABI it does not ship,
         // even resolving this class throws.
         return try {
-            SherpaOnnxVoiceEngine(context, downloader).also { sherpa = it }
+            SherpaOnnxVoiceEngine(context, installer).also { sherpa = it }
         } catch (t: Throwable) {
             Log.e(TAG, "sherpa-onnx engine unavailable", t)
             null
@@ -635,9 +609,9 @@ class VoiceGuideManager(private val context: Context) {
     // ---------------------------------------------------------------
 
     private fun refreshFromPrefs() {
-        val model = VoiceModelDownloader.forVoice(VoiceGuideSettings.voice(context))
-        val installed = model != null && downloader.isInstalled(model)
-        val anyInstalled = VoiceModelDownloader.MODELS.firstOrNull { downloader.isInstalled(it) }
+        val model = installer.forVoice(VoiceGuideSettings.voice(context))
+        val installed = model != null && installer.isInstalled(model)
+        val anyInstalled = installer.models.firstOrNull { installer.isInstalled(it) }
         state = state.copy(
             enabled = VoiceGuideSettings.isEnabled(context),
             talkBackOn = talkBackActive(),
@@ -645,50 +619,44 @@ class VoiceGuideManager(private val context: Context) {
             modelLabel = when {
                 installed -> model.label
                 anyInstalled != null -> anyInstalled.label
-                else -> "Not downloaded"
+                else -> "Not installed"
             },
             supportsPause = active?.supportsPause ?: false
         )
         if (installed) VoiceGuideSettings.setInstalledModel(context, model.id)
     }
 
-    private fun publish(progress: VoiceModelDownloader.Progress) {
+    private fun publish(progress: VoiceModelInstaller.Progress) {
         when (progress) {
-            is VoiceModelDownloader.Progress.Downloading -> state = state.copy(
-                phase = Phase.DOWNLOADING,
-                progress = ratio(progress.received, progress.total),
-                progressLabel = "Downloading ${progress.received / MB} of ${progress.total / MB} MB"
-            )
-
-            is VoiceModelDownloader.Progress.Extracting -> state = state.copy(
+            is VoiceModelInstaller.Progress.Extracting -> state = state.copy(
                 phase = Phase.DOWNLOADING,
                 progress = ratio(progress.written, progress.total),
                 progressLabel = "Unpacking ${progress.written / MB} of ${progress.total / MB} MB"
             )
 
-            VoiceModelDownloader.Progress.Verifying -> state = state.copy(progressLabel = "Checking files")
+            VoiceModelInstaller.Progress.Verifying -> state = state.copy(progressLabel = "Checking files")
 
-            is VoiceModelDownloader.Progress.Done -> state = state.copy(
+            is VoiceModelInstaller.Progress.Done -> state = state.copy(
                 phase = Phase.IDLE,
                 progress = 1f,
                 progressLabel = ""
             )
 
-            is VoiceModelDownloader.Progress.Failed -> state = state.copy(
+            is VoiceModelInstaller.Progress.Failed -> state = state.copy(
                 phase = Phase.ERROR,
                 progress = 0f,
-                downloading = false,
+                installing = false,
                 message = progress.message
             )
 
-            VoiceModelDownloader.Progress.Cancelled -> state = state.copy(
+            VoiceModelInstaller.Progress.Cancelled -> state = state.copy(
                 phase = Phase.IDLE,
                 progress = 0f,
                 progressLabel = "",
-                downloading = false
+                installing = false
             )
 
-            VoiceModelDownloader.Progress.Idle -> Unit
+            VoiceModelInstaller.Progress.Idle -> Unit
         }
     }
 
@@ -710,7 +678,7 @@ class VoiceGuideManager(private val context: Context) {
         const val TALKBACK_HINT = "Voice Guide is paused while TalkBack is on."
         const val PAUSE_FALLBACK_HINT = "Paused. Repeat plays this step again."
         const val UNAVAILABLE_MESSAGE =
-            "No voice engine available. Download a voice pack, or enable a system text-to-speech engine in Android settings."
+            "No voice engine available. Install a voice pack in Settings, or enable a system text-to-speech engine in Android settings."
         const val MODEL_LOAD_FAILED_MESSAGE = "The voice model could not load. Using the system voice."
         const val NO_MODEL_MESSAGE = "No voice pack installed yet."
         const val FOCUS_DENIED_MESSAGE = "Android refused audio focus, so nothing was spoken."

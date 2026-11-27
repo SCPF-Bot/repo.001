@@ -49,7 +49,7 @@ The screen-side guide parser and overlay-side guide parser are separate implemen
 ```text
 MLBB-Plus/
 ├── app/
-│   ├── build.gradle.kts                      (+ downloadSherpaAar task)
+│   ├── build.gradle.kts                      (+ downloadSherpaAar / bundleTtsModels tasks)
 │   ├── proguard-rules.pro
 │   ├── libs/                                 (sherpa-onnx-1.13.8.aar, fetched on
 │   │                                          demand and gitignored — never committed)
@@ -73,7 +73,7 @@ MLBB-Plus/
 │       │   │   │   ├── VoiceGuideSettings.kt
 │       │   │   │   ├── VoiceEngine.kt
 │       │   │   │   ├── SystemTtsVoiceEngine.kt
-│       │   │   │   ├── VoiceModelDownloader.kt
+│       │   │   │   ├── VoiceModelInstaller.kt
 │       │   │   │   ├── SherpaOnnxVoiceEngine.kt
 │       │   │   │   └── VoiceGuideManager.kt  (+ VoiceGuideTransitions)
 │       │   │   └── ui/
@@ -112,7 +112,8 @@ MLBB-Plus/
 │   ├── refactoring-report.md
 │   └── ux-redesign.md
 ├── scripts/
-│   └── validate_assets.py
+│   ├── validate_assets.py
+│   └── update_tts_models.py
 ├── gradle/
 │   ├── libs.versions.toml
 │   └── wrapper/{gradle-wrapper.jar,gradle-wrapper.properties}
@@ -127,7 +128,7 @@ MLBB-Plus/
 
 `app/src/main/assets/heroes/` contains **133** bundled hero portraits and `app/src/main/assets/items/` contains **99** item portraits — one WebP per active item record (`items/{id}.webp`). Every declared local image path in both catalogues resolves; each item record additionally carries a remote `portrait` URL (Fandom) and Coil renders an initials fallback if an asset is unreadable. The resource directory contains launcher artwork and Android theme resources.
 
-`scripts/validate_assets.py` was referenced by `readme.md` and `refactoring-report.md` but was absent from the repository; it was recreated on 2026-11-27 and extended with cross-file referential checks (patch-change ID ↔ roster name, version agreement, guide staleness warnings). It currently passes with one warning: `roam_guide.json` declares `meta.latest = true` while pinned to patch 2.2.16a.
+`scripts/validate_assets.py` was referenced by `readme.md` and `refactoring-report.md` but was absent from the repository; it was recreated on 2026-11-27 and extended with cross-file referential checks (patch-change ID ↔ roster name, version agreement, guide staleness warnings). It currently passes with one warning: `roam_guide.json` declares `meta.latest = true` while pinned to patch 2.2.16a. `scripts/update_tts_models.py` (added 2026-11-27) maintains `app/src/main/assets/tts/tts-models.json`: it downloads and verifies the bundled voice packs against upstream `checksum.txt`, validates their layout, and regenerates the manifest (`--check` mode verifies without writing; `.github/workflows/update-tts-models.yml` runs it weekly and on dispatch).
 
 ## 3. Startup and navigation chain
 
@@ -278,7 +279,7 @@ sequenceDiagram
     end
 ```
 
-`AndroidManifest.xml` declares `SYSTEM_ALERT_WINDOW`, `FOREGROUND_SERVICE`, `FOREGROUND_SERVICE_SPECIAL_USE`, `POST_NOTIFICATIONS`, and — for the Voice Guide model download only — `INTERNET` and `ACCESS_NETWORK_STATE`. The service is non-exported and declared with foreground type `specialUse` plus a subtype explanation. `WidgetOverlayService` creates an ongoing notification with an app-open intent and Stop action, updates the active role/type, initializes the overlay once per service instance, and hides/stops the overlay on destruction.
+`AndroidManifest.xml` declares `SYSTEM_ALERT_WINDOW`, `FOREGROUND_SERVICE`, `FOREGROUND_SERVICE_SPECIAL_USE`, and `POST_NOTIFICATIONS`. No network permissions: the Voice Guide voice packs ship inside the APK and are unpacked on first use, so `INTERNET`/`ACCESS_NETWORK_STATE` were removed. The service is non-exported and declared with foreground type `specialUse` plus a subtype explanation. `WidgetOverlayService` creates an ongoing notification with an app-open intent and Stop action, updates the active role/type, initializes the overlay once per service instance, and hides/stops the overlay on destruction.
 
 `JetOverlay.kt` is the low-level window host. It owns the overlay window, ComposeView attachment, and lifecycle / saved-state / ViewModel-store owners needed by Compose outside an Activity. `OverlayWidgets.kt` owns the visible guide, overlay-specific parsing, interaction state, game timer, objective timers, and enemy spell tracker UI.
 
@@ -300,7 +301,7 @@ timer advances / player taps Next
     notification via observeVoiceForNotification()
 ```
 
-Guards that matter when touching this path: TalkBack on ⇒ the coach refuses to speak and shows a hint; 30 s idle ⇒ the engine is released (`IDLE_RELEASE_MS`); phone call / `AUDIOFOCUS_LOSS` ⇒ stop. `VoiceGuideSettings.revision` + `bump()` keeps the Settings-screen manager and the service manager in step — only **user-facing** setters may bump, or a manager would release its own engine mid-sentence or cancel its own download. Full detail: [`../TTS_IMPLEMENTATION.md`](../TTS_IMPLEMENTATION.md).
+Guards that matter when touching this path: TalkBack on ⇒ the coach refuses to speak and shows a hint; 30 s idle ⇒ the engine is released (`IDLE_RELEASE_MS`); phone call / `AUDIOFOCUS_LOSS` ⇒ stop. `VoiceGuideSettings.revision` + `bump()` keeps the Settings-screen manager and the service manager in step — only **user-facing** setters may bump, or a manager would release its own engine mid-sentence or cancel its own install. Full detail: [`../TTS_IMPLEMENTATION.md`](../TTS_IMPLEMENTATION.md).
 
 ## 6. Kotlin file responsibilities
 
@@ -315,7 +316,7 @@ Guards that matter when touching this path: TalkBack on ⇒ the coach refuses to
 | `screens/HeroesScreen.kt` | Hero catalogue, filters/search/sort, hero detail and relationship tabs | `Hero`, `GameData`, `HeroImage`, `ItemImage` |
 | `screens/ItemsScreen.kt` | Item catalogue, filters/search/sort, item detail and related entities | `Item`, `GameData`, `ItemImage`, `HeroImage` |
 | `screens/PatchNotesScreen.kt` | Patch note sections/cards and navigation to changed entities | `PatchData`, `GameData` |
-| `screens/SettingsScreen.kt` | Overlay permission request UI, auto-start setting, data-file status/diagnostics, Knowledge Base reader, and the Voice Guide section (engine/voice/speed/auto-speak/announce-spells, model download, test line) | Activity callbacks, `GameData`, `KnowledgeBase`, `tts/*` |
+| `screens/SettingsScreen.kt` | Overlay permission request UI, auto-start setting, data-file status/diagnostics, Knowledge Base reader, and the Voice Guide section (engine/voice/speed/auto-speak/announce-spells, model install, test line) | Activity callbacks, `GameData`, `KnowledgeBase`, `tts/*` |
 | `screens/AssetImage.kt` | Coil asset model resolution, hero/item portrait rendering and fallbacks | Bundled image assets, `Hero`, `Item` |
 | `theme/MLBBPlusTheme.kt` | Separate Compose color schemes / typography for app and overlay | Main app and overlay service |
 | `widgets/JetOverlay.kt` | WindowManager overlay host and Compose lifecycle owners | `WidgetOverlayService`, Compose and lifecycle APIs |
@@ -325,9 +326,9 @@ Guards that matter when touching this path: TalkBack on ⇒ the coach refuses to
 | `tts/VoiceGuideSettings.kt` | SharedPreferences for the feature plus a `revision` counter so the two manager instances stay in step | Settings screen, manager, overlay service |
 | `tts/VoiceEngine.kt` | Engine contract (`prepare`/`speak`/`pause`/`resume`/`stop`/`setSpeechRate`/`release`, `supportsPause`) | Both engine implementations, manager |
 | `tts/SystemTtsVoiceEngine.kt` | Android `TextToSpeech` adapter — the always-available fallback | Manager |
-| `tts/VoiceModelDownloader.kt` | Model catalogue (URLs, sha256, sizes) and streaming `.tar.bz2` download → verify → extract into `filesDir/tts/` | Manager, Settings screen |
+| `tts/VoiceModelInstaller.kt` | Manifest-driven model catalogue (`assets/tts/tts-models.json`) and streaming `.tar.bz2` unpack from the APK bundle → verify → extract into `filesDir/tts/` | Manager, Settings screen |
 | `tts/SherpaOnnxVoiceEngine.kt` | sherpa-onnx Kokoro/Piper configuration and `AudioTrack` playback | Manager, sherpa-onnx AAR |
-| `tts/VoiceGuideManager.kt` | State machine (`Phase`, `VoiceUiState`), speak/pause/resume/repeat/step APIs, audio focus, TalkBack, idle release, download orchestration; `object VoiceGuideTransitions` is the shared decision table | Overlay service, widget, Settings screen, unit tests |
+| `tts/VoiceGuideManager.kt` | State machine (`Phase`, `VoiceUiState`), speak/pause/resume/repeat/step APIs, audio focus, TalkBack, idle release, install orchestration; `object VoiceGuideTransitions` is the shared decision table | Overlay service, widget, Settings screen, unit tests |
 
 ## 7. Build, platform, and dependencies
 
@@ -345,9 +346,10 @@ Guards that matter when touching this path: TalkBack on ⇒ the coach refuses to
 - Other UI: Compose UI, Foundation, Material 3, tooling preview.
 - Repositories: Google and Maven Central. **No JitPack** — sherpa-onnx has no builds there.
 - TTS: `sherpa-onnx-1.13.8.aar`, vendored as `implementation(files("libs/sherpa-onnx-1.13.8.aar"))` and fetched on demand by the `downloadSherpaAar` task (sha256-verified, `.part` → rename, `onlyIf { !exists() }`, wired into `preBuild` and every `*compile*Kotlin*` task). Pinned to 1.13.8 deliberately: on 2.0.x Piper fails to initialise and Kokoro needs an extra lexicon file.
+- TTS voice packs: bundled into the APK. `bundleTtsModels` reads `app/src/main/assets/tts/tts-models.json`, fetches/verifies each archive into `app/tts-models-cache/`, and stages them into `app/build/generated/tts-assets/tts/` (registered as an assets source set). `scripts/update_tts_models.py` maintains the manifest (`.github/workflows/update-tts-models.yml` runs it weekly).
 - `org.apache.commons:commons-compress:1.25.0` — `.tar.bz2` extraction (1.26+ would pull commons-io and commons-lang3).
 - `junit:4.13.2` (`testImplementation`) with `testOptions { unitTests.isReturnDefaultValues = true }` for the 36 JVM tests in `app/src/test/java/com/mlbb/plus/tts/`.
-- Permissions added for the model download only: `INTERNET`, `ACCESS_NETWORK_STATE` (unmetered check before offering a 103 MB file). No model binary ships in the APK; models land in `filesDir/tts/`.
+- No network permissions: the voice packs ship inside the APK (`assets/tts/`), and are unpacked (checksum-verified) into `filesDir/tts/` on first use.
 - The AAR carries `arm64-v8a`, `armeabi-v7a`, `x86` and `x86_64` native libs; a commented-out `splits { abi { } }` block is in `app/build.gradle.kts` for when ABI filtering is verified.
 - Release build enables code minification and resource shrinking; debug disables both.
 - Gradle wrapper distribution: Gradle `9.6.1`.

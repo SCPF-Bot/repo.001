@@ -1,0 +1,63 @@
+{
+  "schema": 1,
+  "updated": "2026-11-27",
+  "source": "https://github.com/k2-fsa/sherpa-onnx/releases/download/tts-models",
+  "note": "Maintained by scripts/update_tts_models.py - do not edit by hand. The archives are bundled into the APK at build time by the bundleTtsModels Gradle task; they are not committed to git (the Kokoro archive alone is 103 MB, over GitHub's per-file limit).",
+  "models": [
+    {
+      "id": "kokoro-int8-en-v0_19",
+      "label": "Kokoro (most natural)",
+      "family": "kokoro",
+      "dirName": "kokoro-int8-en-v0_19",
+      "archive": "kokoro-int8-en-v0_19.tar.bz2",
+      "url": "https://github.com/k2-fsa/sherpa-onnx/releases/download/tts-models/kokoro-int8-en-v0_19.tar.bz2",
+      "sha256": "c9f0dd393615805b0bab050c340834d5e684e732aec91c0e860cd30e982c08bd",
+      "sizeBytes": 103248205,
+      "uncompressedBytes": 157935610,
+      "modelFile": "model.int8.onnx",
+      "voicesFile": "voices.bin",
+      "tokensFile": "tokens.txt",
+      "espeakDir": "espeak-ng-data",
+      "speakers": {
+        "af_heart": 1,
+        "am_adam": 5
+      }
+    },
+    {
+      "id": "vits-piper-en_US-lessac-medium-int8",
+      "label": "Piper female (small, faster)",
+      "family": "piper",
+      "dirName": "vits-piper-en_US-lessac-medium-int8",
+      "archive": "vits-piper-en_US-lessac-medium-int8.tar.bz2",
+      "url": "https://github.com/k2-fsa/sherpa-onnx/releases/download/tts-models/vits-piper-en_US-lessac-medium-int8.tar.bz2",
+      "sha256": "f1c6d0295cf16087b05f80fdca5b44daca5cd78e2c425d419a42ba34929805f9",
+      "sizeBytes": 20969179,
+      "uncompressedBytes": 36577170,
+      "modelFile": "en_US-lessac-medium.onnx",
+      "voicesFile": "",
+      "tokensFile": "tokens.txt",
+      "espeakDir": "espeak-ng-data",
+      "speakers": {
+        "lessac-medium": 0
+      }
+    },
+    {
+      "id": "vits-piper-en_US-ryan-medium-int8",
+      "label": "Piper male (small, faster)",
+      "family": "piper",
+      "dirName": "vits-piper-en_US-ryan-medium-int8",
+      "archive": "vits-piper-en_US-ryan-medium-int8.tar.bz2",
+      "url": "https://github.com/k2-fsa/sherpa-onnx/releases/download/tts-models/vits-piper-en_US-ryan-medium-int8.tar.bz2",
+      "sha256": "376eb489d42e98cb49f0e13a633e8d88580bd247ed8aacc298a733210404f771",
+      "sizeBytes": 21083446,
+      "uncompressedBytes": 36577170,
+      "modelFile": "en_US-ryan-medium.onnx",
+      "voicesFile": "",
+      "tokensFile": "tokens.txt",
+      "espeakDir": "espeak-ng-data",
+      "speakers": {
+        "ryan-medium": 0
+      }
+    }
+  ]
+}

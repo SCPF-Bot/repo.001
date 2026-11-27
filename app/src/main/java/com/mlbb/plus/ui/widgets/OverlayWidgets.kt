@@ -903,7 +903,7 @@ fun RoamGuideWidget(
                     onPrev = { coach.speakRelative(spokenSteps, currentStepIndex, -1) },
                     onNext = { coach.speakRelative(spokenSteps, currentStepIndex, 1) },
                     onStop = { coach.stop() },
-                    onCancelDownload = { coach.cancelDownload() }
+                    onCancelInstall = { coach.cancelInstall() }
                 )
             }
 
@@ -1306,7 +1306,7 @@ private fun OutlinedText(
  *
  * Layout: one 48dp row (the Material minimum touch target - deliberately taller
  * than the 28dp guide controls, because these are used mid-fight without
- * looking) plus a single status line for download progress, errors and hints.
+ * looking) plus a single status line for install progress, errors and hints.
  * The row is composed only when Voice Guide is on, so a widget with the feature
  * off is unchanged down to the last pixel.
  */
@@ -1321,7 +1321,7 @@ private fun VoiceControlRow(
     onPrev: () -> Unit,
     onNext: () -> Unit,
     onStop: () -> Unit,
-    onCancelDownload: () -> Unit
+    onCancelInstall: () -> Unit
 ) {
     val downloading = state.phase == VoiceGuideManager.Phase.DOWNLOADING
     val speaking = state.phase == VoiceGuideManager.Phase.SPEAKING
@@ -1333,7 +1333,7 @@ private fun VoiceControlRow(
     val primaryLabel = VoiceGuideTransitions.primaryLabel(state.phase, downloading, busy)
     val primaryAction = VoiceGuideTransitions.primaryAction(state.phase, downloading, busy)
     val primaryDescription = when {
-        downloading -> "Cancel the voice model download"
+        downloading -> "Cancel the voice model install"
         busy -> "Loading the voice model"
         speaking -> "Pause the coach"
         paused -> "Resume the coach"
@@ -1362,7 +1362,7 @@ private fun VoiceControlRow(
                 contentDescription = primaryDescription,
                 onClick = {
                     when (primaryAction) {
-                        VoiceGuideTransitions.PrimaryAction.CANCEL_DOWNLOAD -> onCancelDownload()
+                        VoiceGuideTransitions.PrimaryAction.CANCEL_DOWNLOAD -> onCancelInstall()
                         VoiceGuideTransitions.PrimaryAction.PAUSE -> onPause()
                         VoiceGuideTransitions.PrimaryAction.RESUME -> onResume()
                         VoiceGuideTransitions.PrimaryAction.SPEAK -> onSpeak()
