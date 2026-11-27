@@ -439,6 +439,8 @@ fun AppSearchBar(query: String, onQueryChange: (String) -> Unit,
 
 `AppCard`, `AppTopBar` (Back + title), `EmptyState`, `ErrorState`, `LoadingState` follow the same pattern (48dp, tokens, string resources). See repo file for complete implementations.
 
+**API shape rule learned the hard way (`compileReleaseKotlin` failure, fixed 2026-11-27):** when a component *forwards* a composable lambda to a Material 3 slot, its own parameter must carry the same receiver scope. `TopAppBar.actions` is `@Composable RowScope.() -> Unit`, so `AppTopBar(actions: @Composable () -> Unit)` failed with *"ComposableFunction0\<Unit\> supplied where ComposableFunction1\<RowScope, Unit\> was expected"*. `actions` is now `@Composable RowScope.() -> Unit` (which also lets callers use `Modifier.weight()` on bar actions). Components that *invoke* their content instead of forwarding it (`AppButton`, `AppCard`, …) are unaffected — `content: @Composable () -> Unit` called as `content()` inside the scope compiles fine. Rule: **forwarding ⇒ match the receiver; invoking ⇒ no-arg is fine.**
+
 ### 7.4 Navigation & state (excerpt — full files in repo)
 
 ```kotlin

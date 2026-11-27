@@ -416,7 +416,15 @@ object JsonLoader {
                 }
             }
             out
-        } catch (e: Exception) { emptyList() }
+        } catch (e: Exception) {
+            // Never crash on bad bundled JSON, but do not fail silently either:
+            // Settings reports "MISSING" with no reason otherwise. The broad catch
+            // is deliberate (org.json throws JSONException; malformed data can also
+            // surface as ClassCastException / IndexOutOfBounds) — flagged by detekt
+            // SwallowedException / TooGenericExceptionCaught, 2026-11-27 lint scan.
+            android.util.Log.e("GameData", "heroes.json parse failed", e)
+            emptyList()
+        }
     }
 
     fun loadItems(context: Context): List<Item> {
@@ -471,7 +479,15 @@ object JsonLoader {
                 }
             }
             out
-        } catch (e: Exception) { emptyList() }
+        } catch (e: Exception) {
+            // Never crash on bad bundled JSON, but do not fail silently either:
+            // Settings reports "MISSING" with no reason otherwise. The broad catch
+            // is deliberate (org.json throws JSONException; malformed data can also
+            // surface as ClassCastException / IndexOutOfBounds) — flagged by detekt
+            // SwallowedException / TooGenericExceptionCaught, 2026-11-27 lint scan.
+            android.util.Log.e("GameData", "items.json parse failed", e)
+            emptyList()
+        }
     }
 
     private fun parsePatchData(o: JSONObject): PatchData {
@@ -565,7 +581,15 @@ object JsonLoader {
                 source = heroRoot.optStr("source").ifBlank { fileNotes.originalServer.source }
             )
             fileNotes.copy(version = patchBlock.version.ifBlank { fileNotes.version }, originalServer = patchBlock)
-        } catch (e: Exception) { PatchNotesFile() }
+        } catch (e: Exception) {
+            // Never crash on bad bundled JSON, but do not fail silently either:
+            // Settings reports "MISSING" with no reason otherwise. The broad catch
+            // is deliberate (org.json throws JSONException; malformed data can also
+            // surface as ClassCastException / IndexOutOfBounds) — flagged by detekt
+            // SwallowedException / TooGenericExceptionCaught, 2026-11-27 lint scan.
+            android.util.Log.e("GameData", "patch_notes.json parse failed", e)
+            PatchNotesFile()
+        }
     }
 }
 

@@ -233,6 +233,11 @@ object JetOverlay {
             isShowing = true
         } catch (e: Exception) {
             // Tear down owner on failure, don't leak it.
+            // addView throws when the overlay permission was revoked mid-flight or the
+            // window type is rejected; log it so a "guide never appeared" report is
+            // diagnosable (detekt SwallowedException, 2026-11-27 lint scan). Behavior
+            // is unchanged: the owner is still torn down and no window is shown.
+            android.util.Log.w("JetOverlay", "addView failed, overlay not shown: ${e.message}")
             runCatching { owner.onPause() }
             runCatching { owner.onStop() }
             runCatching { owner.onDestroy() }
@@ -247,7 +252,13 @@ object JetOverlay {
         if (!isShowing && overlayRoot == null) return
         try {
             overlayRoot?.let { windowManager?.removeView(it) }
-        } catch (e: Exception) { }
+        } catch (e: Exception) {
+            // removeView throws if the window is already gone (double hide, or the system
+            // tore it down). Swallowing is correct — hide() must stay idempotent — but it
+            // was an empty block (detekt EmptyCatchBlock), which made "the overlay will not
+            // disappear" undiagnosable. Log only; behavior unchanged.
+            android.util.Log.w("JetOverlay", "removeView failed during hide(): ${e.message}")
+        }
         overlayRoot = null
         windowManager = null
         isShowing = false

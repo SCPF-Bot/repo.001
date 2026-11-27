@@ -41,9 +41,11 @@ object AppDimens {
 
     // Motion (ms). Respect reduced motion: skip non-essential
     // animation when the system animator duration is 0.
-    val MotionFastMs = 150
-    val MotionMediumMs = 250
-    val MotionSlowMs = 300
+    // const: compile-time constants, so animation specs inline them
+    // (detekt MayBeConst).
+    const val MotionFastMs = 150
+    const val MotionMediumMs = 250
+    const val MotionSlowMs = 300
 }
 
 object AppShapes {

@@ -192,3 +192,24 @@ python3 scripts/validate_assets.py     # currently: pass, 1 warning
 ./gradlew :app:assembleDebug
 ./gradlew :app:assembleRelease
 ```
+
+### G. CI compile failure and fix (27 November 2026)
+
+`:app:compileReleaseKotlin` failed in the Build Release workflow:
+
+> `AppComponents.kt` — a `ComposableFunction0<Unit>` (a composable lambda taking no parameters) was supplied where `ComposableFunction1<RowScope, Unit>` was expected.
+
+**Cause.** `AppTopBar` declared `actions: @Composable () -> Unit` and forwarded it directly to `TopAppBar(actions = actions)`. Material 3's `TopAppBar.actions` is `@Composable RowScope.() -> Unit`; a no-receiver composable lambda is not assignable to a receiver-scoped one, so the Compose compiler rejected the forwarding site. This was the only error in the module.
+
+**Fix.** `actions` is now `@Composable RowScope.() -> Unit` (import `androidx.compose.foundation.layout.RowScope` added), matching the slot it forwards to. This also lets callers apply `RowScope` modifiers such as `Modifier.weight()` to bar actions. Also removed an unused `androidx.compose.ui.semantics.contentDescription` import from the same file.
+
+**Why the rest of the file was unaffected.** `AppButton`, `AppOutlinedButton`, `AppTextButton` and `AppCard` *invoke* their `content: @Composable () -> Unit` inside the scoped lambda (`content()`), which is legal; only *forwarding* a lambda by reference into a receiver-scoped parameter requires the matching receiver. Rule of thumb for new components: **forwarding ⇒ match the receiver scope; invoking ⇒ no-arg is fine.**
+
+**Verification caveat unchanged.** Still no Gradle build in this environment (JDK 11, no Android SDK; the project needs JDK 17 + SDK 37). The fix was verified statically against the Material 3 `TopAppBar` signature. Re-run the workflow to confirm:
+
+```bash
+./gradlew :app:compileReleaseKotlin   # or :app:assembleRelease
+python3 scripts/validate_assets.py    # currently: pass, 1 warning
+```
+
+**Process gap this exposed.** `.github/workflows/release.yml` builds only `assembleRelease` and runs no asset validation, and nothing in CI compiles on a pull request — so a type error in an additive file reached the release job. Adding `python3 scripts/validate_assets.py` plus `:app:compileDebugKotlin` as a pre-build step would catch both data and compile regressions earlier and more cheaply.

@@ -29,12 +29,13 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -49,18 +50,17 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.material3.TextButton
 import com.mlbb.plus.ui.components.AppHeader
+import com.mlbb.plus.ui.components.AppIcons
 import com.mlbb.plus.ui.components.BarDivider
-import com.mlbb.plus.ui.components.DetailBackBar
 import com.mlbb.plus.ui.components.CompactDropdown
 import com.mlbb.plus.ui.components.CompactSearchBox
+import com.mlbb.plus.ui.components.DetailBackBar
 import com.mlbb.plus.ui.components.FilterBarCount
 import com.mlbb.plus.ui.components.FilterBarLabel
 import com.mlbb.plus.ui.components.OneBarFilter
 import com.mlbb.plus.ui.components.SubHeading
 import com.mlbb.plus.ui.components.TierBadge
-import com.mlbb.plus.ui.components.AppIcons
 import com.mlbb.plus.ui.model.GameData
 import com.mlbb.plus.ui.model.Hero
 import com.mlbb.plus.ui.theme.AppUiColors
@@ -99,10 +99,14 @@ private fun tierRank(tier: String): Int {
     }
 }
 
+// The removed `onItemClick` parameter was never read here and no caller ever supplied
+// it: the list screen renders hero cards only, and item links live in HeroDetailScreen
+// (which keeps its own onItemClick). An accepted-but-unwired callback is a silent
+// no-op trap — the same defect class as the detail screens accepting `onBack` without
+// rendering it. Flagged by detekt UnusedParameter (2026-11-27 lint scan).
 @Composable
 fun HeroesScreen(
-    onHeroClick: (Hero) -> Unit = {},
-    onItemClick: (com.mlbb.plus.ui.model.Item) -> Unit = {}
+    onHeroClick: (Hero) -> Unit = {}
 ) {
     var query by rememberSaveable { mutableStateOf("") }
     var selectedRole by rememberSaveable { mutableStateOf("All") }

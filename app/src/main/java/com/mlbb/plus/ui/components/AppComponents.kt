@@ -2,6 +2,7 @@ package com.mlbb.plus.ui.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -28,7 +29,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
@@ -181,7 +181,11 @@ fun AppTopBar(
     title: String,
     onBack: (() -> Unit)?,
     modifier: Modifier = Modifier,
-    actions: @Composable () -> Unit = {}
+    // Must be RowScope-scoped: TopAppBar.actions is `@Composable RowScope.() -> Unit`,
+    // so a plain `@Composable () -> Unit` cannot be passed to it (compile error:
+    // ComposableFunction0<Unit> supplied where ComposableFunction1<RowScope, Unit>
+    // was expected). RowScope also lets callers use Modifier.weight() on actions.
+    actions: @Composable RowScope.() -> Unit = {}
 ) {
     TopAppBar(
         title = { Text(title, style = MaterialTheme.typography.titleLarge, maxLines = 1) },

@@ -27,12 +27,13 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -47,17 +48,16 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.material3.TextButton
 import com.mlbb.plus.ui.components.AppHeader
+import com.mlbb.plus.ui.components.AppIcons
 import com.mlbb.plus.ui.components.BarDivider
-import com.mlbb.plus.ui.components.DetailBackBar
 import com.mlbb.plus.ui.components.CompactDropdown
 import com.mlbb.plus.ui.components.CompactSearchBox
+import com.mlbb.plus.ui.components.DetailBackBar
 import com.mlbb.plus.ui.components.FilterBarCount
 import com.mlbb.plus.ui.components.FilterBarLabel
 import com.mlbb.plus.ui.components.OneBarFilter
 import com.mlbb.plus.ui.components.SubHeading
-import com.mlbb.plus.ui.components.AppIcons
 import com.mlbb.plus.ui.model.GameData
 import com.mlbb.plus.ui.model.Hero
 import com.mlbb.plus.ui.model.Item
@@ -86,10 +86,13 @@ private fun tierColor(tier: String): Color {
     }
 }
 
+// The removed `onHeroClick` parameter was never read here and no caller ever supplied
+// it: hero links live in ItemDetailScreen (which keeps its own onHeroClick).
+// Accepted-but-unwired callbacks are silent no-op traps — flagged by detekt
+// UnusedParameter (2026-11-27 lint scan).
 @Composable
 fun ItemsScreen(
-    onItemClick: (Item) -> Unit = {},
-    onHeroClick: (Hero) -> Unit = {}
+    onItemClick: (Item) -> Unit = {}
 ) {
     var query by rememberSaveable { mutableStateOf("") }
     var selectedCat by rememberSaveable { mutableStateOf("All") }

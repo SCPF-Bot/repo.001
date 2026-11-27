@@ -39,18 +39,18 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -63,37 +63,37 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.mlbb.plus.ui.model.GameData
+import com.mlbb.plus.ui.model.RoleTypes
+import com.mlbb.plus.ui.theme.MLBBPlusColors
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import org.json.JSONArray
 import org.json.JSONObject
-import com.mlbb.plus.ui.model.GameData
-import com.mlbb.plus.ui.model.RoleTypes
-import com.mlbb.plus.ui.theme.MLBBPlusColors
 
 private val GuideBackground = MLBBPlusColors.GithubBg.copy(alpha = 0.25f)
 private val GuideSurface = MLBBPlusColors.GithubCard.copy(alpha = 0.25f)
@@ -397,6 +397,14 @@ private fun computeObjective(
     turtleSlain: Int,
     lordSlain: Int,
     lastSlainAt: Int?,
+    // Redundant by invariant, kept for call-site clarity: the slain button sets
+    // `lastSlainWasLord = !isTurtle` and increments `lordSlain` in the same click
+    // (and undo/reset restore both together), so lastSlainWasLord == true always
+    // implies lordSlain > 0 — which is handled by the first branch below and never
+    // needs this flag. It IS used for the slain label ("Lord slain" vs "Turtle
+    // slain"). Do not add a branch here that reads it without re-checking that
+    // invariant. detekt UnusedParameter, 2026-11-27 lint scan.
+    @Suppress("UnusedParameter")
     lastSlainWasLord: Boolean = false,
     timers: ObjectiveTimers = ObjectiveTimers()
 ): ObjectiveStatus {
@@ -1173,18 +1181,6 @@ private fun EnemySpellTrackerWidget(
             }
         }
     }
-}
-
-@Composable
-private fun GuideMessage(message: String) {
-    OutlinedText(
-        text = message,
-        color = GuideText,
-        fontSize = 9.sp,
-        modifier = Modifier
-            .background(GuideBackground, RoundedCornerShape(8.dp))
-            .padding(6.dp)
-    )
 }
 
 @Composable
