@@ -4,42 +4,37 @@ import android.content.Context
 import android.os.StatFs
 import android.util.Log
 import java.io.File
-import java.io.FileOutputStream
-import java.security.DigestInputStream
+import java.io.IOException
+import java.io.InterruptedIOException
+import java.net.HttpURLConnection
+import java.net.URI
 import java.security.MessageDigest
 import java.util.concurrent.atomic.AtomicBoolean
-import kotlin.coroutines.coroutineContext
+import java.util.concurrent.atomic.AtomicReference
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.withContext
-import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
-import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream
 import org.json.JSONObject
 
 /**
- * Offline voice pack installation. The voice packs ship INSIDE the APK as
- * `.tar.bz2` archives under `assets/tts/` (bundled at build time by the
- * `bundleTtsModels` Gradle task), so first use needs no network at all: the
- * selected pack is unpacked straight from the APK into `filesDir/tts/`.
+ * Downloads and installs the neural voice packs on demand.
+ *
+ * Packs are fetched from the upstream `tts-models` release URLs listed in
+ * `assets/tts/tts-models.json`. Nothing is bundled into the APK. The download streams
+ * through [VoicePackUnpacker] straight to disk and is only promoted to "installed" after
+ * its SHA-256 matches the manifest pin.
+ *
+ * Storage: `Android/data/<package>/files/tts/` on shared storage (see [rootDir]). That
+ * needs no storage permission on API 29+, is removed when the app is uninstalled, and is
+ * excluded from backup. It is not visible to other apps.
  *
  * Design notes
  * ------------
- * - The catalogue is not hard-coded: [models] is parsed from
- *   `assets/tts/tts-models.json`, the manifest maintained by
- *   `scripts/update_tts_models.py`. Updating a voice pack is a manifest change,
- *   never a code change.
- * - Extraction is streamed: APK asset -> sha256 -> bzip2 -> tar -> disk, so
- *   peak disk usage is the extracted model only (158 MB Kokoro / 37 MB Piper),
- *   not the archive plus the model.
- * - Extraction goes to `<dir>.partial-<rand>` and is renamed only after the
- *   digest of the whole compressed stream matched [VoiceModel.sha256]. A marker
- *   file records that, so a half-written directory can never look installed.
- * - Every checksum and byte size in the manifest was verified against the
- *   upstream `checksum.txt` of the `tts-models` release (see docs/tts_implementation.md).
- * - sherpa-onnx is pinned to 1.13.8 on purpose: 2.0.x removed the espeak-ng
- *   frontend, which makes the Piper packs unusable unless a separate
- *   `lexicon-en-us.txt` is shipped for Kokoro. Upgrading needs both changes.
+ * - The catalogue is parsed from the manifest. Updating a pack is a manifest change, not a
+ *   code change (`scripts/update_tts_models.py` maintains it).
+ * - The pack is not resumable. A failed download restarts from zero on the next attempt.
+ * - sherpa-onnx is pinned to 1.13.8 on purpose: 2.0.x removed the espeak-ng frontend that
+ *   the Piper packs need.
  */
 class VoiceModelInstaller(private val context: Context) {
 
@@ -47,8 +42,8 @@ class VoiceModelInstaller(private val context: Context) {
     sealed class Progress {
         data object Idle : Progress()
 
-        /** Bytes written to disk; [total] is the archive's uncompressed size. */
-        data class Extracting(val written: Long, val total: Long) : Progress()
+        /** Compressed bytes received so far; [total] is the archive size from the manifest. */
+        data class Downloading(val received: Long, val total: Long) : Progress()
 
         data object Verifying : Progress()
         data class Done(val model: VoiceModel, val dir: File) : Progress()
@@ -58,15 +53,24 @@ class VoiceModelInstaller(private val context: Context) {
 
     private val cancelled = AtomicBoolean(false)
 
-    /** The voice packs compiled into this APK, in fallback order. */
+    /** The in-flight connection, so [cancel] can abort a blocked socket read at once. */
+    private val activeConnection = AtomicReference<HttpURLConnection?>(null)
+
+    /** The voice packs listed in the manifest, in fallback order. */
     val models: List<VoiceModel> = loadModels(context)
 
-    /** `filesDir/tts` - private to the app, survives restarts, no permission needed. */
-    fun rootDir(): File = File(context.filesDir, DIR).apply { if (!exists()) mkdirs() }
+    /**
+     * `Android/data/<package>/files/tts`. Falls back to private `filesDir/tts` when no
+     * external volume is mounted; packs installed in one place are not seen from the other.
+     */
+    fun rootDir(): File {
+        val base = context.getExternalFilesDir(null) ?: context.filesDir
+        return File(base, DIR).apply { if (!exists()) mkdirs() }
+    }
 
     fun modelDir(model: VoiceModel): File = File(rootDir(), model.dirName)
 
-    /** True only when extraction completed AND the digest matched. */
+    /** True only when the download completed AND the digest matched. */
     fun isInstalled(model: VoiceModel): Boolean = marker(model).isFile
 
     fun isInstalled(modelId: String): Boolean = models.firstOrNull { it.id == modelId }?.let { isInstalled(it) } ?: false
@@ -82,8 +86,10 @@ class VoiceModelInstaller(private val context: Context) {
     /** Fallback chain for a wanted pack: the pack itself, then the rest in order. */
     fun fallbackChain(preferred: VoiceModel): List<VoiceModel> = (listOf(preferred) + models.filter { it != preferred })
 
+    /** Stops an install in progress, including a download blocked on the network. */
     fun cancel() {
         cancelled.set(true)
+        activeConnection.get()?.disconnect()
     }
 
     fun resetCancel() {
@@ -101,9 +107,8 @@ class VoiceModelInstaller(private val context: Context) {
     }
 
     /**
-     * Installs [model] from the APK bundle. Safe to call again after a failure:
-     * the partial directory is discarded first. Emits [Progress] updates on the
-     * caller's dispatcher.
+     * Downloads and installs [model]. Safe to call again after a failure: the partial
+     * directory is discarded first. Emits [Progress] updates through [onProgress].
      */
     suspend fun install(
         model: VoiceModel,
@@ -116,7 +121,7 @@ class VoiceModelInstaller(private val context: Context) {
             return@withContext done
         }
         // freeBytes() reports Long.MAX_VALUE when StatFs fails, so "unknown" passes.
-        // A genuinely full disk (0 bytes) must fail; it used to slip through the range check.
+        // A genuinely full disk (0 bytes) must fail.
         val free = freeBytes()
         if (free < model.uncompressedBytes + MIN_FREE_MARGIN) {
             val msg = "Not enough storage: ${model.uncompressedBytes / MB} MB needed, ${free / MB} MB free"
@@ -130,55 +135,36 @@ class VoiceModelInstaller(private val context: Context) {
         work.mkdirs()
 
         try {
-            onProgress(Progress.Extracting(0, model.uncompressedBytes))
-            val digest = MessageDigest.getInstance("SHA-256")
-            var written = 0L
-            var lastPublish = 0L
-
-            DigestInputStream(context.assets.open(assetPath(model)), digest).use { hashed ->
-                BZip2CompressorInputStream(hashed).use { bz2 ->
-                    TarArchiveInputStream(bz2).use { tar ->
-                        var entry = tar.nextEntry
-                        while (entry != null) {
-                            coroutineContext.ensureActive()
-                            if (cancelled.get()) {
-                                work.deleteRecursively()
-                                onProgress(Progress.Cancelled)
-                                return@withContext Progress.Cancelled
-                            }
-                            val out = safeChild(work, model, entry.name, entry.isDirectory)
-                            if (out != null && !entry.isDirectory) {
-                                out.parentFile?.mkdirs()
-                                FileOutputStream(out).use { sink ->
-                                    val buf = ByteArray(BUFFER)
-                                    while (true) {
-                                        val n = tar.read(buf)
-                                        if (n <= 0) break
-                                        sink.write(buf, 0, n)
-                                        written += n
-                                        if (written - lastPublish > PROGRESS_STEP) {
-                                            lastPublish = written
-                                            onProgress(
-                                                Progress.Extracting(written, model.uncompressedBytes)
-                                            )
-                                        }
-                                    }
-                                }
-                            }
-                            entry = tar.nextEntry
-                        }
-                    }
+            onProgress(Progress.Downloading(0, model.sizeBytes))
+            val connection = openConnection(model)
+            val actual: String? = try {
+                connection.inputStream.use { network ->
+                    VoicePackUnpacker.unpack(
+                        network = network,
+                        archiveName = model.archiveName,
+                        dirName = model.dirName,
+                        work = work,
+                        isCancelled = { cancelled.get() },
+                        onReceived = { received -> onProgress(Progress.Downloading(received, model.sizeBytes)) }
+                    )
                 }
+            } finally {
+                activeConnection.compareAndSet(connection, null)
+                connection.disconnect()
+            }
+            if (actual == null || cancelled.get()) {
+                work.deleteRecursively()
+                onProgress(Progress.Cancelled)
+                return@withContext Progress.Cancelled
             }
 
             onProgress(Progress.Verifying)
-            val actual = digest.digest().toHex()
             if (!actual.equals(model.sha256, ignoreCase = true)) {
                 work.deleteRecursively()
                 Log.e(TAG, "checksum mismatch for ${model.id}: $actual")
                 return@withContext fail(
                     onProgress,
-                    "The bundled voice pack failed its integrity check (checksum mismatch).",
+                    "The download failed its integrity check (checksum mismatch). Try again.",
                     retryable = true
                 )
             }
@@ -197,23 +183,43 @@ class VoiceModelInstaller(private val context: Context) {
             marker(model).writeText(actual)
             val done = Progress.Done(model, target)
             onProgress(done)
-            Log.i(TAG, "installed ${model.id} ($written bytes) sha256=$actual")
+            Log.i(TAG, "installed ${model.id} sha256=$actual")
             done
-        } catch (e: java.io.InterruptedIOException) {
+        } catch (e: InterruptedIOException) {
             work.deleteRecursively()
             onProgress(Progress.Cancelled)
             Progress.Cancelled
         } catch (e: CancellationException) {
-            // Cooperative cancellation (coroutine cancelled, e.g. the manager was released).
-            // It must propagate; reporting it as a retryable Failed made a cancel look like a
-            // network error and kept the install state wrong.
+            // Cooperative cancellation (the manager was released). Propagate it so the
+            // caller can clear its spinner.
             work.deleteRecursively()
             throw e
         } catch (e: Exception) {
             work.deleteRecursively()
+            if (cancelled.get()) {
+                onProgress(Progress.Cancelled)
+                return@withContext Progress.Cancelled
+            }
             Log.e(TAG, "install ${model.id} failed", e)
-            fail(onProgress, e.message?.take(160) ?: e.javaClass.simpleName, retryable = true)
+            val reason = e.message?.take(120) ?: e.javaClass.simpleName
+            fail(onProgress, "Download failed: $reason. Check your connection and try again.", retryable = true)
         }
+    }
+
+    /** Opens the pack URL and fails on any non-2xx status before streaming starts. */
+    private fun openConnection(model: VoiceModel): HttpURLConnection {
+        val connection = URI(model.url).toURL().openConnection() as HttpURLConnection
+        connection.connectTimeout = CONNECT_TIMEOUT_MS
+        connection.readTimeout = READ_TIMEOUT_MS
+        connection.instanceFollowRedirects = true
+        connection.setRequestProperty("User-Agent", "MLBB-Plus")
+        activeConnection.set(connection)
+        val status = connection.responseCode
+        if (status !in 200..299) {
+            connection.disconnect()
+            throw IOException("HTTP $status from the download server")
+        }
+        return connection
     }
 
     private fun fail(onProgress: (Progress) -> Unit, message: String, retryable: Boolean): Progress.Failed {
@@ -224,36 +230,6 @@ class VoiceModelInstaller(private val context: Context) {
 
     private fun marker(model: VoiceModel): File = File(modelDir(model), MARKER)
 
-    /** `assets/tts/<archive>` - where bundleTtsModels staged the pack. */
-    private fun assetPath(model: VoiceModel): String = ASSET_PREFIX + model.archiveName
-
-    /**
-     * Resolves one tar entry to a file inside [work], rejecting anything that
-     * would escape it. The archives are prefixed with the model directory name,
-     * which is stripped so the result lands directly in [work].
-     */
-    private fun safeChild(work: File, model: VoiceModel, rawName: String, isDir: Boolean): File? {
-        if (rawName.isBlank()) return null
-        var name = rawName.replace('\\', '/').trimStart('/')
-        val prefix = model.dirName + "/"
-        if (name.startsWith(prefix)) name = name.removePrefix(prefix)
-        if (name == model.dirName) return null
-        if (name.contains("../") || name.endsWith("/..")) {
-            Log.w(TAG, "rejected unsafe tar entry: $rawName")
-            return null
-        }
-        // Skip the metadata we do not need at runtime.
-        val leaf = name.substringAfterLast('/')
-        if (leaf in SKIPPED_FILES) return null
-        val child = File(work, name)
-        val root = work.canonicalPath
-        if (!child.canonicalPath.startsWith(root)) {
-            Log.w(TAG, "rejected tar entry outside the target dir: $rawName")
-            return null
-        }
-        return if (isDir) child.apply { mkdirs() } else child
-    }
-
     private fun freeBytes(): Long = try {
         StatFs(rootDir().absolutePath).availableBytes
     } catch (e: Exception) {
@@ -263,21 +239,18 @@ class VoiceModelInstaller(private val context: Context) {
 
     private fun dirBytes(dir: File): Long = if (!dir.isDirectory) 0L else dir.walkBottomUp().filter { it.isFile }.sumOf { it.length() }
 
-    private fun ByteArray.toHex(): String = joinToString("") { "%02x".format(it) }
-
     companion object {
         private const val TAG = "VoiceModelInstaller"
         const val DIR = "tts"
         private const val MARKER = ".mlbb-voice-installed"
         private const val PARTIAL_INFIX = ".partial-"
-        private const val BUFFER = 64 * 1024
-        private const val PROGRESS_STEP = 512 * 1024L
         private const val MIN_FREE_MARGIN = 64L * 1024 * 1024
         private const val MB = 1_000_000L
-        private val SKIPPED_FILES = setOf("README.md", "MODEL_CARD", "LICENSE", ".DS_Store")
+        private const val CONNECT_TIMEOUT_MS = 30_000
+        /** Longest silence tolerated mid-download before the attempt is failed as retryable. */
+        private const val READ_TIMEOUT_MS = 60_000
 
-        /** Where bundleTtsModels stages the archives and the manifest lives. */
-        private const val ASSET_PREFIX = "tts/"
+        /** The manifest is the only tts asset compiled into the APK. */
         private const val MANIFEST_ASSET = "tts/tts-models.json"
 
         /** Parsed once per process: the manifest is immutable for an install. */
@@ -318,6 +291,7 @@ class VoiceModelInstaller(private val context: Context) {
                         },
                         dirName = m.getString("dirName"),
                         archiveName = m.getString("archive"),
+                        url = m.getString("url"),
                         sha256 = m.getString("sha256"),
                         sizeBytes = m.getLong("sizeBytes"),
                         uncompressedBytes = m.getLong("uncompressedBytes"),
@@ -335,11 +309,10 @@ class VoiceModelInstaller(private val context: Context) {
 }
 
 /**
- * One bundled voice pack, described by the `tts-models.json` manifest.
+ * One voice pack, described by the `tts-models.json` manifest.
  *
- * [speakers] maps the voice ids used by [VoiceGuideSettings] onto the integer
- * `sid` sherpa-onnx expects; Piper packs are single-speaker so they always map
- * to 0.
+ * [speakers] maps the voice ids used by [VoiceGuideSettings] onto the integer `sid`
+ * sherpa-onnx expects. Piper packs are single-speaker, so they always map to 0.
  */
 data class VoiceModel(
     val id: String,
@@ -347,6 +320,7 @@ data class VoiceModel(
     val family: Family,
     val dirName: String,
     val archiveName: String,
+    val url: String,
     val sha256: String,
     val sizeBytes: Long,
     val uncompressedBytes: Long,
@@ -358,15 +332,15 @@ data class VoiceModel(
 ) {
     enum class Family { KOKORO, PIPER }
 
-    /** Human size for UI copy: "103 MB" / "21 MB". */
-    val sizeLabel: String = "${sizeBytes / 1_000_000} MB bundled"
+    /** Download size for UI copy, for example "103 MB". */
+    val sizeLabel: String = "${sizeBytes / 1_000_000} MB"
 
     val diskLabel: String = "about ${uncompressedBytes / 1_000_000} MB on disk"
 
     /**
-     * Verifies the extracted tree before it is promoted to "installed". Uses a
-     * discovered `.onnx` when the expected file is missing, so a renamed future
-     * release degrades to a warning instead of a hard failure.
+     * Verifies the extracted tree before it is promoted to "installed". Uses a discovered
+     * `.onnx` when the expected file is missing, so a renamed future release degrades to a
+     * warning instead of a hard failure.
      */
     fun matchesLayout(dir: File): Boolean {
         if (!dir.isDirectory) return false
@@ -385,7 +359,7 @@ data class VoiceModel(
     }
 
     companion object {
-        /** Guards against a truncated/placeholder file passing the layout check. */
+        /** Guards against a truncated or placeholder file passing the layout check. */
         private const val MIN_ONNX_BYTES = 2L * 1024 * 1024
     }
 }

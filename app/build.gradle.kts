@@ -26,18 +26,26 @@ android {
     }
   }
 
-  // Release signing is opt-in: CI (or a developer) exports KEYSTORE_PATH, STORE_PASSWORD and
-  // KEY_PASSWORD. Without them, release builds are produced unsigned rather than signed with
-  // a known key. Debug builds use AGP's auto-generated ~/.android/debug.keystore, so a fresh
-  // clone builds without any keystore file in the repository.
-  val releaseKeystorePath: String? = System.getenv("KEYSTORE_PATH")?.takeIf { it.isNotBlank() }
+  // Release signing. A real upload key can be supplied through KEYSTORE_PATH, STORE_PASSWORD,
+  // KEY_PASSWORD and (optionally) KEY_ALIAS, for example from CI secrets. Without them the
+  // release is signed with the committed TEST key in app/keystore/. Its password is public
+  // on purpose, so a test-signed APK is for testing and sideloading only. Never publish it.
+  // Debug builds keep AGP's auto-generated debug key.
+  val uploadKeystorePath: String? = System.getenv("KEYSTORE_PATH")?.takeIf { it.isNotBlank() }
+  val testStorePassword = "mlbb-test"
+  val testKeyAlias = "mlbb-test"
   signingConfigs {
-    if (releaseKeystorePath != null) {
-      create("release") {
-        storeFile = file(releaseKeystorePath)
+    create("release") {
+      if (uploadKeystorePath != null) {
+        storeFile = file(uploadKeystorePath)
         storePassword = System.getenv("STORE_PASSWORD")
         keyAlias = System.getenv("KEY_ALIAS")?.takeIf { it.isNotBlank() } ?: "upload"
         keyPassword = System.getenv("KEY_PASSWORD")
+      } else {
+        storeFile = file("keystore/mlbb-test-release.jks")
+        storePassword = testStorePassword
+        keyAlias = testKeyAlias
+        keyPassword = testStorePassword
       }
     }
   }
@@ -48,10 +56,13 @@ android {
       isMinifyEnabled = true
       isShrinkResources = true
       isDebuggable = false
-      proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
-      if (releaseKeystorePath != null) {
-        signingConfig = signingConfigs.getByName("release")
+      // Native code for 64-bit ARM only (about 90 MB smaller than four ABIs). Debug builds keep
+      // every ABI so x86 emulators still run them. Add armeabi-v7a here if 32-bit phones matter.
+      ndk {
+        abiFilters += listOf("arm64-v8a")
       }
+      proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+      signingConfig = signingConfigs.getByName("release")
     }
     debug {
       isMinifyEnabled = false
@@ -82,12 +93,6 @@ android {
     // not block merges. Flip abortOnError once the baseline is clean (see docs/review).
     abortOnError = false
     checkReleaseBuilds = false
-  }
-
-  sourceSets {
-    getByName("main") {
-      assets.directories.add(layout.buildDirectory.dir("generated/tts-assets").get().asFile.absolutePath)
-    }
   }
 
   testOptions {
@@ -190,54 +195,12 @@ val downloadSherpaAar = tasks.register("downloadSherpaAar") {
 }
 
 // ============================================================
-// Voice Guide: bundled TTS voice packs
+// Voice Guide: voice packs are NOT bundled. The app downloads the selected pack from the
+// upstream URL in assets/tts/tts-models.json the first time Voice Guide is enabled.
 // ============================================================
-val ttsManifestFile = layout.projectDirectory.file("src/main/assets/tts/tts-models.json")
-val ttsCacheDir = layout.projectDirectory.dir("tts-models-cache")
-val ttsGeneratedAssets = layout.buildDirectory.dir("generated/tts-assets")
-
-val bundleTtsModels = tasks.register("bundleTtsModels") {
-  val manifestFile: File = ttsManifestFile.asFile
-  val cacheRoot: File = ttsCacheDir.asFile
-  val assetsRoot: File = ttsGeneratedAssets.get().asFile
-  group = "voice guide"
-  description = "Fetches and checksum-verifies the bundled TTS voice packs into generated assets."
-  inputs.file(manifestFile)
-  outputs.dir(assetsRoot)
-  doLast {
-    @Suppress("UNCHECKED_CAST")
-    val manifest = groovy.json.JsonSlurper().parse(manifestFile) as Map<String, Any?>
-    @Suppress("UNCHECKED_CAST")
-    val models = manifest["models"] as? List<Map<String, Any?>>
-      ?: throw GradleException("tts-models.json: missing or invalid 'models' array")
-    val cache = cacheRoot.apply { mkdirs() }
-    val outDir = File(assetsRoot, "tts").apply { mkdirs() }
-    for (model in models) {
-      val archive = model["archive"] as? String
-        ?: throw GradleException("tts-models.json: a model entry has no 'archive'")
-      val url = model["url"] as? String
-        ?: throw GradleException("tts-models.json: $archive has no 'url'")
-      val expected = (model["sha256"] as? String ?: "").lowercase()
-      if (expected.isEmpty()) throw GradleException("tts-models.json: $archive has no 'sha256'")
-      val cached = File(cache, archive)
-      if (!expected.equals(VoiceGuideFetch.fileSha256(cached), ignoreCase = true)) {
-        logger.lifecycle("Voice Guide: downloading $url")
-        VoiceGuideFetch.downloadVerified(url, cached, expected, archive)
-        logger.lifecycle("Voice Guide: $archive verified (${cached.length() / (1 shl 20)} MB)")
-      }
-      val target = File(outDir, archive)
-      if (!target.exists() || !expected.equals(VoiceGuideFetch.fileSha256(target), ignoreCase = true)) {
-        cached.copyTo(target, overwrite = true)
-      }
-    }
-    logger.lifecycle("Voice Guide: ${models.size} voice pack(s) staged into ${outDir.path}")
-  }
-}
 
 tasks.matching { it.name == "preBuild" || (it.name.contains("compile") && it.name.contains("Kotlin")) }
   .configureEach { dependsOn(downloadSherpaAar) }
-tasks.matching { it.name == "preBuild" || (it.name.contains("merge") && it.name.contains("Assets")) }
-  .configureEach { dependsOn(bundleTtsModels) }
 
 dependencies {
   implementation(libs.androidx.core.ktx)

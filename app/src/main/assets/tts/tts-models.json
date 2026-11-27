@@ -2,7 +2,7 @@
   "schema": 1,
   "updated": "2026-11-27",
   "source": "https://github.com/k2-fsa/sherpa-onnx/releases/download/tts-models",
-  "note": "Maintained by scripts/update_tts_models.py - do not edit by hand. The archives are bundled into the APK at build time by the bundleTtsModels Gradle task; they are not committed to git (the Kokoro archive alone is 103 MB, over GitHub's per-file limit).",
+  "note": "Maintained by scripts/update_tts_models.py - do not edit by hand. The voice packs are NOT bundled in the APK. The app downloads the selected pack from its url when Voice Guide is turned on, and checks the sha256 before using it.",
   "models": [
     {
       "id": "kokoro-int8-en-v0_19",

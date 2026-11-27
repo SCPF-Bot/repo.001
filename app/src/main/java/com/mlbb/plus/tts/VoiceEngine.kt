@@ -5,7 +5,7 @@ package com.mlbb.plus.tts
  * implementations exist:
  *
  *  - [SherpaOnnxVoiceEngine]: on-device neural TTS (Kokoro first, Piper as the
- *    lighter fallback). Voice packs ship inside the APK and are unpacked on first use (no network).
+ *    lighter fallback). Voice packs are downloaded once, when Voice Guide is turned on, and then work offline.
  *  - [SystemTtsVoiceEngine]: the platform `android.speech.tts.TextToSpeech`
  *    service. Zero download, works out of the box, lower quality and depends on
  *    whatever TTS engine the device ships (some Chinese-market ROMs ship none).

@@ -5,4 +5,5 @@
 -->
 <full-backup-content>
     <exclude domain="root" path="." />
+    <exclude domain="external" path="." />
 </full-backup-content>

@@ -513,7 +513,7 @@ class AppViewModel : ViewModel() {
 
 **Build & data (run first):**
 - [ ] `python3 scripts/validate_assets.py` passes — currently **pass with 1 warning** (`roam_guide.json` at 2.2.16a). It checks JSON syntax, declared totals (133 heroes / 99 items), unique IDs, all 232 portrait paths, matchup self-links/duplicates/unresolved IDs, guide pick linking, patch-change ID ↔ roster name, and cross-file patch-version agreement.
-- [~] `./gradlew :app:assembleDebug` passes and unit tests run green (2026-11-27). `:app:assembleRelease` (R8 + shrink) still fails with OutOfMemoryError on a 2 GB sandbox; see `review-2026-11-27.md` OPEN-1. Original note: this environment had JDK 11 and no Android SDK.
+- [~] `./gradlew :app:assembleDebug` passes and unit tests run green (2026-11-27). `:app:assembleRelease` (R8 + shrink) and `:app:bundleRelease` now succeed on the 2 GB sandbox, test-signed (2026-11-27 later pass; see `review-2026-11-27.md` addendum). Original note: this environment had JDK 11 and no Android SDK.
 - [ ] Every guide hero pick / core item resolves or is listed in Settings diagnostics (verified 2026-11-27: 0 unlinked picks, 0 unlinked core items).
 - [ ] Patch screen lists **13** hero changes, each opening the correct hero (spot-check Masha → Masha, not Baxia) and 2 item changes.
 - [ ] Patch header reads “Updated 2026-11-11 • Patch 2.2.23 • Season 42” — no `-tier-2026-11-23` stamp anywhere in the UI.

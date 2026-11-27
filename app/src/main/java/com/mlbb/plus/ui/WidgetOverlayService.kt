@@ -6,6 +6,7 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
 import android.content.Intent
+import android.content.res.Configuration
 import android.content.pm.ServiceInfo
 import android.os.Build
 import android.os.IBinder
@@ -21,7 +22,7 @@ import com.mlbb.plus.ui.model.GameData
 import com.mlbb.plus.ui.model.RoleTypes
 import com.mlbb.plus.ui.theme.MLBBPlusTheme
 import com.mlbb.plus.ui.widgets.JetOverlay
-import com.mlbb.plus.ui.widgets.RoamGuideWidget
+import com.mlbb.plus.ui.widgets.FloatingGuide
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -121,7 +122,7 @@ class WidgetOverlayService : Service() {
             JetOverlay.initialize(application) {
                 overlayContent {
                     MLBBPlusTheme {
-                        RoamGuideWidget(
+                        FloatingGuide(
                             role = currentRole,
                             roleType = currentRoleType,
                             onBack = { stopSelf() },
@@ -150,6 +151,16 @@ class WidgetOverlayService : Service() {
     }
 
     override fun onBind(intent: Intent?): IBinder? = null
+
+    /**
+     * Rotation: the bubble/guide switch reads [JetOverlay.isLandscape], and the bubble position
+     * is re-clamped so it stays on screen. A service receives this callback without a manifest
+     * configChanges entry, which is why the handler lives here.
+     */
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        JetOverlay.onConfigurationChanged(newConfig)
+    }
 
     /**
      * Keeps the notification honest while the coach talks: the Play/Pause label

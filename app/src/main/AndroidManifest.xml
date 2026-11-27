@@ -5,12 +5,13 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- Voice Guide only: downloads a neural voice pack (up to ~103 MB) from the sherpa-onnx
+         GitHub release when the player turns Voice Guide on. Nothing else uses the network.
+         The packs go to app-specific external storage, which needs no storage permission. -->
+    <uses-permission android:name="android.permission.INTERNET" />
 
-    <!-- Voice Guide: the sherpa-onnx voice packs ship INSIDE the APK and are
-         unpacked into the app's private folder on first use, so speech is fully
-         offline and the app needs no network permissions at all. Backup is disabled
-         (and the extraction rules exclude everything) because the packs are ~145 MB
-         and can be re-extracted from the APK. -->
+    <!-- Backup is disabled, and the extraction rules exclude everything, because the voice
+         packs (up to ~160 MB unpacked) are re-downloaded on demand. -->
     <application
         android:allowBackup="false"
         android:dataExtractionRules="@xml/data_extraction_rules"

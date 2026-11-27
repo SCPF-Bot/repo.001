@@ -71,6 +71,7 @@ The app should avoid assuming that every user understands game abbreviations or 
 - Objective timing support for Turtle and Lord.
 - Battle-spell defaults and enemy spell cooldown tracking.
 - Compact / expanded presentation and touch interaction state.
+- **Orientation modes (added 2026-11-27).** Portrait shows only a round bubble, which can be dragged. Landscape opens the bubble into the full guide with a smooth transition (tap the bubble; the ▴ control in the header folds it back). Rotating to portrait collapses the guide to the bubble again. The card keeps its clock and objective state while folded. In landscape the card is 70% of the screen width, and one header card holds the timer, role selector, close controls, and the five-cell spell tracker. Each orientation's screen size is recorded automatically on launch and on rotation (`ScreenProfiles.kt`), and each orientation keeps its own bubble position as a fraction of the screen.
 - Foreground notification with an explicit Stop action.
 - **Voice Guide — spoken coach (added 2026-11-27, default OFF).** Reads the step the player is on
   in condensed spoken English and can auto-speak each new step as the match timer advances; overlay
@@ -78,9 +79,9 @@ The app should avoid assuming that every user understands game abbreviations or 
   tinted gold. With the feature off the overlay composes exactly what it did before.
 - **On-device voices, fully offline.** Kokoro (most natural) or the smaller/faster Piper
   voices through **sherpa-onnx 1.13.8**, with Android's own TTS as the last fallback. No cloud TTS
-  is used: the voice packs are compiled into the APK and unpacked (checksum-verified) into
-  `filesDir/tts/` on first use, and every utterance is synthesised on the device — no network
-  permission needed. Game audio is ducked
+  is used: the selected voice pack is downloaded once, when Voice Guide is turned on, from the
+  upstream release (checksum-verified) into `Android/data/<app>/files/tts/`, and every utterance is
+  synthesised on the device. Game audio is ducked
   rather than muted, TalkBack pauses the coach, and the notification gains Play/Pause and Stop voice
   actions. Engine choice, model URLs and checksums, the text-normalisation contract and the device
   test checklist are in [tts_implementation.md](tts_implementation.md).
@@ -154,7 +155,7 @@ Roadmap status is based on code and bundled assets in this repository snapshot, 
 - [x] Five role guide assets: Roam, Jungle, Mid, Gold, and EXP.
 - [x] Shared role-aware floating overlay and foreground notification / Stop action.
 - [x] Objective timers and enemy battle-spell tracking in overlay.
-- [x] Optional **Voice Guide**: on-device spoken coach in the overlay (Kokoro / Piper via sherpa-onnx 1.13.8, Android TTS fallback), default OFF, fully offline: the voice packs are compiled into the APK and unpacked (checksum-verified) into `filesDir/tts/` on first use.
+- [x] Optional **Voice Guide**: on-device spoken coach in the overlay (Kokoro / Piper via sherpa-onnx 1.13.8, Android TTS fallback), default OFF. Turning it on downloads the selected voice pack once (checksum-verified) into `Android/data/<app>/files/tts/`; speech is fully offline after that.
 - [x] First Kotlin unit tests: **40 JVM tests** (3 classes, including Robolectric on SDK 35) covering the TTS text normalizer (time phrasing, abbreviation expansion, truncation) and the voice-guide state transitions, plus the extracted `VoiceGuideTransitions` decision table shared by manager, widget and UI.
 - [x] Patch-note integration and guide references on hero/item details.
 - [x] Matchup and synergy fields for all 133 heroes, with methodology and source notes.
@@ -173,7 +174,7 @@ Roadmap status is based on code and bundled assets in this repository snapshot, 
 - [ ] Add a visible data freshness / source details screen and a consistent stale-data warning.
 - [ ] Audit all guide steps, objective timings, and role recommendations against the current live patch before publishing a new data snapshot.
 - [ ] Run the Voice Guide device checklist ([tts_implementation.md](tts_implementation.md) §9): first-use install and time-to-first-audio, in-game ducking, fallback when a model directory is deleted, TalkBack, incoming call, rapid Next/Prev taps, and settings persistence across restart. The feature was compile- and unit-test-verified off-device but never run on a phone.
-- [~] `./gradlew assembleDebug`, unit tests and lint pass on JDK 17 / SDK 37 (2026-11-27, see `review-2026-11-27.md`). `assembleRelease` runs out of memory under R8 on a 2 GB sandbox; the likely cause is `material-icons-extended` (review OPEN-1). Verify on CI, and enable `abiFilters` / ABI splits for arm64-v8a + armeabi-v7a (review DEC-1).
+- [~] `./gradlew assembleDebug`, `assembleRelease` and `bundleRelease` pass on JDK 17 / SDK 37 in the 2 GB sandbox (2026-11-27 later pass). The release is test-signed unless upload-key secrets are set. Remaining: a green GitHub run, and reducing native size by ABI filtering (review DEC-1).
 - [ ] Verify accessibility, large text, landscape, and tablet/foldable layouts on real devices or emulators.
 - [ ] Test overlay permission, foreground-service start/stop, notification behavior, and OEM-specific restrictions across supported Android versions.
 

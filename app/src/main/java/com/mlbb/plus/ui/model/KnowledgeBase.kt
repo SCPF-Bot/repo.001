@@ -70,7 +70,7 @@ object KnowledgeBaseData {
                 "Auto-speak reads each new step once. It is keyed to the step, not to the clock, so a recomposition or a paused timer never repeats a line. Switch it off in Settings if you only want the Speaker button.",
                 "What you hear is condensed, not read verbatim. The screen keeps the full paragraph; the voice gets the phase, the call-out and the opening instruction, trimmed at a sentence or clause boundary. Abbreviations are expanded only when spoken - \u201cRetri\u201d becomes \u201cRetribution\u201d, \u201cEXP\u201d becomes \u201cE X P lane\u201d - and field names, ids and links are never read aloud.",
                 "Game audio is ducked, not paused. MLBB Plus asks Android for transient focus that may duck, so your game and voice chat drop in volume while the coach talks and come straight back. An incoming call stops the coach immediately.",
-                "Four offline voices bundled inside the APK: two Kokoro natural voices (Natural female and Natural male, about 103 MB bundled) and two Piper fast voices (Fast female and Fast male, about 21 MB each bundled). Unpacking runs completely offline with zero network permissions. Delete a pack in Settings and the coach falls back to the next available voice, then to your phone\u2019s own system voice.",
+                "Four offline voices in two downloadable packs: two Kokoro natural voices (Natural female and Natural male, about 103 MB) and two Piper fast voices (Fast female and Fast male, about 21 MB each). Each pack downloads once, when you switch Voice Guide on, and then speech runs completely offline. Delete a pack in Settings and the coach falls back to the next available voice, then to your phone\u2019s own system voice.",
                 "Using TalkBack? Voice Guide steps aside automatically while touch exploration is on, so two voices never talk over each other. Turn TalkBack off and it resumes where you left it."
             ),
             table = KnowledgeTable(
@@ -89,7 +89,7 @@ object KnowledgeBaseData {
             ),
             mistakes = listOf(
                 "Expecting sound the moment the overlay launches - the guide never speaks on its own, the first Speaker tap is what starts it.",
-                "Thinking you need internet to install voices - all packs ship inside the APK and unpack locally into private app storage, as long as you have enough free space.",
+                "Voices need internet once: the pack downloads when you switch Voice Guide on, and it is stored in the app's own folder on shared storage (Android/data/<app>/files/tts). After that, speech needs no network. Deleting a pack frees the space.",
                 "Turning on \u201cAnnounce enemy battle spells\u201d and then wondering why it stays quiet: it only fires when you tap a lane in the cooldown tracker, and at most once per spell per cooldown.",
                 "Deleting every voice pack and blaming the feature - with no pack installed the coach falls back to your phone\u2019s system voice, which some devices do not ship in English."
             ),

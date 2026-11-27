@@ -94,15 +94,17 @@ private val GuideMuted = MLBBPlusColors.GithubSecondary
 private val GuideGold = MLBBPlusColors.Gold
 private val GuideRed = MLBBPlusColors.Red
 
-// --- Widget width: matched to the green line in the reference photo ---
-// Measured from the photo (720px wide): green line runs x = 150 → 526,
-// i.e. left = 20.8%, right = 72.9%, width = 52.1% of screen width.
-// Previous value was 0.62f in landscape (too wide, blocked extra vision).
-// Portrait is not the in-game case (MLBB is landscape) so it stays wide
-// for readability, but landscape — the real case — is now exactly 0.52f.
-private const val WIDGET_WIDTH_FRACTION_LANDSCAPE = 0.52f
-private const val WIDGET_WIDTH_FRACTION_PORTRAIT = 0.92f
+// --- Widget width (landscape only; portrait shows just the bubble) ---
+// 70% of the screen width. The header holds the timer, role selector, and the five
+// spell cells, so it needs this room. Previously 52%, widened to 68% when expanded.
+private const val WIDGET_WIDTH_FRACTION_LANDSCAPE = 0.70f
 private const val WIDGET_MIN_WIDTH_DP = 300f
+
+/** Card width in dp for a landscape screen of [screenWidthDp]. */
+internal fun landscapeWidgetWidthDp(screenWidthDp: Float): Float =
+    (screenWidthDp * WIDGET_WIDTH_FRACTION_LANDSCAPE)
+        .coerceAtLeast(WIDGET_MIN_WIDTH_DP)
+        .coerceAtMost(screenWidthDp - 8)
 
 // Low-distraction knobs: tweak these first.
 private const val IDLE_FADE_MS = 4_000L       // no touch for this long -> fade
@@ -448,10 +450,9 @@ private fun computeObjective(
  * explicitly bounded because the host overlay window is WRAP_CONTENT; relying on
  * fillMaxWidth alone made long instruction lines size/clamp unpredictably.
  *
- * Width is matched to the green line in the reference photo: 52% of screen
- * width in landscape (150–526px on a 720px-wide screenshot). See
- * WIDGET_WIDTH_FRACTION_LANDSCAPE. The host overlay window should centre
- * this widget horizontally — the widget itself only controls its own width.
+ * Width is 70% of screen width in landscape (see WIDGET_WIDTH_FRACTION_LANDSCAPE).
+ * The header card holds the timer, role selector, close controls and the spell
+ * tracker; the host overlay window centres the widget horizontally.
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -461,13 +462,15 @@ fun RoamGuideWidget(
     onBack: () -> Unit,
     // Voice Guide coach. Null (the default) keeps every existing caller and
     // preview working, and means the widget behaves exactly as before.
-    voice: VoiceGuideManager? = null
+    voice: VoiceGuideManager? = null,
+    // Folds the card back to the bubble. Null keeps the card without a collapse control.
+    onCollapse: (() -> Unit)? = null
 ) {
     val context = LocalContext.current
     // Width from displayMetrics (true screen), NOT LocalConfiguration.
     // In a WRAP_CONTENT overlay window, LocalConfiguration returns the WINDOW size,
     // so widgetWidth fed back on itself and shrank to ~35% (your screenshot).
-    // displayMetrics is the real screen, so 52% is really 52%.
+    // displayMetrics is the real screen, so the width fraction is the true share of it.
     // Dynamic roles: each role's JSON is parsed once and cached for the overlay's lifetime.
     val guideCache = remember { HashMap<String, GuideData>() }
     val guideFor: (String) -> GuideData = { r -> guideCache.getOrPut(r) { loadGuide(context, r) } }
@@ -627,23 +630,9 @@ fun RoamGuideWidget(
         else currentStep?.compact.takeUnless { it.isNullOrBlank() } ?: objectiveDescription
     val displayMetrics = LocalResources.current.displayMetrics
     val screenWidthDp = displayMetrics.widthPixels / displayMetrics.density
-    val screenHeightDp = displayMetrics.heightPixels / displayMetrics.density
-    val isLandscape = screenWidthDp > screenHeightDp
-    // Adaptive width — displayMetrics (true screen) + NO fillMaxHeight.
-    // fillMaxHeight() in a WRAP_CONTENT window produces a full-screen strip, so it is not used.
-    // LocalConfiguration reports the window size, not the screen, so displayMetrics is used.
-    // Base: 52% landscape (green line), 92% portrait. If description is long,
-    // expand a bit to the RIGHT so it still fits in 2-3 lines, then shrink back.
-    // Max: 78% landscape / 95% portrait, so it never runs off-screen.
-    val baseFraction = if (isLandscape) WIDGET_WIDTH_FRACTION_LANDSCAPE else WIDGET_WIDTH_FRACTION_PORTRAIT
-    val maxFraction = if (isLandscape) 0.78f else 0.95f
-    // width never depends on text length (no jumping when the step changes);
-    // it only widens when YOU expand to the full view.
-    val adaptiveExtra = if (displayMode == 1) 0.16f else 0f
-    val widthFraction = (baseFraction + adaptiveExtra).coerceAtMost(maxFraction)
-    val widgetWidth = (screenWidthDp * widthFraction)
-        .coerceAtLeast(WIDGET_MIN_WIDTH_DP)
-        .coerceAtMost(screenWidthDp - 8)
+    // Width is fixed at 70% of the true screen width (displayMetrics, not the window).
+    // It no longer depends on text length or on the expanded state, so nothing jumps.
+    val widgetWidth = landscapeWidgetWidthDp(screenWidthDp)
     // Step progress for timer background. Fixed value, no fillMaxHeight.
     val stepProgress = if (currentStep != null) {
         val span = (currentStep.endSeconds - currentStep.startSeconds).coerceAtLeast(1)
@@ -871,6 +860,18 @@ fun RoamGuideWidget(
                         }
                     }
                 }
+                if (onCollapse != null) {
+                    GuideControl(
+                        "▴",
+                        GuideMuted,
+                        modifier = Modifier
+                            .width(30.dp)
+                            .testTag("overlay_collapse_button"),
+                        fontSize = 14.sp,
+                        onClick = onCollapse,
+                        contentDescription = "Collapse roam guide to bubble"
+                    )
+                }
                 GuideControl(
                     "×",
                     GuideMuted,
@@ -882,6 +883,18 @@ fun RoamGuideWidget(
                     contentDescription = "Close roam guide"
                 )
             }
+
+            // Spell tracker sits in the same header card as the timer and selector,
+            // on its own row so each of the five cells has room for its label.
+            EnemySpellTrackerWidget(
+                elapsedSeconds = elapsedSeconds,
+                spells = guide.spells,
+                spellDefaults = guide.spellDefaults,
+                onSpellUsed = { spellName, cooldownSeconds ->
+                    if (voiceOn) voice.announceSpell(spellName, cooldownSeconds)
+                },
+                modifier = Modifier.fillMaxWidth()
+            )
 
             if (voiceOn) {
                 val coach = voice
@@ -979,15 +992,6 @@ fun RoamGuideWidget(
             }
         }
 
-        EnemySpellTrackerWidget(
-            elapsedSeconds = elapsedSeconds,
-            spells = guide.spells,
-            spellDefaults = guide.spellDefaults,
-            onSpellUsed = { spellName, cooldownSeconds ->
-                if (voiceOn) voice.announceSpell(spellName, cooldownSeconds)
-            },
-            modifier = Modifier.fillMaxWidth()
-        )
     }
 }
 
@@ -1021,8 +1025,8 @@ private val fallbackSpells = listOf(
     TrackedSpell("Vengeance", 75)
 )
 
-// Short labels so lane + spell still fit when the whole widget is only
-// ~52% of screen width (see RoamGuideWidget width comment).
+// Short labels so lane + spell still fit in one spell cell (the spell row is
+// one fifth of the 70%-wide header card; see RoamGuideWidget width comment).
 private val spellAbbreviations = mapOf(
     "Aegis" to "AEG",
     "Arrival" to "ARR",
@@ -1055,8 +1059,8 @@ private fun formatCooldown(seconds: Int): String = "%02d:%02d".format(seconds / 
  * derived from game time, so pausing or adjusting the game clock stays coherent.
  *
  * Width: this composable is intentionally width-agnostic — it fills whatever
- * its parent gives it. [RoamGuideWidget] constrains that parent to the green-line
- * width (~52% of screen in landscape), so each of the 5 cells stays ~1/5 of that.
+ * its parent gives it. [RoamGuideWidget] places it in the header card (70% of
+ * screen width in landscape), so each of the 5 cells is about one fifth of that.
  */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable

@@ -17,9 +17,9 @@ timer advances.
 | Default state | **OFF** (`enabled = false`). With it off the overlay composes exactly what it did before: no extra row, no engine, no audio focus, no model on disk. |
 | Where it appears | One 48dp control row at the bottom of the guide overlay (Speak/Pause/Resume · Repeat · Prev · Next · Stop) plus a single status line for progress, fallback notices and errors. |
 | Notification | Two extra actions while the feature is on: **Play/Pause voice** and **Stop voice**, reusing the existing foreground-service notification (no second service). |
-| Settings | `Settings → Voice Guide`: engine (Auto / On-device neural / System), voice, speed 0.85×–1.25×, auto-speak, announce enemy spells, install voice (bundled size + progress + cancel), play a test line. |
+| Settings | `Settings → Voice Guide`: engine (Auto / On-device neural / System), voice, speed 0.85×–1.25×, auto-speak, announce enemy spells, install voice (size + download progress + cancel), play a test line. |
 | Knowledge Base | New entry `voice-guide` — "Voice Guide: Hear Your Next Play" (19 entries total). |
-| Storage | Voice packs are **compiled into the APK** (`assets/tts/`, staged at build time by the `bundleTtsModels` Gradle task from `app/tts-models-cache/`) and unpacked into `filesDir/tts/` on first use. No network is needed at runtime; the archives are never committed to git. |
+| Storage | Voice packs are **downloaded on demand**, not bundled. Turning Voice Guide on fetches the selected pack from the upstream release URL in `tts-models.json` into `Android/data/<app>/files/tts/` (app-specific external storage, no permission needed, removed on uninstall). No network is needed after that. The APK carries only the manifest. |
 
 ---
 
@@ -52,15 +52,10 @@ user-facing ids stay the names (`af_heart`, `lessac-medium`, …) and are mapped
 
 ---
 
-## 3. Voice models — pins, bundling, checksums, storage
+## 3. Voice models — pins, download, checksums, storage
 
 Base URL: `https://github.com/k2-fsa/sherpa-onnx/releases/download/tts-models/` (a permanent
-release tag, not a moving branch). The archives are **compiled into the APK**: the `bundleTtsModels`
-Gradle task downloads them into `app/tts-models-cache/` (gitignored) at build time, stages them into
-`assets/tts/`, and the app unpacks them into `filesDir/tts/` on first use — speech needs no network
-at all. Checksums are the official ones from that tag's `checksum.txt` and are re-verified twice:
-at build time by `bundleTtsModels`, and again in-app while streaming (`DigestInputStream`), so a
-corrupt or truncated pack is rejected rather than installed.
+release tag, not a moving branch). The archives are **not** bundled. When Voice Guide is turned on, `VoiceModelInstaller` downloads the selected archive from its `url` in the manifest (`VoicePackUnpacker` streams it straight to disk) into `Android/data/<package>/files/tts/`. It is promoted to "installed" only when the SHA-256 of the compressed stream matches the pin, so a corrupt or truncated download is rejected rather than installed. Downloads are not resumable: a failed attempt restarts from zero.
 
 The catalogue lives in `app/src/main/assets/tts/tts-models.json` — the single source of truth read
 by the app, by Gradle and by `scripts/update_tts_models.py` (the only writer). Pins (id, sha256,
@@ -75,12 +70,12 @@ dispatch, commits a refreshed manifest, and chains `Build Release` (see §4 and
 | Piper female | `vits-piper-en_US-lessac-medium-int8.tar.bz2` | `f1c6d0295cf16087b05f80fdca5b44daca5cd78e2c425d419a42ba34929805f9` | 20,969,179 B | ~36.6 MB (397 entries; `.onnx` 18.6 MB) |
 | Piper male | `vits-piper-en_US-ryan-medium-int8.tar.bz2` | `376eb489d42e98cb49f0e13a633e8d88580bd247ed8aacc298a733210404f771` | 21,083,446 B | ~36.6 MB |
 
-Storage layout, all under `filesDir/tts/`:
+Storage layout, all under `Android/data/<package>/files/tts/` (`getExternalFilesDir`; `filesDir/tts/` when no external volume is mounted):
 
 ```
-filesDir/tts/<dirName>/                      installed model
-                    /.mlbb-voice-installed    marker written last, only after verification
-                    /<dirName>.partial-<nanoTime>/   extraction scratch, renamed atomically
+Android/data/<package>/files/tts/<dirName>/                      installed model
+                                             /.mlbb-voice-installed    marker written last, only after verification
+                                             /<dirName>.partial-<nanoTime>/   download and extraction scratch, renamed atomically
 ```
 
 Extraction streams `BZip2CompressorInputStream → TarArchiveInputStream` (commons-compress) — no
@@ -110,20 +105,14 @@ vendored:
   (JavaPluginExtension), which is what previously broke the script with "Unresolved reference 'io'".
   `downloadSherpaAar` fetches the AAR from the v1.13.8 release, verifies its sha256
   (`633c24321e06b1fe79feafa03ea16cbc0f8a286641e2da3559bac91bdb13bd96`, 50,129,134 B) with
-  `MessageDigest`, writes `.part` then renames, and is `onlyIf { !exists() }`. `bundleTtsModels`
-  reads `app/src/main/assets/tts/tts-models.json`, fetches/verifies each voice pack into
-  `app/tts-models-cache/`, and copies the archives into
-  `app/build/generated/tts-assets/tts/` (registered as an extra assets source set), so
-  the packs land in `assets/tts/` of every APK. Both are wired as dependencies of `preBuild`
-  (`bundleTtsModels` also of `*merge*Assets*`), so a fresh clone builds without a manual step.
+  `MessageDigest`, writes `.part` then renames, and is `onlyIf { !exists() }`. There is no pack-bundling task any more: the voice packs are downloaded at runtime from the URLs in `tts-models.json`, so the build fetches only the AAR.
   Committing `app/libs/sherpa-onnx-1.13.8.aar` yourself is also fine — the task then does nothing.
-- `app/src/main/AndroidManifest.xml` — no network permissions at all: the voice packs ship in the
-  APK, so `INTERNET`/`ACCESS_NETWORK_STATE` are not needed (they were removed).
+- `app/src/main/AndroidManifest.xml` — `INTERNET` only, used by the Voice Guide pack download. `ACCESS_NETWORK_STATE` is not requested. No storage permission is needed, because the packs go to app-specific external storage.
 - `testOptions { unitTests.isReturnDefaultValues = true }` so the normalizer/manager tests can run
   on the JVM.
-- ABI splits: the AAR ships `arm64-v8a` (31.9 MB), `armeabi-v7a` (22.5 MB), `x86`, `x86_64`. A
-  commented-out `splits { abi { } }` block is in place; enabling `abiFilters` for arm64 + armv7 is
-  the recommended release-size move and needs a device/CI check first.
+- ABI splits: the AAR ships `arm64-v8a` (31.9 MB), `armeabi-v7a` (22.5 MB), `x86` and `x86_64`. The release
+  build keeps only `arm64-v8a` (`ndk { abiFilters }` in `buildTypes.release`), so the release APK is 37.8 MB. Debug
+  builds keep all four ABIs. Adding `armeabi-v7a` back is a one-line change, but it needs a device check first.
 
 ---
 
@@ -137,7 +126,8 @@ vendored:
 | `VoiceGuideSettings.kt` | SharedPreferences `mlbb_plus_voice_guide` (keys `enabled`, `engine`, `voice`, `rate`, `auto_speak`, `announce_enemy_spells`, `installed_model`, `fallback_notice`) plus a `revision` counter that the manager observes. |
 | `VoiceEngine.kt` | The engine contract: `prepare`, `speak`, `pause`/`resume` where supported (`supportsPause`), `stop`, `setSpeechRate(newRate)`, `release`. |
 | `SystemTtsVoiceEngine.kt` | Android `TextToSpeech` adapter. Initialisation is sequenced on `Dispatchers.Main.immediate` so the status callback cannot race the reference assignment. |
-| `VoiceModelInstaller.kt` | Manifest-driven model catalogue (§3, parsed from `assets/tts/tts-models.json`), streaming unpack from the APK bundle + checksum + tar.bz2 extraction + marker file, sealed `Progress` (`Extracting`/`Verifying`/`Done`/`Failed`). |
+| `VoiceModelInstaller.kt` | Manifest-driven model catalogue (§3, parsed from `assets/tts/tts-models.json`), streaming download into `Android/data/<package>/files/tts/`, sealed `Progress` (`Downloading`/`Verifying`/`Done`/`Failed`), marker file. |
+| `VoicePackUnpacker.kt` | Streams a `.tar.bz2` or `.tar.gz` pack through the SHA-256 digest into a work directory: prefix stripping, path-escape guard, cancellation, progress. No Android dependencies, covered by JVM tests. |
 | `SherpaOnnxVoiceEngine.kt` | Kokoro/Piper config, fallback between installed models, `AudioTrack` MONO PCM_FLOAT playback with `generateWithCallback`. |
 | `VoiceGuideManager.kt` | Owns everything the UI touches: `VoiceUiState`, `Phase`, speak/pause/resume/repeat/relative-step/install APIs, audio focus, TalkBack, idle release — and `object VoiceGuideTransitions`, the pure decision table shared with the widget and the tests. |
 
@@ -254,24 +244,23 @@ having no Android imports) so both classes test on the JVM with no Robolectric a
 
 ```bash
 ./gradlew downloadSherpaAar     # optional; assemble* runs it automatically
-./gradlew bundleTtsModels       # optional; assemble* runs it automatically
 ./gradlew assembleDebug assembleRelease
 python3 scripts/validate_assets.py
-python3 scripts/update_tts_models.py   # refresh/verify the bundled voice packs
+python3 scripts/update_tts_models.py   # refresh/verify the voice pack manifest
 ```
 
 ### Manual device checklist (maps to spec §7 — not yet run)
 
 1. Feature OFF: overlay pixel-identical to before; no audio; layout unchanged at 360dp and in
    landscape.
-2. First use: tap Speak with no model → size + progress + cancel → after the unpack, speaks the
+2. First use: turn Voice Guide on with no model → download progress + cancel → after the download, speaks the
    current step in under 2s on a mid-range device.
 3. Coach flow: Speak → Next (immediate, and the spoken line is tinted gold) → Repeat → Pause
    mid-sentence → Resume continues cleanly.
 4. Auto-speak: advancing to the next step, and Turtle at 2:00, each speak **once**.
 5. In-game over MLBB: game audio ducked not muted; overlay Stop and notification Stop both work;
    no crash when backgrounded.
-6. Fallback: delete `filesDir/tts/kokoro-int8-en-v0_19` → falls back to Piper or System, shows the
+6. Fallback: delete `Android/data/<package>/files/tts/kokoro-int8-en-v0_19` → falls back to Piper or System, shows the
    notice, no crash. Airplane mode with a model installed → still speaks.
 7. Persistence: voice, rate and toggles survive restart; auto-start-last-role and auto-start Voice
    Guide both respect a revoked overlay permission.

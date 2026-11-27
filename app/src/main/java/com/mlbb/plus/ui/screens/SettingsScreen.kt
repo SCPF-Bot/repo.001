@@ -280,7 +280,7 @@ private fun VoiceGuideSection() {
 
     if (!enabled) {
         Text(
-            text = "Off. The floating guide behaves exactly as before: no voice controls, no audio focus, no model unpacked on disk.",
+            text = "Off. The floating guide behaves exactly as before: no voice controls, no audio focus, no voice model downloaded.",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -346,7 +346,7 @@ private fun VoiceGuideSection() {
             VoiceOptionChip(
                 label = "Neural (offline)",
                 selected = engine == VoiceGuideSettings.ENGINE_SHERPA,
-                trailing = "bundled model",
+                trailing = "downloads once",
                 onClick = {
                     VoiceGuideSettings.setEngine(context, VoiceGuideSettings.ENGINE_SHERPA)
                     manager.onSettingsChanged()
@@ -366,7 +366,7 @@ private fun VoiceGuideSection() {
         VoiceSettingLabel("VOICE MODEL ON THIS DEVICE")
         if (installedIds.isEmpty()) {
             Text(
-                text = "Nothing unpacked yet. The voice packs ship inside the APK and unpack into private app storage on first use.",
+                text = "No voice model downloaded yet. Turning Voice Guide on downloads the selected one (about 20 to 105 MB) to Android/data/<app>/files/tts. Speech then works offline.",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -442,9 +442,9 @@ private fun VoiceGuideSection() {
         }
 
         Text(
-            text = "Voice packs ship inside the APK (" +
-                installer.models.joinToString(", ") { "${it.uncompressedBytes / 1_000_000} MB" } +
-                " unpacked). Synthesis runs completely offline; game audio is ducked cleanly while speaking.",
+            text = "Neural voice packs download once (" +
+                installer.models.joinToString(", ") { "${it.sizeBytes / 1_000_000} MB" } +
+                ") and then synthesise completely offline. Game audio is ducked cleanly while speaking.",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )

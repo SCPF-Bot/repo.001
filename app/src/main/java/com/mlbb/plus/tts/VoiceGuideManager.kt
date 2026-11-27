@@ -170,7 +170,7 @@ class VoiceGuideManager(private val context: Context) {
     /** Notification Stop Voice: silence the coach, keep the overlay running. */
     fun stopFromNotification() = stop()
 
-    /** Speaker tap: speak [step] now, unpacking the voice pack from the APK if needed. */
+    /** Speaker tap: speak [step] now, downloading the voice pack first if it is missing. */
     fun speak(step: SpokenStep) {
         lastStep = step
         speakInternal(step, forceRepeat = true)
@@ -242,6 +242,9 @@ class VoiceGuideManager(private val context: Context) {
         VoiceGuideSettings.setEnabled(context, enabled)
         if (enabled) {
             state = state.copy(enabled = true, message = "")
+            // Turning Voice Guide on downloads the selected neural voice (once). The platform
+            // voice speaks until the download finishes.
+            startInstallIfNeeded()
         } else {
             stop()
             releaseEngines()
@@ -288,7 +291,7 @@ class VoiceGuideManager(private val context: Context) {
         )
     }
 
-    /** Unpacks the pack for the selected voice from the APK, reporting progress into [state]. */
+    /** Downloads and unpacks the pack for the selected voice, reporting progress into [state]. */
     fun installSelectedModel(onFinished: ((Boolean) -> Unit)? = null) {
         val model = installer.forVoice(VoiceGuideSettings.voice(context))
         if (model == null) {
@@ -457,17 +460,17 @@ class VoiceGuideManager(private val context: Context) {
     }
 
     /**
-     * First-tap install flow. The voice packs ship inside the APK, so there is
-     * nothing to consent to and no metered-network surprise: the selected pack
-     * simply starts unpacking. Speech is instant either way - the platform
-     * voice carries the lines until the neural pack is ready.
+     * Starts the download of the selected neural voice when it is missing. Runs when Voice
+     * Guide is switched on and again on the first speak, so a failed download is retried.
+     * Speech is instant either way: the platform voice carries the lines until the neural
+     * pack is ready.
      */
     private fun startInstallIfNeeded() {
         if (VoiceGuideSettings.engine(context) == VoiceGuideSettings.ENGINE_SYSTEM) return
         if (installJob?.isActive == true) return
         val model = installer.forVoice(VoiceGuideSettings.voice(context)) ?: return
         if (installer.isInstalled(model)) return
-        state = state.copy(message = "Unpacking ${model.label} from the app bundle.")
+        state = state.copy(message = "Downloading ${model.label} (${model.sizeLabel}).")
         installSelectedModel()
     }
 
@@ -634,10 +637,10 @@ class VoiceGuideManager(private val context: Context) {
 
     private fun publish(progress: VoiceModelInstaller.Progress) {
         when (progress) {
-            is VoiceModelInstaller.Progress.Extracting -> state = state.copy(
+            is VoiceModelInstaller.Progress.Downloading -> state = state.copy(
                 phase = Phase.DOWNLOADING,
-                progress = ratio(progress.written, progress.total),
-                progressLabel = "Unpacking ${progress.written / MB} of ${progress.total / MB} MB"
+                progress = ratio(progress.received, progress.total),
+                progressLabel = "Downloading ${progress.received / MB} of ${progress.total / MB} MB"
             )
 
             VoiceModelInstaller.Progress.Verifying -> state = state.copy(progressLabel = "Checking files")

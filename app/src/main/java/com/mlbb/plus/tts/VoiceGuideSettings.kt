@@ -12,7 +12,7 @@ import androidx.core.content.edit
  * engine, voice and rate.
  *
  * IMPORTANT: [isEnabled] defaults to false. Nothing is ever spoken,
- * focus-requested or unpacked until the player turns Voice Guide on in
+ * focus-requested or downloaded until the player turns Voice Guide on in
  * Settings, or taps the Speaker control in the overlay. That first tap is the
  * consent moment.
  */

@@ -49,7 +49,7 @@ The screen-side guide parser and overlay-side guide parser are separate implemen
 ```text
 MLBB-Plus/
 ├── app/
-│   ├── build.gradle.kts                      (+ downloadSherpaAar / bundleTtsModels tasks)
+│   ├── build.gradle.kts                      (+ downloadSherpaAar task; no voice-pack bundling)
 │   ├── proguard-rules.pro
 │   ├── libs/                                 (sherpa-onnx-1.13.8.aar, fetched on
 │   │                                          demand and gitignored — never committed)
@@ -279,7 +279,7 @@ sequenceDiagram
     end
 ```
 
-`AndroidManifest.xml` declares `SYSTEM_ALERT_WINDOW`, `FOREGROUND_SERVICE`, `FOREGROUND_SERVICE_SPECIAL_USE`, and `POST_NOTIFICATIONS`. No network permissions: the Voice Guide voice packs ship inside the APK and are unpacked on first use, so `INTERNET`/`ACCESS_NETWORK_STATE` were removed. The service is non-exported and declared with foreground type `specialUse` plus a subtype explanation. `WidgetOverlayService` creates an ongoing notification with an app-open intent and Stop action, updates the active role/type, initializes the overlay once per service instance, and hides/stops the overlay on destruction.
+`AndroidManifest.xml` declares `SYSTEM_ALERT_WINDOW`, `FOREGROUND_SERVICE`, `FOREGROUND_SERVICE_SPECIAL_USE`, `POST_NOTIFICATIONS`, and `INTERNET`. `INTERNET` is used only by the Voice Guide pack download. The voice packs are not bundled in the APK: they are downloaded when Voice Guide is turned on, into app-specific external storage, which needs no storage permission. The service is non-exported and declared with foreground type `specialUse` plus a subtype explanation. `WidgetOverlayService` creates an ongoing notification with an app-open intent and Stop action, updates the active role/type, initializes the overlay once per service instance, and hides/stops the overlay on destruction.
 
 `JetOverlay.kt` is the low-level window host. It owns the overlay window, ComposeView attachment, and lifecycle / saved-state / ViewModel-store owners needed by Compose outside an Activity. `OverlayWidgets.kt` owns the visible guide, overlay-specific parsing, interaction state, game timer, objective timers, and enemy spell tracker UI.
 
@@ -326,7 +326,7 @@ Guards that matter when touching this path: TalkBack on ⇒ the coach refuses to
 | `tts/VoiceGuideSettings.kt` | SharedPreferences for the feature plus a `revision` counter so the two manager instances stay in step | Settings screen, manager, overlay service |
 | `tts/VoiceEngine.kt` | Engine contract (`prepare`/`speak`/`pause`/`resume`/`stop`/`setSpeechRate`/`release`, `supportsPause`) | Both engine implementations, manager |
 | `tts/SystemTtsVoiceEngine.kt` | Android `TextToSpeech` adapter — the always-available fallback | Manager |
-| `tts/VoiceModelInstaller.kt` | Manifest-driven model catalogue (`assets/tts/tts-models.json`) and streaming `.tar.bz2` unpack from the APK bundle → verify → extract into `filesDir/tts/` | Manager, Settings screen |
+| `tts/VoiceModelInstaller.kt` | Manifest-driven model catalogue (`assets/tts/tts-models.json`), download → verify → extract into `Android/data/<package>/files/tts/` | Manager, Settings screen |
 | `tts/SherpaOnnxVoiceEngine.kt` | sherpa-onnx Kokoro/Piper configuration and `AudioTrack` playback | Manager, sherpa-onnx AAR |
 | `tts/VoiceGuideManager.kt` | State machine (`Phase`, `VoiceUiState`), speak/pause/resume/repeat/step APIs, audio focus, TalkBack, idle release, install orchestration; `object VoiceGuideTransitions` is the shared decision table | Overlay service, widget, Settings screen, unit tests |
 
@@ -346,11 +346,11 @@ Guards that matter when touching this path: TalkBack on ⇒ the coach refuses to
 - Other UI: Compose UI, Foundation, Material 3, tooling preview.
 - Repositories: Google and Maven Central. **No JitPack** — sherpa-onnx has no builds there.
 - TTS: `sherpa-onnx-1.13.8.aar`, vendored as `implementation(files("libs/sherpa-onnx-1.13.8.aar"))` and fetched on demand by the `downloadSherpaAar` task (sha256-verified, `.part` → rename, `onlyIf { !exists() }`, wired into `preBuild` and every `*compile*Kotlin*` task). Pinned to 1.13.8 deliberately: on 2.0.x Piper fails to initialise and Kokoro needs an extra lexicon file.
-- TTS voice packs: bundled into the APK. `bundleTtsModels` reads `app/src/main/assets/tts/tts-models.json`, fetches/verifies each archive into `app/tts-models-cache/`, and stages them into `app/build/generated/tts-assets/tts/` (registered as an assets source set). `scripts/update_tts_models.py` maintains the manifest (`.github/workflows/update-tts-models.yml` runs it weekly).
+- TTS voice packs: downloaded at runtime, not bundled. `assets/tts/tts-models.json` lists each pack's upstream URL and sha256. `scripts/update_tts_models.py` maintains the manifest (`.github/workflows/update-tts-models.yml` runs it weekly).
 - `org.apache.commons:commons-compress:1.28.0` — `.tar.bz2` extraction (1.26+ would pull commons-io and commons-lang3).
 - `junit:4.13.2` (`testImplementation`) with `testOptions { unitTests.isReturnDefaultValues = true }` for the 36 JVM tests in `app/src/test/java/com/mlbb/plus/tts/`.
-- No network permissions: the voice packs ship inside the APK (`assets/tts/`), and are unpacked (checksum-verified) into `filesDir/tts/` on first use.
-- The AAR carries `arm64-v8a`, `armeabi-v7a`, `x86` and `x86_64` native libs; a commented-out `splits { abi { } }` block is in `app/build.gradle.kts` for when ABI filtering is verified.
+- Network: `INTERNET` is used only by the Voice Guide pack download. Packs are stored in `Android/data/<package>/files/tts/` and checked against their sha256 before use.
+- The AAR carries `arm64-v8a`, `armeabi-v7a`, `x86` and `x86_64` native libs; the release build keeps only `arm64-v8a` (`ndk { abiFilters }` in `buildTypes.release`); debug builds keep all four.
 - Release build enables code minification and resource shrinking; debug disables both.
 - Gradle wrapper distribution: Gradle `9.3.1` (`gradle/wrapper/gradle-wrapper.properties`; `gradlew` is committed).
 

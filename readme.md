@@ -11,15 +11,13 @@ Requirements: JDK 17, Android SDK Platform 37, Android Gradle Plugin / Gradle ve
 ./gradlew :app:assembleRelease
 ```
 
+Release builds are signed with the committed **test** key (`app/keystore/mlbb-test-release.jks`, public password), so they are for testing only. To sign with a real upload key, set `KEYSTORE_PATH`, `STORE_PASSWORD` and `KEY_PASSWORD` (and optionally `KEY_ALIAS`). The release build also runs R8 minification and resource shrinking, and it packages native code for `arm64-v8a` only. Debug builds keep all four ABIs.
+
 The first build requires Gradle and Android dependencies to be available from their configured repositories.
 
-The optional Voice Guide needs the sherpa-onnx AAR, which is **not** on Google Maven, plus three
-TTS voice packs. A `downloadSherpaAar` task fetches `sherpa-onnx-1.13.8.aar` into `app/libs/` and a
-`bundleTtsModels` task fetches the voice packs into `app/tts-models-cache/`; both verify sha256 and
-run automatically as part of `assembleDebug` / `assembleRelease`, so the first build needs network
-access once (or place the files yourself and the tasks do nothing). The voice packs are **compiled
-into the APK** and unpacked into `filesDir/tts/` on first use, so speech is fully offline at
-runtime. See [`docs/tts_implementation.md`](docs/tts_implementation.md).
+The optional Voice Guide needs the sherpa-onnx AAR, which is **not** on Google Maven. A `downloadSherpaAar` task fetches `sherpa-onnx-1.13.8.aar` into `app/libs/`, verifies its sha256, and runs automatically as part of `assembleDebug` / `assembleRelease`, so the first build needs network access once (or place the file yourself and the task does nothing).
+
+The voice packs are **not** bundled in the APK. When the player turns Voice Guide on, the app downloads the selected pack (about 21 to 103 MB) from the upstream sherpa-onnx release into `Android/data/<app>/files/tts/`, checks its sha256, and then speaks offline. See [`docs/tts_implementation.md`](docs/tts_implementation.md).
 
 Before building, validate local data and portraits:
 

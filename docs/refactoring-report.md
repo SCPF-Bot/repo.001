@@ -222,6 +222,6 @@ Several statements above were written before a Gradle build was possible. Curren
 
 - **Build:** `./gradlew :app:assembleDebug` and `:app:testDebugUnitTest` now pass on JDK 17 with SDK 37. Unit tests: 40, all passing. Lint: 5 warnings, 0 errors. The Gradle wrapper (9.3.1) is committed.
 - **Release validation step:** the validation step described in §F was not in `release.yml` when this report was first written. `release.yml` now runs `scripts/validate_assets.py` before the build.
-- **Release build:** `:app:assembleRelease` fails with an R8 `OutOfMemoryError` on a 2 GB sandbox. See `review-2026-11-27.md` OPEN-1.
+- **Release build:** `:app:assembleRelease` and `:app:bundleRelease` now pass on the 2 GB sandbox, test-signed. The R8 memory error is no longer reproduced. See `review-2026-11-27.md` addendum.
 - **Full findings, fixes and open items:** `docs/review-2026-11-27.md`.
 

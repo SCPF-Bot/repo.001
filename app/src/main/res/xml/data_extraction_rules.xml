@@ -2,15 +2,17 @@
 <!--
   Android 12+ backup and device-transfer policy. Backup is also disabled in the manifest
   (allowBackup="false"); these rules keep the policy explicit and cover any future change.
-  Everything is excluded: the ~145 MB voice packs in filesDir are re-extracted from the APK,
-  and the settings are small enough that restoring them is not worth the risk of restoring
-  stale model state onto a new device.
+  Everything is excluded: the voice packs in Android/data are re-downloaded on demand, and
+  the settings are small enough that restoring them is not worth the risk of restoring stale
+  model state onto a new device.
 -->
 <data-extraction-rules>
     <cloud-backup>
         <exclude domain="root" path="." />
+        <exclude domain="external" path="." />
     </cloud-backup>
     <device-transfer>
         <exclude domain="root" path="." />
+        <exclude domain="external" path="." />
     </device-transfer>
 </data-extraction-rules>

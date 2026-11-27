@@ -24,8 +24,8 @@ import kotlin.concurrent.withLock as withThreadLock
  * On-device neural TTS through sherpa-onnx. Kokoro is the primary voice, Piper
  * the lighter fallback, exactly as the feature spec asks.
  *
- * Everything runs offline: the model files are unpacked from the APK bundle by
- * [VoiceModelInstaller] (`filesDir/tts/`), synthesis happens on a background
+ * Everything runs offline: the model files are downloaded by
+ * [VoiceModelInstaller] (`Android/data/<app>/files/tts/`), synthesis happens on a background
  * thread, and audio goes out through a streaming [AudioTrack] so the first
  * sentence starts playing while the rest is still being generated.
  *

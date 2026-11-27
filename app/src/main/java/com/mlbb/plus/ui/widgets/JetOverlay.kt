@@ -3,6 +3,8 @@ package com.mlbb.plus.ui.widgets
 import android.annotation.SuppressLint
 import android.app.Application
 import android.content.Context
+import android.content.SharedPreferences
+import android.content.res.Configuration
 import android.graphics.PixelFormat
 import android.provider.Settings
 import android.util.Log
@@ -11,10 +13,12 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewConfiguration
 import android.view.WindowManager
-import androidx.core.content.edit
 import android.widget.FrameLayout
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.ComposeView
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
@@ -68,6 +72,14 @@ class OverlayLifecycleOwner : LifecycleOwner, SavedStateRegistryOwner, ViewModel
     }
 }
 
+/**
+ * Clamps a saved bubble position to the current screen, in pixels. [x] is the offset from the
+ * horizontal centre and [y] the offset from the top. Used on show() and after every rotation,
+ * so a position saved in portrait cannot leave the bubble off-screen in landscape.
+ */
+internal fun clampedOffset(x: Int, y: Int, screenWidthPx: Int, screenHeightPx: Int): Pair<Int, Int> =
+    x.coerceIn(-screenWidthPx / 2, screenWidthPx / 2) to y.coerceIn(0, screenHeightPx / 2)
+
 // --- JetOverlay: WindowManager + ComposeView ---
 
 class JetOverlayScope {
@@ -93,8 +105,16 @@ object JetOverlay {
     private var scopeContent: @Composable () -> Unit = {}
     private var overlayRoot: View? = null
     private var windowManager: WindowManager? = null
+    private var windowParams: WindowManager.LayoutParams? = null
     private var lifecycleOwner: OverlayLifecycleOwner? = null
     private var isShowing = false
+
+    /**
+     * True in landscape. The floating guide opens only in landscape, so the content reads this to
+     * choose between the bubble and the guide. Set in show() and updated on rotation.
+     */
+    var isLandscape by mutableStateOf(false)
+        private set
 
     // Bumped on every touch of the overlay window (and by wake()). The widget
     // observes it with snapshotFlow to wake from its idle fade.
@@ -136,7 +156,12 @@ object JetOverlay {
         val type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
 
         val dm = context.resources.displayMetrics
-        val prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+        val prefs = ScreenProfiles.prefs(context)
+        val landscape = context.resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+        // Automatic: this launch's screen size is recorded for its orientation.
+        ScreenProfiles.record(prefs, dm.widthPixels, dm.heightPixels, landscape)
+        isLandscape = landscape
+        val (startX, startY) = restoredBubble(context, prefs, landscape, dm.widthPixels, dm.heightPixels)
         val params = WindowManager.LayoutParams(
             WindowManager.LayoutParams.WRAP_CONTENT,
             WindowManager.LayoutParams.WRAP_CONTENT,
@@ -149,10 +174,10 @@ object JetOverlay {
         ).apply {
             // x = offset from screen centre, y = offset from top (px).
             gravity = Gravity.TOP or Gravity.CENTER_HORIZONTAL
-            x = prefs.getInt(KEY_X, 0).coerceIn(-dm.widthPixels / 2, dm.widthPixels / 2)
-            y = prefs.getInt(KEY_Y, (DEFAULT_Y_DP * dm.density).toInt())
-                .coerceIn(0, dm.heightPixels / 2)
+            x = startX
+            y = startY
         }
+        windowParams = params
 
         // ── Drag: a parent FrameLayout that takes over the gesture past the touch slop ──
         val touchSlop = ViewConfiguration.get(context).scaledTouchSlop.toFloat()
@@ -179,10 +204,11 @@ object JetOverlay {
             private fun endTouch() {
                 touchTick.longValue += 1
                 if (isDragging) {
-                    prefs.edit {
-                        putInt(KEY_X, params.x)
-                        putInt(KEY_Y, params.y)
-                    }
+                    // Saved under the orientation the drag happened in.
+                    val screen = context.resources.displayMetrics
+                    ScreenProfiles.saveBubble(
+                        prefs, isLandscape, params.x, params.y, screen.widthPixels, screen.heightPixels
+                    )
                 }
                 isDragging = false
             }
@@ -258,7 +284,58 @@ object JetOverlay {
             lifecycleOwner = null
             overlayRoot = null
             windowManager = null
+            windowParams = null
         }
+    }
+
+    /**
+     * Called from the service on every rotation. Records the new orientation's screen size,
+     * switches the content (bubble or guide), and moves the bubble to that orientation's own
+     * saved spot. If that orientation has no saved spot yet, the bubble stays where it is.
+     */
+    fun onConfigurationChanged(newConfig: Configuration) {
+        val landscape = newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE
+        isLandscape = landscape
+        val context = app ?: return
+        val dm = context.resources.displayMetrics
+        val prefs = ScreenProfiles.prefs(context)
+        ScreenProfiles.record(prefs, dm.widthPixels, dm.heightPixels, landscape)
+
+        val root = overlayRoot ?: return
+        val params = windowParams ?: return
+        val wm = windowManager ?: return
+        val saved = ScreenProfiles.savedBubble(prefs, landscape, dm.widthPixels, dm.heightPixels)
+        val (x, y) = if (saved != null) {
+            clampedOffset(saved.first, saved.second, dm.widthPixels, dm.heightPixels)
+        } else {
+            // First time in this orientation: keep the bubble where the user left it.
+            clampedOffset(params.x, params.y, dm.widthPixels, dm.heightPixels).also { (cx, cy) ->
+                ScreenProfiles.saveBubble(prefs, landscape, cx, cy, dm.widthPixels, dm.heightPixels)
+            }
+        }
+        if (x == params.x && y == params.y) return
+        params.x = x
+        params.y = y
+        runCatching { wm.updateViewLayout(root, params) }
+    }
+
+    /**
+     * Bubble position for [landscape]: its own saved spot if there is one, otherwise the single
+     * position saved before per-orientation positions existed, otherwise the default.
+     */
+    private fun restoredBubble(
+        context: Context,
+        prefs: SharedPreferences,
+        landscape: Boolean,
+        widthPx: Int,
+        heightPx: Int
+    ): Pair<Int, Int> {
+        ScreenProfiles.savedBubble(prefs, landscape, widthPx, heightPx)?.let { (x, y) ->
+            return clampedOffset(x, y, widthPx, heightPx)
+        }
+        val legacy = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+        val defaultY = (DEFAULT_Y_DP * context.resources.displayMetrics.density).toInt()
+        return clampedOffset(legacy.getInt(KEY_X, 0), legacy.getInt(KEY_Y, defaultY), widthPx, heightPx)
     }
 
     fun hide() {
@@ -273,6 +350,7 @@ object JetOverlay {
         }
         overlayRoot = null
         windowManager = null
+        windowParams = null
         isShowing = false
         lifecycleOwner?.let { owner ->
             runCatching { owner.onPause() }

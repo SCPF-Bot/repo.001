@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""Update and verify the bundled TTS voice packs for MLBB Plus.
+"""Update and verify the TTS voice pack manifest for MLBB Plus.
 
-The voice packs ship inside the APK (see docs/tts_implementation.md): the Gradle
-task ``bundleTtsModels`` reads ``app/src/main/assets/tts/tts-models.json`` and
-stages the archives listed there into the build. This script is the only thing
-that writes that manifest.
+The voice packs are NOT bundled in the APK (see docs/tts_implementation.md). The app
+downloads the selected pack from the upstream URL in
+``app/src/main/assets/tts/tts-models.json`` the first time Voice Guide is turned on.
+This script is the only thing that writes that manifest.
 
 What it does (default = update mode):
   1. Downloads every pinned voice pack archive into ``app/tts-models-cache/``
@@ -231,9 +231,9 @@ def serialize(entries) -> str:
         "source": SOURCE_BASE,
         "note": (
             "Maintained by scripts/update_tts_models.py - do not edit by hand. "
-            "The archives are bundled into the APK at build time by the "
-            "bundleTtsModels Gradle task; they are not committed to git (the "
-            "Kokoro archive alone is 103 MB, over GitHub's per-file limit)."
+            "The voice packs are NOT bundled in the APK. The app downloads the "
+            "selected pack from its url when Voice Guide is turned on, and checks "
+            "the sha256 before using it."
         ),
         "models": entries,
     }
