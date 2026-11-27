@@ -17,6 +17,7 @@ permissions:
 jobs:
   build-release:
     runs-on: ubuntu-latest
+    timeout-minutes: 45
 
     steps:
       - name: Checkout repository
@@ -39,57 +40,38 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Set up Gradle 9.3.1
+      - name: Set up Gradle (uses the committed wrapper, 9.3.1)
         uses: gradle/actions/setup-gradle@v4
-        with:
-          gradle-version: "9.3.1"
 
-      - name: Ensure ephemeral debug keystore on CI runner
-        run: |
-          if [ ! -f debug.keystore ]; then
-            keytool -genkeypair -keystore debug.keystore -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"
-          fi
+      # Debug builds need no keystore: AGP signs them with its default debug key.
+      - name: Unit tests, lint and debug build
+        run: ./gradlew --no-daemon :app:testDebugUnitTest :app:lintDebug :app:assembleDebug
 
-      - name: Run unit tests, Lint, and Debug build
-        run: gradle --no-daemon :app:testDebugUnitTest :app:lintDebug :app:assembleDebug
-
-      - name: Prepare release test signing key
+      # Release signing is opt-in. Without the secrets the release is built unsigned, so no
+      # artifact is ever signed with a key whose password is public.
+      - name: Load release signing key from secrets
         env:
           RELEASE_KEYSTORE_BASE64: ${{ secrets.RELEASE_KEYSTORE_BASE64 }}
           SECRET_STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
           SECRET_KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
-          KEYSTORE_FILE="${{ github.workspace }}/my-upload-key.jks"
-          if [ -n "$RELEASE_KEYSTORE_BASE64" ] && [ -n "$SECRET_STORE_PASSWORD" ] && [ -n "$SECRET_KEY_PASSWORD" ]; then
-            echo "$RELEASE_KEYSTORE_BASE64" | base64 --decode > "$KEYSTORE_FILE"
-            STORE_PASS="$SECRET_STORE_PASSWORD"
-            KEY_PASS="$SECRET_KEY_PASSWORD"
-          else
-            STORE_PASS="mlbb-test-store"
-            KEY_PASS="mlbb-test-store"
-            rm -f "$KEYSTORE_FILE"
-            keytool -genkeypair \
-              -keystore "$KEYSTORE_FILE" \
-              -storepass "$STORE_PASS" \
-              -alias upload \
-              -keypass "$KEY_PASS" \
-              -keyalg RSA \
-              -keysize 2048 \
-              -validity 10000 \
-              -dname "CN=MLBB Plus Test,O=MLBB Plus,C=US"
+          if [ -z "$RELEASE_KEYSTORE_BASE64" ] || [ -z "$SECRET_STORE_PASSWORD" ] || [ -z "$SECRET_KEY_PASSWORD" ]; then
+            echo "::notice::Release signing secrets are not set; the release APK/AAB will be UNSIGNED."
+            exit 0
           fi
-          echo "KEYSTORE_PATH=$KEYSTORE_FILE" >> "$GITHUB_ENV"
-          echo "STORE_PASSWORD=$STORE_PASS" >> "$GITHUB_ENV"
-          echo "KEY_PASSWORD=$KEY_PASS" >> "$GITHUB_ENV"
+          # Kept under RUNNER_TEMP, outside the checkout, so it never lands in the workspace.
+          KEYSTORE_FILE="$RUNNER_TEMP/upload-key.jks"
+          echo "$RELEASE_KEYSTORE_BASE64" | base64 --decode > "$KEYSTORE_FILE"
+          {
+            echo "KEYSTORE_PATH=$KEYSTORE_FILE"
+            echo "STORE_PASSWORD=$SECRET_STORE_PASSWORD"
+            echo "KEY_PASSWORD=$SECRET_KEY_PASSWORD"
+          } >> "$GITHUB_ENV"
 
-      - name: Build Release APK & AAB
-        run: gradle --no-daemon :app:assembleRelease :app:bundleRelease
+      - name: Build release APK & AAB
+        run: ./gradlew --no-daemon :app:assembleRelease :app:bundleRelease
 
-      - name: Clean up ephemeral keystores
-        if: always()
-        run: rm -f "${{ github.workspace }}/my-upload-key.jks" "${{ github.workspace }}/debug.keystore"
-
-      - name: Upload test & debug artifacts
+      - name: Upload test, lint & debug artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
@@ -100,10 +82,11 @@ jobs:
             app/build/reports/tests/testDebugUnitTest/
           if-no-files-found: warn
 
-      - name: Upload Release APK & AAB artifacts
+      - name: Upload release APK & AAB artifacts
         uses: actions/upload-artifact@v4
         with:
           name: release-apk-and-aab
           path: |
             app/build/outputs/apk/release/*.apk
             app/build/outputs/bundle/release/*.aab
+          if-no-files-found: warn
