@@ -1,42 +1,34 @@
-name: Build Release
+name: Android Release Build
 
 on:
-  workflow_dispatch:
-  # Direct source pushes.
   push:
-    branches: [main]
-    paths:
-      - "app/**"
-      - "gradle/**"
-      - "build.gradle.kts"
-      - "settings.gradle.kts"
-      - "gradle.properties"
-      - ".github/workflows/release.yml"
-  # "Extract Archives" and "Update TTS Models" push their commits with
-  # GITHUB_TOKEN (and possibly [skip ci]), which never fires `push` workflows,
-  # so chain off their completion instead. The old trigger pointed at a
-  # "Build Debug" workflow that does not exist in this repo.
-  workflow_run:
-    workflows: ["Extract Archives", "Update TTS Models"]
-    types: [completed]
-    branches: [main]
+    branches:
+      - main
+    tags:
+      - "v*"
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
 
 permissions:
   contents: read
 
-concurrency:
-  group: release-${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
-  build:
-    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+  build-release:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
 
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Validate bundled JSON & portrait assets
+        run: python3 scripts/validate_assets.py
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
@@ -44,102 +36,74 @@ jobs:
           distribution: temurin
           java-version: "17"
 
-      - name: Setup Gradle
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Set up Gradle 9.3.1
         uses: gradle/actions/setup-gradle@v4
-
-      - name: Cache voice guide binaries
-        uses: actions/cache@v4
         with:
-          path: |
-            app/libs
-            app/tts-models-cache
-          key: voice-guide-${{ hashFiles('gradle/libs.versions.toml', 'app/src/main/assets/tts/tts-models.json') }}
+          gradle-version: "9.3.1"
 
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
-
-      - name: Install Android SDK components
+      - name: Ensure ephemeral debug keystore on CI runner
         run: |
-          set -uo pipefail
-          SDKMANAGER="$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager"
+          if [ ! -f debug.keystore ]; then
+            keytool -genkeypair -keystore debug.keystore -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"
+          fi
 
-          yes | "$SDKMANAGER" --licenses > /dev/null || true
-          "$SDKMANAGER" "build-tools;36.0.0" "platform-tools"
+      - name: Run unit tests, Lint, and Debug build
+        run: gradle --no-daemon :app:testDebugUnitTest :app:lintDebug :app:assembleDebug
 
-          # compileSdk 37: the SDK id is android-37 or android-37.0 depending on the
-          # repository, so look it up instead of hard-coding it.
-          PLATFORM=$("$SDKMANAGER" --list 2>/dev/null \
-            | grep -oE 'platforms;android-37(\.[0-9]+)?' | sort -u | head -n1)
-          if [[ -n "$PLATFORM" ]]; then
-            echo "Installing $PLATFORM"
-            "$SDKMANAGER" "$PLATFORM"
+      - name: Prepare release test signing key
+        env:
+          RELEASE_KEYSTORE_BASE64: ${{ secrets.RELEASE_KEYSTORE_BASE64 }}
+          SECRET_STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
+          SECRET_KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: |
+          KEYSTORE_FILE="${{ github.workspace }}/my-upload-key.jks"
+          if [ -n "$RELEASE_KEYSTORE_BASE64" ] && [ -n "$SECRET_STORE_PASSWORD" ] && [ -n "$SECRET_KEY_PASSWORD" ]; then
+            echo "$RELEASE_KEYSTORE_BASE64" | base64 --decode > "$KEYSTORE_FILE"
+            STORE_PASS="$SECRET_STORE_PASSWORD"
+            KEY_PASS="$SECRET_KEY_PASSWORD"
           else
-            echo "No android-37 platform listed; AGP will download it (licenses are accepted)."
+            STORE_PASS="mlbb-test-store"
+            KEY_PASS="mlbb-test-store"
+            rm -f "$KEYSTORE_FILE"
+            keytool -genkeypair \
+              -keystore "$KEYSTORE_FILE" \
+              -storepass "$STORE_PASS" \
+              -alias upload \
+              -keypass "$KEY_PASS" \
+              -keyalg RSA \
+              -keysize 2048 \
+              -validity 10000 \
+              -dname "CN=MLBB Plus Test,O=MLBB Plus,C=US"
           fi
+          echo "KEYSTORE_PATH=$KEYSTORE_FILE" >> "$GITHUB_ENV"
+          echo "STORE_PASSWORD=$STORE_PASS" >> "$GITHUB_ENV"
+          echo "KEY_PASSWORD=$KEY_PASS" >> "$GITHUB_ENV"
 
-      - name: Print toolchain versions
-        run: |
-          ./gradlew --version
-          grep -E '^(agp|kotlin|composeBom) ' gradle/libs.versions.toml
-          grep -nE 'compileSdk|minSdk|targetSdk|namespace|applicationId' app/build.gradle.kts
+      - name: Build Release APK & AAB
+        run: gradle --no-daemon :app:assembleRelease :app:bundleRelease
 
-      - name: Generate ephemeral signing keystore
-        run: |
-          keytool -genkeypair \
-            -keystore release-key.jks \
-            -alias release \
-            -keyalg RSA \
-            -keysize 2048 \
-            -validity 1 \
-            -storepass android \
-            -keypass android \
-            -dname "CN=CI Build, OU=Dev, O=MLBB Plus, L=Unknown, ST=Unknown, C=US"
+      - name: Clean up ephemeral keystores
+        if: always()
+        run: rm -f "${{ github.workspace }}/my-upload-key.jks" "${{ github.workspace }}/debug.keystore"
 
-      - name: Build release APK
-        run: |
-          set -o pipefail
-          ./gradlew :app:assembleRelease --stacktrace 2>&1 | tee assemble-release.log
-
-      - name: Align APK
-        run: |
-          set -euo pipefail
-
-          APK=$(find app/build/outputs/apk/release -name "*.apk" -print -quit)
-          if [[ -z "$APK" ]]; then
-            echo "No release APK was produced" >&2
-            exit 1
-          fi
-
-          echo "Aligning $APK"
-          "$ANDROID_SDK_ROOT/build-tools/36.0.0/zipalign" -f -v 4 "$APK" app-release-aligned.apk
-
-      - name: Sign APK
-        run: |
-          "$ANDROID_SDK_ROOT/build-tools/36.0.0/apksigner" sign \
-            --ks release-key.jks \
-            --ks-key-alias release \
-            --ks-pass pass:android \
-            --key-pass pass:android \
-            --out app-release-signed.apk \
-            app-release-aligned.apk
-
-      - name: Verify signed APK
-        run: |
-          "$ANDROID_SDK_ROOT/build-tools/36.0.0/apksigner" verify --verbose app-release-signed.apk
-
-      - name: Upload release APK artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: mlbb-plus-release
-          path: app-release-signed.apk
-          retention-days: 30
-          if-no-files-found: error
-
-      - name: Upload build log
+      - name: Upload test & debug artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: build-logs
-          path: assemble-release.log
-          retention-days: 7
-          if-no-files-found: ignore
+          name: debug-and-reports
+          path: |
+            app/build/outputs/apk/debug/*.apk
+            app/build/reports/lint-results-debug.html
+            app/build/reports/tests/testDebugUnitTest/
+          if-no-files-found: warn
+
+      - name: Upload Release APK & AAB artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-apk-and-aab
+          path: |
+            app/build/outputs/apk/release/*.apk
+            app/build/outputs/bundle/release/*.aab
