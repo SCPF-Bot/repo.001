@@ -56,12 +56,12 @@ The app should avoid assuming that every user understands game abbreviations or 
 
 | Area | Current capability |
 |---|---|
-| Home | Role and guide-type selection, guide briefing, quick-start guidance, launch state, patch banner, meta/mover content, quick navigation |
+| Home | Role and guide-type selection, guide briefing (win/avoid conditions, picks, loadout), launch state, and a collapsible lane-mechanics card. Deliberately minimal since 2026-11-27: the CURRENT META patch banner, QUICK START card, patch movers, quick-action shortcuts and top-meta-hero row were removed so the screen is position → playstyle → launch. Patch and meta content live on the Patch tab and in Hero Explorer; quick-start guidance moved to Settings → Knowledge Base. |
 | Heroes | Search, filters, sorting, hero cards, hero detail, skills/build/profile data, hero relationships and guide references |
 | Items | Search, filters, sorting, item details, stats/passives/actives, build relationships, heroes using an item |
 | Patch | Original Server patch summary, hero/item changes, equipment/battlefield/system notes, links to affected entities |
 | Settings | Overlay permission flow, auto-start-last-role preference, Help & Knowledge Base reader, bundled-data diagnostics |
-| Knowledge Base | In-app help library (`KnowledgeBase.kt`): topic list + reader with prev/next, related topics, quick-reference tables, common mistakes, and "using this in MLBB Plus" tips. Two-pane on windows ≥840dp, list → reader on phones. |
+| Knowledge Base | In-app help library (`KnowledgeBase.kt`): **18 topics**, list + reader with prev/next, related topics, quick-reference tables, common mistakes, and "using this in MLBB Plus" tips. Two-pane on windows ≥840dp, list → reader on phones. The reader opens on the first entry, which is now **Quick Start: Set Up Your Floating Guide** (moved here from Home on 2026-11-27). |
 
 ### Floating guide overlay
 
@@ -211,7 +211,7 @@ A release should not be considered ready until:
 The current app-screen refresh improves first-use clarity and navigation while intentionally preserving the floating overlay implementation.
 
 Implemented refinements:
-- Home includes a plain-language Quick Start flow for choosing a position, selecting a playstyle, and enabling the floating guide.
+- Home guides the player through choosing a position, selecting a playstyle, and enabling the floating guide. *(The plain-language QUICK START card that explained those three steps moved to Settings → Knowledge Base on 2026-11-27; the flow itself is unchanged and the guide card still drives it.)*
 - Setup terminology uses clearer labels such as **Position**, **Playstyle**, **Enable Widget**, and **Display over other apps**.
 - Overlay permission is requested through a direct Android Settings action with an explanation, rather than a misleading in-app permission switch.
 - The startup preference remembers the last selected position and playstyle and can start the guide on app launch when overlay permission is already granted.
@@ -222,6 +222,14 @@ Implemented refinements:
 - Compose toggle semantics and practical minimum touch sizes support accessibility.
 
 The refresh did not change the overlay implementation files: `WidgetOverlayService.kt`, `JetOverlay.kt`, and `OverlayWidgets.kt`.
+
+### Home simplification (27 November 2026)
+
+Home was cut back to the core task. Removed: the **CURRENT META** patch banner (a clickable card at the top that opened Patch notes), the **QUICK START** card, the **PATCH MOVERS** row, the **QUICK ACTIONS** row (Hero Explorer / Item Explorer / Patch Notes shortcuts) and the **TOP META HEROES** row. Rationale: the bottom navigation bar (and rail on wide windows) already reaches every section, so the shortcuts duplicated it; and the banner/movers/meta rows pushed the guide setup below the fold on small phones.
+
+Home is now: header → guide setup card (position, playstyle, briefing, picks, loadout, status chips, Launch) → collapsible lane-mechanics card → floating Launch button. The mechanics card **starts collapsed**, with its section title inside a 56dp header row that toggles it and a subtitle reporting how many notes and rules are inside; expand/collapse state is saved and resets when the role changes.
+
+Two follow-on corrections: `HomeScreen` no longer accepts `onOpenHeroes` / `onOpenItems` / `onOpenPatchNotes` (their only consumers were removed, and an accepted-but-unwired callback is a silent no-op), and `GameData.topMetaHeroes` in `Models.kt` now has no caller — it is retained as a data-layer helper but is currently dead code.
 
 > **Correction (27 November 2026):** this section previously stated that `MLBBPlusTheme.kt` was unchanged. It has since been extended: the file holds two separate themes — `AppUiTheme` / `AppUiColors` for the main app and `MLBBPlusTheme` / `MLBBPlusColors` for the floating overlay. The Material 3 redesign pass added `darkTheme` / `dynamicColor` parameters to `AppUiTheme` and pointed it at the new `Color.kt` / `Type.kt` token files. **The overlay theme and overlay behaviour were not changed**, and `AppUiTheme` still defaults to dark because screens read `AppUiColors.*` directly. See [ux-redesign.md](ux-redesign.md).
 

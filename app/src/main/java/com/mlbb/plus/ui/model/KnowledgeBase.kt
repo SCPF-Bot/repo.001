@@ -27,6 +27,38 @@ data class KnowledgeEntry(
 
 object KnowledgeBaseData {
     val entries: List<KnowledgeEntry> = listOf(
+        // First entry on purpose: the Knowledge Base opens on entries.first(), so this is
+        // the landing topic. It replaced the QUICK START card that used to sit on Home
+        // (removed 2026-11-27 to keep Home focused on position -> playstyle -> launch).
+        KnowledgeEntry(
+            id = "quick-start",
+            title = "Quick Start: Set Up Your Floating Guide",
+            categoryLabel = "Getting Started",
+            summary = "Three steps to a working in-game guide: choose your position, choose a playstyle, then allow MLBB Plus to appear over other apps.",
+            details = listOf(
+                "Step 1 — Choose your position: on Home, open the Position dropdown and pick the role you play most often (Roam, Jungle, Mid, Gold or EXP). The briefing updates immediately and the choice is remembered next time you open the app.",
+                "Step 2 — Choose a playstyle: the Playstyle dropdown lists the archetypes for that role, for example Crowd Control or Initiator for Roam. Win conditions, what to avoid, recommended picks and the loadout all follow your selection.",
+                "Step 3 — Allow the guide to appear: tap Enable Widget. Android opens the “Display over other apps” page — find MLBB Plus, turn the switch on, and return to the app. Home then reads PERMISSION ON.",
+                "Launch it: tap Launch guide. An ongoing notification confirms the overlay is running; switch to Mobile Legends and the widget appears over the match. Stop it from that notification at any time.",
+                "Android does not let an app grant this permission to itself, so there is no in-app switch. MLBB Plus can only open the system page and then re-read the real permission state when you come back — which is why the status only changes after you return."
+            ),
+            table = KnowledgeTable(
+                headers = listOf("Step", "Where", "What you should see"),
+                rows = listOf(
+                    listOf("1. Position", "Home → guide card", "Your role in the Position dropdown; briefing text changes"),
+                    listOf("2. Playstyle", "Home → guide card", "Win / avoid conditions, picks and loadout for that archetype"),
+                    listOf("3. Permission", "Android settings", "“Display over other apps” on for MLBB Plus; Home shows PERMISSION ON"),
+                    listOf("4. Launch", "Home → Launch guide", "Ongoing notification; overlay visible once you switch to the game")
+                )
+            ),
+            mistakes = listOf(
+                "Tapping Launch guide before granting the permission — nothing can appear until “Display over other apps” is on.",
+                "Assuming the permission failed because the app looks unchanged: the status chip only flips after you return from Android settings.",
+                "Leaving the guide on a playstyle you do not actually play — the timed steps, spells and picks all follow the selected archetype."
+            ),
+            appTip = "Settings → Floating guide re-opens the Android permission page and shows the current status. Turn on “Start the guide when the app opens” there to launch it automatically once permission is granted.",
+            relatedIds = listOf("roles-lanes", "turtle-lord", "meta")
+        ),
         KnowledgeEntry(
             id = "meta",
             title = "What is \"Meta\" & Top Meta Heroes?",
@@ -35,7 +67,7 @@ object KnowledgeBaseData {
             details = listOf(
                 "A hero enters the meta when recent buffs, item adjustments, or objective changes amplify their kit—making them stronger than average alternatives in ranked play.",
                 "In MLBB Plus, heroes marked as meta picks combine strong current-patch performance with high draft priority on Original Server.",
-                "On Home, CURRENT META summarizes the active patch headline, while TOP META HEROES surfaces standout live-server picks for quick inspection."
+                "The Patch tab summarizes the active patch headline and every hero/item change; Hero Explorer's Sort by -> Meta brings current meta picks to the top of the grid."
             ),
             mistakes = listOf(
                 "Blind-picking a meta hero you have zero practice on into hard counters—comfort on an A-tier hero often outperforms first-timing an S+ pick.",

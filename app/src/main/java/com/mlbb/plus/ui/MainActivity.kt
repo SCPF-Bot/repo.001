@@ -273,9 +273,9 @@ private fun MLBBPlusApp(onLaunchWidget: (String, String) -> Unit) {
                         overlayGranted = overlayGranted,
                         overlayRunning = overlayRunning,
                         onLaunchWidget = { onLaunchWidget(selectedRole, selectedRoleType) },
-                        onOpenHeroes = { tab = Tab.HEROES },
-                        onOpenItems = { tab = Tab.ITEMS },
-                        onOpenPatchNotes = { tab = Tab.PATCH },
+                        // onOpenHeroes / onOpenItems / onOpenPatchNotes removed with the
+                        // Home Quick Actions row and CURRENT META banner (2026-11-27):
+                        // the navigation bar / rail already reaches every section.
                         onHeroClick = { heroId ->
                             selectedHero = GameData.heroesById[heroId]
                             heroReturnTab = Tab.HOME

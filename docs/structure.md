@@ -150,9 +150,7 @@ flowchart TD
     IL --> ID[Item detail]
     T --> P[Patch notes]
     T --> S[Settings]
-    H -->|hero pick / meta hero| HD
-    H -->|quick action| IL
-    H -->|patch banner| P
+    H -->|guide pick / briefing hero| HD
     ID -->|linked hero| HD
     P -->|hero change| HD
     P -->|item change| ID
@@ -163,7 +161,7 @@ flowchart TD
 
 | Screen / composable | Main inputs | Navigation or output |
 |---|---|---|
-| `HomeScreen` | Selected role/type, overlay permission/running state, `GameData` | Changes role/type; launches overlay; opens hero, item, or patch details |
+| `HomeScreen` | Selected role/type, overlay permission/running state, `GameData` | Changes role/type; launches overlay; opens hero details from guide picks. Since 2026-11-27 it takes no `onOpenHeroes` / `onOpenItems` / `onOpenPatchNotes` callbacks — the Quick Actions row and CURRENT META banner that used them were removed |
 | `HeroesScreen` | `GameData.heroes`, hero click callback | Opens `HeroDetailScreen` |
 | `HeroDetailScreen` | Selected `Hero`, `GameData` ID maps and guide references | Overview / relationship content; related hero and item links |
 | `ItemsScreen` | `GameData.items` | Opens `ItemDetailScreen` |
@@ -277,7 +275,7 @@ sequenceDiagram
 | `components/UiKit.kt` | Shared app composables, icons, role/tier colors, search/filter/sort primitives | Main screens |
 | `model/Models.kt` | Hero/item/patch models, JSON parsers, `JsonLoader`, `GameData` and cross-reference indexes | Activity, screens, settings diagnostics, overlay service |
 | `model/Guides.kt` | Guide screen models, guide asset parser, hero/item guide reference models | `GameData`, Home and detail screens |
-| `screens/HomeScreen.kt` | Home dashboard, role/type picker, guide summary, patch/meta/quick actions, launch CTA | `GameData`, guide models, shared components, images |
+| `screens/HomeScreen.kt` | Home dashboard: role/type picker, guide briefing, collapsible lane-mechanics card, launch CTA | `GameData`, guide models, shared components, images |
 | `screens/HeroesScreen.kt` | Hero catalogue, filters/search/sort, hero detail and relationship tabs | `Hero`, `GameData`, `HeroImage`, `ItemImage` |
 | `screens/ItemsScreen.kt` | Item catalogue, filters/search/sort, item detail and related entities | `Item`, `GameData`, `ItemImage`, `HeroImage` |
 | `screens/PatchNotesScreen.kt` | Patch note sections/cards and navigation to changed entities | `PatchData`, `GameData` |
@@ -359,6 +357,12 @@ Implemented in the 2026-11-27 redesign/data-sync pass (details in [ux-redesign.m
 - New Material 3 token files (`theme/Color.kt`, `theme/Type.kt`, `theme/Dimens.kt`), reusable components (`components/AppComponents.kt`), route/tab definitions (`navigation/AppRoute.kt`), and a lightweight `viewmodel/AppViewModel.kt`. `AppUiTheme` gained `darkTheme` / `dynamicColor` parameters but still defaults to dark, because screens read `AppUiColors.*` directly.
 - `PatchNotesFile.shortVersion` added and used wherever a bare patch number is compared or displayed (Patch screen, overlay patch label, Settings diagnostics, Home/Heroes/Items headers), replacing three duplicated `substringBefore("-")` expressions.
 - Settings guide-staleness now keys off the patch number rather than the self-declared `meta.latest` flag.
+
+Home simplification (2026-11-27, second pass):
+- Removed from `HomeScreen`: the CURRENT META patch banner, QUICK START card, PATCH MOVERS row, QUICK ACTIONS row and TOP META HEROES row, plus the private composables that rendered them (`PatchBanner`, `QuickStartCard`, `QuickStartStep`, `MoverCard`, `QuickActionCard`, `MetaHeroCard` — 143 lines) and the now-unused `onOpenHeroes` / `onOpenItems` / `onOpenPatchNotes` parameters. `MainActivity`'s call site was updated to match.
+- `MechanicsCard` is now a single collapsible card, **collapsed by default**, with the section title inside its 56dp header row, a chevron that rotates on expand, a saved expand/collapse state keyed on the role, and `stateDescription` semantics for TalkBack.
+- Quick-start guidance moved to `KnowledgeBase.kt` as the new first entry (`id = "quick-start"`, category "Getting Started"), so the Knowledge Base reader now opens on it. The `meta` entry's description of Home was updated to stop referencing the removed sections.
+- `GameData.topMetaHeroes` (`Models.kt`) is now unreferenced — retained as a data-layer helper, flagged as dead code.
 
 The overlay continues to provide a role-aware guide, match timer, objective timing, and enemy battle-spell cooldown tracking. It remains draggable, dismissible, and touch-pass-through outside its window. The refactor does not replace it with a generic floating button or add distracting animation.
 

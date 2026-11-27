@@ -75,7 +75,7 @@ Top 3 journeys (from `overview.md` §3/§5): **(J1) First launch → choose Posi
 | U4 | **Tiny text** — 8sp item prices, 10sp hero names, 10sp “Meta snapshot.” *Accessibility / cognitive load.* | Unreadable at 200% font scale; fails WCAG. | Minimum 11sp (`labelSmall`); grid labels move to `bodySmall`/`labelMedium`. |
 | U5 | **Detail selection not saveable** — `selectedHero/Item` use `remember`, not `rememberSaveable`; process death loses detail. Search/filter/tab *are* saveable (inconsistent). *Nielsen: Error prevention.* | Rotation/process death dumps user to list. | Store hero/item **IDs** with `rememberSaveable`; resolve via `GameData.*ById`. |
 | U6 | **No feedback after Launch** — tap starts foreground service silently; user must switch apps to verify. *Nielsen: Visibility of system status.* | “Did it work?” doubt; duplicate taps. | Snackbar (“Guide running — switch to your game”) + running-state chip already on Home. |
-| U7 | **Permission copy split across 3 places** — Home Quick Start, RolePanel, Settings each explain overlay permission differently. *Cognitive load.* | Confusion about “Display over other apps.” | Single source of truth in Settings; Home shows status + one CTA. Copy in §5. |
+| U7 | **Permission copy split across 3 places** — Home Quick Start, RolePanel, Settings each explain overlay permission differently. *Cognitive load.* | Confusion about “Display over other apps.” | **Partly resolved 2026-11-27:** the Home Quick Start card was removed, leaving RolePanel (status chip + one CTA) and Settings (full explanation), with the long-form explainer in the Knowledge Base Quick Start topic. Copy in §5. |
 | U8 | **Fixed(5) grid doesn’t adapt** — stretched on tablets (960dp), cramped on foldables. *Responsiveness.* | Wasted space / tiny cards on large windows. | `GridCells.Adaptive(64.dp)` (§5). |
 | U9 | **Monospace body text (overlay)** — entire overlay in mono. *Readability.* | Slow reading in-match; fails font-scale expectations. | Mono for timers only; sans for body (§4). |
 | U10 | **No loading/error states** — data loads synchronously in `onCreate`; screens assume data present. *Nielsen: Help users recover.* | Blank/empty on slow devices; no retry path. | `LoadingState`/`ErrorState` components; staged async load (§7). Bundled data is fast, so this is low-urgency but required for QA. |
@@ -94,10 +94,9 @@ MLBB Plus (single Activity, 5 tabs — unchanged destinations)
 │
 ├── Home ─────────────────────────────── J1 + J3 (core task entry)
 │   ├── Guide setup (Position → Playstyle → Enable/Launch)  ← PRIMARY
-│   ├── Patch banner (→ Patch)
-│   ├── Mechanics (progressive disclosure)
-│   ├── Patch movers (→ Hero detail)
-│   └── Quick actions (→ Heroes / Items / Patch) + Meta heroes
+│   └── Lane mechanics (collapsible, COLLAPSED by default)
+│       (Patch banner, movers, quick actions and meta heroes removed —
+│        the nav bar already reaches those sections)
 │
 ├── Heroes ───────────────────────────── J2
 │   ├── Search + filters + sort (48dp, visible Clear)
@@ -118,6 +117,7 @@ MLBB Plus (single Activity, 5 tabs — unchanged destinations)
     ├── Floating guide permission (single source of truth)
     ├── Startup preference (auto-start last role)
     ├── Help & Knowledge Base (two-pane ≥840dp, list→reader on phones)
+    │   └── Quick Start — first topic, so the reader opens on it  ← onboarding
     └── Data status & troubleshooting (expandable)
 ```
 
@@ -207,27 +207,30 @@ Material Symbols / outlined icons, 24dp (18dp small), consistent `contentDescrip
 
 Conventions: **Before** = current code behavior. **After** = redesigned behavior. Code excerpts are in §7; full files in repo.
 
-### 5.1 Splash & Onboarding (first launch)
+### 5.1 Splash & Onboarding (first launch) — **shipped 2026-11-27**
 
-1. **Purpose:** Show value in ≤3 steps, allow skip, never force sign-in (no auth exists).
-2. **Layout (top→bottom):** Splash (theme `windowBackground` + app name, no new activity) → first-run Quick Start card on Home (Position → Playstyle → Enable Widget) with **Skip** / **Get started** → Guide setup.
-3. **Hierarchy:** 1) “Choose your position” 2) “Choose a playstyle” 3) “Enable the floating guide.”
-4. **UI improvements:** Reuse existing `QuickStartCard` copy verbatim (already plain-language). Add dismiss (persist `onboarding_seen` in existing `mlbb_plus_prefs`). No carousel, no pager — progressive disclosure on the dashboard itself.
-5. **Interactions:** Skip dismisses permanently; Get started scrolls to Guide setup; rotation/process death preserves dismissal (saveable/prefs).
-6. **States:** First run = card visible. Returning = card hidden, Guide setup at top. Permission denied = step 3 shows “Open Android settings” CTA (existing behavior, kept).
-7. **Copy:** Keep existing: “Choose your position — Pick the role you play most often.” / “Choose a playstyle — The guide updates to match your strategy.” / “Allow the guide to appear — Tap Enable Widget, then turn on ‘Display over other apps’.”
+1. **Purpose:** Show value in ≤3 steps, never force sign-in (no auth exists), and never occupy space the core task needs.
+2. **Layout:** Splash = theme `windowBackground` only (no new activity). Onboarding = **Settings → Help & Knowledge Base → “Quick Start: Set Up Your Floating Guide”**, the first entry, so the reader opens on it. Home itself carries no onboarding card — the guide card *is* the flow (Position dropdown → Playstyle dropdown → Enable Widget / Launch guide).
+3. **Hierarchy (inside the Quick Start topic):** 1) Choose your position 2) Choose a playstyle 3) Allow the guide to appear 4) Launch it — as a numbered list, a 4-row “Step / Where / What you should see” table, three common mistakes, and an app tip pointing at Settings → Floating guide.
+4. **UI improvements:** The old `QuickStartCard` repeated on every launch what the dropdowns already afford, and pushed guide setup down the page. Moving it to the Knowledge Base gives it room for the permission explanation (why there is no in-app switch, why the status only flips after returning from Android settings) without taxing the launch path. No carousel, no pager, no first-run flag, nothing to dismiss.
+5. **Interactions:** Settings → Help & Knowledge Base (56dp row) → reader opens on Quick Start → prev/next and related topics (`roles-lanes`, `turtle-lord`, `meta`) → Back returns to the topic list, then to Settings.
+6. **States:** Knowledge Base always available offline; two-pane on windows ≥840dp, list → reader on phones (existing behaviour, kept). Permission denied is explained in step 3 of the topic and acted on from the Settings permission card.
+7. **Copy:** Kept verbatim from the removed card and expanded: “Choose your position — pick the role you play most often (Roam, Jungle, Mid, Gold or EXP).” / “Choose a playstyle — win conditions, what to avoid, recommended picks and the loadout all follow your selection.” / “Allow the guide to appear — tap Enable Widget; Android opens ‘Display over other apps’.” / “Launch it — an ongoing notification confirms the overlay is running.”
 
-*Trade-off:* A dedicated 3-page onboarding activity would be more “premium” but adds an activity, back-stack complexity, and a new feature surface. The dismissible card achieves the same comprehension with zero new navigation. Chosen for safety.
+*Trade-off:* A dedicated 3-page onboarding activity would be more “premium” but adds an activity, back-stack complexity, and a new feature surface. A dismissible Home card was the interim proposal; the Knowledge Base topic won because it is discoverable *after* first run too (when a player changes role or re-installs), needs no first-run preference, and costs zero space on the launch screen.
 
-### 5.2 Home & Dashboard
+### 5.2 Home & Dashboard — **simplified 2026-11-27**
 
-1. **Purpose:** Let the player pick Position + Playstyle and launch the floating guide in one glance.
-2. **Layout:** `AppTopBar` (“MLBB Plus”, patch subtitle) → Guide setup card (Position/Playstyle dropdowns, win/avoid, picks, loadout, status chips, primary Launch button) → Patch banner → Mechanics → Movers → Quick actions → Meta heroes.
-3. **Hierarchy:** 1) Guide setup + Launch 2) Patch context 3) Discovery (movers/meta).
-4. **UI improvements:** Guide setup moves **above** Patch banner (currently banner + Quick Start push it down). Launch becomes a full-width `AppButton` (48dp+, disabled/loading states) instead of a floating custom row. Status chips keep text labels (“PERMISSION ON”, “PATCH 2.2.23”). Max width 960dp kept.
-5. **Interactions:** Tap Position/Playstyle → dropdown (existing, kept). Tap Launch → permission check → service start → Snackbar + haptic. Tap pick/mover/meta hero → Hero detail. Pull-to-refresh: N/A (offline data, no network) — do not add.
-6. **States:** Loading (staged, §7), empty (no guide file → existing “overlay still gives you timer…” message, kept), error (staged), offline (N/A — offline-first by design; show patch version so staleness is visible).
-7. **Copy:** Button: “Launch guide” / “Enable widget” (action-oriented, kept). Status: “Overlay is running” / “Overlay is not running” (kept).
+1. **Purpose:** Let the player pick Position + Playstyle and launch the floating guide in one glance. Nothing else belongs here.
+2. **Layout (shipped):** `AppHeader` (“MLBB PLUS”, “{role} guide • patch 2.2.23 • floating guide”) → **Guide setup card** (Position/Playstyle dropdowns, win/avoid conditions, picks, loadout, status chips, guide briefing) → **collapsible lane-mechanics card** → floating Launch button. Max content width 960dp kept.
+   **Removed:** CURRENT META patch banner, QUICK START card, PATCH MOVERS row, QUICK ACTIONS row, TOP META HEROES row — plus the six private composables that rendered them and the `onOpenHeroes` / `onOpenItems` / `onOpenPatchNotes` parameters they consumed.
+3. **Hierarchy:** 1) Guide setup + Launch 2) Lane mechanics (on demand). Patch context now lives on the Patch tab; meta discovery lives in Hero Explorer (Sort → Meta) — both one tap away in the nav bar, which is why the duplicated shortcuts were cut.
+4. **UI improvements:** Guide setup is now the **first** content on the screen instead of the fourth (banner + Quick Start + …). The mechanics card is a single 56dp header row that toggles, with the section title inside it, a chevron that rotates 90° on expand, and a collapsed subtitle that says what is inside (“6 notes • 6 rules of thumb”) so the row is never a mystery. Launch is still the floating button; promoting it to a full-width `AppButton` in a Scaffold bottom slot remains a staged proposal (§5.2 note below).
+5. **Interactions:** Tap Position/Playstyle → dropdown (kept). Tap mechanics header → expand/collapse; state is `rememberSaveable` keyed on role, so switching role collapses it again while rotation and process death preserve the player’s choice. Tap a guide pick → Hero detail (kept). Tap Launch → permission check → service start. Pull-to-refresh: N/A (offline data) — do not add.
+6. **States:** No guide file → existing “overlay still gives you timer / Turtle-Lord tracker / spell cooldowns” message (kept). Guide older than the live patch → orange status chip (kept; currently true for Roam). Loading/error states staged (§7). Offline: N/A by design — the patch version in the header keeps staleness visible.
+7. **Copy:** Button “Launch guide” / “Enable widget” (kept). Status “PERMISSION ON” / “SETUP NEEDED”, “GUIDE 2.2.16a • OLDER THAN 2.2.23” (kept). Mechanics header subtitle “{n} notes • {m} rules of thumb” collapsed / “Hide notes and rules” expanded (new).
+
+*Still proposed, not yet shipped:* replace the floating Launch button with a full-width `AppButton` in a Scaffold bottom slot (insets-aware, disabled/loading states, Snackbar + haptic confirmation — audit items U2/U6).
 
 ### 5.3 Heroes — Search & List
 
@@ -292,7 +295,7 @@ Same pattern as Heroes (§5.3). Differences: filters = Category (Attack/Magic/De
 6. **States:** Permission granted/denied cards (existing ✓/! icons → replace with M3 icons + text). Data missing → red “MISSING” chip (existing, kept).
 7. **Copy:** “Permission is enabled — The floating guide is allowed to appear over other apps.” / “On the next screen, find MLBB Plus and enable ‘Display over other apps’.” (kept — plain language, no jargon).
 
-**Knowledge Base (sub-screen):** List → reader on phones; two-pane ≥840dp (existing, kept). Prev/Next, related topics, quick-reference tables, “Common mistakes,” “Using this in MLBB Plus” tip (existing, kept). Back: reader → list → Settings (existing `BackHandler`, kept). Redesign only swaps custom rows for `AppCard`/`AppTopBar` and 48dp targets.
+**Knowledge Base (sub-screen):** **18 topics** as of 2026-11-27, list → reader on phones; two-pane ≥840dp (existing, kept). Prev/Next, related topics, quick-reference tables, “Common mistakes,” “Using this in MLBB Plus” tip (existing, kept). Back: reader → list → Settings (existing `BackHandler`, kept). The reader opens on `entries.first()`, which is now the **Quick Start** topic moved here from Home (§5.1), so Help is also the onboarding path. Redesign still to do: swap custom rows for `AppCard`/`AppTopBar` and 48dp targets throughout.
 
 ### 5.9 Floating Guide Overlay (critical in-match flow)
 
@@ -312,16 +315,19 @@ There is no form, create, edit, or account flow in `overview.md` or code. Per co
 
 ## 6. Key Flows
 
-### 6.1 Onboarding (first launch → first guide)
+### 6.1 Onboarding (first launch → first guide) — **shipped 2026-11-27**
 
-1. Launch app → splash (theme background) → Home with Quick Start card visible (first run only).
+1. Launch app → splash (theme background) → **Home shows the guide setup card first**: Position and Playstyle dropdowns, briefing, status chips, Launch button. No onboarding gate, nothing to dismiss, no sign-in.
 2. **Step 1 — Position:** Tap Position dropdown → select (e.g. “Roam”). Guide briefing updates instantly. Selection persists (`last_role`).
 3. **Step 2 — Playstyle:** Tap Playstyle dropdown → select (e.g. “Initiator”). Win/avoid, picks, loadout update. Selection persists (`last_role_type`).
 4. **Step 3 — Enable:** Tap “Enable widget” → Android overlay settings opens (app-specific page). User enables “Display over other apps” → returns → status flips to “PERMISSION ON” (via `ON_RESUME`, never optimistic).
-5. Tap “Launch guide” → service starts → Snackbar “Guide running — switch to your game” + haptic → user switches to MLBB.
-6. Tap **Skip** at any point → card dismisses permanently; Guide setup remains at top of Home. No sign-in, no forced path.
+5. Tap “Launch guide” → foreground service starts, ongoing notification appears → user switches to MLBB and the widget is on screen.
+6. **Explainer path (any time, not just first run):** Settings → Help & Knowledge Base → opens directly on **Quick Start: Set Up Your Floating Guide**, which walks the same four steps with a “Step / Where / What you should see” table, the three common mistakes (launching before granting permission, expecting the status to change before you return from settings, leaving a playstyle you do not play), and a tip pointing back at Settings → Floating guide and the auto-start preference.
+7. Optional depth: the collapsed lane-mechanics card on Home expands in one tap to the role’s notes and rules of thumb.
 
-**Feedback at every step:** dropdown selection is instant; permission status is always visible; launch confirms via Snackbar + running chip. **Error prevention:** invalid role/type combos auto-correct to the guide’s first type (existing `LaunchedEffect`, kept); permission cannot be faked by UI state.
+**Feedback at every step:** dropdown selection is instant; permission status is always visible in a chip; the launch is confirmed by the ongoing notification and the “Overlay is running” chip. **Error prevention:** invalid role/type combos auto-correct to the guide’s first type (existing `LaunchedEffect`, kept); permission cannot be faked by UI state; a guide older than the live patch is flagged in orange rather than presented as current.
+
+**Staged, not shipped:** Snackbar + haptic confirmation on launch (audit item U6). Today the notification and status chip are the confirmation.
 
 ### 6.2 Core task (find a hero/item and act on it)
 
@@ -373,7 +379,13 @@ There is no form, create, edit, or account flow in `overview.md` or code. Per co
 | `AndroidManifest.xml` | MODIFIED | `enableOnBackInvokedCallback="true"` (predictive back) |
 | `res/values/strings.xml` | MODIFIED | Shared component strings |
 | `res/values/dimens.xml` | **NEW** | XML spacing tokens (mirror `AppDimens`) |
-| `docs/overview.md`, `docs/structure.md`, `docs/links.md`, `docs/refactoring-report.md`, `readme.md` | MODIFIED | Synced to the refreshed assets (99 items, guide patches, tier snapshot, provenance) + correction notes |
+| `ui/screens/HomeScreen.kt` | MODIFIED | **Home simplification:** removed CURRENT META banner, QUICK START card, PATCH MOVERS, QUICK ACTIONS, TOP META HEROES + their 6 private composables (143 lines) and 3 now-dead callback params; `MechanicsCard` is a collapsible card, collapsed by default |
+| `ui/MainActivity.kt` | MODIFIED | `HomeScreen(...)` call site drops the three removed callbacks |
+| `ui/model/KnowledgeBase.kt` | MODIFIED | New first entry `quick-start` (category “Getting Started”) holding the onboarding steps, table, mistakes and tip; `meta` entry no longer describes removed Home sections |
+| `ui/widgets/OverlayWidgets.kt` | MODIFIED | Bare patch comparison for the in-match label; `lastSlainWasLord` invariant documented; dead `GuideMessage` removed (lint scan) |
+| `ui/widgets/JetOverlay.kt` | MODIFIED | `show()`/`hide()` failures now logged instead of silently swallowed (lint scan) |
+| `docs/overview.md`, `docs/structure.md`, `docs/links.md`, `docs/refactoring-report.md`, `readme.md` | MODIFIED | Synced to the refreshed assets (99 items, guide patches, tier snapshot, provenance), the Home simplification, and the lint-scan corrections |
+
 
 ### 7.2 Theming (copy-paste ready)
 

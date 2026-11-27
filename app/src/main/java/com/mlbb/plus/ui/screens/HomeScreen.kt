@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -29,30 +30,27 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.mlbb.plus.ui.components.AppHeader
 import com.mlbb.plus.ui.components.AppIcons
-import com.mlbb.plus.ui.components.SectionLabel
-import com.mlbb.plus.ui.components.TierBadge
 import com.mlbb.plus.ui.model.GameData
 import com.mlbb.plus.ui.model.GuideFile
 import com.mlbb.plus.ui.model.GuideType
-import com.mlbb.plus.ui.model.Hero
 import com.mlbb.plus.ui.model.HeroPick
-import com.mlbb.plus.ui.model.PatchHeroChange
 import com.mlbb.plus.ui.model.RoleTypes
 import com.mlbb.plus.ui.theme.AppUiColors
 
@@ -65,11 +63,13 @@ fun HomeScreen(
     overlayGranted: Boolean,
     overlayRunning: Boolean,
     onLaunchWidget: () -> Unit,
-    onOpenHeroes: () -> Unit,
-    onOpenItems: () -> Unit,
-    onOpenPatchNotes: () -> Unit,
     onHeroClick: (Int) -> Unit,
 ) {
+    // Removed 2026-11-27 (Home simplification): onOpenHeroes / onOpenItems /
+    // onOpenPatchNotes. Their only consumers were the Quick Actions row and the
+    // CURRENT META banner; with both gone the callbacks would have been
+    // accepted-but-unwired no-ops — the same trap as the old detail-screen
+    // `onBack`. The bottom navigation bar / rail already reaches every section.
     val roles = remember { RoleTypes.roles }
     val typeIds = remember(selectedRole) { RoleTypes.typesFor(selectedRole) }
     // Bare patch number ("2.2.23") from PatchNotesFile.shortVersion: displayVersion can
@@ -95,10 +95,6 @@ fun HomeScreen(
                 Modifier.padding(horizontal = 16.dp, vertical = 18.dp),
                 verticalArrangement = Arrangement.spacedBy(22.dp)
             ) {
-                PatchBanner(onClick = onOpenPatchNotes)
-
-                QuickStartCard(overlayGranted = overlayGranted)
-
                 RolePanel(
                     selectedRole = selectedRole,
                     selectedRoleType = selectedRoleType,
@@ -113,42 +109,14 @@ fun HomeScreen(
                     onHeroClick = onHeroClick
                 )
 
+                // Lane mechanics: one collapsible card, COLLAPSED by default.
+                // The section label now lives inside the card header so there is a
+                // single 48dp+ tap target instead of a label above an always-open card.
                 if (guide != null && guide.mechanics.isNotEmpty()) {
-                    SectionLabel("${selectedRole.uppercase()} MECHANICS \u2022 PATCH $guidePatch")
-                    MechanicsCard(guide)
-                }
-
-                val movers = remember(GameData.patchNotes) {
-                    GameData.patchNotes.originalServer.heroChanges.filter { GameData.heroesById[it.heroId] != null }
-                }
-                if (movers.isNotEmpty()) {
-                    SectionLabel("PATCH $shortPatch MOVERS")
-                    Row(
-                        Modifier.horizontalScroll(rememberScrollState()),
-                        horizontalArrangement = Arrangement.spacedBy(10.dp)
-                    ) {
-                        movers.forEach { change ->
-                            val hero = GameData.heroesById[change.heroId] ?: return@forEach
-                            MoverCard(hero = hero, change = change, onClick = { onHeroClick(hero.id) })
-                        }
-                    }
-                }
-
-                SectionLabel("QUICK ACTIONS")
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    QuickActionCard("Hero Explorer", AppIcons.Person, AppUiColors.Blue, Modifier.weight(1f), onOpenHeroes)
-                    QuickActionCard("Item Explorer", AppIcons.Apps, AppUiColors.Teal, Modifier.weight(1f), onOpenItems)
-                    QuickActionCard("Patch Notes", AppIcons.History, AppUiColors.GithubSecondary, Modifier.weight(1f), onOpenPatchNotes)
-                }
-
-                SectionLabel("TOP META HEROES")
-                Row(
-                    Modifier.horizontalScroll(rememberScrollState()),
-                    horizontalArrangement = Arrangement.spacedBy(10.dp)
-                ) {
-                    GameData.topMetaHeroes.forEach { hero ->
-                        MetaHeroCard(hero = hero, onClick = { onHeroClick(hero.id) })
-                    }
+                    MechanicsCard(
+                        guide = guide,
+                        title = "${selectedRole.uppercase()} MECHANICS \u2022 PATCH $guidePatch"
+                    )
                 }
 
                 // Room so the floating launch button never covers the last card.
@@ -161,81 +129,6 @@ fun HomeScreen(
             onClick = onLaunchWidget,
             modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp)
         )
-    }
-}
-
-@Composable
-private fun QuickStartCard(overlayGranted: Boolean) {
-    val shape = RoundedCornerShape(16.dp)
-    Column(
-        Modifier.fillMaxWidth().clip(shape)
-            .background(AppUiColors.GithubSurface.copy(alpha = 0.72f))
-            .border(1.dp, AppUiColors.GithubBorder, shape).padding(14.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        Text("QUICK START", color = AppUiColors.Gold, fontWeight = FontWeight.Bold, fontSize = 12.sp, letterSpacing = 1.sp)
-        QuickStartStep("1", "Choose your position", "Pick the role you play most often.")
-        QuickStartStep("2", "Choose a playstyle", "The guide updates to match your strategy.")
-        if (overlayGranted) {
-            QuickStartStep("3", "Open your floating guide", "Tap Launch Widget at the bottom of the screen.")
-        } else {
-            QuickStartStep("3", "Allow the guide to appear", "Tap Enable Widget, then turn on ‘Display over other apps’ in Android settings.")
-        }
-    }
-}
-
-@Composable
-private fun QuickStartStep(number: String, title: String, detail: String) {
-    Row(horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.Top) {
-        Box(Modifier.size(24.dp).clip(CircleShape).background(AppUiColors.Gold.copy(alpha = 0.16f)), contentAlignment = Alignment.Center) {
-            Text(number, color = AppUiColors.Gold, fontSize = 11.sp, fontWeight = FontWeight.Bold)
-        }
-        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(1.dp)) {
-            Text(title, color = AppUiColors.GithubText, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
-            Text(detail, color = AppUiColors.GithubSecondary, fontSize = 12.sp, lineHeight = 17.sp)
-        }
-    }
-}
-
-@Composable
-private fun PatchBanner(onClick: () -> Unit) {
-    val notes = GameData.patchNotes
-    val cur = notes.originalServer
-    val shape = RoundedCornerShape(18.dp)
-    // Title + counts come from patch_notes.json (e.g. "Patch 2.2.23 \u2014 Popol and Kupa Revamp").
-    val headline = cur.title.ifBlank { "Patch ${notes.shortVersion}" }
-    val counts = buildString {
-        append("${GameData.liveHeroes.size} heroes")
-        if (cur.heroChanges.isNotEmpty()) append(" \u2022 ${cur.heroChanges.size} hero changes")
-        if (cur.date.isNotBlank()) append(" \u2022 ${cur.date}")
-    }
-    Row(
-        Modifier
-            .fillMaxWidth()
-            .clip(shape)
-            .background(
-                Brush.horizontalGradient(
-                    listOf(AppUiColors.Gold.copy(alpha = 0.14f), AppUiColors.Gold.copy(alpha = 0.04f))
-                )
-            )
-            .border(1.dp, AppUiColors.Gold.copy(alpha = 0.45f), shape)
-            .clickable(role = Role.Button, onClick = onClick)
-            .padding(16.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(14.dp)
-    ) {
-        Box(
-            Modifier.size(52.dp).clip(RoundedCornerShape(14.dp)).background(AppUiColors.Gold.copy(alpha = 0.18f)),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(AppIcons.Fire, contentDescription = null, tint = AppUiColors.Gold, modifier = Modifier.size(28.dp))
-        }
-        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-            Text("CURRENT META", color = AppUiColors.Gold, fontWeight = FontWeight.Bold, fontSize = 17.sp, letterSpacing = 1.sp)
-            Text(headline, color = AppUiColors.GithubText, fontSize = 13.sp, fontWeight = FontWeight.SemiBold, maxLines = 1, overflow = TextOverflow.Ellipsis)
-            Text(counts, color = AppUiColors.GithubSecondary, fontSize = 12.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
-        }
-        Icon(AppIcons.ChevronRight, contentDescription = null, tint = AppUiColors.Gold)
     }
 }
 
@@ -427,63 +320,88 @@ private fun PickChip(pick: HeroPick, onHeroClick: (Int) -> Unit) {
     }
 }
 
-/** <role>_mechanics from the guide's meta: the 3 most useful notes, rest behind a toggle. */
+/**
+ * <role>_mechanics from the guide's meta, as a collapsible card.
+ *
+ * COLLAPSED BY DEFAULT (2026-11-27 redesign): Home is the launch screen, and lane
+ * mechanics are reference detail rather than the primary task — so they no longer
+ * push the guide setup down the page. The previous two-stage "first 3 notes + Show
+ * all" toggle is replaced by a single expand/collapse: the header is the only tap
+ * target, it is 56dp tall (clears the 48dp minimum), and the collapsed subtitle
+ * still says what is inside so the section is not a mystery row.
+ *
+ * State is keyed on the role and saved, so switching role resets it to collapsed
+ * while rotation / process death keeps whatever the player chose.
+ */
 @Composable
-private fun MechanicsCard(guide: GuideFile) {
-    var showAll by remember(guide.role) { mutableStateOf(false) }
+private fun MechanicsCard(guide: GuideFile, title: String) {
+    var expanded by rememberSaveable(guide.role) { mutableStateOf(false) }
     val shape = RoundedCornerShape(16.dp)
-    val notes = if (showAll) guide.mechanics else guide.mechanics.take(3)
     Column(
         Modifier
             .fillMaxWidth()
             .clip(shape)
             .background(AppUiColors.GithubCard)
             .border(1.dp, AppUiColors.GithubBorder, shape)
-            .padding(14.dp),
-        verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
-        notes.forEach { note ->
-            Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                Text(note.title, color = AppUiColors.Gold, fontSize = 12.sp, fontWeight = FontWeight.Bold)
-                Text(note.text, color = AppUiColors.GithubSecondary, fontSize = 12.sp, lineHeight = 18.sp)
+        Row(
+            Modifier
+                .fillMaxWidth()
+                .semantics {
+                    role = Role.Button
+                    stateDescription = if (expanded) "Expanded" else "Collapsed"
+                }
+                .clickable { expanded = !expanded }
+                .heightIn(min = 56.dp)
+                .padding(horizontal = 14.dp, vertical = 10.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                Text(
+                    title,
+                    color = AppUiColors.Gold,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 1.sp,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Text(
+                    if (expanded) "Hide notes and rules"
+                    else "${guide.mechanics.size} notes \u2022 ${guide.globalRules.size} rules of thumb",
+                    color = AppUiColors.GithubSecondary,
+                    fontSize = 11.sp,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
             }
-        }
-        if (showAll && guide.globalRules.isNotEmpty()) {
-            Text("RULES OF THUMB", color = AppUiColors.GithubSecondary, fontSize = 11.sp, letterSpacing = 1.sp)
-            guide.globalRules.forEach { Text("\u2022 $it", color = AppUiColors.GithubText, fontSize = 12.sp, lineHeight = 18.sp) }
-        }
-        if (guide.mechanics.size > 3 || guide.globalRules.isNotEmpty()) {
-            Text(
-                if (showAll) "Show less" else "Show all ${guide.mechanics.size} notes + rules",
-                color = AppUiColors.Gold,
-                fontSize = 12.sp,
-                fontWeight = FontWeight.SemiBold,
-                modifier = Modifier.clickable(role = Role.Button) { showAll = !showAll }.padding(vertical = 4.dp)
+            // Chevron points right when collapsed, down when expanded.
+            Icon(
+                AppIcons.ChevronRight,
+                contentDescription = null,
+                tint = AppUiColors.Gold,
+                modifier = Modifier.size(20.dp).rotate(if (expanded) 90f else 0f)
             )
         }
-    }
-}
-
-@Composable
-private fun MoverCard(hero: Hero, change: PatchHeroChange, onClick: () -> Unit) {
-    val color = patchBadgeColor(change.type)
-    val shape = RoundedCornerShape(16.dp)
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier
-            .width(96.dp)
-            .clip(shape)
-            .background(color.copy(alpha = 0.10f))
-            .border(1.dp, color.copy(alpha = 0.45f), shape)
-            .clickable(role = Role.Button, onClick = onClick)
-            .padding(horizontal = 8.dp, vertical = 12.dp)
-    ) {
-        HeroImage(hero = hero, modifier = Modifier.size(52.dp).clip(CircleShape).border(2.dp, color, CircleShape))
-        Spacer(Modifier.height(8.dp))
-        Text(hero.name, color = AppUiColors.GithubText, fontSize = 12.sp, fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis)
-        Text(change.type.uppercase().ifBlank { "CHANGE" }, color = color, fontSize = 10.sp, fontWeight = FontWeight.Bold, letterSpacing = 0.5.sp)
-        if (change.tierChange.isNotBlank()) {
-            Text(change.tierChange.replace("->", "\u2192"), color = AppUiColors.GithubSecondary, fontSize = 10.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        if (expanded) {
+            Column(
+                Modifier.fillMaxWidth().padding(start = 14.dp, end = 14.dp, bottom = 14.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                guide.mechanics.forEach { note ->
+                    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                        Text(note.title, color = AppUiColors.Gold, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                        Text(note.text, color = AppUiColors.GithubSecondary, fontSize = 12.sp, lineHeight = 18.sp)
+                    }
+                }
+                if (guide.globalRules.isNotEmpty()) {
+                    Text("RULES OF THUMB", color = AppUiColors.GithubSecondary, fontSize = 11.sp, letterSpacing = 1.sp)
+                    guide.globalRules.forEach {
+                        Text("\u2022 $it", color = AppUiColors.GithubText, fontSize = 12.sp, lineHeight = 18.sp)
+                    }
+                }
+            }
         }
     }
 }
@@ -532,62 +450,6 @@ private fun DropdownBox(value: String, options: List<String>, labels: (String) -
                 )
             }
         }
-    }
-}
-
-@Composable
-private fun QuickActionCard(label: String, icon: ImageVector, tint: Color, modifier: Modifier, onClick: () -> Unit) {
-    val shape = RoundedCornerShape(16.dp)
-    Column(
-        modifier
-            .clip(shape)
-            .background(Brush.verticalGradient(listOf(tint.copy(alpha = 0.20f), tint.copy(alpha = 0.07f))))
-            .border(1.dp, tint.copy(alpha = 0.40f), shape)
-            .clickable(role = Role.Button, onClick = onClick)
-            .padding(12.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        Box(
-            Modifier.size(44.dp).clip(RoundedCornerShape(12.dp)).background(tint.copy(alpha = 0.22f)),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(icon, contentDescription = null, tint = if (tint == AppUiColors.GithubSecondary) AppUiColors.GithubText else tint, modifier = Modifier.size(24.dp))
-        }
-        Text(label, color = AppUiColors.GithubText, fontWeight = FontWeight.SemiBold, fontSize = 13.sp, maxLines = 2, overflow = TextOverflow.Ellipsis, lineHeight = 17.sp)
-    }
-}
-
-@Composable
-private fun MetaHeroCard(hero: Hero, onClick: () -> Unit) {
-    val shape = RoundedCornerShape(16.dp)
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier
-            .width(96.dp)
-            .clip(shape)
-            .background(AppUiColors.GithubCard)
-            .border(1.dp, AppUiColors.GithubBorder, shape)
-            .clickable(onClick = onClick)
-            .padding(horizontal = 8.dp, vertical = 12.dp)
-    ) {
-        Box {
-            HeroImage(
-                hero = hero,
-                modifier = Modifier
-                    .size(58.dp)
-                    .clip(CircleShape)
-                    .border(2.dp, AppUiColors.GithubText.copy(alpha = 0.85f), CircleShape) // theme near-white, not hardcoded white
-            )
-            TierBadge(hero.tier, Modifier.align(Alignment.TopEnd))
-        }
-        Spacer(Modifier.height(8.dp))
-        Text(hero.name, color = AppUiColors.GithubText, fontSize = 13.sp, fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis)
-        // winRate is 0..1 (Models.kt) -> *100 is correct.
-        Text(
-            if (hero.hasLiveStats) "%.0f%% win".format(hero.winRate * 100) else "Tier ${hero.tier}",
-            color = AppUiColors.GithubSecondary,
-            fontSize = 12.sp
-        )
     }
 }
 
