@@ -12,13 +12,21 @@ import android.os.IBinder
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.core.app.NotificationCompat
 import androidx.core.app.ServiceCompat
+import com.mlbb.plus.tts.VoiceGuideManager
 import com.mlbb.plus.ui.model.GameData
 import com.mlbb.plus.ui.model.RoleTypes
 import com.mlbb.plus.ui.theme.MLBBPlusTheme
 import com.mlbb.plus.ui.widgets.JetOverlay
 import com.mlbb.plus.ui.widgets.RoamGuideWidget
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.launch
 
 // ============================================================
 // mlbb/ui/WidgetOverlayService.kt  ->  FIXED
@@ -65,6 +73,19 @@ class WidgetOverlayService : Service() {
 
     private var overlayInitialized = false
 
+    /**
+     * Voice Guide coach. Created with the service so the overlay (which is built
+     * once) always captures a live instance, and released in [onDestroy].
+     *
+     * It does nothing at all until the player enables Voice Guide in Settings:
+     * no engine is loaded, no audio focus is requested, no model is downloaded,
+     * and no voice row is composed. That is what keeps the overlay byte-for-byte
+     * identical for everyone who never turns the feature on.
+     */
+    private var voice: VoiceGuideManager? = null
+
+    private var notificationScope: CoroutineScope? = null
+
     override fun onCreate() {
         super.onCreate()
         // Service can start without MainActivity - load JSONs here too
@@ -73,10 +94,12 @@ class WidgetOverlayService : Service() {
             updateRole(currentRole, RoleTypes.defaultTypeFor(currentRole))
         }
         createChannel()
+        voice = VoiceGuideManager(this)
+        observeVoiceForNotification()
         // FIX [2]: must call startForeground immediately in onCreate.
         ServiceCompat.startForeground(
             this,
-            1,
+            NOTIFICATION_ID,
             buildNotification(currentRole, currentRoleType),
             // SPECIAL_USE only exists on API 34+; passing it on 29-33 is invalid.
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
@@ -93,6 +116,26 @@ class WidgetOverlayService : Service() {
             return START_NOT_STICKY
         }
 
+        // Voice Guide notification actions. They never start or stop the overlay
+        // itself: "Stop voice" only silences the coach.
+        when (intent?.action) {
+            ACTION_VOICE_TOGGLE -> {
+                voice?.toggleFromNotification()
+                getSystemService(NotificationManager::class.java)
+                    ?.notify(NOTIFICATION_ID, buildNotification(currentRole, currentRoleType))
+                return START_STICKY
+            }
+
+            ACTION_VOICE_STOP -> {
+                voice?.stopFromNotification()
+                getSystemService(NotificationManager::class.java)
+                    ?.notify(NOTIFICATION_ID, buildNotification(currentRole, currentRoleType))
+                return START_STICKY
+            }
+
+            else -> Unit
+        }
+
         // FIX [5]: intent is null when the system restarts a
         // START_STICKY service - fall back to last known role.
         val requestedRole = intent?.getStringExtra(EXTRA_ROLE) ?: currentRole
@@ -106,7 +149,7 @@ class WidgetOverlayService : Service() {
 
         // FIX [7]: null-safe notify.
         getSystemService(NotificationManager::class.java)
-            ?.notify(1, buildNotification(role, roleType))
+            ?.notify(NOTIFICATION_ID, buildNotification(role, roleType))
 
         if (!overlayInitialized) {
             JetOverlay.initialize(application) {
@@ -115,7 +158,8 @@ class WidgetOverlayService : Service() {
                         RoamGuideWidget(
                             role = currentRole,
                             roleType = currentRoleType,
-                            onBack = { JetOverlay.hide() }
+                            onBack = { JetOverlay.hide() },
+                            voice = voice
                         )
                     }
                 }
@@ -128,6 +172,12 @@ class WidgetOverlayService : Service() {
 
     override fun onDestroy() {
         markRunning(false)
+        // Voice Guide: stop speech, hand audio focus back to the game, release
+        // the native engine (Kokoro holds ~200 MB) and drop the listeners.
+        notificationScope?.cancel()
+        notificationScope = null
+        voice?.release()
+        voice = null
         JetOverlay.hide()
         // FIX [6]: remove the foreground notification.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
@@ -140,6 +190,25 @@ class WidgetOverlayService : Service() {
     }
 
     override fun onBind(intent: Intent?): IBinder? = null
+
+    /**
+     * Keeps the notification honest while the coach talks: the Play/Pause label
+     * follows the manager's phase. Cheap, because phase changes are rare and
+     * [distinctUntilChanged] collapses recomposition churn.
+     */
+    private fun observeVoiceForNotification() {
+        val manager = voice ?: return
+        val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
+        notificationScope = scope
+        scope.launch {
+            snapshotFlow { manager.state.phase to manager.state.enabled }
+                .distinctUntilChanged()
+                .collect {
+                    getSystemService(NotificationManager::class.java)
+                        ?.notify(NOTIFICATION_ID, buildNotification(currentRole, currentRoleType))
+                }
+        }
+    }
 
     private fun buildNotification(role: String, roleType: String): Notification {
         // FIX [3]: tap notification -> open app.
@@ -156,12 +225,47 @@ class WidgetOverlayService : Service() {
             Intent(this, WidgetOverlayService::class.java).setAction(ACTION_STOP),
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
-        return NotificationCompat.Builder(this, CHANNEL_ID)
+        val voiceState = voice?.state
+        val voiceOn = voiceState?.enabled == true
+        val speaking = voiceState?.phase == VoiceGuideManager.Phase.SPEAKING
+        val builder = NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle("MLBB Plus running")
-            .setContentText("$roleType $role \u2022 Tap to open app, or Stop to hide it")
+            .setContentText(
+                if (voiceOn && speaking) {
+                    "$roleType $role \u2022 Voice coach is speaking"
+                } else {
+                    "$roleType $role \u2022 Tap to open app, or Stop to hide it"
+                }
+            )
             .setSmallIcon(android.R.drawable.ic_dialog_info)
             .setContentIntent(contentIntent)
             .setOngoing(true)
+
+        // Voice actions only exist while the feature is on, so the notification
+        // is unchanged for everyone else.
+        if (voiceOn) {
+            val toggleIntent = PendingIntent.getService(
+                this,
+                2,
+                Intent(this, WidgetOverlayService::class.java).setAction(ACTION_VOICE_TOGGLE),
+                PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+            )
+            val voiceStopIntent = PendingIntent.getService(
+                this,
+                3,
+                Intent(this, WidgetOverlayService::class.java).setAction(ACTION_VOICE_STOP),
+                PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+            )
+            builder
+                .addAction(
+                    android.R.drawable.ic_media_play,
+                    if (speaking) "Pause voice" else "Play voice",
+                    toggleIntent
+                )
+                .addAction(android.R.drawable.ic_media_stop, "Stop voice", voiceStopIntent)
+        }
+
+        return builder
             .addAction(android.R.drawable.ic_menu_close_clear_cancel, "Stop", stopIntent)
             .setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_IMMEDIATE)
             .build()
@@ -176,6 +280,10 @@ class WidgetOverlayService : Service() {
         const val EXTRA_ROLE = "ROLE"
         const val EXTRA_ROLE_TYPE = "ROLE_TYPE"
         const val ACTION_STOP = "com.mlbb.plus.STOP_OVERLAY"
+
+        /** Voice Guide: Play/Pause and Stop-voice notification actions. */
+        const val ACTION_VOICE_TOGGLE = "com.mlbb.plus.VOICE_TOGGLE"
+        const val ACTION_VOICE_STOP = "com.mlbb.plus.VOICE_STOP"
 
         var isRunning = false
             internal set
@@ -195,6 +303,9 @@ class WidgetOverlayService : Service() {
         }
 
         private const val CHANNEL_ID = "mlbb_plus"
+
+        /** Single foreground notification id, shared by every notify() call. */
+        private const val NOTIFICATION_ID = 1
     }
 }
 

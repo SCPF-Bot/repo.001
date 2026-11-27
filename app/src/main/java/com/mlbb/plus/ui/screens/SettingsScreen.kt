@@ -12,8 +12,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -22,6 +24,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
@@ -29,6 +32,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.mlbb.plus.tts.VoiceGuideManager
+import com.mlbb.plus.tts.VoiceGuideSettings
+import com.mlbb.plus.tts.VoiceModel
+import com.mlbb.plus.tts.VoiceModelDownloader
 import com.mlbb.plus.ui.components.AppIcons
 import com.mlbb.plus.ui.components.DetailBackBar
 import com.mlbb.plus.ui.components.ScreenTitleBar
@@ -38,7 +45,9 @@ import com.mlbb.plus.ui.model.KnowledgeActionTarget
 import com.mlbb.plus.ui.model.KnowledgeBaseData
 import com.mlbb.plus.ui.model.KnowledgeEntry
 import com.mlbb.plus.ui.theme.AppUiColors
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 @Composable
 fun SettingsScreen(
@@ -150,6 +159,8 @@ private fun SettingsContent(
             checked = autoStartLastRole,
             onChecked = onAutoStartChange
         )
+
+        VoiceGuideSection()
 
         SectionLabel("HELP")
         Row(
@@ -545,6 +556,321 @@ private fun KnowledgeBaseView(
     }
 }
 
+/**
+ * Voice Guide settings: master switch, voice, speed, engine, auto-speak,
+ * enemy-spell announcements and on-demand model storage.
+ *
+ * This screen owns its own [VoiceGuideManager] for previews and downloads. The
+ * overlay service has a second one; both follow [VoiceGuideSettings.revision],
+ * so a change made here reaches the in-game coach immediately.
+ *
+ * Layout follows the rest of this screen: [SettingsRow] already draws its own
+ * card, so the switches stay top-level siblings and only the chips, storage and
+ * buttons are grouped inside one card.
+ */
+@Composable
+private fun VoiceGuideSection() {
+    val context = LocalContext.current
+    val manager = remember { VoiceGuideManager(context) }
+    DisposableEffect(Unit) {
+        onDispose { manager.release() }
+    }
+
+    val revision = VoiceGuideSettings.revision
+    val state = manager.state
+    val enabled = remember(revision) { VoiceGuideSettings.isEnabled(context) }
+    val engine = remember(revision) { VoiceGuideSettings.engine(context) }
+    val voiceId = remember(revision) { VoiceGuideSettings.voice(context) }
+    val rate = remember(revision) { VoiceGuideSettings.rate(context) }
+    val autoSpeak = remember(revision) { VoiceGuideSettings.autoSpeak(context) }
+    val announceSpells = remember(revision) { VoiceGuideSettings.announceSpells(context) }
+    val downloader = remember { VoiceModelDownloader(context) }
+
+    // Storage checks touch the disk, so they run off the main thread and are
+    // recomputed when a setting changes or a download finishes.
+    val installedIds by produceState<Set<String>>(emptySet(), revision, state.downloading, state.modelLabel) {
+        value = withContext(Dispatchers.IO) {
+            VoiceModelDownloader.MODELS.filter { downloader.isInstalled(it) }.map { it.id }.toSet()
+        }
+    }
+    val selectedModel = VoiceModelDownloader.forVoice(voiceId)
+    val selectedInstalled = selectedModel != null && selectedModel.id in installedIds
+
+    SectionLabel("VOICE GUIDE")
+
+    SettingsRow(
+        title = "Voice Guide",
+        subtitle = "Hear the current step through the floating guide. Nothing is spoken, downloaded or " +
+            "focused until you switch this on.",
+        checked = enabled,
+        onChecked = { manager.setEnabled(it) }
+    )
+
+    if (!enabled) {
+        Text(
+            "Off. The floating guide behaves exactly as it did before: no voice controls, no audio focus, " +
+                "no model on disk.",
+            color = AppUiColors.GithubSecondary,
+            fontSize = 12.sp,
+            lineHeight = 17.sp
+        )
+        return
+    }
+
+    Column(
+        Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp))
+            .background(AppUiColors.GithubCard)
+            .border(1.dp, AppUiColors.GithubBorder, RoundedCornerShape(16.dp)).padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        VoiceSettingLabel("VOICE")
+        Row(
+            Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            VoiceModelDownloader.MODELS.forEach { model ->
+                model.speakers.keys.forEach { id ->
+                    VoiceOptionChip(
+                        label = voiceLabel(id, model),
+                        selected = voiceId == id,
+                        trailing = if (model.id in installedIds) "installed" else model.sizeLabel,
+                        onClick = {
+                            VoiceGuideSettings.setVoice(context, id)
+                            manager.onSettingsChanged()
+                        }
+                    )
+                }
+            }
+        }
+
+        VoiceSettingLabel("SPEED")
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            VoiceGuideSettings.RATES.forEach { option ->
+                VoiceOptionChip(
+                    label = speedLabel(option),
+                    selected = kotlin.math.abs(rate - option) < 0.001f,
+                    trailing = null,
+                    onClick = { manager.setRate(option) }
+                )
+            }
+        }
+
+        VoiceSettingLabel("ENGINE")
+        Row(
+            Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            VoiceOptionChip(
+                label = "Automatic",
+                selected = engine == VoiceGuideSettings.ENGINE_AUTO,
+                trailing = "recommended",
+                onClick = {
+                    VoiceGuideSettings.setEngine(context, VoiceGuideSettings.ENGINE_AUTO)
+                    manager.onSettingsChanged()
+                }
+            )
+            VoiceOptionChip(
+                label = "Neural (offline)",
+                selected = engine == VoiceGuideSettings.ENGINE_SHERPA,
+                trailing = "needs a download",
+                onClick = {
+                    VoiceGuideSettings.setEngine(context, VoiceGuideSettings.ENGINE_SHERPA)
+                    manager.onSettingsChanged()
+                }
+            )
+            VoiceOptionChip(
+                label = "System voice",
+                selected = engine == VoiceGuideSettings.ENGINE_SYSTEM,
+                trailing = "no download",
+                onClick = {
+                    VoiceGuideSettings.setEngine(context, VoiceGuideSettings.ENGINE_SYSTEM)
+                    manager.onSettingsChanged()
+                }
+            )
+        }
+
+        VoiceSettingLabel("VOICE MODEL ON THIS DEVICE")
+        if (installedIds.isEmpty()) {
+            Text(
+                "Nothing downloaded yet. Models are fetched on demand into the app's private folder - " +
+                    "never bundled inside the APK.",
+                color = AppUiColors.GithubSecondary,
+                fontSize = 12.sp,
+                lineHeight = 17.sp
+            )
+        } else {
+            VoiceModelDownloader.MODELS.filter { it.id in installedIds }.forEach { model ->
+                VoiceModelRow(model = model, onDelete = { manager.deleteModel(model) })
+            }
+        }
+
+        if (state.downloading) {
+            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                LinearProgressIndicator(
+                    progress = { state.progress },
+                    modifier = Modifier.fillMaxWidth().height(6.dp).clip(RoundedCornerShape(3.dp)),
+                    color = AppUiColors.Gold,
+                    trackColor = AppUiColors.GithubBorder
+                )
+                Text(
+                    state.progressLabel.ifBlank { "Preparing download" },
+                    color = AppUiColors.GithubSecondary,
+                    fontSize = 11.sp
+                )
+                OutlinedButton(
+                    onClick = { manager.cancelDownload() },
+                    modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),
+                    shape = RoundedCornerShape(12.dp)
+                ) { Text("Cancel download", fontWeight = FontWeight.SemiBold) }
+            }
+        } else if (selectedModel != null) {
+            Button(
+                onClick = { manager.downloadSelectedModel() },
+                modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = AppUiColors.Gold,
+                    contentColor = Color(0xFF171717)
+                ),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Text(
+                    if (selectedInstalled) {
+                        "Re-download voice \u2022 ${selectedModel.sizeLabel}"
+                    } else {
+                        "Download voice \u2022 ${selectedModel.sizeLabel}"
+                    },
+                    fontWeight = FontWeight.Bold
+                )
+            }
+        }
+
+        Button(
+            onClick = { manager.playTestLine() },
+            modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = AppUiColors.GithubSurface,
+                contentColor = AppUiColors.GithubText
+            ),
+            shape = RoundedCornerShape(12.dp)
+        ) { Text("Play test voice", fontWeight = FontWeight.Bold) }
+
+        if (state.message.isNotBlank()) {
+            Text(
+                state.message,
+                color = if (state.phase == VoiceGuideManager.Phase.ERROR) AppUiColors.Red else AppUiColors.Green,
+                fontSize = 12.sp,
+                lineHeight = 17.sp
+            )
+        }
+        if (state.engineLabel.isNotBlank()) {
+            Text(
+                "Active engine: ${state.engineLabel}",
+                color = AppUiColors.GithubSecondary,
+                fontSize = 11.sp
+            )
+        }
+
+        Text(
+            "Kokoro ${VoiceModelDownloader.KOKORO.sizeLabel} and about " +
+                "${VoiceModelDownloader.KOKORO.uncompressedBytes / 1_000_000} MB unpacked; Piper " +
+                "${VoiceModelDownloader.PIPER_LESSAC.sizeLabel}. Synthesis is fully offline once unpacked: " +
+                "no audio is ever sent to a server. Game audio is ducked, not paused, and an incoming call " +
+                "stops the coach.",
+            color = AppUiColors.GithubSecondary,
+            fontSize = 11.sp,
+            lineHeight = 16.sp
+        )
+    }
+
+    SettingsRow(
+        title = "Speak automatically on each step",
+        subtitle = "Read the new step once when the guide advances. Off means the Speaker button is the only " +
+            "way to hear a step.",
+        checked = autoSpeak,
+        onChecked = { VoiceGuideSettings.setAutoSpeak(context, it) }
+    )
+    SettingsRow(
+        title = "Announce enemy battle spells",
+        subtitle = "Say \"Enemy Flicker used\" when you tap a lane in the cooldown tracker. Off by default, " +
+            "and at most once per spell per cooldown.",
+        checked = announceSpells,
+        onChecked = { VoiceGuideSettings.setAnnounceSpells(context, it) }
+    )
+}
+
+@Composable
+private fun VoiceSettingLabel(text: String) {
+    Text(
+        text,
+        color = AppUiColors.GithubSecondary,
+        fontSize = 11.sp,
+        fontWeight = FontWeight.Bold,
+        letterSpacing = 1.sp
+    )
+}
+
+@Composable
+private fun VoiceOptionChip(label: String, selected: Boolean, trailing: String?, onClick: () -> Unit) {
+    FilterChip(
+        selected = selected,
+        onClick = onClick,
+        modifier = Modifier.heightIn(min = 40.dp),
+        shape = RoundedCornerShape(10.dp),
+        label = {
+            Column {
+                Text(label, fontSize = 12.sp, fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium)
+                if (!trailing.isNullOrBlank()) {
+                    Text(trailing, fontSize = 10.sp, color = AppUiColors.GithubSecondary)
+                }
+            }
+        },
+        colors = FilterChipDefaults.filterChipColors(
+            selectedContainerColor = AppUiColors.Gold.copy(alpha = 0.18f),
+            selectedLabelColor = AppUiColors.Gold
+        )
+    )
+}
+
+@Composable
+private fun VoiceModelRow(model: VoiceModel, onDelete: () -> Unit) {
+    Row(
+        Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp))
+            .background(AppUiColors.GithubBg)
+            .border(1.dp, AppUiColors.GithubBorder, RoundedCornerShape(12.dp))
+            .padding(horizontal = 12.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
+        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+            Text(model.label, color = AppUiColors.GithubText, fontWeight = FontWeight.SemiBold, fontSize = 13.sp)
+            Text(
+                "${model.diskLabel} \u2022 ${model.speakers.size} voice" +
+                    (if (model.speakers.size == 1) "" else "s"),
+                color = AppUiColors.GithubSecondary,
+                fontSize = 11.sp
+            )
+        }
+        TextButton(onClick = onDelete, shape = RoundedCornerShape(10.dp)) {
+            Text("Delete", color = AppUiColors.Red, fontWeight = FontWeight.SemiBold)
+        }
+    }
+}
+
+/** Human label for a voice id, without ever exposing a raw model identifier. */
+private fun voiceLabel(id: String, model: VoiceModel): String = when (id) {
+    VoiceGuideSettings.VOICE_KOKORO_FEMALE -> "Natural female"
+    VoiceGuideSettings.VOICE_KOKORO_MALE -> "Natural male"
+    VoiceGuideSettings.VOICE_PIPER_FEMALE -> "Fast female"
+    VoiceGuideSettings.VOICE_PIPER_MALE -> "Fast male"
+    else -> model.label
+}
+
+private fun speedLabel(rate: Float): String = when {
+    rate < 0.9f -> "Relaxed 0.85\u00d7"
+    rate > 1.1f -> "Brisk 1.25\u00d7"
+    else -> "Normal 1.0\u00d7"
+}
+
 @Composable
 private fun SettingsRow(title: String, subtitle: String, checked: Boolean, onChecked: (Boolean) -> Unit) {
     Row(
@@ -627,7 +953,11 @@ private fun DataFilesSection() {
                         "${g.types.size} types \u2022 ${g.stepCount} steps \u2022 patch ${g.patch.ifBlank { "?" }}" +
                             (if (g.updated.isNotBlank()) " \u2022 ${g.updated}" else "") +
                             (if (older) " \u2022 older than $livePatch" else ""),
-                        if (older) "OLDER" else if (g.latest) "LATEST" else "OK",
+                        when {
+                            older -> "OLDER"
+                            g.latest -> "LATEST"
+                            else -> "OK"
+                        },
                         if (older) AppUiColors.Orange else AppUiColors.Green
                     )
                 }

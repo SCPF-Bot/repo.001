@@ -6,6 +6,14 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
+    <!-- Voice Guide: downloads sherpa-onnx voice packs on demand (nothing is
+         bundled in the APK) and checks whether the network is unmetered before
+         offering a 103 MB download. Both are normal permissions: no runtime
+         prompt, and no synthesis ever happens over the network - the models run
+         fully on-device once unpacked. -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
     <application
         android:allowBackup="false"
         android:enableOnBackInvokedCallback="true"

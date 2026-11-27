@@ -11,6 +11,11 @@ activityCompose  = "1.13.0"
 composeBom       = "2026.06.00"
 coil             = "3.0.4"
 savedstate       = "1.2.1"
+# Voice Guide: .tar.bz2 model packs need a bzip2 decoder; Android ships java.util.zip only.
+# 1.25.0 is the last release with NO mandatory transitive dependencies (1.26+ pulls
+# commons-io + commons-lang3), and it post-dates the 1.21-era CVE fixes for tar/zip.
+commonsCompress  = "1.25.0"
+junit            = "4.13.2"
 
 [libraries]
 androidx-core-ktx                  = { group = "androidx.core",       name = "core-ktx",                  version.ref = "coreKtx" }
@@ -29,6 +34,9 @@ compose-foundation                 = { group = "androidx.compose.foundation", na
 compose-material3                  = { group = "androidx.compose.material3",  name = "material3" }
 
 coil-compose                       = { group = "io.coil-kt.coil3",    name = "coil-compose",              version.ref = "coil" }
+
+commons-compress                   = { group = "org.apache.commons",  name = "commons-compress",          version.ref = "commonsCompress" }
+junit                              = { group = "junit",               name = "junit",                     version.ref = "junit" }
 
 [plugins]
 android-application = { id = "com.android.application",                version.ref = "agp" }

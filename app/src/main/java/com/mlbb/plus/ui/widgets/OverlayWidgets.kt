@@ -87,6 +87,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.mlbb.plus.tts.SpokenStep
+import com.mlbb.plus.tts.VoiceGuideManager
+import com.mlbb.plus.tts.VoiceGuideTransitions
 import com.mlbb.plus.ui.model.GameData
 import com.mlbb.plus.ui.model.RoleTypes
 import com.mlbb.plus.ui.theme.MLBBPlusColors
@@ -466,7 +469,14 @@ private fun computeObjective(
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun RoamGuideWidget(role: String = "Roam", roleType: String = "", onBack: () -> Unit) {
+fun RoamGuideWidget(
+    role: String = "Roam",
+    roleType: String = "",
+    onBack: () -> Unit,
+    // Voice Guide coach. Null (the default) keeps every existing caller and
+    // preview working, and means the widget behaves exactly as before.
+    voice: VoiceGuideManager? = null
+) {
     val context = LocalContext.current
     // V8 FIX: Width from displayMetrics (true screen), NOT LocalConfiguration.
     // In a WRAP_CONTENT overlay window, LocalConfiguration returns the WINDOW size,
@@ -546,10 +556,45 @@ fun RoamGuideWidget(role: String = "Roam", roleType: String = "", onBack: () -> 
         }
     }
 
-    val currentStep = selectedPlan?.steps?.firstOrNull {
+    // Voice Guide needs the step INDEX (Next / Prev walk the list), so the
+    // lookup is index-based. Semantics are unchanged: first step whose window
+    // contains the clock, else the last one.
+    val currentStepIndex = selectedPlan?.steps?.indexOfFirst {
         elapsedSeconds >= it.startSeconds && elapsedSeconds < it.endSeconds
-    } ?: selectedPlan?.steps?.lastOrNull()
+    }?.takeIf { it >= 0 } ?: (selectedPlan?.steps?.lastIndex ?: -1)
+    val currentStep = selectedPlan?.steps?.getOrNull(currentStepIndex)
     val hasGuide = selectedPlan != null && currentStep != null
+
+    // ---------------- Voice Guide (floating TTS coach) ----------------
+    // Inert unless the service handed us a manager AND the player switched the
+    // feature on, so with Voice Guide off the overlay composes exactly what it
+    // did before: no extra row, no engine, no audio focus, no download.
+    // `voice` is null until the overlay host attaches a manager (and in
+    // previews), so the flag is derived from the state alone: no manager means no
+    // state means not enabled. Note that voiceOn therefore *proves* both
+    // voiceState and voice are non-null, and K2 sees that chain - so the calls
+    // guarded by voiceOn below use plain dot access on purpose, they are not
+    // unguarded.
+    val voiceState = voice?.state
+    val voiceOn = voiceState?.enabled == true
+    val spokenSteps = remember(selectedPlan) {
+        selectedPlan?.steps?.mapIndexed { index, step -> step.toSpoken(selectedPlan.id, index) }
+            ?: emptyList()
+    }
+    val currentSpoken = spokenSteps.getOrNull(currentStepIndex)
+    val coachIsSpeakingThisStep = voiceOn &&
+        voiceState.phase == VoiceGuideManager.Phase.SPEAKING &&
+        voiceState.speakingKey == currentSpoken?.key
+    // Auto-speak once per step change. The key carries the plan id, the index
+    // and the start time, so a recomposition or a 1 Hz clock tick cannot
+    // re-trigger it, and switching plan or role always does.
+    LaunchedEffect(currentSpoken?.key) {
+        val step = currentSpoken ?: return@LaunchedEffect
+        // Always register, even while the feature is off: the notification's
+        // Play action then has a current step the moment the player turns it on.
+        voice?.setCurrentStep(step)
+        if (voiceOn) voice.onStepAdvanced(step)
+    }
     val objective = computeObjective(elapsedSeconds, turtleSlain, lordSlain, lastSlainAt, lastSlainWasLord, guide.timers)
     val isTurtle = objective.type == ObjectiveType.TURTLE
     val objectiveText = if (objective.isAlive) {
@@ -842,6 +887,26 @@ fun RoamGuideWidget(role: String = "Roam", roleType: String = "", onBack: () -> 
                 GuideControl("×", GuideMuted, modifier = Modifier.width(28.dp), fontSize = 14.sp, onClick = onBack, contentDescription = "Close roam guide")
             }
 
+            if (voiceOn) {
+                // Bound to a non-null local so the click lambdas below capture a
+                // manager they can call directly: a lambda may run long after this
+                // composition, and a captured `voice?.` would silently swallow a
+                // tap on a row that is only drawn when a manager exists.
+                val coach = voice
+                VoiceControlRow(
+                    state = voiceState,
+                    canStep = hasGuide && spokenSteps.size > 1,
+                    onSpeak = { currentSpoken?.let { coach.speak(it) } },
+                    onPause = { coach.pause() },
+                    onResume = { coach.resume() },
+                    onRepeat = { coach.repeat() },
+                    onPrev = { coach.speakRelative(spokenSteps, currentStepIndex, -1) },
+                    onNext = { coach.speakRelative(spokenSteps, currentStepIndex, 1) },
+                    onStop = { coach.stop() },
+                    onCancelDownload = { coach.cancelDownload() }
+                )
+            }
+
             // V8 FIX (4): Description ALWAYS visible — no hide toggle to trap you.
             // V8 FIX (9): Bare brace block REMOVED — it was parsed as a trailing lambda
             // to the header Row, so everything after it lost @Composable context.
@@ -859,9 +924,11 @@ fun RoamGuideWidget(role: String = "Roam", roleType: String = "", onBack: () -> 
                     // V9: one fixed size — no font that shrinks/grows with text length.
                     val descFontSize = 9.sp
                     val descLineHeight = 12.sp
+                    // Voice Guide: the description is tinted gold while the coach
+                    // reads it aloud, so one glance shows which step is being spoken.
                     OutlinedText(
                         text = shownDescription,
-                        color = GuideText,
+                        color = if (coachIsSpeakingThisStep) GuideGold else GuideText,
                         fontSize = descFontSize,
                         lineHeight = descLineHeight,
                         maxLines = if (displayMode == 1) 6 else 2,
@@ -952,6 +1019,12 @@ fun RoamGuideWidget(role: String = "Roam", roleType: String = "", onBack: () -> 
             elapsedSeconds = elapsedSeconds,
             spells = guide.spells,
             spellDefaults = guide.spellDefaults,
+            // Voice Guide: optional spoken "Enemy Flicker used". Off by default
+            // in Settings, and the manager allows at most one call per spell per
+            // cooldown cycle.
+            onSpellUsed = { spellName, cooldownSeconds ->
+                if (voiceOn) voice.announceSpell(spellName, cooldownSeconds)
+            },
             modifier = Modifier.fillMaxWidth()
         )
     }
@@ -1043,7 +1116,8 @@ private fun EnemySpellTrackerWidget(
     elapsedSeconds: Int,
     modifier: Modifier = Modifier,
     spells: List<TrackedSpell> = emptyList(),
-    spellDefaults: Map<String, String> = emptyMap()
+    spellDefaults: Map<String, String> = emptyMap(),
+    onSpellUsed: ((spellName: String, cooldownSeconds: Int) -> Unit)? = null
 ) {
     val availableSpells = if (spells.isEmpty()) fallbackSpells else spells
     var trackedSpells by rememberSaveable { mutableStateOf(initialTrackedSpells(availableSpells, spellDefaults)) }
@@ -1086,6 +1160,12 @@ private fun EnemySpellTrackerWidget(
                             )
                             .combinedClickable(
                                 onClick = {
+                                    // Voice Guide: only the tap that STARTS a
+                                    // cooldown means "the enemy just used it";
+                                    // tapping again cancels and must stay quiet.
+                                    if (!isCoolingDown) {
+                                        onSpellUsed?.invoke(spell.name, spell.cooldownSeconds)
+                                    }
                                     trackedSpells = trackedSpells.map { current ->
                                         if (current.lane == laneSpell.lane) {
                                             current.copy(usedAtSeconds = if (isCoolingDown) null else elapsedSeconds)
@@ -1220,6 +1300,171 @@ private fun OutlinedText(
         )
     }
 }
+
+/**
+ * Voice Guide controls, shown only while the feature is enabled.
+ *
+ * Layout: one 48dp row (the Material minimum touch target - deliberately taller
+ * than the 28dp guide controls, because these are used mid-fight without
+ * looking) plus a single status line for download progress, errors and hints.
+ * The row is composed only when Voice Guide is on, so a widget with the feature
+ * off is unchanged down to the last pixel.
+ */
+@Composable
+private fun VoiceControlRow(
+    state: VoiceGuideManager.VoiceUiState,
+    canStep: Boolean,
+    onSpeak: () -> Unit,
+    onPause: () -> Unit,
+    onResume: () -> Unit,
+    onRepeat: () -> Unit,
+    onPrev: () -> Unit,
+    onNext: () -> Unit,
+    onStop: () -> Unit,
+    onCancelDownload: () -> Unit
+) {
+    val downloading = state.phase == VoiceGuideManager.Phase.DOWNLOADING
+    val speaking = state.phase == VoiceGuideManager.Phase.SPEAKING
+    val paused = state.phase == VoiceGuideManager.Phase.PAUSED
+    val busy = state.phase == VoiceGuideManager.Phase.PREPARING
+
+    // Label and action come from the shared decision table, so the overlay, the
+    // notification and the unit tests all describe the same behaviour.
+    val primaryLabel = VoiceGuideTransitions.primaryLabel(state.phase, downloading, busy)
+    val primaryAction = VoiceGuideTransitions.primaryAction(state.phase, downloading, busy)
+    val primaryDescription = when {
+        downloading -> "Cancel the voice model download"
+        busy -> "Loading the voice model"
+        speaking -> "Pause the coach"
+        paused -> "Resume the coach"
+        else -> "Speak this step"
+    }
+    val primaryColor = when {
+        downloading || busy -> GuideMuted
+        speaking -> GuideGold
+        paused -> GuideAccent
+        else -> GuideAccent
+    }
+
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(2.dp)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(3.dp)
+        ) {
+            GuideControl(
+                primaryLabel,
+                primaryColor,
+                modifier = Modifier.weight(1.3f).height(VOICE_CONTROL_HEIGHT),
+                fontSize = 11.sp,
+                contentDescription = primaryDescription,
+                onClick = {
+                    when (primaryAction) {
+                        VoiceGuideTransitions.PrimaryAction.CANCEL_DOWNLOAD -> onCancelDownload()
+                        VoiceGuideTransitions.PrimaryAction.PAUSE -> onPause()
+                        VoiceGuideTransitions.PrimaryAction.RESUME -> onResume()
+                        VoiceGuideTransitions.PrimaryAction.SPEAK -> onSpeak()
+                        VoiceGuideTransitions.PrimaryAction.NONE -> Unit
+                    }
+                }
+            )
+            GuideControl(
+                "Repeat",
+                if (speaking || paused) GuideText else GuideMuted,
+                modifier = Modifier.weight(1f).height(VOICE_CONTROL_HEIGHT),
+                fontSize = 10.sp,
+                contentDescription = "Repeat this step",
+                onClick = onRepeat
+            )
+            GuideControl(
+                "Prev",
+                if (canStep) GuideText else GuideMuted,
+                modifier = Modifier.weight(0.8f).height(VOICE_CONTROL_HEIGHT),
+                fontSize = 10.sp,
+                contentDescription = "Speak the previous step",
+                onClick = { if (canStep) onPrev() }
+            )
+            GuideControl(
+                "Next",
+                if (canStep) GuideText else GuideMuted,
+                modifier = Modifier.weight(0.8f).height(VOICE_CONTROL_HEIGHT),
+                fontSize = 10.sp,
+                contentDescription = "Speak the next step",
+                onClick = { if (canStep) onNext() }
+            )
+            GuideControl(
+                "Stop",
+                GuideMuted,
+                modifier = Modifier.weight(0.8f).height(VOICE_CONTROL_HEIGHT),
+                fontSize = 10.sp,
+                contentDescription = "Stop speaking and give audio back to the game",
+                onClick = onStop
+            )
+        }
+
+        // Download progress: a 3dp bar, same visual language as the timer fill.
+        if (downloading && state.progress > 0f) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(3.dp)
+                    .clip(RoundedCornerShape(2.dp))
+                    .background(GuideSurface)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(state.progress.coerceIn(0f, 1f))
+                        .height(3.dp)
+                        .background(GuideAccent)
+                )
+            }
+        }
+
+        // One status line: progress text, the fallback notice, the TalkBack hint
+        // or an error. Blank means the row costs nothing.
+        val note = state.progressLabel.ifBlank { state.message }
+        if (note.isNotBlank()) {
+            OutlinedText(
+                text = note,
+                color = if (state.phase == VoiceGuideManager.Phase.ERROR) GuideRed else GuideMuted,
+                fontSize = 8.sp,
+                lineHeight = 10.sp,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+    }
+}
+
+/** 48dp: the Material minimum touch target, so the coach can be driven mid-fight. */
+private val VOICE_CONTROL_HEIGHT = 48.dp
+
+/**
+ * Reduces one guide step to the fragments the coach may say, most important
+ * first. Only prose the player can already read on screen is used: ids, keys and
+ * raw JSON never reach this list. [com.mlbb.plus.tts.TtsTextNormalizer] then
+ * expands abbreviations and condenses it to 8-18 words, and
+ * [com.mlbb.plus.tts.VoiceGuideManager] prefixes the game clock.
+ *
+ * Missing fields fall through: phase -> callout -> description (which parseStep
+ * fills from the JSON "instruction" key first) -> compact, and a step with none
+ * of them produces no fragments at all, so the manager says nothing rather than
+ * reading a field name aloud.
+ */
+private fun GuideStep.toSpoken(planId: String, index: Int): SpokenStep = SpokenStep(
+    key = "$planId#$index#$startSeconds",
+    startSeconds = startSeconds,
+    // parseStep() already prefers the JSON "instruction" key and falls back to
+    // "description", so `description` here IS the step's instruction. `compact`
+    // ("Setup - Guard buff, don't feed") is the last resort for a step that has
+    // neither.
+    fragments = listOf(phase, callout, description.ifBlank { compact })
+        .map { it.trim() }
+        .filter { it.isNotBlank() }
+)
 
 @Composable
 private fun GuideControl(

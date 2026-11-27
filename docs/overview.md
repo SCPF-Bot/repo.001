@@ -60,8 +60,8 @@ The app should avoid assuming that every user understands game abbreviations or 
 | Heroes | Search, filters, sorting, hero cards, hero detail, skills/build/profile data, hero relationships and guide references |
 | Items | Search, filters, sorting, item details, stats/passives/actives, build relationships, heroes using an item |
 | Patch | Original Server patch summary, hero/item changes, equipment/battlefield/system notes, links to affected entities |
-| Settings | Overlay permission flow, auto-start-last-role preference, Help & Knowledge Base reader, bundled-data diagnostics |
-| Knowledge Base | In-app help library (`KnowledgeBase.kt`): **18 topics**, list + reader with prev/next, related topics, quick-reference tables, common mistakes, and "using this in MLBB Plus" tips. Two-pane on windows ≥840dp, list → reader on phones. The reader opens on the first entry, which is now **Quick Start: Set Up Your Floating Guide** (moved here from Home on 2026-11-27). |
+| Settings | Overlay permission flow, auto-start-last-role preference, Help & Knowledge Base reader, bundled-data diagnostics, and a **Voice Guide** section (engine, voice, speed, auto-speak, announce enemy spells, model download with real size/progress/cancel, test line) |
+| Knowledge Base | In-app help library (`KnowledgeBase.kt`): **19 topics**, list + reader with prev/next, related topics, quick-reference tables, common mistakes, and "using this in MLBB Plus" tips. Two-pane on windows ≥840dp, list → reader on phones. The reader opens on the first entry, which is now **Quick Start: Set Up Your Floating Guide** (moved here from Home on 2026-11-27); the second is **Voice Guide: Hear Your Next Play**, added with the spoken coach. |
 
 ### Floating guide overlay
 
@@ -72,6 +72,17 @@ The app should avoid assuming that every user understands game abbreviations or 
 - Battle-spell defaults and enemy spell cooldown tracking.
 - Compact / expanded presentation and touch interaction state.
 - Foreground notification with an explicit Stop action.
+- **Voice Guide — spoken coach (added 2026-11-27, default OFF).** Reads the step the player is on
+  in condensed spoken English and can auto-speak each new step as the match timer advances; overlay
+  controls are Speak/Pause/Resume · Repeat · Prev · Next · Stop, and the line being read aloud is
+  tinted gold. With the feature off the overlay composes exactly what it did before.
+- **On-device voices, offline after download.** Kokoro (most natural) or the smaller/faster Piper
+  voices through **sherpa-onnx 1.13.8**, with Android's own TTS as the last fallback. Nothing is
+  bundled in the APK and no cloud TTS is used: a model is downloaded in-app into `filesDir/tts/`
+  (checksum-verified) and every later utterance is synthesised on the device. Game audio is ducked
+  rather than muted, TalkBack pauses the coach, and the notification gains Play/Pause and Stop voice
+  actions. Engine choice, model URLs and checksums, the text-normalisation contract and the device
+  test checklist are in [TTS_IMPLEMENTATION.md](../TTS_IMPLEMENTATION.md).
 
 ### Bundled data snapshot
 
@@ -142,6 +153,8 @@ Roadmap status is based on code and bundled assets in this repository snapshot, 
 - [x] Five role guide assets: Roam, Jungle, Mid, Gold, and EXP.
 - [x] Shared role-aware floating overlay and foreground notification / Stop action.
 - [x] Objective timers and enemy battle-spell tracking in overlay.
+- [x] Optional **Voice Guide**: on-device spoken coach in the overlay (Kokoro / Piper via sherpa-onnx 1.13.8, Android TTS fallback), default OFF, offline after an in-app checksum-verified model download to `filesDir/tts/`.
+- [x] First Kotlin unit tests: **36 JVM tests** covering the TTS text normalizer (time phrasing, abbreviation expansion, truncation) and the voice-guide state transitions, plus the extracted `VoiceGuideTransitions` decision table shared by manager, widget and tests.
 - [x] Patch-note integration and guide references on hero/item details.
 - [x] Matchup and synergy fields for all 133 heroes, with methodology and source notes.
 - [x] UX refinements for quick start, search/filter/sort, navigation, and settings diagnostics.
@@ -158,6 +171,8 @@ Roadmap status is based on code and bundled assets in this repository snapshot, 
 - [ ] Consolidate the duplicated guide JSON parsing logic so screen summaries and overlay execution cannot silently diverge.
 - [ ] Add a visible data freshness / source details screen and a consistent stale-data warning.
 - [ ] Audit all guide steps, objective timings, and role recommendations against the current live patch before publishing a new data snapshot.
+- [ ] Run the Voice Guide device checklist ([TTS_IMPLEMENTATION.md](../TTS_IMPLEMENTATION.md) §9): first-use download and time-to-first-audio, in-game ducking, fallback when a model directory is deleted, TalkBack, incoming call, rapid Next/Prev taps, and settings persistence across restart. The feature was compile- and unit-test-verified off-device but never run on a phone.
+- [ ] Confirm a clean `./gradlew assembleDebug assembleRelease` on a real toolchain (the TTS work was verified with a standalone `kotlinc` + Compose compiler plugin harness, not Gradle) and then enable `abiFilters` / ABI splits for arm64-v8a + armeabi-v7a to keep the sherpa-onnx AAR (x86 included) out of release builds.
 - [ ] Verify accessibility, large text, landscape, and tablet/foldable layouts on real devices or emulators.
 - [ ] Test overlay permission, foreground-service start/stop, notification behavior, and OEM-specific restrictions across supported Android versions.
 
@@ -169,7 +184,8 @@ Roadmap status is based on code and bundled assets in this repository snapshot, 
 - [ ] Add per-hero role/loadout recommendations and draft planning that accounts for the full team composition.
 - [ ] Add bookmarks / favorites and recently viewed heroes or items.
 - [ ] Add overlay customization for size, opacity, position, and compactness, with sensible defaults.
-- [ ] Add optional guide-language support and clearer glossary explanations for game terms.
+- [ ] Add optional guide-language support and clearer glossary explanations for game terms. Voice Guide is English-only today: both the neural voice models and the normalizer's abbreviation/clock table are English, so another language means new models plus a new normalizer table, not a toggle.
+- [ ] Let Voice Guide share one `espeak-ng-data/` copy between installed models (~18 MB duplicated per model today) and consider a first-run latency probe that recommends Piper instead of Kokoro on low-end hardware.
 
 ### Longer-term possibilities — only after data quality and reliability are established
 

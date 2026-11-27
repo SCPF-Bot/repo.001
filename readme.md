@@ -1,6 +1,6 @@
 # MLBB Plus
 
-MLBB Plus is an offline-first Android companion for Mobile Legends: Bang Bang. It combines hero/item/patch reference screens with a role-aware floating guide overlay for Roam, Jungle, Mid, Gold, and EXP. This is an independent fan project and is not affiliated with Moonton.
+MLBB Plus is an offline-first Android companion for Mobile Legends: Bang Bang. It combines hero/item/patch reference screens with a role-aware floating guide overlay for Roam, Jungle, Mid, Gold, and EXP, plus an optional on-device spoken coach (**Voice Guide**, off by default). This is an independent fan project and is not affiliated with Moonton.
 
 ## Build
 
@@ -13,10 +13,23 @@ Requirements: JDK 17, Android SDK Platform 37, Android Gradle Plugin / Gradle ve
 
 The first build requires Gradle and Android dependencies to be available from their configured repositories.
 
+The optional Voice Guide needs the sherpa-onnx AAR, which is **not** on Google Maven. A
+`downloadSherpaAar` task fetches `sherpa-onnx-1.13.8.aar` into `app/libs/` and verifies its sha256;
+it runs automatically as part of `assembleDebug` / `assembleRelease`, so the first build needs
+network access once (or commit the AAR yourself and the task does nothing). Voice **models** are
+never bundled: they are downloaded in-app on demand into `filesDir/tts/`. See
+[`TTS_IMPLEMENTATION.md`](TTS_IMPLEMENTATION.md).
+
 Before building, validate local data and portraits:
 
 ```bash
 python3 scripts/validate_assets.py
+```
+
+Unit tests (JVM only, no device or emulator needed):
+
+```bash
+./gradlew :app:testDebugUnitTest
 ```
 
 ## Documentation
@@ -26,6 +39,7 @@ python3 scripts/validate_assets.py
 - [`docs/links.md`](docs/links.md) — official Android/Kotlin/library docs, UX references, and game-data provenance.
 - [`docs/refactoring-report.md`](docs/refactoring-report.md) — exhaustive Kotlin review, implemented changes, file-by-file recommendations, and validation notes.
 - [`docs/ux-redesign.md`](docs/ux-redesign.md) — Material 3 UX audit, design system, screen-by-screen redesign, accessibility and QA checklists.
+- [`TTS_IMPLEMENTATION.md`](TTS_IMPLEMENTATION.md) — Voice Guide: engine choice, model URLs and checksums, storage, text normalisation, state machine, how to test, known limitations.
 
 ## Bundled data
 

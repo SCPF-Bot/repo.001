@@ -49,47 +49,62 @@ The screen-side guide parser and overlay-side guide parser are separate implemen
 ```text
 MLBB-Plus/
 ├── app/
-│   ├── build.gradle.kts
+│   ├── build.gradle.kts                      (+ downloadSherpaAar task)
 │   ├── proguard-rules.pro
-│   └── src/main/
-│       ├── AndroidManifest.xml
-│       ├── assets/
-│       │   ├── heroes.json
-│       │   ├── items.json
-│       │   ├── patch_notes.json
-│       │   ├── roam_guide.json
-│       │   ├── jungle_guide.json
-│       │   ├── mid_guide.json
-│       │   ├── gold_guide.json
-│       │   ├── exp_guide.json
-│       │   ├── heroes/*.webp   (133 portraits)
-│       │   └── items/*.webp    (99 portraits)
-│       ├── java/com/mlbb/plus/ui/
-│       │   ├── MainActivity.kt
-│       │   ├── WidgetOverlayService.kt
-│       │   ├── components/UiKit.kt
-│       │   ├── components/AppComponents.kt   (Material 3 redesign components)
-│       │   ├── model/Models.kt
-│       │   ├── model/Guides.kt
-│       │   ├── model/KnowledgeBase.kt
-│       │   ├── navigation/AppRoute.kt        (routes/tabs/deep-link spec)
-│       │   ├── screens/
-│       │   │   ├── AssetImage.kt
-│       │   │   ├── HomeScreen.kt
-│       │   │   ├── HeroesScreen.kt
-│       │   │   ├── ItemsScreen.kt
-│       │   │   ├── PatchNotesScreen.kt
-│       │   │   └── SettingsScreen.kt
-│       │   ├── theme/MLBBPlusTheme.kt
-│       │   ├── theme/{Color,Type,Dimens}.kt  (Material 3 tokens)
-│       │   ├── viewmodel/AppViewModel.kt     (StateFlow root state)
-│       │   └── widgets/
-│       │       ├── JetOverlay.kt
-│       │       └── OverlayWidgets.kt
-│       └── res/
-│           ├── drawable/
-│           ├── mipmap-anydpi-v26/
-│           └── values/{colors.xml,strings.xml,dimens.xml,themes.xml}
+│   ├── libs/                                 (sherpa-onnx-1.13.8.aar, fetched on
+│   │                                          demand and gitignored — never committed)
+│   └── src/
+│       ├── main/
+│       │   ├── AndroidManifest.xml
+│       │   ├── assets/
+│       │   │   ├── heroes.json
+│       │   │   ├── items.json
+│       │   │   ├── patch_notes.json
+│       │   │   ├── roam_guide.json
+│       │   │   ├── jungle_guide.json
+│       │   │   ├── mid_guide.json
+│       │   │   ├── gold_guide.json
+│       │   │   ├── exp_guide.json
+│       │   │   ├── heroes/*.webp   (133 portraits)
+│       │   │   └── items/*.webp    (99 portraits)
+│       │   ├── java/com/mlbb/plus/
+│       │   │   ├── tts/                      (Voice Guide — on-device spoken coach)
+│       │   │   │   ├── TtsTextNormalizer.kt
+│       │   │   │   ├── VoiceGuideSettings.kt
+│       │   │   │   ├── VoiceEngine.kt
+│       │   │   │   ├── SystemTtsVoiceEngine.kt
+│       │   │   │   ├── VoiceModelDownloader.kt
+│       │   │   │   ├── SherpaOnnxVoiceEngine.kt
+│       │   │   │   └── VoiceGuideManager.kt  (+ VoiceGuideTransitions)
+│       │   │   └── ui/
+│       │   │       ├── MainActivity.kt
+│       │   │       ├── WidgetOverlayService.kt
+│       │   │       ├── components/UiKit.kt
+│       │   │       ├── components/AppComponents.kt   (Material 3 redesign components)
+│       │   │       ├── model/Models.kt
+│       │   │       ├── model/Guides.kt
+│       │   │       ├── model/KnowledgeBase.kt
+│       │   │       ├── navigation/AppRoute.kt        (routes/tabs/deep-link spec)
+│       │   │       ├── screens/
+│       │   │       │   ├── AssetImage.kt
+│       │   │       │   ├── HomeScreen.kt
+│       │   │       │   ├── HeroesScreen.kt
+│       │   │       │   ├── ItemsScreen.kt
+│       │   │       │   ├── PatchNotesScreen.kt
+│       │   │       │   └── SettingsScreen.kt
+│       │   │       ├── theme/MLBBPlusTheme.kt
+│       │   │       ├── theme/{Color,Type,Dimens}.kt  (Material 3 tokens)
+│       │   │       ├── viewmodel/AppViewModel.kt     (StateFlow root state)
+│       │   │       └── widgets/
+│       │   │           ├── JetOverlay.kt
+│       │   │           └── OverlayWidgets.kt
+│       │   └── res/
+│       │       ├── drawable/
+│       │       ├── mipmap-anydpi-v26/
+│       │       └── values/{colors.xml,strings.xml,dimens.xml,themes.xml}
+│       └── test/java/com/mlbb/plus/tts/      (JVM unit tests — no device needed)
+│           ├── TtsTextNormalizerTest.kt
+│           └── VoiceGuideManagerTest.kt
 ├── docs/
 │   ├── overview.md
 │   ├── structure.md
@@ -106,6 +121,7 @@ MLBB-Plus/
 ├── gradle.properties
 ├── gradlew
 ├── gradlew.bat
+├── TTS_IMPLEMENTATION.md                     (Voice Guide implementation record)
 └── readme.md
 ```
 
@@ -262,16 +278,36 @@ sequenceDiagram
     end
 ```
 
-`AndroidManifest.xml` declares `SYSTEM_ALERT_WINDOW`, `FOREGROUND_SERVICE`, `FOREGROUND_SERVICE_SPECIAL_USE`, and `POST_NOTIFICATIONS`. The service is non-exported and declared with foreground type `specialUse` plus a subtype explanation. `WidgetOverlayService` creates an ongoing notification with an app-open intent and Stop action, updates the active role/type, initializes the overlay once per service instance, and hides/stops the overlay on destruction.
+`AndroidManifest.xml` declares `SYSTEM_ALERT_WINDOW`, `FOREGROUND_SERVICE`, `FOREGROUND_SERVICE_SPECIAL_USE`, `POST_NOTIFICATIONS`, and — for the Voice Guide model download only — `INTERNET` and `ACCESS_NETWORK_STATE`. The service is non-exported and declared with foreground type `specialUse` plus a subtype explanation. `WidgetOverlayService` creates an ongoing notification with an app-open intent and Stop action, updates the active role/type, initializes the overlay once per service instance, and hides/stops the overlay on destruction.
 
 `JetOverlay.kt` is the low-level window host. It owns the overlay window, ComposeView attachment, and lifecycle / saved-state / ViewModel-store owners needed by Compose outside an Activity. `OverlayWidgets.kt` owns the visible guide, overlay-specific parsing, interaction state, game timer, objective timers, and enemy spell tracker UI.
+
+### 5.1 Voice Guide chain (off by default)
+
+`WidgetOverlayService` constructs one `VoiceGuideManager` and passes it into `RoamGuideWidget` as an optional parameter; the widget passes nothing back except calls. There is deliberately no second service, no DI and no shared ViewModel.
+
+```text
+timer advances / player taps Next
+  → OverlayWidgets maps GuideStep → SpokenStep(key = "planId#index#startSeconds")
+  → LaunchedEffect(key) registers the step, and calls onStepAdvanced() when the feature is on
+  → VoiceGuideManager.shouldAutoSpeak() (VoiceGuideTransitions) decides: once per step, never on a
+    recomposition or a 1 Hz clock tick
+  → resolveEngine(): System preference → SystemTtsVoiceEngine; otherwise first installed model →
+    SherpaOnnxVoiceEngine; on load failure → System (Auto) or an explained error (Neural)
+  → TtsTextNormalizer condenses the step to the word budget and phrases the clock
+  → audio focus GAIN_TRANSIENT_MAY_DUCK (game ducked, never muted) → speak
+  → VoiceUiState flows back to VoiceControlRow (label/action from VoiceGuideTransitions) and to the
+    notification via observeVoiceForNotification()
+```
+
+Guards that matter when touching this path: TalkBack on ⇒ the coach refuses to speak and shows a hint; 30 s idle ⇒ the engine is released (`IDLE_RELEASE_MS`); phone call / `AUDIOFOCUS_LOSS` ⇒ stop. `VoiceGuideSettings.revision` + `bump()` keeps the Settings-screen manager and the service manager in step — only **user-facing** setters may bump, or a manager would release its own engine mid-sentence or cancel its own download. Full detail: [`../TTS_IMPLEMENTATION.md`](../TTS_IMPLEMENTATION.md).
 
 ## 6. Kotlin file responsibilities
 
 | File | Responsibility | Main dependencies / consumers |
 |---|---|---|
 | `MainActivity.kt` | Activity entry point, root navigation, settings/preferences, permission flow, service launch | `GameData`, all screens, `WidgetOverlayService`, `AppUiTheme` |
-| `WidgetOverlayService.kt` | Foreground service lifecycle, notification, active role/type, overlay initialization/show/hide | `GameData`, `JetOverlay`, `RoamGuideWidget`, `MLBBPlusTheme` |
+| `WidgetOverlayService.kt` | Foreground service lifecycle, notification (now with Play/Pause + Stop voice actions), active role/type, overlay initialization/show/hide; owns the `VoiceGuideManager` and pushes its state into the notification | `GameData`, `JetOverlay`, `RoamGuideWidget`, `MLBBPlusTheme`, `tts/VoiceGuideManager` |
 | `components/UiKit.kt` | Shared app composables, icons, role/tier colors, search/filter/sort primitives | Main screens |
 | `model/Models.kt` | Hero/item/patch models, JSON parsers, `JsonLoader`, `GameData` and cross-reference indexes | Activity, screens, settings diagnostics, overlay service |
 | `model/Guides.kt` | Guide screen models, guide asset parser, hero/item guide reference models | `GameData`, Home and detail screens |
@@ -279,11 +315,19 @@ sequenceDiagram
 | `screens/HeroesScreen.kt` | Hero catalogue, filters/search/sort, hero detail and relationship tabs | `Hero`, `GameData`, `HeroImage`, `ItemImage` |
 | `screens/ItemsScreen.kt` | Item catalogue, filters/search/sort, item detail and related entities | `Item`, `GameData`, `ItemImage`, `HeroImage` |
 | `screens/PatchNotesScreen.kt` | Patch note sections/cards and navigation to changed entities | `PatchData`, `GameData` |
-| `screens/SettingsScreen.kt` | Overlay permission request UI, auto-start setting, data-file status/diagnostics | Activity callbacks, `GameData` |
+| `screens/SettingsScreen.kt` | Overlay permission request UI, auto-start setting, data-file status/diagnostics, Knowledge Base reader, and the Voice Guide section (engine/voice/speed/auto-speak/announce-spells, model download, test line) | Activity callbacks, `GameData`, `KnowledgeBase`, `tts/*` |
 | `screens/AssetImage.kt` | Coil asset model resolution, hero/item portrait rendering and fallbacks | Bundled image assets, `Hero`, `Item` |
 | `theme/MLBBPlusTheme.kt` | Separate Compose color schemes / typography for app and overlay | Main app and overlay service |
 | `widgets/JetOverlay.kt` | WindowManager overlay host and Compose lifecycle owners | `WidgetOverlayService`, Compose and lifecycle APIs |
-| `widgets/OverlayWidgets.kt` | Shared role guide overlay UI, local JSON parser, timers and spell tracker | Role guide JSON, `GameData`, overlay theme |
+| `widgets/OverlayWidgets.kt` | Shared role guide overlay UI, local JSON parser, timers and spell tracker; maps the current step to a `SpokenStep`, draws `VoiceControlRow`, and tints the line being read aloud | Role guide JSON, `GameData`, overlay theme, `tts/VoiceGuideManager` |
+| `model/KnowledgeBase.kt` | In-app help library: 19 topics with details, quick-reference tables, common mistakes, app tips and related-topic links | Settings Knowledge Base reader |
+| `tts/TtsTextNormalizer.kt` | Pure JVM: guide text → condensed spoken English (clock phrasing, abbreviation expansion, symbol cleanup, word-budget truncation) | `tts/VoiceGuideManager`, overlay widget, unit tests |
+| `tts/VoiceGuideSettings.kt` | SharedPreferences for the feature plus a `revision` counter so the two manager instances stay in step | Settings screen, manager, overlay service |
+| `tts/VoiceEngine.kt` | Engine contract (`prepare`/`speak`/`pause`/`resume`/`stop`/`setSpeechRate`/`release`, `supportsPause`) | Both engine implementations, manager |
+| `tts/SystemTtsVoiceEngine.kt` | Android `TextToSpeech` adapter — the always-available fallback | Manager |
+| `tts/VoiceModelDownloader.kt` | Model catalogue (URLs, sha256, sizes) and streaming `.tar.bz2` download → verify → extract into `filesDir/tts/` | Manager, Settings screen |
+| `tts/SherpaOnnxVoiceEngine.kt` | sherpa-onnx Kokoro/Piper configuration and `AudioTrack` playback | Manager, sherpa-onnx AAR |
+| `tts/VoiceGuideManager.kt` | State machine (`Phase`, `VoiceUiState`), speak/pause/resume/repeat/step APIs, audio focus, TalkBack, idle release, download orchestration; `object VoiceGuideTransitions` is the shared decision table | Overlay service, widget, Settings screen, unit tests |
 
 ## 7. Build, platform, and dependencies
 
@@ -299,7 +343,12 @@ sequenceDiagram
 - Coil Compose: `3.0.4`.
 - SavedState: `1.2.1`.
 - Other UI: Compose UI, Foundation, Material 3, tooling preview.
-- Repositories: Google and Maven Central.
+- Repositories: Google and Maven Central. **No JitPack** — sherpa-onnx has no builds there.
+- TTS: `sherpa-onnx-1.13.8.aar`, vendored as `implementation(files("libs/sherpa-onnx-1.13.8.aar"))` and fetched on demand by the `downloadSherpaAar` task (sha256-verified, `.part` → rename, `onlyIf { !exists() }`, wired into `preBuild` and every `*compile*Kotlin*` task). Pinned to 1.13.8 deliberately: on 2.0.x Piper fails to initialise and Kokoro needs an extra lexicon file.
+- `org.apache.commons:commons-compress:1.25.0` — `.tar.bz2` extraction (1.26+ would pull commons-io and commons-lang3).
+- `junit:4.13.2` (`testImplementation`) with `testOptions { unitTests.isReturnDefaultValues = true }` for the 36 JVM tests in `app/src/test/java/com/mlbb/plus/tts/`.
+- Permissions added for the model download only: `INTERNET`, `ACCESS_NETWORK_STATE` (unmetered check before offering a 103 MB file). No model binary ships in the APK; models land in `filesDir/tts/`.
+- The AAR carries `arm64-v8a`, `armeabi-v7a`, `x86` and `x86_64` native libs; a commented-out `splits { abi { } }` block is in `app/build.gradle.kts` for when ABI filtering is verified.
 - Release build enables code minification and resource shrinking; debug disables both.
 - Gradle wrapper distribution: Gradle `9.6.1`.
 
@@ -319,6 +368,10 @@ The versions above are read from `gradle/libs.versions.toml`, `app/build.gradle.
 | Overlay appearance | `MLBBPlusTheme` / `MLBBPlusColors`, `OverlayWidgets.kt` (overlay-only) |
 | Overlay lifecycle / permission | Manifest, `MainActivity`, `WidgetOverlayService`, `JetOverlay`, Android version behavior |
 | Gradle dependency/version | Version catalog, app plugin configuration, wrapper compatibility, clean debug and release builds |
+| Guide step text fields (`instruction`, `description`, `callout`, `phase`, `compact`, `dont`, `objective_*`) | `OverlayWidgets.toSpoken()` fallback chain, `TtsTextNormalizer` budgets and abbreviation table, `TtsTextNormalizerTest`, and a re-run over all 286 real steps |
+| Voice Guide settings or pref keys | `VoiceGuideSettings` (including which setters call `bump()`), both manager instances, `SettingsScreen.VoiceGuideSection`, `VoiceGuideManagerTest` |
+| sherpa-onnx version or a voice model | `downloadSherpaAar` sha256 + `VoiceModelDownloader.MODELS` URLs/checksums/sizes, `SherpaOnnxVoiceEngine` config and thread counts, the sid ↔ voice-name mapping, and the 1.13.8 pin rationale in `TTS_IMPLEMENTATION.md` §2 |
+| `VoiceGuideTransitions` decision table | Manager `compose()`/auto-speak gate, `VoiceControlRow` label + click dispatch, notification Play/Pause label, `VoiceGuideManagerTest` |
 
 ## 9. Current architectural boundaries and known maintenance risks
 

@@ -60,6 +60,43 @@ object KnowledgeBaseData {
             relatedIds = listOf("roles-lanes", "turtle-lord", "meta")
         ),
         KnowledgeEntry(
+            id = "voice-guide",
+            title = "Voice Guide: Hear Your Next Play",
+            categoryLabel = "Getting Started",
+            summary = "Turn the floating guide into a coach that speaks: tap Speaker to hear the current step in eight to eighteen words, and let it read each new step automatically while you keep your eyes on the fight.",
+            details = listOf(
+                "Switch it on first: Settings \u2192 Voice Guide \u2192 Voice Guide. Until then the overlay is unchanged - no voice controls, no audio focus, nothing downloaded. Turning it on is also the moment MLBB Plus may fetch a voice model.",
+                "In the overlay you get a 48dp voice row: Speak, Repeat, Prev, Next and Stop. Speak reads the step you are looking at; Prev and Next read the neighbouring steps without touching your game timer, so you can hear what comes next before it happens.",
+                "Auto-speak reads each new step once. It is keyed to the step, not to the clock, so a recomposition or a paused timer never repeats a line. Switch it off in Settings if you only want the Speaker button.",
+                "What you hear is condensed, not read verbatim. The screen keeps the full paragraph; the voice gets the phase, the call-out and the opening instruction, trimmed at a sentence or clause boundary. Abbreviations are expanded only when spoken - \u201cRetri\u201d becomes \u201cRetribution\u201d, \u201cEXP\u201d becomes \u201cE X P lane\u201d - and field names, ids and links are never read aloud.",
+                "Game audio is ducked, not paused. MLBB Plus asks Android for transient focus that may duck, so your game and voice chat drop in volume while the coach talks and come straight back. An incoming call stops the coach immediately.",
+                "Two voices, one download each. Kokoro is the natural voice (about 103 MB, four natural voices to pick from) and Piper is the light, fast one (about 21 MB). Both run entirely offline once unpacked - no audio is ever sent anywhere. Delete a pack in Settings and the coach falls back to the next available voice, then to your phone\u2019s own system voice.",
+                "Using TalkBack? Voice Guide steps aside automatically while touch exploration is on, so two voices never talk over each other. Turn TalkBack off and it resumes where you left it."
+            ),
+            table = KnowledgeTable(
+                headers = listOf("Control", "Where", "What it does"),
+                rows = listOf(
+                    listOf("Voice Guide switch", "Settings \u2192 Voice Guide", "Master switch. Off means the overlay is exactly as it was before"),
+                    listOf("Speak", "Overlay voice row", "Reads the step currently on screen; starts the model download the first time"),
+                    listOf("Pause / Resume", "Overlay voice row", "Holds the sentence mid-way on the neural voices, restarts it on the system voice"),
+                    listOf("Repeat", "Overlay voice row", "Says the same step again"),
+                    listOf("Prev / Next", "Overlay voice row", "Reads the neighbouring step without moving your game timer"),
+                    listOf("Stop", "Overlay voice row or notification", "Silences the coach and hands audio straight back to the game"),
+                    listOf("Play / Pause voice", "Ongoing notification", "Drives the coach without touching the overlay"),
+                    listOf("Speed", "Settings \u2192 Voice Guide", "0.85\u00d7 relaxed, 1.0\u00d7 normal, 1.25\u00d7 brisk"),
+                    listOf("Enemy spells", "Settings \u2192 Voice Guide", "Off by default: says \u201cEnemy Flicker used\u201d when you tap a lane in the cooldown tracker")
+                )
+            ),
+            mistakes = listOf(
+                "Expecting sound the moment the overlay launches - the guide never speaks on its own, the first Speaker tap is what starts it.",
+                "Starting a 103 MB Kokoro download on mobile data. On a metered connection the overlay asks you to confirm with a second tap; on Wi-Fi it just starts, and the system voice carries the lines until it finishes.",
+                "Turning on \u201cAnnounce enemy battle spells\u201d and then wondering why it stays quiet: it only fires when you tap a lane in the cooldown tracker, and at most once per spell per cooldown.",
+                "Deleting every voice pack and blaming the feature - with no pack installed the coach falls back to your phone\u2019s system voice, which some devices do not ship in English."
+            ),
+            appTip = "Settings \u2192 Voice Guide shows which pack is installed and how much space it takes, lets you re-download or delete it, and has a Play test voice button so you can check the result before a match.",
+            relatedIds = listOf("quick-start", "cd-spells", "turtle-lord", "rotation")
+        ),
+        KnowledgeEntry(
             id = "meta",
             title = "What is \"Meta\" & Top Meta Heroes?",
             categoryLabel = "Meta & App",
