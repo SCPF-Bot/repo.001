@@ -53,8 +53,9 @@ jobs:
       - name: Unit tests, lint and debug build
         run: ./gradlew --no-daemon :app:testDebugUnitTest :app:lintDebug :app:assembleDebug
 
-      # Release signing is opt-in. Without the secrets the release is built unsigned, so no
-      # artifact is ever signed with a key whose password is public.
+      # Release signing: with the upload-key secrets the release is signed with that key.
+      # Without them it is signed with the committed TEST key (app/keystore/), whose password
+      # is public. Such an APK is for testing and sideloading only, never for publishing.
       - name: Load release signing key from secrets
         env:
           RELEASE_KEYSTORE_BASE64: ${{ secrets.RELEASE_KEYSTORE_BASE64 }}
@@ -62,7 +63,7 @@ jobs:
           SECRET_KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
           if [ -z "$RELEASE_KEYSTORE_BASE64" ] || [ -z "$SECRET_STORE_PASSWORD" ] || [ -z "$SECRET_KEY_PASSWORD" ]; then
-            echo "::notice::Release signing secrets are not set; the release APK/AAB will be UNSIGNED."
+            echo "::notice::Upload-key secrets are not set; the release is signed with the TEST key (testing only)."
             exit 0
           fi
           # Kept under RUNNER_TEMP, outside the checkout, so it never lands in the workspace.
