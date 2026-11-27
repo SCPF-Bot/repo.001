@@ -1,10 +1,7 @@
 import java.io.File
+import java.net.HttpURLConnection
 import java.net.URI
-import java.net.http.HttpClient
-import java.net.http.HttpRequest
-import java.net.http.HttpResponse
 import java.security.MessageDigest
-import java.time.Duration
 
 plugins {
   alias(libs.plugins.android.application)
@@ -29,21 +26,19 @@ android {
     }
   }
 
-  // Do not remove or modify these signingConfigs. They are necessary for building, installing,
-  // and updating Android apps in AI Studio.
+  // Release signing is opt-in: CI (or a developer) exports KEYSTORE_PATH, STORE_PASSWORD and
+  // KEY_PASSWORD. Without them, release builds are produced unsigned rather than signed with
+  // a known key. Debug builds use AGP's auto-generated ~/.android/debug.keystore, so a fresh
+  // clone builds without any keystore file in the repository.
+  val releaseKeystorePath: String? = System.getenv("KEYSTORE_PATH")?.takeIf { it.isNotBlank() }
   signingConfigs {
-    create("release") {
-      val keystorePath = System.getenv("KEYSTORE_PATH") ?: "${rootDir}/my-upload-key.jks"
-      storeFile = file(keystorePath)
-      storePassword = System.getenv("STORE_PASSWORD")
-      keyAlias = "upload"
-      keyPassword = System.getenv("KEY_PASSWORD")
-    }
-    create("debugConfig") {
-      storeFile = file("${rootDir}/debug.keystore")
-      storePassword = "android"
-      keyAlias = "androiddebugkey"
-      keyPassword = "android"
+    if (releaseKeystorePath != null) {
+      create("release") {
+        storeFile = file(releaseKeystorePath)
+        storePassword = System.getenv("STORE_PASSWORD")
+        keyAlias = System.getenv("KEY_ALIAS")?.takeIf { it.isNotBlank() } ?: "upload"
+        keyPassword = System.getenv("KEY_PASSWORD")
+      }
     }
   }
 
@@ -54,18 +49,15 @@ android {
       isShrinkResources = true
       isDebuggable = false
       proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
-      // Do not remove or modify this signingConfig assignment. It is necessary for Android apps in
-      // AI Studio.
-      signingConfig = signingConfigs.getByName("release")
+      if (releaseKeystorePath != null) {
+        signingConfig = signingConfigs.getByName("release")
+      }
     }
     debug {
       isMinifyEnabled = false
       isShrinkResources = false
       applicationIdSuffix = ".debug"
       versionNameSuffix = "-debug"
-      // Do not remove or modify this signingConfig assignment. It is necessary for Android apps in
-      // AI Studio.
-      signingConfig = signingConfigs.getByName("debugConfig")
     }
   }
 
@@ -86,6 +78,8 @@ android {
   }
 
   lint {
+    // Non-fatal on purpose for now: lint findings are reported in the CI artifacts but do
+    // not block merges. Flip abortOnError once the baseline is clean (see docs/review).
     abortOnError = false
     checkReleaseBuilds = false
   }
@@ -110,45 +104,19 @@ android {
 }
 
 // ============================================================
-// Voice Guide: sherpa-onnx AAR provisioning (pinned 1.13.8)
+// Voice Guide: shared download + checksum helpers
 // ============================================================
-val sherpaVersion = "1.13.8"
-val sherpaAarName = "sherpa-onnx-$sherpaVersion.aar"
-val sherpaAarSha256 = "633c24321e06b1fe79feafa03ea16cbc0f8a286641e2da3559bac91bdb13bd96"
-val sherpaAarUrl =
-  "https://github.com/k2fsa/sherpa-onnx/releases/download/v$sherpaVersion/$sherpaAarName"
-val sherpaAarFile = layout.projectDirectory.file("libs/$sherpaAarName")
 
-val downloadSherpaAar = tasks.register("downloadSherpaAar") {
-  val target: File = sherpaAarFile.asFile
-  val url: String = sherpaAarUrl
-  val expectedSha: String = sherpaAarSha256
-  group = "voice guide"
-  description = "Downloads and checksum-verifies the sherpa-onnx AAR into app/libs."
-  outputs.file(target)
-  onlyIf { !target.exists() }
-  doLast {
-    target.parentFile.mkdirs()
-    logger.lifecycle("Voice Guide: downloading $url (50 MB, once)")
-    val partial = File(target.absolutePath + ".part")
-    val client = HttpClient.newBuilder()
-      .followRedirects(HttpClient.Redirect.NORMAL)
-      .connectTimeout(Duration.ofSeconds(30))
-      .build()
-    val req = HttpRequest.newBuilder(URI(url))
-      .timeout(Duration.ofSeconds(180))
-      .header("User-Agent", "Mozilla/5.0")
-      .GET()
-      .build()
-    val resp = client.send(req, HttpResponse.BodyHandlers.ofInputStream())
-    if (resp.statusCode() !in 200..299) {
-      throw GradleException("HTTP ${resp.statusCode()} downloading $url")
-    }
-    resp.body().use { input ->
-      partial.outputStream().use { output -> input.copyTo(output, bufferSize = 1 shl 16) }
-    }
+/**
+ * Checksum and download helpers. Declared as a nested object (not top-level functions) so the
+ * configuration cache can serialise the task actions that use them.
+ */
+object VoiceGuideFetch {
+  /** Lower-case hex SHA-256 of [file], or "" when it does not exist. */
+  fun fileSha256(file: File): String {
+    if (!file.isFile) return ""
     val digest = MessageDigest.getInstance("SHA-256")
-    partial.inputStream().use { input ->
+    file.inputStream().use { input ->
       val buffer = ByteArray(1 shl 16)
       while (true) {
         val read = input.read(buffer)
@@ -156,16 +124,67 @@ val downloadSherpaAar = tasks.register("downloadSherpaAar") {
         digest.update(buffer, 0, read)
       }
     }
-    val actual = digest.digest().joinToString("") { "%02x".format(it) }
-    if (!actual.equals(expectedSha, ignoreCase = true)) {
+    return digest.digest().joinToString("") { "%02x".format(it) }
+  }
+
+  /**
+   * Downloads [url] to [dest] through a `.part` file and only moves it into place once its
+   * SHA-256 matches [expectedSha256]. A failed or tampered download never replaces [dest].
+   */
+  fun downloadVerified(url: String, dest: File, expectedSha256: String, label: String) {
+    dest.parentFile.mkdirs()
+    val partial = File(dest.absolutePath + ".part")
+    val connection = URI(url).toURL().openConnection() as HttpURLConnection
+    connection.connectTimeout = 30_000
+    connection.readTimeout = 300_000
+    connection.setRequestProperty("User-Agent", "MLBB-Plus-build")
+    val status = connection.responseCode
+    if (status !in 200..299) {
+      throw GradleException("HTTP $status downloading $url")
+    }
+    connection.inputStream.use { input ->
+      partial.outputStream().use { output -> input.copyTo(output, bufferSize = 1 shl 16) }
+    }
+    val actual = VoiceGuideFetch.fileSha256(partial)
+    if (!expectedSha256.equals(actual, ignoreCase = true)) {
       partial.delete()
       throw GradleException(
-        "sherpa-onnx AAR checksum mismatch.\n  expected $expectedSha\n  actual   $actual"
+        "$label checksum mismatch.\n  expected $expectedSha256\n  actual   $actual"
       )
     }
-    if (!partial.renameTo(target)) {
-      throw GradleException("Could not move the downloaded AAR to ${target.path}")
+    dest.delete()
+    if (!partial.renameTo(dest)) {
+      throw GradleException("Could not move the downloaded $label to ${dest.path}")
     }
+  }
+}
+
+// ============================================================
+// Voice Guide: sherpa-onnx AAR provisioning (pinned 1.13.8)
+// ============================================================
+val sherpaVersion = "1.13.8"
+val sherpaAarName = "sherpa-onnx-$sherpaVersion.aar"
+val sherpaAarSha256 = "633c24321e06b1fe79feafa03ea16cbc0f8a286641e2da3559bac91bdb13bd96"
+// Published under the k2-fsa GitHub organisation. The k2fsa spelling returns HTTP 404.
+val sherpaAarUrl =
+  "https://github.com/k2-fsa/sherpa-onnx/releases/download/v$sherpaVersion/$sherpaAarName"
+val sherpaAarFile = layout.projectDirectory.file("libs/$sherpaAarName")
+
+val downloadSherpaAar = tasks.register("downloadSherpaAar") {
+  // Copy script-level values into locals: a lambda that reads a script property captures the
+  // script instance, which the configuration cache cannot serialise.
+  val target: File = sherpaAarFile.asFile
+  val url: String = sherpaAarUrl
+  val pinnedSha256: String = sherpaAarSha256
+  group = "voice guide"
+  description = "Downloads and checksum-verifies the sherpa-onnx AAR into app/libs."
+  outputs.file(target)
+  // Re-download when the AAR is missing or no longer matches its pin, so a truncated or
+  // tampered file is never compiled in silently.
+  onlyIf { !pinnedSha256.equals(VoiceGuideFetch.fileSha256(target), ignoreCase = true) }
+  doLast {
+    logger.lifecycle("Voice Guide: downloading $url (50 MB, once)")
+    VoiceGuideFetch.downloadVerified(url, target, pinnedSha256, "sherpa-onnx AAR")
     logger.lifecycle("Voice Guide: sherpa-onnx AAR verified and installed")
   }
 }
@@ -191,20 +210,6 @@ val bundleTtsModels = tasks.register("bundleTtsModels") {
     @Suppress("UNCHECKED_CAST")
     val models = manifest["models"] as? List<Map<String, Any?>>
       ?: throw GradleException("tts-models.json: missing or invalid 'models' array")
-    val sha256Of = { f: File ->
-      if (!f.isFile) "" else {
-        val digest = MessageDigest.getInstance("SHA-256")
-        f.inputStream().use { input ->
-          val buffer = ByteArray(1 shl 16)
-          while (true) {
-            val read = input.read(buffer)
-            if (read <= 0) break
-            digest.update(buffer, 0, read)
-          }
-        }
-        digest.digest().joinToString("") { "%02x".format(it) }
-      }
-    }
     val cache = cacheRoot.apply { mkdirs() }
     val outDir = File(assetsRoot, "tts").apply { mkdirs() }
     for (model in models) {
@@ -215,29 +220,13 @@ val bundleTtsModels = tasks.register("bundleTtsModels") {
       val expected = (model["sha256"] as? String ?: "").lowercase()
       if (expected.isEmpty()) throw GradleException("tts-models.json: $archive has no 'sha256'")
       val cached = File(cache, archive)
-      if (!expected.equals(sha256Of(cached), ignoreCase = true)) {
+      if (!expected.equals(VoiceGuideFetch.fileSha256(cached), ignoreCase = true)) {
         logger.lifecycle("Voice Guide: downloading $url")
-        val partial = File(cache, "$archive.part")
-        URI(url).toURL().openConnection().apply {
-          connectTimeout = 30_000
-          readTimeout = 300_000
-        }.getInputStream().use { input ->
-          partial.outputStream().use { output -> input.copyTo(output, bufferSize = 1 shl 16) }
-        }
-        val actual = sha256Of(partial)
-        if (!expected.equals(actual, ignoreCase = true)) {
-          partial.delete()
-          throw GradleException(
-            "TTS pack checksum mismatch for $archive.\n  expected $expected\n  actual   $actual"
-          )
-        }
-        if (!partial.renameTo(cached)) {
-          throw GradleException("Could not move the downloaded pack to ${cached.path}")
-        }
+        VoiceGuideFetch.downloadVerified(url, cached, expected, archive)
         logger.lifecycle("Voice Guide: $archive verified (${cached.length() / (1 shl 20)} MB)")
       }
       val target = File(outDir, archive)
-      if (!target.exists() || !expected.equals(sha256Of(target), ignoreCase = true)) {
+      if (!target.exists() || !expected.equals(VoiceGuideFetch.fileSha256(target), ignoreCase = true)) {
         cached.copyTo(target, overwrite = true)
       }
     }

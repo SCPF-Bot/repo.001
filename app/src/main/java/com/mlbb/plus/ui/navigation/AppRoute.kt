@@ -47,9 +47,3 @@ fun AppTab.toRoute(): AppRoute = when (this) {
     AppTab.PATCH -> AppRoute.PatchRoute
     AppTab.SETTINGS -> AppRoute.SettingsRoute
 }
-
-object DeepLinks {
-    const val SCHEME = "mlbbplus"
-    fun hero(heroId: Int) = "$SCHEME://hero/$heroId"
-    fun item(itemId: Int) = "$SCHEME://item/$itemId"
-}

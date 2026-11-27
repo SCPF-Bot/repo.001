@@ -8,9 +8,13 @@
 
     <!-- Voice Guide: the sherpa-onnx voice packs ship INSIDE the APK and are
          unpacked into the app's private folder on first use, so speech is fully
-         offline and the app needs no network permissions at all. -->
+         offline and the app needs no network permissions at all. Backup is disabled
+         (and the extraction rules exclude everything) because the packs are ~145 MB
+         and can be re-extracted from the APK. -->
     <application
         android:allowBackup="false"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
         android:enableOnBackInvokedCallback="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"

@@ -35,25 +35,23 @@ private fun assetModel(imageFromJson: String, fallbackPath: String): String {
     return "file:///android_asset/$clean"
 }
 
+/**
+ * Loads a bundled portrait from assets, or shows a role/brand-tinted initial tile when the
+ * asset is missing or fails to decode. [stateKey] resets the loading state when the asset changes.
+ */
 @Composable
-fun HeroImage(
-    hero: Hero,
+private fun AssetPortrait(
+    model: String,
+    initial: String,
+    tint: Color,
     modifier: Modifier,
-    contentScale: ContentScale = ContentScale.Crop,
-    contentDescription: String = hero.name
+    contentScale: ContentScale,
+    contentDescription: String,
+    stateKey: Any
 ) {
-    val model = assetModel(
-        hero.image.ifBlank { hero.portrait },
-        "heroes/${hero.slug.ifBlank { hero.id.toString() }}.webp"
-    )
-    var state by remember(hero.id, model) { mutableStateOf<AsyncImagePainter.State>(AsyncImagePainter.State.Empty) }
+    var state by remember(stateKey, model) { mutableStateOf<AsyncImagePainter.State>(AsyncImagePainter.State.Empty) }
     if (state is AsyncImagePainter.State.Error) {
-        FallbackPortrait(
-            initial = hero.name.firstOrNull()?.uppercase() ?: "?",
-            tint = roleColor(hero.role),
-            modifier = modifier,
-            contentDescription = contentDescription
-        )
+        FallbackPortrait(initial = initial, tint = tint, modifier = modifier, contentDescription = contentDescription)
     } else {
         Box(modifier = modifier.background(MaterialTheme.colorScheme.surfaceContainerHigh)) {
             AsyncImage(
@@ -68,32 +66,42 @@ fun HeroImage(
 }
 
 @Composable
+fun HeroImage(
+    hero: Hero,
+    modifier: Modifier,
+    contentScale: ContentScale = ContentScale.Crop,
+    contentDescription: String = hero.name
+) {
+    AssetPortrait(
+        model = assetModel(
+            hero.image.ifBlank { hero.portrait },
+            "heroes/${hero.slug.ifBlank { hero.id.toString() }}.webp"
+        ),
+        initial = hero.name.firstOrNull()?.uppercase() ?: "?",
+        tint = roleColor(hero.role),
+        modifier = modifier,
+        contentScale = contentScale,
+        contentDescription = contentDescription,
+        stateKey = hero.id
+    )
+}
+
+@Composable
 fun ItemImage(
     item: Item,
     modifier: Modifier,
     contentScale: ContentScale = ContentScale.Crop,
     contentDescription: String = item.name
 ) {
-    val model = assetModel(item.image, "items/${item.id}.webp")
-    var state by remember(item.id, model) { mutableStateOf<AsyncImagePainter.State>(AsyncImagePainter.State.Empty) }
-    if (state is AsyncImagePainter.State.Error) {
-        FallbackPortrait(
-            initial = item.name.firstOrNull()?.uppercase() ?: "?",
-            tint = MaterialTheme.colorScheme.primary,
-            modifier = modifier,
-            contentDescription = contentDescription
-        )
-    } else {
-        Box(modifier = modifier.background(MaterialTheme.colorScheme.surfaceContainerHigh)) {
-            AsyncImage(
-                model = model,
-                contentDescription = contentDescription,
-                contentScale = contentScale,
-                modifier = Modifier.fillMaxSize(),
-                onState = { state = it }
-            )
-        }
-    }
+    AssetPortrait(
+        model = assetModel(item.image, "items/${item.id}.webp"),
+        initial = item.name.firstOrNull()?.uppercase() ?: "?",
+        tint = MaterialTheme.colorScheme.primary,
+        modifier = modifier,
+        contentScale = contentScale,
+        contentDescription = contentDescription,
+        stateKey = item.id
+    )
 }
 
 @Composable

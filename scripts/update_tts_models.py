@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Update and verify the bundled TTS voice packs for MLBB Plus.
 
-The voice packs ship inside the APK (see TTS_IMPLEMENTATION.md): the Gradle
+The voice packs ship inside the APK (see docs/tts_implementation.md): the Gradle
 task ``bundleTtsModels`` reads ``app/src/main/assets/tts/tts-models.json`` and
 stages the archives listed there into the build. This script is the only thing
 that writes that manifest.

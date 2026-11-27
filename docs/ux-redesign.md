@@ -1,7 +1,7 @@
 # MLBB Plus — Android UI/UX Redesign
 
 **Source of truth:** `repo.001/docs/overview.md` (product intent) + code in `repo.001/app/src/main/java/com/mlbb/plus/ui/` (technical reality). Docs were re-synced to the bundled assets on 2026-11-27 — see `overview.md` §14 and `refactoring-report.md`’s addendum for the data-refresh record.
-**Stack:** Kotlin 2.3.21, Jetpack Compose + Material 3 (BOM 2026.06.00), single Activity + foreground-service overlay, bundled JSON, Coil 3. No backend, auth, DI, Room, or tests in this snapshot.
+**Stack:** Kotlin 2.4.21, Jetpack Compose + Material 3 (BOM 2026.11.01), single Activity + foreground-service overlay, bundled JSON, Coil 3. No backend, auth, DI, Room, or tests in this snapshot.
 **What changed in this pass:** new design-system files + reusable components + navigation/view-model foundations + back-button fix + predictive back. **Plus a 2026-11-27 data-sync pass** after the bundled JSON was refreshed (heroes 2026-11-23, items 2026-11-26, guides 2026-11-20): one data correction (Masha’s wrong hero ID), four code corrections caused by the new data (`shortVersion`, patch date source, Settings staleness guard, version-stamp leak), the recreated/extended `scripts/validate_assets.py`, and all docs synced to the assets. No business logic, API, or JSON schema changed. Full files are in the repo (see §7); this document is the rationale and the migration guide.
 
 > **How to read this:** §1–§9 follow the requested output format exactly. Conflicts between `overview.md` and code are flagged inline as **[CONFLICT]** and collected below. Assumptions are flagged as **[ASSUMPTION]**.
@@ -513,7 +513,7 @@ class AppViewModel : ViewModel() {
 
 **Build & data (run first):**
 - [ ] `python3 scripts/validate_assets.py` passes — currently **pass with 1 warning** (`roam_guide.json` at 2.2.16a). It checks JSON syntax, declared totals (133 heroes / 99 items), unique IDs, all 232 portrait paths, matchup self-links/duplicates/unresolved IDs, guide pick linking, patch-change ID ↔ roster name, and cross-file patch-version agreement.
-- [ ] `./gradlew :app:assembleDebug` and `:app:assembleRelease` (R8 + shrink) both succeed. **Not yet run** — this environment has JDK 11 and no Android SDK; the project needs JDK 17 + SDK 37.
+- [~] `./gradlew :app:assembleDebug` passes and unit tests run green (2026-11-27). `:app:assembleRelease` (R8 + shrink) still fails with OutOfMemoryError on a 2 GB sandbox; see `review-2026-11-27.md` OPEN-1. Original note: this environment had JDK 11 and no Android SDK.
 - [ ] Every guide hero pick / core item resolves or is listed in Settings diagnostics (verified 2026-11-27: 0 unlinked picks, 0 unlinked core items).
 - [ ] Patch screen lists **13** hero changes, each opening the correct hero (spot-check Masha → Masha, not Baxia) and 2 item changes.
 - [ ] Patch header reads “Updated 2026-11-11 • Patch 2.2.23 • Season 42” — no `-tier-2026-11-23` stamp anywhere in the UI.

@@ -1,19 +1,16 @@
-<?xml version="1.0" encoding="utf-8"?><!--
-   Sample data extraction rules file; uncomment and customize as necessary.
-   See https://developer.android.com/about/versions/12/backup-restore#xml-changes
-   for details.
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Android 12+ backup and device-transfer policy. Backup is also disabled in the manifest
+  (allowBackup="false"); these rules keep the policy explicit and cover any future change.
+  Everything is excluded: the ~145 MB voice packs in filesDir are re-extracted from the APK,
+  and the settings are small enough that restoring them is not worth the risk of restoring
+  stale model state onto a new device.
 -->
 <data-extraction-rules>
     <cloud-backup>
-        <!-- TODO: Use <include> and <exclude> to control what is backed up.
-        <include .../>
-        <exclude .../>
-        -->
+        <exclude domain="root" path="." />
     </cloud-backup>
-    <!--
     <device-transfer>
-        <include .../>
-        <exclude .../>
+        <exclude domain="root" path="." />
     </device-transfer>
-    -->
 </data-extraction-rules>

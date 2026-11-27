@@ -46,6 +46,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import com.mlbb.plus.BuildConfig
 import com.mlbb.plus.tts.VoiceGuideManager
 import com.mlbb.plus.tts.VoiceGuideSettings
 import com.mlbb.plus.tts.VoiceModel
@@ -232,7 +233,7 @@ private fun SettingsContent(
             DataFilesSection()
 
             Text(
-                text = "MLBB Plus v1.0",
+                text = "MLBB Plus v${BuildConfig.VERSION_NAME}",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )

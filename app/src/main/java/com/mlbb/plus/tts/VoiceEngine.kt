@@ -1,14 +1,11 @@
 package com.mlbb.plus.tts
 
 /**
- * mlbb/tts/VoiceEngine.kt
- * GitHub path: app/src/main/java/com/mlbb/plus/tts/VoiceEngine.kt
- *
  * The only speech API the overlay and [WidgetOverlayService] ever touch. Two
  * implementations exist:
  *
  *  - [SherpaOnnxVoiceEngine]: on-device neural TTS (Kokoro first, Piper as the
- *    lighter fallback). Voice models are downloaded on demand, never bundled.
+ *    lighter fallback). Voice packs ship inside the APK and are unpacked on first use (no network).
  *  - [SystemTtsVoiceEngine]: the platform `android.speech.tts.TextToSpeech`
  *    service. Zero download, works out of the box, lower quality and depends on
  *    whatever TTS engine the device ships (some Chinese-market ROMs ship none).

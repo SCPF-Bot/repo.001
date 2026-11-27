@@ -101,7 +101,7 @@ MLBB-Plus/
 │       │   └── res/
 │       │       ├── drawable/
 │       │       ├── mipmap-anydpi-v26/
-│       │       └── values/{colors.xml,strings.xml,dimens.xml,themes.xml}
+│       │       └── values/{strings.xml,dimens.xml,themes.xml}
 │       └── test/java/com/mlbb/plus/tts/      (JVM unit tests — no device needed)
 │           ├── TtsTextNormalizerTest.kt
 │           └── VoiceGuideManagerTest.kt
@@ -122,7 +122,7 @@ MLBB-Plus/
 ├── gradle.properties
 ├── gradlew
 ├── gradlew.bat
-├── TTS_IMPLEMENTATION.md                     (Voice Guide implementation record)
+├── docs/tts_implementation.md                (Voice Guide implementation record)
 └── readme.md
 ```
 
@@ -245,7 +245,7 @@ Each asset uses a root structure with `meta`, role-specific auxiliary data (such
 - `app/src/main/assets/heroes/*.webp`: bundled hero portraits consumed by `HeroImage()`.
 - `app/src/main/res/drawable/`: launcher foreground/background vector artwork.
 - `app/src/main/res/mipmap-anydpi-v26/`: adaptive launcher icon definitions.
-- `app/src/main/res/values/colors.xml`: Android resource color tokens.
+- `app/src/main/res/drawable/ic_launcher_monochrome.xml`: monochrome layer for Android 13+ themed icons (derived from the foreground artwork).
 - `strings.xml`: app and notification strings.
 - `themes.xml`: platform window theme and system-bar defaults.
 - `MLBBPlusTheme.kt`: Compose theme definitions. `AppUiTheme` / `AppUiColors` are for the main app; `MLBBPlusTheme` / `MLBBPlusColors` are used by the floating overlay. Keep these roles distinct when changing UI styling.
@@ -301,7 +301,7 @@ timer advances / player taps Next
     notification via observeVoiceForNotification()
 ```
 
-Guards that matter when touching this path: TalkBack on ⇒ the coach refuses to speak and shows a hint; 30 s idle ⇒ the engine is released (`IDLE_RELEASE_MS`); phone call / `AUDIOFOCUS_LOSS` ⇒ stop. `VoiceGuideSettings.revision` + `bump()` keeps the Settings-screen manager and the service manager in step — only **user-facing** setters may bump, or a manager would release its own engine mid-sentence or cancel its own install. Full detail: [`../TTS_IMPLEMENTATION.md`](../TTS_IMPLEMENTATION.md).
+Guards that matter when touching this path: TalkBack on ⇒ the coach refuses to speak and shows a hint; 30 s idle ⇒ the engine is released (`IDLE_RELEASE_MS`); phone call / `AUDIOFOCUS_LOSS` ⇒ stop. `VoiceGuideSettings.revision` + `bump()` keeps the Settings-screen manager and the service manager in step — only **user-facing** setters may bump, or a manager would release its own engine mid-sentence or cancel its own install. Full detail: [`tts_implementation.md`](tts_implementation.md).
 
 ## 6. Kotlin file responsibilities
 
@@ -332,27 +332,27 @@ Guards that matter when touching this path: TalkBack on ⇒ the coach refuses to
 
 ## 7. Build, platform, and dependencies
 
-- Gradle root project: `MLBB Assistant 2.0`; included module: `:app`.
-- Android Gradle Plugin: `9.2.1`.
-- Kotlin: `2.3.21`; Kotlin Compose compiler plugin is applied through the version catalog.
+- Gradle root project: `MLBB Plus`; included module: `:app`.
+- Android Gradle Plugin: `9.1.1`.
+- Kotlin: `2.4.21`; Kotlin Compose compiler plugin is applied through the version catalog.
 - Compile SDK: `37`; target SDK: `36`; minimum SDK: `29`.
 - Java source/target compatibility: `17`.
-- Compose BOM: `2026.06.00`.
-- AndroidX Core KTX: `1.16.0`.
-- Lifecycle: `2.11.0`.
+- Compose BOM: `2026.11.01`.
+- AndroidX Core KTX: `1.19.1`.
+- Lifecycle: `2.11.1`.
 - Activity Compose: `1.13.0`.
-- Coil Compose: `3.0.4`.
-- SavedState: `1.2.1`.
+- Coil Compose: `3.6.3`.
+- SavedState: `1.5.0`.
 - Other UI: Compose UI, Foundation, Material 3, tooling preview.
 - Repositories: Google and Maven Central. **No JitPack** — sherpa-onnx has no builds there.
 - TTS: `sherpa-onnx-1.13.8.aar`, vendored as `implementation(files("libs/sherpa-onnx-1.13.8.aar"))` and fetched on demand by the `downloadSherpaAar` task (sha256-verified, `.part` → rename, `onlyIf { !exists() }`, wired into `preBuild` and every `*compile*Kotlin*` task). Pinned to 1.13.8 deliberately: on 2.0.x Piper fails to initialise and Kokoro needs an extra lexicon file.
 - TTS voice packs: bundled into the APK. `bundleTtsModels` reads `app/src/main/assets/tts/tts-models.json`, fetches/verifies each archive into `app/tts-models-cache/`, and stages them into `app/build/generated/tts-assets/tts/` (registered as an assets source set). `scripts/update_tts_models.py` maintains the manifest (`.github/workflows/update-tts-models.yml` runs it weekly).
-- `org.apache.commons:commons-compress:1.25.0` — `.tar.bz2` extraction (1.26+ would pull commons-io and commons-lang3).
+- `org.apache.commons:commons-compress:1.28.0` — `.tar.bz2` extraction (1.26+ would pull commons-io and commons-lang3).
 - `junit:4.13.2` (`testImplementation`) with `testOptions { unitTests.isReturnDefaultValues = true }` for the 36 JVM tests in `app/src/test/java/com/mlbb/plus/tts/`.
 - No network permissions: the voice packs ship inside the APK (`assets/tts/`), and are unpacked (checksum-verified) into `filesDir/tts/` on first use.
 - The AAR carries `arm64-v8a`, `armeabi-v7a`, `x86` and `x86_64` native libs; a commented-out `splits { abi { } }` block is in `app/build.gradle.kts` for when ABI filtering is verified.
 - Release build enables code minification and resource shrinking; debug disables both.
-- Gradle wrapper distribution: Gradle `9.6.1`.
+- Gradle wrapper distribution: Gradle `9.3.1` (`gradle/wrapper/gradle-wrapper.properties`; `gradlew` is committed).
 
 The versions above are read from `gradle/libs.versions.toml`, `app/build.gradle.kts`, and `gradle/wrapper/gradle-wrapper.properties`; they are not recommendations to upgrade blindly.
 
@@ -372,7 +372,7 @@ The versions above are read from `gradle/libs.versions.toml`, `app/build.gradle.
 | Gradle dependency/version | Version catalog, app plugin configuration, wrapper compatibility, clean debug and release builds |
 | Guide step text fields (`instruction`, `description`, `callout`, `phase`, `compact`, `dont`, `objective_*`) | `OverlayWidgets.toSpoken()` fallback chain, `TtsTextNormalizer` budgets and abbreviation table, `TtsTextNormalizerTest`, and a re-run over all 286 real steps |
 | Voice Guide settings or pref keys | `VoiceGuideSettings` (including which setters call `bump()`), both manager instances, `SettingsScreen.VoiceGuideSection`, `VoiceGuideManagerTest` |
-| sherpa-onnx version or a voice model | `downloadSherpaAar` sha256 + `VoiceModelDownloader.MODELS` URLs/checksums/sizes, `SherpaOnnxVoiceEngine` config and thread counts, the sid ↔ voice-name mapping, and the 1.13.8 pin rationale in `TTS_IMPLEMENTATION.md` §2 |
+| sherpa-onnx version or a voice model | `downloadSherpaAar` sha256 + `VoiceModelInstaller` model table (`VoiceModel`) URLs/checksums/sizes, `SherpaOnnxVoiceEngine` config and thread counts, the sid ↔ voice-name mapping, and the 1.13.8 pin rationale in `docs/tts_implementation.md` §2 |
 | `VoiceGuideTransitions` decision table | Manager `compose()`/auto-speak gate, `VoiceControlRow` label + click dispatch, notification Play/Pause label, `VoiceGuideManagerTest` |
 
 ## 9. Current architectural boundaries and known maintenance risks

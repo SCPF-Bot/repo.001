@@ -83,7 +83,7 @@ The app should avoid assuming that every user understands game abbreviations or 
   permission needed. Game audio is ducked
   rather than muted, TalkBack pauses the coach, and the notification gains Play/Pause and Stop voice
   actions. Engine choice, model URLs and checksums, the text-normalisation contract and the device
-  test checklist are in [TTS_IMPLEMENTATION.md](../TTS_IMPLEMENTATION.md).
+  test checklist are in [tts_implementation.md](tts_implementation.md).
 
 ### Bundled data snapshot
 
@@ -127,13 +127,13 @@ The tier snapshot is dated 2026-11-23 (all ranks, all lanes): S+ 18, S 16, A 32,
 
 | Layer | Current implementation |
 |---|---|
-| Language | Kotlin 2.3.21 |
-| Android build | Android Gradle Plugin 9.2.1; Gradle wrapper 9.6.1 |
+| Language | Kotlin 2.4.21 |
+| Android build | Android Gradle Plugin 9.1.1; Gradle wrapper 9.3.1 (committed `gradlew`) |
 | Android SDK | compile 37, target 36, min 29 |
 | Runtime | Single Activity + Android foreground Service |
-| UI | Jetpack Compose, Material 3, Compose BOM 2026.06.00 |
-| Lifecycle / Activity | AndroidX Lifecycle 2.11.0; Activity Compose 1.13.0 |
-| Images | Coil Compose 3.0.4; bundled WebP portraits |
+| UI | Jetpack Compose, Material 3, Compose BOM 2026.11.01 |
+| Lifecycle / Activity | AndroidX Lifecycle 2.11.1; Activity Compose 1.13.0 |
+| Images | Coil Compose 3.6.3; bundled WebP portraits |
 | Data format | Local JSON assets parsed with `org.json` into Kotlin data classes |
 | Preferences | `SharedPreferences` for last role, last guide type, and auto-start setting |
 | Overlay | `WindowManager` / `TYPE_APPLICATION_OVERLAY` host with ComposeView (`JetOverlay`) |
@@ -155,7 +155,7 @@ Roadmap status is based on code and bundled assets in this repository snapshot, 
 - [x] Shared role-aware floating overlay and foreground notification / Stop action.
 - [x] Objective timers and enemy battle-spell tracking in overlay.
 - [x] Optional **Voice Guide**: on-device spoken coach in the overlay (Kokoro / Piper via sherpa-onnx 1.13.8, Android TTS fallback), default OFF, fully offline: the voice packs are compiled into the APK and unpacked (checksum-verified) into `filesDir/tts/` on first use.
-- [x] First Kotlin unit tests: **36 JVM tests** covering the TTS text normalizer (time phrasing, abbreviation expansion, truncation) and the voice-guide state transitions, plus the extracted `VoiceGuideTransitions` decision table shared by manager, widget and tests.
+- [x] First Kotlin unit tests: **40 JVM tests** (3 classes, including Robolectric on SDK 35) covering the TTS text normalizer (time phrasing, abbreviation expansion, truncation) and the voice-guide state transitions, plus the extracted `VoiceGuideTransitions` decision table shared by manager, widget and UI.
 - [x] Patch-note integration and guide references on hero/item details.
 - [x] Matchup and synergy fields for all 133 heroes, with methodology and source notes.
 - [x] UX refinements for quick start, search/filter/sort, navigation, and settings diagnostics.
@@ -163,8 +163,8 @@ Roadmap status is based on code and bundled assets in this repository snapshot, 
 
 ### Next priorities — reliability and maintainability
 
-- [ ] Establish a reproducible clean debug and release build in CI; record SDK / JDK / Gradle requirements.
-- [ ] Wire `scripts/validate_assets.py` into CI so a bad data push cannot ship (it currently must be run by hand).
+- [~] Reproducible build: the Gradle wrapper (9.3.1) is committed, CI runs `./gradlew`, and JDK 17 / SDK 37 are recorded in the readme. Still needed: a green GitHub run of the release workflow (see `review-2026-11-27.md`, OPEN-1).
+- [x] Wire `scripts/validate_assets.py` into CI: `release.yml` and `update-tts-models.yml` run it, so a bad data push fails the build.
 - [ ] Refresh `roam_guide.json` from 2.2.16a to 2.2.23 (hero pools, Sprint 100s → 75s, Chastise Pauldron / Antique Cuirass, Concussive Blast vs minions) and clear its `meta.latest` flag mismatch.
 - [ ] Repair `heroes.json.fixNotes` (character-split first entry) and `items.json.notes` (five orphaned keys), and decide whether `items.json.patchChanges` should be surfaced on the Patch screen.
 - [ ] Collapse the duplicated hero relationship fields (`counters`/`counteredBy`/`synergies` vs `goodAgainst`/`badAgainst`/`goodWith`/`bestPartners`) to one canonical pair.
@@ -172,8 +172,8 @@ Roadmap status is based on code and bundled assets in this repository snapshot, 
 - [ ] Consolidate the duplicated guide JSON parsing logic so screen summaries and overlay execution cannot silently diverge.
 - [ ] Add a visible data freshness / source details screen and a consistent stale-data warning.
 - [ ] Audit all guide steps, objective timings, and role recommendations against the current live patch before publishing a new data snapshot.
-- [ ] Run the Voice Guide device checklist ([TTS_IMPLEMENTATION.md](../TTS_IMPLEMENTATION.md) §9): first-use install and time-to-first-audio, in-game ducking, fallback when a model directory is deleted, TalkBack, incoming call, rapid Next/Prev taps, and settings persistence across restart. The feature was compile- and unit-test-verified off-device but never run on a phone.
-- [ ] Confirm a clean `./gradlew assembleDebug assembleRelease` on a real toolchain (the TTS work was verified with a standalone `kotlinc` + Compose compiler plugin harness, not Gradle) and then enable `abiFilters` / ABI splits for arm64-v8a + armeabi-v7a to keep the sherpa-onnx AAR (x86 included) out of release builds.
+- [ ] Run the Voice Guide device checklist ([tts_implementation.md](tts_implementation.md) §9): first-use install and time-to-first-audio, in-game ducking, fallback when a model directory is deleted, TalkBack, incoming call, rapid Next/Prev taps, and settings persistence across restart. The feature was compile- and unit-test-verified off-device but never run on a phone.
+- [~] `./gradlew assembleDebug`, unit tests and lint pass on JDK 17 / SDK 37 (2026-11-27, see `review-2026-11-27.md`). `assembleRelease` runs out of memory under R8 on a 2 GB sandbox; the likely cause is `material-icons-extended` (review OPEN-1). Verify on CI, and enable `abiFilters` / ABI splits for arm64-v8a + armeabi-v7a (review DEC-1).
 - [ ] Verify accessibility, large text, landscape, and tablet/foldable layouts on real devices or emulators.
 - [ ] Test overlay permission, foreground-service start/stop, notification behavior, and OEM-specific restrictions across supported Android versions.
 

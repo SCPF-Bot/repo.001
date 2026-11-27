@@ -1,9 +1,6 @@
 package com.mlbb.plus.tts
 
 /**
- * mlbb/tts/TtsTextNormalizer.kt
- * GitHub path: app/src/main/java/com/mlbb/plus/tts/TtsTextNormalizer.kt
- *
  * Turns the on-screen guide text into something that sounds right when spoken.
  *
  * The screen keeps the full paragraph (6 lines); the voice gets a condensed

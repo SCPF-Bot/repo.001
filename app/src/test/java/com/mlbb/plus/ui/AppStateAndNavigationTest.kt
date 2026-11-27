@@ -19,8 +19,10 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
+// Robolectric 4.18 runs SDK 36 only on a Java 21+ runtime, but the build and CI use JDK 17.
+// SDK 35 keeps the test on JDK 17; it does not change the app's targetSdk (36).
 @RunWith(RobolectricTestRunner::class)
-@Config(sdk = [36])
+@Config(sdk = [35])
 class AppStateAndNavigationTest {
 
     private lateinit var context: Context

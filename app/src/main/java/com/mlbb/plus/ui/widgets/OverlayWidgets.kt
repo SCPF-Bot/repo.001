@@ -1,30 +1,14 @@
 package com.mlbb.plus.ui.widgets
 
-// widgets/OverlayWidgets.kt — the compact in-game roam widget (timer + objective +
-// enemy spell tracker). The overlay engine lives in JetOverlay.kt.
-// DYNAMIC ROLES: the header selector opens Role -> Type menus. The role loads
-// assets/<role>_guide.json (roam_guide.json, jungle_guide.json, mid_guide.json,
-// gold_guide.json, exp_guide.json); the type is one entry of that file's "roles"
-// array. A role whose file is missing/invalid still gets the timer, objective
-// and spell tracker. Schema + how to add a role: docs/overview.md.
-// V13 — GUIDE-DRIVEN (see docs/overview.md "What the widget reads"): enemy-spell cooldowns +
-//   defaults now come from the guide's battle_spells (Sprint is 75s in 2.2.23, the hardcoded
-//   table said 100s), Turtle/Lord timers come from meta.objective_timers, per-step
-//   objective_contest / objective_trade / compact / phase are shown, the pre-game panel shows
-//   win condition + emblem + spells + core items, and the launcher passes the guide TYPE ID.
-// V10 — idle fade is now gentle (IDLE_ALPHA 0.6, was 0.15 = unreadable mid-game), the
-//   short guide text is visible by default, and the 'first tap only wakes' guard is OFF
-//   (FIRST_TAP_ONLY_WAKES) so spell taps always register. Also removed the root
-//   pointerInput from the widget while that guard is off: it made Compose claim EVERY touch
-//   inside the widget, which is what silently killed dragging (see JetOverlay.kt).
-// V9 — LOW-DISTRACTION PASS for in-game use:
-//   idle fade (whole widget -> IDLE_ALPHA after IDLE_FADE_MS, first tap only wakes it),
-//   fixed width/font (no layout jumps), description hidden by default and only
-//   'peeks' on step/objective change, muted colors (gold/red only when objective is
-//   <= URGENT_SECONDS or up), single-Text soft shadow instead of 9-copy outline,
-//   slimmer 30dp spell row, no per-second text churn after a slain.
-// V8 — Fixes: (1) Drag restored, (2) 45% opacity both widgets, (3) Lord at 8:00 always,
-// (4) Hide instructions deleted, (5) Timer/plan/buttons 28dp UX, + final sweep.
+/*
+ * The in-game roam widget: timer, objective tracker, enemy battle-spell cooldowns and the
+ * role/type guide, plus the optional Voice Guide controls. The overlay engine lives in JetOverlay.kt.
+ *
+ * Roles: the header selector opens Role -> Type menus. The role loads
+ * assets/<role>_guide.json; its type is one entry of that file's "roles" array. A role whose
+ * file is missing or invalid still gets the timer, objective and spell tracker.
+ * Schema and how to add a role: docs/overview.md ("What the widget reads").
+ */
 
 // ── SINGLE SOURCE OF TRUTH ────────────────────────────────────────────────────
 // This is the ONLY file that may declare Roam* / Tracker* / Guide* types.
@@ -76,8 +60,6 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.input.pointer.PointerEventPass
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalResources
@@ -122,13 +104,13 @@ private const val WIDGET_WIDTH_FRACTION_LANDSCAPE = 0.52f
 private const val WIDGET_WIDTH_FRACTION_PORTRAIT = 0.92f
 private const val WIDGET_MIN_WIDTH_DP = 300f
 
-// V9 low-distraction knobs — tweak these first.
+// Low-distraction knobs: tweak these first.
 private const val IDLE_FADE_MS = 4_000L       // no touch for this long -> fade
 private const val EXPANDED_IDLE_MS = 10_000L  // longer grace when you expanded to read
 private const val IDLE_ALPHA = 0.6f           // whole-widget alpha while idle (spells + guide stay readable)
-private const val FIRST_TAP_ONLY_WAKES = false // true = while idle, the first tap only wakes the widget (use with a low IDLE_ALPHA)
 private const val PEEK_MS = 5_000L            // how long the hidden description shows on a change
 private const val URGENT_SECONDS = 10         // objective turns gold/red + wakes at <= this
+private const val GAME_CLOCK_MAX_SECONDS = 18 * 60  // the overlay timer stops at 18:00
 
 private data class GuideStep(
     val startSeconds: Int,
@@ -141,7 +123,7 @@ private data class GuideStep(
     val vision: String,
     val decision: String,
     val dont: String,
-    // V13: per-step text the widget used to ignore.
+    // per-step text the widget used to ignore.
     val compact: String = "",
     val objectiveContest: String = "",
     val objectiveTrade: String = ""
@@ -181,7 +163,7 @@ private data class GuidePlan(
     val turtleTrade: String,
     val lordContest: String,
     val lordTrade: String,
-    // V13: role-level fields the widget used to ignore.
+    // role-level fields the widget used to ignore.
     val winCondition: String = "",
     val loseCondition: String = "",
     val battleSpells: List<String> = emptyList(),
@@ -411,12 +393,11 @@ private fun computeObjective(
     // implies lordSlain > 0 — which is handled by the first branch below and never
     // needs this flag. It IS used for the slain label ("Lord slain" vs "Turtle
     // slain"). Do not add a branch here that reads it without re-checking that
-    // invariant. detekt UnusedParameter, 2026-11-27 lint scan.
+    // invariant. 
     @Suppress("UnusedParameter")
     lastSlainWasLord: Boolean = false,
     timers: ObjectiveTimers = ObjectiveTimers()
 ): ObjectiveStatus {
-    // V11 FIX: V8 was wrong ("first Lord ALWAYS at 8:00").
     // Wiki: "First Lord will appear exactly 2 min after last Turtle slain.
     // E.g. last Turtle 7:45 -> Lord 9:45." + "Turtle not slain after 8:00
     // turns into Lord if no damage for 5s." + "No Turtle if last slain after 6:00."
@@ -483,7 +464,7 @@ fun RoamGuideWidget(
     voice: VoiceGuideManager? = null
 ) {
     val context = LocalContext.current
-    // V8 FIX: Width from displayMetrics (true screen), NOT LocalConfiguration.
+    // Width from displayMetrics (true screen), NOT LocalConfiguration.
     // In a WRAP_CONTENT overlay window, LocalConfiguration returns the WINDOW size,
     // so widgetWidth fed back on itself and shrank to ~35% (your screenshot).
     // displayMetrics is the real screen, so 52% is really 52%.
@@ -511,14 +492,14 @@ fun RoamGuideWidget(
     // True once the user picked something in the selector, so the description peeks
     // even before the game timer has started.
     var selectionTouched by remember { mutableStateOf(false) }
-    // V11: 3-state cycle, replaces detailsExpanded (bool).
+    // 3-state cycle, replaces detailsExpanded (bool).
     // 0 = default: short description (2 lines)
     // 1 = expand: full description (6 lines) + details
     // 2 = full collapsed: even short description hidden, only header left
     // Loop: 0 -> 1 -> 2 -> 0. Positional saveable state keeps this local to the widget.
-    var displayMode by rememberSaveable { mutableIntStateOf(0) } // V10: default = short guide text visible
+    var displayMode by rememberSaveable { mutableIntStateOf(0) } // default = short guide text visible
     var helpExpanded by rememberSaveable { mutableStateOf(false) }
-    // V8 FIX (4): Hide instructions DELETED. It hid the description with no way
+    // Hide instructions DELETED. It hid the description with no way
     // back (button lived inside expanded section, so once hidden you couldn't
     // unhide without re-expanding). Description is now always visible.
     var turtleSlain by rememberSaveable { mutableIntStateOf(0) }
@@ -527,11 +508,10 @@ fun RoamGuideWidget(
     var lastSlainWasLord by rememberSaveable { mutableStateOf(false) }
     var previousObjective by remember { mutableStateOf<ObjectiveSnapshot?>(null) }
 
-    // V9: idle fade. Any touch on the overlay window bumps JetOverlay.touchTick;
+    // idle fade. Any touch on the overlay window bumps JetOverlay.touchTick;
     // we wake, then fade again after the idle delay. snapshotFlow reads the tick
     // outside composition so drags don't recompose the widget.
     var awake by remember { mutableStateOf(true) }
-    val awakeNow by rememberUpdatedState(awake)
     val displayModeNow by rememberUpdatedState(displayMode)
     val menuOpenNow by rememberUpdatedState(menuStage != 0 || helpExpanded)
     LaunchedEffect(Unit) {
@@ -557,7 +537,7 @@ fun RoamGuideWidget(
     LaunchedEffect(isRunning) {
         while (isRunning) {
             delay(1_000L)
-            if (elapsedSeconds < 18 * 60) elapsedSeconds += 1 else isRunning = false
+            if (elapsedSeconds < GAME_CLOCK_MAX_SECONDS) elapsedSeconds += 1 else isRunning = false
         }
     }
 
@@ -607,7 +587,7 @@ fun RoamGuideWidget(
     } else {
         "${objective.label} in ${formatGameTime(objective.secondsUntil)}"
     }
-    // V9: muted unless the objective is up or about to be. Gold/red now MEAN something.
+    // muted unless the objective is up or about to be. Gold/red now MEAN something.
     val urgent = objective.isAlive || objective.secondsUntil <= URGENT_SECONDS
     val objectiveColor = when {
         !urgent -> GuideMuted
@@ -627,7 +607,7 @@ fun RoamGuideWidget(
             peek = false
         }
     }
-    // V13: the step's own objective_contest / objective_trade are written for that moment of the game
+    // the step's own objective_contest / objective_trade are written for that moment of the game
     // ("Second Turtle", "First Lord"), so prefer them when the step is about the objective that is up;
     // otherwise fall back to the role-level template. objective_trade was never shown before.
     val stepAboutObjective = currentStep != null && currentStep.phase.contains(objective.label, ignoreCase = true)
@@ -637,34 +617,34 @@ fun RoamGuideWidget(
         ?: if (isTurtle) selectedPlan?.turtleTrade.orEmpty() else selectedPlan?.lordTrade.orEmpty()
     val objectiveDescription = if (!hasGuide) "No guide data for $activeRole (${guideAssetFor(activeRole)} missing or invalid). Timer, objective and spells still work." else when {
         objective.isAlive -> contestText
-        // FIX V7: slain label = LAST slain, not NEXT. At 7:26 you killed Turtle,
+        // The slain label names the LAST slain objective, not the next one. At 7:26 after a Turtle kill, the next is Lord.
         // next is Lord — old said "Lord slain".
-        lastSlainAt != null -> "${if (lastSlainWasLord) "Lord" else "Turtle"} slain. Next: ${objective.label}. Push, farm, or reset." // V9: countdown lives in the pill; no per-second text churn
+        lastSlainAt != null -> "${if (lastSlainWasLord) "Lord" else "Turtle"} slain. Next: ${objective.label}. Push, farm, or reset." // countdown lives in the pill; no per-second text churn
         else -> currentStep.description
     }
-    // V13: hidden mode (≡) peeks the guide's one-line `compact` text instead of the full instruction.
+    // hidden mode (≡) peeks the guide's one-line `compact` text instead of the full instruction.
     val peekText = if (objective.isAlive || lastSlainAt != null) objectiveDescription
         else currentStep?.compact.takeUnless { it.isNullOrBlank() } ?: objectiveDescription
     val displayMetrics = LocalResources.current.displayMetrics
     val screenWidthDp = displayMetrics.widthPixels / displayMetrics.density
     val screenHeightDp = displayMetrics.heightPixels / displayMetrics.density
     val isLandscape = screenWidthDp > screenHeightDp
-    // V8 FIX: Adaptive width — displayMetrics (true screen) + NO fillMaxHeight.
-    // V6 used fillMaxHeight() in WRAP_CONTENT window -> full-screen tall strip.
-    // V7 used LocalConfiguration (window size) -> shrank to ~35% (screenshot).
+    // Adaptive width — displayMetrics (true screen) + NO fillMaxHeight.
+    // fillMaxHeight() in a WRAP_CONTENT window produces a full-screen strip, so it is not used.
+    // LocalConfiguration reports the window size, not the screen, so displayMetrics is used.
     // Base: 52% landscape (green line), 92% portrait. If description is long,
     // expand a bit to the RIGHT so it still fits in 2-3 lines, then shrink back.
     // Max: 78% landscape / 95% portrait, so it never runs off-screen.
     val baseFraction = if (isLandscape) WIDGET_WIDTH_FRACTION_LANDSCAPE else WIDGET_WIDTH_FRACTION_PORTRAIT
     val maxFraction = if (isLandscape) 0.78f else 0.95f
-    // V9: width never depends on text length (no jumping when the step changes);
+    // width never depends on text length (no jumping when the step changes);
     // it only widens when YOU expand to the full view.
     val adaptiveExtra = if (displayMode == 1) 0.16f else 0f
     val widthFraction = (baseFraction + adaptiveExtra).coerceAtMost(maxFraction)
     val widgetWidth = (screenWidthDp * widthFraction)
         .coerceAtLeast(WIDGET_MIN_WIDTH_DP)
         .coerceAtMost(screenWidthDp - 8)
-    // V7 FIX: Step progress for timer background. Fixed value, no fillMaxHeight.
+    // Step progress for timer background. Fixed value, no fillMaxHeight.
     val stepProgress = if (currentStep != null) {
         val span = (currentStep.endSeconds - currentStep.startSeconds).coerceAtLeast(1)
         ((elapsedSeconds - currentStep.startSeconds).toFloat() / span).coerceIn(0f, 1f)
@@ -680,24 +660,7 @@ fun RoamGuideWidget(
     Column(
         modifier = Modifier
             .width(widgetWidth.dp)
-            .graphicsLayer { alpha = fadeAlpha }
-            // V9: while faded, the first tap only WAKES the widget — the whole
-            // gesture is swallowed so a teamfight tap can't hit a button.
-            .then(if (FIRST_TAP_ONLY_WAKES) Modifier.pointerInput(Unit) {
-                awaitPointerEventScope {
-                    var swallowing = false
-                    while (true) {
-                        val event = awaitPointerEvent(PointerEventPass.Initial)
-                        if (event.changes.any { it.pressed && !it.previousPressed }) {
-                            swallowing = !awakeNow
-                        }
-                        if (swallowing) {
-                            event.changes.forEach { it.consume() }
-                            if (event.changes.none { it.pressed }) swallowing = false
-                        }
-                    }
-                }
-            } else Modifier),
+            .graphicsLayer { alpha = fadeAlpha },
         // No outer horizontal padding: the card itself is widgetWidth,
         // so its visible edges line up exactly with the green line.
         verticalArrangement = Arrangement.spacedBy(onePx)
@@ -733,7 +696,7 @@ fun RoamGuideWidget(
                             if (isRunning) GuideAccent.copy(alpha = 0.65f) else GuideBorder,
                             RoundedCornerShape(9.dp)
                         )
-                        .clickable { isRunning = !isRunning && elapsedSeconds < 18 * 60 }
+                        .clickable { isRunning = !isRunning && elapsedSeconds < GAME_CLOCK_MAX_SECONDS }
                         .semantics { contentDescription = "Start or pause timer" }
                         .testTag("overlay_timer_button"),
                     contentAlignment = Alignment.Center
@@ -991,7 +954,7 @@ fun RoamGuideWidget(
                     verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
                     GuideControl("−10s", GuideMuted) { elapsedSeconds = (elapsedSeconds - 10).coerceAtLeast(0) }
-                    GuideControl("+10s", GuideMuted) { elapsedSeconds = (elapsedSeconds + 10).coerceAtMost(18 * 60) }
+                    GuideControl("+10s", GuideMuted) { elapsedSeconds = (elapsedSeconds + 10).coerceAtMost(GAME_CLOCK_MAX_SECONDS) }
                     GuideControl("Reset", GuideMuted) {
                         elapsedSeconds = 0
                         isRunning = false
@@ -1112,7 +1075,7 @@ private fun EnemySpellTrackerWidget(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(2.dp)
     ) {
-        // V7: ENEMY / "Tap = used · Hold = change" header REMOVED.
+        // ENEMY / "Tap = used · Hold = change" header REMOVED.
         // Moved to ? help menu in Roam header. Saves one row + no clipping.
         Row(
             modifier = Modifier.fillMaxWidth(),

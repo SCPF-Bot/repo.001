@@ -56,7 +56,7 @@ object KnowledgeBaseData {
                 "Assuming the permission failed because the app looks unchanged: the status chip only flips after you return from Android settings.",
                 "Leaving the guide on a playstyle you do not actually play — the timed steps, spells and picks all follow the selected archetype."
             ),
-            appTip = "Settings → Floating guide re-opens the Android permission page and shows the current status. Turn on “Start the guide when the app opens” there to launch it automatically once permission is granted.",
+            appTip = "Settings → Overlay permission card (“Open Android settings” / “Manage Android permission”) reopens the Android permission page and shows the current status. Turn on “Start the guide when the app opens” there to launch it automatically once permission is granted.",
             relatedIds = listOf("roles-lanes", "turtle-lord", "meta")
         ),
         KnowledgeEntry(
@@ -84,7 +84,7 @@ object KnowledgeBaseData {
                     listOf("Stop", "Overlay voice row or notification", "Silences the coach and hands audio straight back to the game"),
                     listOf("Play / Pause voice", "Ongoing notification", "Drives the coach without touching the overlay"),
                     listOf("Speed", "Settings \u2192 Voice Guide", "0.85\u00d7 relaxed, 1.0\u00d7 normal, 1.25\u00d7 brisk"),
-                    listOf("Enemy spells", "Settings \u2192 Voice Guide", "Off by default: says \u201cEnemy Flicker used\u201d when you tap a lane in the cooldown tracker")
+                    listOf("Announce enemy battle spells", "Settings \u2192 Voice Guide", "Off by default: says \u201cEnemy Flicker used\u201d when you tap a lane in the cooldown tracker")
                 )
             ),
             mistakes = listOf(
@@ -104,13 +104,13 @@ object KnowledgeBaseData {
             details = listOf(
                 "A hero enters the meta when recent buffs, item adjustments, or objective changes amplify their kit—making them stronger than average alternatives in ranked play.",
                 "In MLBB Plus, heroes marked as meta picks combine strong current-patch performance with high draft priority on Original Server.",
-                "The Patch tab summarizes the active patch headline and every hero/item change; Hero Explorer's Sort by -> Meta brings current meta picks to the top of the grid."
+                "The Patch tab summarizes the active patch headline and every hero/item change; Hero Explorer's default Sort by → Recommended puts top-tier heroes (then highest win rate) at the top of the grid."
             ),
             mistakes = listOf(
                 "Blind-picking a meta hero you have zero practice on into hard counters—comfort on an A-tier hero often outperforms first-timing an S+ pick.",
                 "Assuming last month's meta is unchanged after a balance patch or item rework."
             ),
-            appTip = "Open Hero Explorer and set Sort by -> Meta or Recommended to bring top meta heroes to the top.",
+            appTip = "Open Hero Explorer. The default Sort by → Recommended lists top-tier heroes first, then by win rate.",
             action = KnowledgeAction("Open Hero Explorer", KnowledgeActionTarget.HEROES),
             relatedIds = listOf("tiers", "wr-pr-br", "patch-terms")
         ),

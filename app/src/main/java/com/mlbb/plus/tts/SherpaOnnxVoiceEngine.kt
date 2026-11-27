@@ -13,23 +13,26 @@ import com.k2fsa.sherpa.onnx.OfflineTtsModelConfig
 import com.k2fsa.sherpa.onnx.OfflineTtsVitsModelConfig
 import java.io.File
 import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.locks.ReentrantLock
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import kotlin.concurrent.withLock as withThreadLock
 
 /**
- * mlbb/tts/SherpaOnnxVoiceEngine.kt
- * GitHub path: app/src/main/java/com/mlbb/plus/tts/SherpaOnnxVoiceEngine.kt
- *
  * On-device neural TTS through sherpa-onnx. Kokoro is the primary voice, Piper
  * the lighter fallback, exactly as the feature spec asks.
  *
  * Everything runs offline: the model files are unpacked from the APK bundle by
  * [VoiceModelInstaller] (`filesDir/tts/`), synthesis happens on a background
- * thread, and audio goes
- * out through a streaming [AudioTrack] so the first sentence starts playing
- * while the rest is still being generated.
+ * thread, and audio goes out through a streaming [AudioTrack] so the first
+ * sentence starts playing while the rest is still being generated.
+ *
+ * Native lifetime: [OfflineTts] and [AudioTrack] are freed only while holding
+ * [genLock], the same lock held for the whole of a generation. A release that
+ * lands mid-sentence first asks the generator to stop, then waits for it, so a
+ * native handle is never freed while sherpa-onnx is still using it.
  *
  * Version pin: sherpa-onnx **1.13.8**. 2.0.x dropped the built-in espeak-ng
  * frontend, which the Piper VITS packs depend on ("no lexicon, and no frontend
@@ -56,14 +59,17 @@ class SherpaOnnxVoiceEngine(
         get() = true
 
     /** The pack currently loaded, for Settings copy and logs. Null before [prepare]. */
+    @Volatile
     var loadedModel: VoiceModel? = null
         private set
 
     /** The speaker id resolved for the configured voice. */
+    @Volatile
     var loadedSid: Int = 0
         private set
 
     /** Sample rate reported by the model (24000 Kokoro, 22050 Piper). */
+    @Volatile
     var loadedSampleRate: Int = 0
         private set
 
@@ -75,10 +81,17 @@ class SherpaOnnxVoiceEngine(
 
     /** Guards the engine/track handover so [release] cannot race [load]. */
     private val stateLock = Any()
+
+    /**
+     * Held for the whole of one generation and for the native teardown. Lets a
+     * release wait for an in-flight sentence before it frees the native handles.
+     */
+    private val genLock = ReentrantLock()
     private val speaking = AtomicBoolean(false)
     private val stopRequested = AtomicBoolean(false)
     private val paused = AtomicBoolean(false)
     private val loadLock = Mutex()
+    @Volatile
     private var rate = VoiceGuideSettings.DEFAULT_RATE
 
     /**
@@ -154,7 +167,14 @@ class SherpaOnnxVoiceEngine(
             val wantedVoice = VoiceGuideSettings.voice(context)
             val sid = (model.speakers[wantedVoice] ?: model.speakers.values.firstOrNull() ?: 0)
                 .coerceIn(0, (speakers - 1).coerceAtLeast(0))
+            // Build the track before publishing anything: a missing track used to
+            // leave the engine half-loaded (tts set, track null, load() returning false).
             val player = buildTrack(sr)
+            if (player == null) {
+                engine.release()
+                Log.e(TAG, "${model.id}: no AudioTrack for ${sr} Hz, not loading")
+                return@withContext false
+            }
             synchronized(stateLock) {
                 tts = engine
                 track = player
@@ -163,7 +183,7 @@ class SherpaOnnxVoiceEngine(
                 loadedSampleRate = sr
             }
             Log.i(TAG, "loaded ${model.id}: sr=$sr speakers=$speakers sid=$sid threads=$threads")
-            player != null
+            true
         } catch (t: Throwable) {
             // UnsatisfiedLinkError on an unsupported ABI, OOM on a small device,
             // or a corrupt model. The manager falls back to the platform engine.
@@ -217,21 +237,11 @@ class SherpaOnnxVoiceEngine(
             onDone?.invoke()
             return
         }
-        val engine = tts
-        val player = track
-        if (engine == null || player == null) {
+        if (tts == null || track == null) {
             if (!prepare()) {
                 onDone?.invoke()
                 return
             }
-        }
-        val ttsNow = tts ?: run {
-            onDone?.invoke()
-            return
-        }
-        val trackNow = track ?: run {
-            onDone?.invoke()
-            return
         }
 
         // Rapid Next/Prev: drop whatever was playing before starting.
@@ -248,34 +258,41 @@ class SherpaOnnxVoiceEngine(
         }
         try {
             withContext(Dispatchers.IO) {
-                val config = GenerationConfig(
-                    silenceScale = SILENCE_SCALE,
-                    speed = rate,
-                    sid = loadedSid
-                )
-                try {
-                    trackNow.play()
-                    ttsNow.generateWithConfigAndCallback(spoken, config) { samples ->
-                        if (stopRequested.get()) {
-                            0 // ask sherpa-onnx to stop generating
-                        } else {
-                            writeBlocking(trackNow, samples)
-                            1
+                genLock.withThreadLock {
+                    // A release or reload may have replaced or freed the handles while we
+                    // waited for the lock, so read them only now, under the lock.
+                    val ttsNow = tts
+                    val trackNow = track
+                    if (ttsNow == null || trackNow == null || stopRequested.get()) return@withThreadLock
+                    val config = GenerationConfig(
+                        silenceScale = SILENCE_SCALE,
+                        speed = rate,
+                        sid = loadedSid
+                    )
+                    try {
+                        trackNow.play()
+                        ttsNow.generateWithConfigAndCallback(spoken, config) { samples ->
+                            if (stopRequested.get()) {
+                                0 // ask sherpa-onnx to stop generating
+                            } else {
+                                writeBlocking(trackNow, samples)
+                                1
+                            }
                         }
-                    }
-                    if (!stopRequested.get()) {
-                        // MODE_STREAM: stop() plays out what is already buffered.
-                        trackNow.stop()
-                    }
-                } catch (t: Throwable) {
-                    if (!stopRequested.get()) Log.e(TAG, "generation failed", t)
-                } finally {
-                    if (stopRequested.get()) {
-                        try {
-                            trackNow.pause()
-                            trackNow.flush()
-                        } catch (t: Throwable) {
-                            Log.w(TAG, "flush failed", t)
+                        if (!stopRequested.get()) {
+                            // MODE_STREAM: stop() plays out what is already buffered.
+                            trackNow.stop()
+                        }
+                    } catch (t: Throwable) {
+                        if (!stopRequested.get()) Log.e(TAG, "generation failed", t)
+                    } finally {
+                        if (stopRequested.get()) {
+                            try {
+                                trackNow.pause()
+                                trackNow.flush()
+                            } catch (t: Throwable) {
+                                Log.w(TAG, "flush failed", t)
+                            }
                         }
                     }
                 }
@@ -358,34 +375,44 @@ class SherpaOnnxVoiceEngine(
     override fun release() = releaseInternal()
 
     /**
-     * Tears the native engine down. Runs under [stateLock], and the expensive
-     * part of [load] publishes its handles under the same lock, so a release
-     * that lands mid-load either happens before the handles are stored (and the
-     * load then overwrites them) or after (and cleans them up).
+     * Tears the native engine down. The handles are detached under [stateLock],
+     * so a concurrent [load] never sees them half-published. The native objects
+     * are freed under [genLock]: a sentence in flight is asked to stop (its
+     * callback returns 0, and the blocked AudioTrack write is unblocked by the
+     * pause/flush below) and the free waits for it to leave the generator.
      */
-    private fun releaseInternal() = synchronized(stateLock) {
+    private fun releaseInternal() {
         stopRequested.set(true)
         paused.set(false)
         speaking.set(false)
+        val engine: OfflineTts?
+        val player: AudioTrack?
+        synchronized(stateLock) {
+            engine = tts
+            player = track
+            tts = null
+            track = null
+            loadedModel = null
+            loadedSampleRate = 0
+        }
         try {
-            track?.let {
-                it.pause()
-                it.flush()
-                it.release()
+            player?.pause()
+            player?.flush()
+        } catch (t: Throwable) {
+            Log.w(TAG, "AudioTrack pause/flush failed", t)
+        }
+        genLock.withThreadLock {
+            try {
+                player?.release()
+            } catch (t: Throwable) {
+                Log.w(TAG, "AudioTrack release failed", t)
             }
-        } catch (t: Throwable) {
-            Log.w(TAG, "AudioTrack release failed", t)
+            try {
+                engine?.release()
+            } catch (t: Throwable) {
+                Log.w(TAG, "OfflineTts release failed", t)
+            }
         }
-        track = null
-        try {
-            tts?.release()
-        } catch (t: Throwable) {
-            Log.w(TAG, "OfflineTts release failed", t)
-        }
-        tts = null
-        loadedModel = null
-        loadedSampleRate = 0
-        Unit
     }
 
     companion object {

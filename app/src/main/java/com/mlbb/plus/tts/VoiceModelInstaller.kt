@@ -9,6 +9,7 @@ import java.security.DigestInputStream
 import java.security.MessageDigest
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.coroutines.coroutineContext
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.withContext
@@ -17,9 +18,6 @@ import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream
 import org.json.JSONObject
 
 /**
- * mlbb/tts/VoiceModelInstaller.kt
- * GitHub path: app/src/main/java/com/mlbb/plus/tts/VoiceModelInstaller.kt
- *
  * Offline voice pack installation. The voice packs ship INSIDE the APK as
  * `.tar.bz2` archives under `assets/tts/` (bundled at build time by the
  * `bundleTtsModels` Gradle task), so first use needs no network at all: the
@@ -38,7 +36,7 @@ import org.json.JSONObject
  *   digest of the whole compressed stream matched [VoiceModel.sha256]. A marker
  *   file records that, so a half-written directory can never look installed.
  * - Every checksum and byte size in the manifest was verified against the
- *   upstream `checksum.txt` of the `tts-models` release (see TTS_IMPLEMENTATION.md).
+ *   upstream `checksum.txt` of the `tts-models` release (see docs/tts_implementation.md).
  * - sherpa-onnx is pinned to 1.13.8 on purpose: 2.0.x removed the espeak-ng
  *   frontend, which makes the Piper packs unusable unless a separate
  *   `lexicon-en-us.txt` is shipped for Kokoro. Upgrading needs both changes.
@@ -117,8 +115,10 @@ class VoiceModelInstaller(private val context: Context) {
             onProgress(done)
             return@withContext done
         }
+        // freeBytes() reports Long.MAX_VALUE when StatFs fails, so "unknown" passes.
+        // A genuinely full disk (0 bytes) must fail; it used to slip through the range check.
         val free = freeBytes()
-        if (free in 1 until model.uncompressedBytes + MIN_FREE_MARGIN) {
+        if (free < model.uncompressedBytes + MIN_FREE_MARGIN) {
             val msg = "Not enough storage: ${model.uncompressedBytes / MB} MB needed, ${free / MB} MB free"
             onProgress(Progress.Failed(msg, retryable = false))
             return@withContext Progress.Failed(msg, retryable = false)
@@ -203,6 +203,12 @@ class VoiceModelInstaller(private val context: Context) {
             work.deleteRecursively()
             onProgress(Progress.Cancelled)
             Progress.Cancelled
+        } catch (e: CancellationException) {
+            // Cooperative cancellation (coroutine cancelled, e.g. the manager was released).
+            // It must propagate; reporting it as a retryable Failed made a cancel look like a
+            // network error and kept the install state wrong.
+            work.deleteRecursively()
+            throw e
         } catch (e: Exception) {
             work.deleteRecursively()
             Log.e(TAG, "install ${model.id} failed", e)

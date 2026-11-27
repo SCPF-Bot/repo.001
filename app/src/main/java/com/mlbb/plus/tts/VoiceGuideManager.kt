@@ -23,9 +23,6 @@ import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.launch
 
 /**
- * mlbb/tts/VoiceGuideManager.kt
- * GitHub path: app/src/main/java/com/mlbb/plus/tts/VoiceGuideManager.kt
- *
  * The single owner of "what is being spoken right now". The overlay widget and
  * [com.mlbb.plus.ui.WidgetOverlayService] only ever talk to this class plus
  * [VoiceUiState]; they never see an engine, an AudioTrack or a model install.
@@ -218,12 +215,16 @@ class VoiceGuideManager(private val context: Context) {
         }
     }
 
-    /** Stop speaking and hand audio focus straight back to the game. */
+    /**
+     * Stop speaking and hand audio focus straight back to the game.
+     *
+     * Deliberately does NOT touch an in-flight voice-pack install: audio focus loss
+     * (an incoming call), TalkBack and the settings toggle all call stop(), and none
+     * of them should throw away a 20-100 MB download. Only [cancelInstall] does that.
+     */
     fun stop() {
         speakJob?.cancel()
         speakJob = null
-        installer.cancel()
-        installJob = null
         active?.stop()
         abandonFocus()
         state = state.copy(
@@ -231,8 +232,7 @@ class VoiceGuideManager(private val context: Context) {
             progress = 0f,
             progressLabel = "",
             speakingKey = "",
-            message = "",
-            installing = false
+            message = ""
         )
         scheduleIdleRelease()
     }
@@ -305,19 +305,25 @@ class VoiceGuideManager(private val context: Context) {
         installer.resetCancel()
         state = state.copy(installing = true)
         installJob = scope.launch {
-            val result = installer.install(model) { publish(it) }
-            val ok = result is VoiceModelInstaller.Progress.Done
-            refreshFromPrefs()
-            state = state.copy(
-                installing = false,
-                message = when {
-                    ok -> "${model.label} installed."
-                    result is VoiceModelInstaller.Progress.Cancelled -> "Install cancelled."
-                    else -> state.message
-                }
-            )
-            if (ok) releaseEngines() // pick up the new pack on the next line
-            onFinished?.invoke(ok)
+            var result: VoiceModelInstaller.Progress = VoiceModelInstaller.Progress.Cancelled
+            try {
+                result = installer.install(model) { publish(it) }
+            } finally {
+                // Runs on cancellation too (install() now rethrows it), so the spinner
+                // always clears even when the job is replaced or the manager is released.
+                val ok = result is VoiceModelInstaller.Progress.Done
+                refreshFromPrefs()
+                state = state.copy(
+                    installing = false,
+                    message = when {
+                        ok -> "${model.label} installed."
+                        result is VoiceModelInstaller.Progress.Cancelled -> "Install cancelled."
+                        else -> state.message
+                    }
+                )
+                if (ok) releaseEngines() // pick up the new pack on the next line
+                onFinished?.invoke(ok)
+            }
         }
     }
 

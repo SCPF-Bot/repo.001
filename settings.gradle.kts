@@ -22,6 +22,6 @@ dependencyResolutionManagement {
   }
 }
 
-rootProject.name = "MLBB Assistant 2.0"
+rootProject.name = "MLBB Plus"
 
 include(":app")

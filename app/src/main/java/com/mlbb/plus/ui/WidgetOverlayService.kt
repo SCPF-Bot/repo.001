@@ -15,6 +15,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.core.app.NotificationCompat
 import androidx.core.app.ServiceCompat
+import com.mlbb.plus.R
 import com.mlbb.plus.tts.VoiceGuideManager
 import com.mlbb.plus.ui.model.GameData
 import com.mlbb.plus.ui.model.RoleTypes
@@ -28,47 +29,14 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 
-// ============================================================
-// mlbb/ui/WidgetOverlayService.kt  ->  FIXED
-// GitHub path: app/src/main/java/com/mlbb/plus/ui/WidgetOverlayService.kt
-// ------------------------------------------------------------
-// FIXES:
-//  [1] Package unified: com.mlbb.ui -> com.mlbb.plus.ui
-//      (matches GameData / MainActivity / namespace).
-//  [2] Foreground service for targetSdk 36 / Android 14+:
-//      Old: startForeground(1, notification) with plain
-//      Notification.Builder. On API 29+ / 34+ this throws
-//      SecurityException / ForegroundServiceDidNotStartInTime
-//      without a declared foregroundServiceType + permission.
-//      Fix: ServiceCompat.startForeground() with
-//      FOREGROUND_SERVICE_TYPE_SPECIAL_USE on API 29+, plus
-//      NotificationCompat with setForegroundServiceBehavior(
-//      FOREGROUND_SERVICE_IMMEDIATE).
-//      MANIFEST STILL REQUIRED (see bottom comment):
-//        <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-//        <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
-//        <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
-//        <service android:name=".ui.WidgetOverlayService"
-//            android:foregroundServiceType="specialUse" ... />
-//  [3] Notification: added content Intent (tap -> MainActivity),
-//      Stop action (PendingIntent to ACTION_STOP), setOngoing(true),
-//      FLAG_IMMUTABLE (required API 31+), NotificationCompat.
-//      Before: notification had no way to stop the service and
-//      used a bare Builder without ongoing / actions.
-//  [4] companion setters: private set -> internal set + explicit
-//      updateRole() / markRunning() helpers. Old private-set in a
-//      companion is fragile / confusing - the instance methods
-//      assign companion state. Helpers make the mutation explicit
-//      and keep the public API read-only.
-//  [5] onStartCommand: handles null intent (system restarts a
-//      START_STICKY service with null intent). Old code already
-//      used ?: currentRole, now documented + null-safe notify().
-//  [6] onDestroy: stopForeground(STOP_FOREGROUND_REMOVE) so the
-//      notification is actually removed. Old code only hid overlay.
-//  [7] NotificationManager.notify() made null-safe (?.) -
-//      getSystemService() can return null on some OEMs.
-// ============================================================
-
+/**
+ * Foreground service that hosts the floating guide overlay and the Voice Guide coach.
+ *
+ * Lifecycle: onCreate starts foreground immediately (required on API 31+ for a
+ * service started from the background). onStartCommand (re)targets the role and
+ * shows the overlay. onDestroy stops speech, releases the native voice engine,
+ * hides the overlay and removes the notification.
+ */
 class WidgetOverlayService : Service() {
 
     private var overlayInitialized = false
@@ -96,7 +64,7 @@ class WidgetOverlayService : Service() {
         createChannel()
         voice = VoiceGuideManager(this)
         observeVoiceForNotification()
-        // FIX [2]: must call startForeground immediately in onCreate.
+        // Must reach startForeground promptly, so it happens here rather than after the overlay is built.
         ServiceCompat.startForeground(
             this,
             NOTIFICATION_ID,
@@ -136,8 +104,7 @@ class WidgetOverlayService : Service() {
             else -> Unit
         }
 
-        // FIX [5]: intent is null when the system restarts a
-        // START_STICKY service - fall back to last known role.
+        // The intent is null when the system restarts a START_STICKY service: fall back to the last known role.
         val requestedRole = intent?.getStringExtra(EXTRA_ROLE) ?: currentRole
         val role = requestedRole.takeIf { it in RoleTypes.roles } ?: "Roam"
         val requestedType = intent?.getStringExtra(EXTRA_ROLE_TYPE) ?: currentRoleType
@@ -147,7 +114,6 @@ class WidgetOverlayService : Service() {
         updateRole(role, roleType)
         markRunning(true)
 
-        // FIX [7]: null-safe notify.
         getSystemService(NotificationManager::class.java)
             ?.notify(NOTIFICATION_ID, buildNotification(role, roleType))
 
@@ -172,20 +138,14 @@ class WidgetOverlayService : Service() {
 
     override fun onDestroy() {
         markRunning(false)
-        // Voice Guide: stop speech, hand audio focus back to the game, release
-        // the native engine (Kokoro holds ~200 MB) and drop the listeners.
+        // Stop speech, hand audio focus back to the game, release the native engine
+        // (Kokoro holds ~200 MB) and drop the listeners.
         notificationScope?.cancel()
         notificationScope = null
         voice?.release()
         voice = null
         JetOverlay.hide()
-        // FIX [6]: remove the foreground notification.
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            stopForeground(STOP_FOREGROUND_REMOVE)
-        } else {
-            @Suppress("DEPRECATION")
-            stopForeground(true)
-        }
+        stopForeground(STOP_FOREGROUND_REMOVE)
         super.onDestroy()
     }
 
@@ -211,14 +171,12 @@ class WidgetOverlayService : Service() {
     }
 
     private fun buildNotification(role: String, roleType: String): Notification {
-        // FIX [3]: tap notification -> open app.
         val contentIntent = PendingIntent.getActivity(
             this,
             0,
             Intent(this, MainActivity::class.java),
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
-        // FIX [3]: Stop action.
         val stopIntent = PendingIntent.getService(
             this,
             1,
@@ -229,12 +187,12 @@ class WidgetOverlayService : Service() {
         val voiceOn = voiceState?.enabled == true
         val speaking = voiceState?.phase == VoiceGuideManager.Phase.SPEAKING
         val builder = NotificationCompat.Builder(this, CHANNEL_ID)
-            .setContentTitle("MLBB Plus running")
+            .setContentTitle(getString(R.string.app_running_title))
             .setContentText(
                 if (voiceOn && speaking) {
-                    "$roleType $role \u2022 Voice coach is speaking"
+                    getString(R.string.notif_text_speaking, roleType, role)
                 } else {
-                    "$roleType $role \u2022 Tap to open app, or Stop to hide it"
+                    getString(R.string.notif_text_idle, roleType, role)
                 }
             )
             .setSmallIcon(android.R.drawable.ic_dialog_info)
@@ -259,20 +217,24 @@ class WidgetOverlayService : Service() {
             builder
                 .addAction(
                     android.R.drawable.ic_media_play,
-                    if (speaking) "Pause voice" else "Play voice",
+                    getString(if (speaking) R.string.notif_action_pause_voice else R.string.notif_action_play_voice),
                     toggleIntent
                 )
-                .addAction(com.mlbb.plus.R.drawable.ic_voice_stop, "Stop voice", voiceStopIntent)
+                .addAction(R.drawable.ic_voice_stop, getString(R.string.notif_action_stop_voice), voiceStopIntent)
         }
 
         return builder
-            .addAction(android.R.drawable.ic_menu_close_clear_cancel, "Stop", stopIntent)
+            .addAction(android.R.drawable.ic_menu_close_clear_cancel, getString(R.string.notif_action_stop), stopIntent)
             .setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_IMMEDIATE)
             .build()
     }
 
     private fun createChannel() {
-        val channel = NotificationChannel(CHANNEL_ID, "MLBB Plus", NotificationManager.IMPORTANCE_LOW)
+        val channel = NotificationChannel(
+            CHANNEL_ID,
+            getString(R.string.notif_channel_name),
+            NotificationManager.IMPORTANCE_LOW
+        )
         getSystemService(NotificationManager::class.java)?.createNotificationChannel(channel)
     }
 
@@ -293,7 +255,7 @@ class WidgetOverlayService : Service() {
         var currentRoleType by mutableStateOf("")
             internal set
 
-        // FIX [4]: explicit mutation helpers.
+        // Explicit mutation helpers: the public surface stays read-only.
         internal fun updateRole(role: String, roleType: String) {
             currentRole = role
             currentRoleType = roleType
@@ -308,18 +270,3 @@ class WidgetOverlayService : Service() {
         private const val NOTIFICATION_ID = 1
     }
 }
-
-// MANIFEST (AndroidManifest.xml) - REQUIRED, not in .kts:
-//   <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-//   <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
-//   <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
-//   <application ...>
-//     <service
-//       android:name=".ui.WidgetOverlayService"
-//       android:exported="false"
-//       android:foregroundServiceType="specialUse" />
-//   </application>
-//   NOTE: if your service class is in com.mlbb.plus.ui, the
-//   manifest name above resolves via namespace com.mlbb.plus.
-//   If you keep the old package com.mlbb.ui, use the fully
-//   qualified name instead.

@@ -19,7 +19,7 @@ TTS voice packs. A `downloadSherpaAar` task fetches `sherpa-onnx-1.13.8.aar` int
 run automatically as part of `assembleDebug` / `assembleRelease`, so the first build needs network
 access once (or place the files yourself and the tasks do nothing). The voice packs are **compiled
 into the APK** and unpacked into `filesDir/tts/` on first use, so speech is fully offline at
-runtime. See [`TTS_IMPLEMENTATION.md`](TTS_IMPLEMENTATION.md).
+runtime. See [`docs/tts_implementation.md`](docs/tts_implementation.md).
 
 Before building, validate local data and portraits:
 
@@ -39,8 +39,9 @@ Unit tests (JVM only, no device or emulator needed):
 - [`docs/structure.md`](docs/structure.md) — project structure, runtime flows, architecture, and change-impact map.
 - [`docs/links.md`](docs/links.md) — official Android/Kotlin/library docs, UX references, and game-data provenance.
 - [`docs/refactoring-report.md`](docs/refactoring-report.md) — exhaustive Kotlin review, implemented changes, file-by-file recommendations, and validation notes.
+- [`docs/review-2026-11-27.md`](docs/review-2026-11-27.md) — full repository review (2026-11-27): verified build and lint results, every finding with its status, open items and decisions needed.
 - [`docs/ux-redesign.md`](docs/ux-redesign.md) — Material 3 UX audit, design system, screen-by-screen redesign, accessibility and QA checklists.
-- [`TTS_IMPLEMENTATION.md`](TTS_IMPLEMENTATION.md) — Voice Guide: engine choice, model URLs and checksums, storage, text normalisation, state machine, how to test, known limitations.
+- [`docs/tts_implementation.md`](docs/tts_implementation.md) — Voice Guide: engine choice, model URLs and checksums, storage, text normalisation, state machine, how to test, known limitations.
 
 ## Bundled data
 

@@ -1,8 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">MLBB Plus</string>
-    <string name="roam_guide_running">MLBB Plus running</string>
-    <string name="roam_guide_stop_hint">Tap Stop in the app to hide it</string>
+    <string name="app_running_title">MLBB Plus running</string>
+
+    <!-- Foreground-service notification (WidgetOverlayService) -->
+    <string name="notif_channel_name">MLBB Plus</string>
+    <string name="notif_text_speaking">%1$s %2$s • Voice coach is speaking</string>
+    <string name="notif_text_idle">%1$s %2$s • Tap to open app, or Stop to hide it</string>
+    <string name="notif_action_stop">Stop</string>
+    <string name="notif_action_play_voice">Play voice</string>
+    <string name="notif_action_pause_voice">Pause voice</string>
+    <string name="notif_action_stop_voice">Stop voice</string>
 
     <!-- Shared component & screen labels -->
     <string name="action_back">Back</string>
@@ -10,8 +18,6 @@
     <string name="action_clear">Clear</string>
     <string name="action_clear_filters">Clear filters</string>
     <string name="action_clear_search">Clear search</string>
-    <string name="action_skip">Skip</string>
-    <string name="action_get_started">Get started</string>
     <string name="action_launch_widget">Launch Widget</string>
     <string name="action_enable_widget">Enable Widget</string>
     <string name="search_hint">Search</string>
@@ -20,11 +26,9 @@
     <string name="state_loading">Loading…</string>
     <string name="state_empty_title">Nothing here yet</string>
     <string name="state_empty_message">Try a different search or clear the filters.</string>
-    <string name="state_error_message">Something went wrong. Check your local data and try again.</string>
     <string name="state_no_results_title">No matching results</string>
     <string name="state_no_heroes_message">No heroes match your current search or filters.</string>
     <string name="state_no_items_message">No active items match your current search or filters.</string>
-    <string name="content_desc_search">Search</string>
     <string name="snackbar_overlay_running">Guide running — switch to your game</string>
     <string name="snackbar_permission_needed">Allow “Display over other apps” for MLBB Plus, then return here.</string>
 </resources>

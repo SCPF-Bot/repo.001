@@ -101,7 +101,7 @@ uploads over 100 MB anyway (the Kokoro archive alone is 103 MB).
 sherpa-onnx is **not** on Google Maven and JitPack has no builds for it (all 404), so the AAR is
 vendored:
 
-- `gradle/libs.versions.toml` — `commonsCompress = "1.25.0"` (1.26+ pulls commons-io/lang3),
+- `gradle/libs.versions.toml` — `commonsCompress = "1.28.0"` (1.26+ pulls commons-io/lang3),
   `junit = "4.13.2"`.
 - `app/build.gradle.kts` — `implementation(files("libs/sherpa-onnx-1.13.8.aar"))`,
   `libs.commons.compress`, `testImplementation(libs.junit)`, and two provisioning tasks. Both

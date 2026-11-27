@@ -1,15 +1,17 @@
 package com.mlbb.plus.ui.widgets
 
+import android.annotation.SuppressLint
 import android.app.Application
 import android.content.Context
 import android.graphics.PixelFormat
-import android.os.Build
 import android.provider.Settings
+import android.util.Log
 import android.view.Gravity
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewConfiguration
 import android.view.WindowManager
+import androidx.core.content.edit
 import android.widget.FrameLayout
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableLongStateOf
@@ -26,22 +28,19 @@ import androidx.savedstate.SavedStateRegistryController
 import androidx.savedstate.SavedStateRegistryOwner
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 
-// ============================================================
-// widgets/JetOverlay.kt — generic overlay engine (WindowManager + ComposeView)
-//
-//  [1] Window is WRAP_CONTENT, TOP | CENTER_HORIZONTAL (the widget centres itself and
-//      sets its own width), NOT_TOUCH_MODAL so touches outside it reach the game.
-//  [2] DRAG (fixed for good): the ComposeView sits inside a small FrameLayout that
-//      INTERCEPTS the gesture once the finger passes the system touch slop. The old
-//      approach (OnTouchListener on the ComposeView itself) never fires when Compose
-//      claims the touch — and Compose claims every touch over any clickable or
-//      pointerInput modifier, i.e. almost the whole widget. Intercepting from a parent
-//      works over buttons and spell cells too; a plain tap still reaches them, and a
-//      drag cancels the press so nothing fires by accident. No fling.
-//  [3] The dropped position is saved and restored (clamped to the screen).
-//  [4] touchTick / wake(): every touch bumps a Compose state so the widget can wake
-//      from its idle fade; the widget also calls wake() for alerts.
-// ============================================================
+/**
+ * Generic floating-window host: a WindowManager overlay with a ComposeView inside.
+ *
+ * - The window is WRAP_CONTENT, anchored TOP | CENTER_HORIZONTAL. The content centres
+ *   itself and sets its own width. NOT_TOUCH_MODAL lets touches outside it reach the game.
+ * - Dragging: the ComposeView sits inside a small FrameLayout that intercepts the gesture
+ *   once the finger passes the system touch slop. Compose claims touches over any
+ *   clickable or pointerInput, so an OnTouchListener on the ComposeView never fires.
+ *   A plain tap still reaches the controls, and a drag cancels the press. There is no fling.
+ * - The dropped position is saved and restored, clamped to the screen.
+ * - [touchTick] / [wake]: every touch bumps a Compose state so content can wake from its
+ *   idle fade. Content also calls wake() for alerts.
+ */
 
 // --- Service LifecycleOwner for ComposeView in a Service ---
 
@@ -78,7 +77,13 @@ class JetOverlayScope {
     }
 }
 
+// StaticFieldLeak is suppressed deliberately: the View and WindowManager here are created from
+// the Application context (never an Activity) and cleared in hide(), so nothing outlives the
+// overlay.
+@SuppressLint("StaticFieldLeak")
 object JetOverlay {
+    private const val TAG = "JetOverlay"
+
     private const val PREFS = "jet_overlay_prefs"
     private const val KEY_X = "overlay_x"
     private const val KEY_Y = "overlay_y"
@@ -109,9 +114,12 @@ object JetOverlay {
     fun show() {
         val context = app ?: return
         if (isShowing) return
-        // Must have overlay permission - MainActivity already checks this
-        // before starting the service. If not granted, do nothing.
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.canDrawOverlays(context)) return
+        // MainActivity checks the permission before starting the service. If it was revoked
+        // since then, log why nothing appeared rather than failing silently.
+        if (!Settings.canDrawOverlays(context)) {
+            Log.w(TAG, "overlay permission missing, overlay not shown")
+            return
+        }
         val wm = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
         windowManager = wm
 
@@ -124,10 +132,8 @@ object JetOverlay {
             setContent { scopeContent() }
         }
 
-        val type = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-            WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
-        else
-            @Suppress("DEPRECATION") WindowManager.LayoutParams.TYPE_PHONE
+        // minSdk is 29, so TYPE_APPLICATION_OVERLAY (API 26+) is always available.
+        val type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
 
         val dm = context.resources.displayMetrics
         val prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
@@ -173,7 +179,10 @@ object JetOverlay {
             private fun endTouch() {
                 touchTick.longValue += 1
                 if (isDragging) {
-                    prefs.edit().putInt(KEY_X, params.x).putInt(KEY_Y, params.y).apply()
+                    prefs.edit {
+                        putInt(KEY_X, params.x)
+                        putInt(KEY_Y, params.y)
+                    }
                 }
                 isDragging = false
             }
@@ -196,6 +205,9 @@ object JetOverlay {
                 return isDragging
             }
 
+            // Declared so the click contract is explicit; taps are reported from onTouchEvent.
+            override fun performClick(): Boolean = super.performClick()
+
             // Receives the gesture after we intercepted it, or when nothing underneath
             // (empty padding / background) wanted it.
             override fun onTouchEvent(event: MotionEvent): Boolean {
@@ -205,7 +217,12 @@ object JetOverlay {
                         if (!isDragging && passedSlop(event)) isDragging = true
                         if (isDragging) moveWindow(event)
                     }
-                    MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> endTouch()
+                    MotionEvent.ACTION_UP -> {
+                        // A tap that was not dragged is a click, reported for accessibility services.
+                        if (!isDragging) performClick()
+                        endTouch()
+                    }
+                    MotionEvent.ACTION_CANCEL -> endTouch()
                 }
                 return true
             }
@@ -232,12 +249,9 @@ object JetOverlay {
             overlayRoot = root
             isShowing = true
         } catch (e: Exception) {
-            // Tear down owner on failure, don't leak it.
-            // addView throws when the overlay permission was revoked mid-flight or the
-            // window type is rejected; log it so a "guide never appeared" report is
-            // diagnosable (detekt SwallowedException, 2026-11-27 lint scan). Behavior
-            // is unchanged: the owner is still torn down and no window is shown.
-            android.util.Log.w("JetOverlay", "addView failed, overlay not shown: ${e.message}")
+            // addView throws when the overlay permission was revoked mid-flight or the window
+            // type is rejected. Log it, then tear the owner down so nothing leaks.
+            Log.w(TAG, "addView failed, overlay not shown: ${e.message}")
             runCatching { owner.onPause() }
             runCatching { owner.onStop() }
             runCatching { owner.onDestroy() }
@@ -253,11 +267,9 @@ object JetOverlay {
         try {
             overlayRoot?.let { windowManager?.removeView(it) }
         } catch (e: Exception) {
-            // removeView throws if the window is already gone (double hide, or the system
-            // tore it down). Swallowing is correct — hide() must stay idempotent — but it
-            // was an empty block (detekt EmptyCatchBlock), which made "the overlay will not
-            // disappear" undiagnosable. Log only; behavior unchanged.
-            android.util.Log.w("JetOverlay", "removeView failed during hide(): ${e.message}")
+            // removeView throws if the window is already gone (double hide, or the system tore
+            // it down). Swallowing is correct because hide() must stay idempotent. Log it.
+            Log.w(TAG, "removeView failed during hide(): ${e.message}")
         }
         overlayRoot = null
         windowManager = null

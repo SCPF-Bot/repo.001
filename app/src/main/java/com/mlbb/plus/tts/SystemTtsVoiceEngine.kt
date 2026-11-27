@@ -20,14 +20,11 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 
 /**
- * mlbb/tts/SystemTtsVoiceEngine.kt
- * GitHub path: app/src/main/java/com/mlbb/plus/tts/SystemTtsVoiceEngine.kt
- *
  * Zero-download engine: delegates to the platform [TextToSpeech] service.
  * It is the fallback when no sherpa-onnx voice pack is installed, and the
  * guaranteed baseline on devices where the AAR's native libs cannot load.
  *
- * Behaviour notes (see TTS_IMPLEMENTATION.md "Known limitations"):
+ * Behaviour notes (see docs/tts_implementation.md, "Known limitations"):
  *  - [pause] / [resume] are NOT supported by the platform API. They are no-ops;
  *    the overlay's Pause therefore stops the line and Repeat speaks it again.
  *  - Some ROMs ship no English TTS data. [prepare] then returns false and
@@ -148,8 +145,10 @@ class SystemTtsVoiceEngine(private val context: Context) : VoiceEngine {
                 Log.e(TAG, "platform speak() threw", e)
                 TextToSpeech.ERROR
             }
-            if (result != TextToSpeech.SUCCESS) utterance.finish()
+            // Register cancellation before anything can fail, so a cancelled Next/Prev
+            // always finishes the utterance and releases the caller.
             cont.invokeOnCancellation { utterance.finish() }
+            if (result != TextToSpeech.SUCCESS) utterance.finish()
         }
     }
 

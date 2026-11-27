@@ -3,11 +3,9 @@ package com.mlbb.plus.tts
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.core.content.edit
 
 /**
- * mlbb/tts/VoiceGuideSettings.kt
- * GitHub path: app/src/main/java/com/mlbb/plus/tts/VoiceGuideSettings.kt
- *
  * Every Voice Guide preference in one place, on the same [SharedPreferences]
  * mechanism the rest of the app uses (no DataStore, no DI). Values survive a
  * process death and a device restart, so the overlay comes back with the same
@@ -38,10 +36,12 @@ object VoiceGuideSettings {
     const val VOICE_PIPER_MALE = "ryan-medium"
 
     /** Spec: three playback rates, 1.0 default. */
-    val RATES = listOf(0.85f, 1.0f, 1.25f)
     const val DEFAULT_RATE = 1.0f
     const val MIN_RATE = 0.85f
     const val MAX_RATE = 1.25f
+
+    /** The three selectable rates, derived from the bounds so they cannot drift apart. */
+    val RATES: List<Float> = listOf(MIN_RATE, DEFAULT_RATE, MAX_RATE)
 
     private const val PREFS_NAME = "mlbb_plus_voice_guide"
     private const val KEY_ENABLED = "enabled"
@@ -82,7 +82,7 @@ object VoiceGuideSettings {
     fun isEnabled(context: Context): Boolean = prefs(context).getBoolean(KEY_ENABLED, false)
 
     fun setEnabled(context: Context, enabled: Boolean) {
-        prefs(context).edit().putBoolean(KEY_ENABLED, enabled).apply()
+        prefs(context).edit { putBoolean(KEY_ENABLED, enabled) }
         bump()
     }
 
@@ -93,21 +93,21 @@ object VoiceGuideSettings {
     fun engine(context: Context): String = prefs(context).getString(KEY_ENGINE, ENGINE_AUTO) ?: ENGINE_AUTO
 
     fun setEngine(context: Context, engine: String) {
-        prefs(context).edit().putString(KEY_ENGINE, engine).apply()
+        prefs(context).edit { putString(KEY_ENGINE, engine) }
         bump()
     }
 
     fun voice(context: Context): String = prefs(context).getString(KEY_VOICE, VOICE_KOKORO_FEMALE) ?: VOICE_KOKORO_FEMALE
 
     fun setVoice(context: Context, voice: String) {
-        prefs(context).edit().putString(KEY_VOICE, voice).apply()
+        prefs(context).edit { putString(KEY_VOICE, voice) }
         bump()
     }
 
     fun rate(context: Context): Float = prefs(context).getFloat(KEY_RATE, DEFAULT_RATE).coerceIn(MIN_RATE, MAX_RATE)
 
     fun setRate(context: Context, rate: Float) {
-        prefs(context).edit().putFloat(KEY_RATE, rate.coerceIn(MIN_RATE, MAX_RATE)).apply()
+        prefs(context).edit { putFloat(KEY_RATE, rate.coerceIn(MIN_RATE, MAX_RATE)) }
         bump()
     }
 
@@ -116,7 +116,7 @@ object VoiceGuideSettings {
     fun autoSpeak(context: Context): Boolean = prefs(context).getBoolean(KEY_AUTO_SPEAK, true)
 
     fun setAutoSpeak(context: Context, value: Boolean) {
-        prefs(context).edit().putBoolean(KEY_AUTO_SPEAK, value).apply()
+        prefs(context).edit { putBoolean(KEY_AUTO_SPEAK, value) }
         bump()
     }
 
@@ -125,7 +125,7 @@ object VoiceGuideSettings {
     fun announceSpells(context: Context): Boolean = prefs(context).getBoolean(KEY_ANNOUNCE_SPELLS, false)
 
     fun setAnnounceSpells(context: Context, value: Boolean) {
-        prefs(context).edit().putBoolean(KEY_ANNOUNCE_SPELLS, value).apply()
+        prefs(context).edit { putBoolean(KEY_ANNOUNCE_SPELLS, value) }
         bump()
     }
 
@@ -138,7 +138,7 @@ object VoiceGuideSettings {
     fun installedModel(context: Context): String = prefs(context).getString(KEY_MODEL, "") ?: ""
 
     fun setInstalledModel(context: Context, modelId: String) {
-        prefs(context).edit().putString(KEY_MODEL, modelId).apply()
+        prefs(context).edit { putString(KEY_MODEL, modelId) }
     }
 
     /**
@@ -148,16 +148,16 @@ object VoiceGuideSettings {
     fun fallbackNotice(context: Context): String = prefs(context).getString(KEY_NOTICE, "") ?: ""
 
     fun setFallbackNotice(context: Context, notice: String) {
-        prefs(context).edit().putString(KEY_NOTICE, notice).apply()
+        prefs(context).edit { putString(KEY_NOTICE, notice) }
     }
 
     fun clearFallbackNotice(context: Context) {
-        prefs(context).edit().remove(KEY_NOTICE).apply()
+        prefs(context).edit { remove(KEY_NOTICE) }
     }
 
     /** Wipes the model pointer (the files themselves go via [VoiceModelInstaller.delete]). */
     fun resetModel(context: Context) {
-        prefs(context).edit().remove(KEY_MODEL).apply()
+        prefs(context).edit { remove(KEY_MODEL) }
         bump()
     }
 }
