@@ -103,7 +103,9 @@ Exact dependency versions are recorded in `gradle/libs.versions.toml`; see [stru
 
 - [overview.md](overview.md) — mission, vision, current capabilities, technology stack, and roadmap.
 - [structure.md](structure.md) — file-by-file map, dependency/data flow, service lifecycle, and change-impact guide.
-- [refactoring-report.md](refactoring-report.md) — exhaustive Kotlin review, per-file recommendations, UI changes, and validation notes.
+- [refactoring-report.md](refactoring-report.md) — exhaustive Kotlin review, per-file recommendations, UI changes, and validation notes (see its 27 November 2026 addendum for the data-refresh sync).
+- [ux-redesign.md](ux-redesign.md) — Material 3 UX audit, information architecture, design system, screen-by-screen redesign, key flows, accessibility and QA checklists.
+- `../scripts/validate_assets.py` — the asset validator referenced throughout these docs.
 
 ## 6. Maintenance rules for this link index
 
@@ -150,6 +152,28 @@ The machine-readable audit reports:
 | Favorable matchups per hero | 4–5 |
 | Best measured allies per hero | 4–5 |
 | Heroes using MLBBHub counter fallback | 43 |
+
+**Re-verified 2026-11-27** against the refreshed `heroes.json` (`version 2.2.23-tier-2026-11-23`) with `scripts/validate_assets.py`: 133 heroes, every favorable/toughest/ally list populated, toughest 3–5 and favorable/ally 4–5 entries per hero, no self-links, no duplicate IDs, and every relationship ID resolving to a roster hero. The `matchupData`, `matchupDataset`, and per-hero `matchupData*` provenance fields in the asset match the values recorded above (source, 2026-11-21, all ranks, past 1 day, 43-hero MLBBHub fallback).
+
+### Tier snapshot (added 2026-11-23)
+
+Recorded in `heroes.json.tierSnapshot` and mirrored per hero in `tier` / `tierSource` / `tierUpdated`:
+
+- Source: **MLBBDex** tier list (`https://mlbbdex.com/en/tier-list`), patch 2.2.23, updated **2026-11-23**, scope all ranks / all lanes.
+- Method: win rate + 0.25 × ban rate, recomputed from the published tier snapshot.
+- Distribution: **S+ 18, S 16, A 32, B 46, C 21** (133 total).
+- Rule: `isMeta` is true exactly when tier is **S+** — the Home "meta heroes" and Patch "meta heroes by lane" cards derive from this flag, not from a hardcoded list.
+- Tier definitions ship with the data (S+ = current-patch meta / high-priority bans; C = needs favorable drafts or buffs), so the UI can explain a tier instead of implying a guarantee.
+
+Tier lists are editorial aggregations of win/ban rates and move faster than matchup data; treat them as draft guidance for the stated patch and refresh them with each patch.
+
+### Item catalogue and build-tree provenance (updated 2026-11-26)
+
+- Source: **Fandom Equipment wiki** (`https://mobile-legends.fandom.com/wiki/Equipment`), recorded in `items.json.source`; per-item remote artwork URLs are in `portrait` / `fandomFile`.
+- Catalogue: **99** active items (Attack 31, Magic 25, Defense 25, Movement 8, Roam 6, Jungle 3, Attack & Magic 1); all ship a bundled `items/{id}.webp` portrait.
+- Build tree: `items.json.buildTreeMetadata` — patch 2.2.23, updated **2026-11-23**; `buildsInto` is the reverse of `buildPathIds`, and component links resolve by stable item ID.
+- History recorded in `items.json.patchChanges`: 66 items added 2026-11-21 (Tier 1/2 components plus missing Tier 3 items), legacy/duplicate entries removed 2026-11-26 (Courage Mask 4003 → Blessing: Encourage, shop Favor 4004 → Blessing: Favor, Athena's Shield 3004 → Valkyrie's Shield 3015, Twilight Armor 3007 → Chastise Pauldron). The original 41 records kept their IDs, stats and build paths so `heroes.json` core-build references still resolve — verified: **0 unlinked core items** across all 133 heroes.
+- The Equipment page blocked direct access during collection; names were cross-checked against its search-indexed mirror, so the removal list in `items.json.notes` may not be exhaustive.
 
 ### Interpretation and maintenance caveats
 

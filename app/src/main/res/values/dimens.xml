@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Redesign spacing tokens mirror AppDimens (theme/Dimens.kt).
+     XML layouts (none currently) and future View code must use
+     these instead of hardcoded dp values. -->
+<resources>
+    <dimen name="space_2">2dp</dimen>
+    <dimen name="space_4">4dp</dimen>
+    <dimen name="space_8">8dp</dimen>
+    <dimen name="space_12">12dp</dimen>
+    <dimen name="space_16">16dp</dimen>
+    <dimen name="space_24">24dp</dimen>
+    <dimen name="screen_margin">16dp</dimen>
+    <dimen name="screen_margin_wide">24dp</dimen>
+    <dimen name="card_gap">12dp</dimen>
+    <dimen name="section_gap">24dp</dimen>
+    <dimen name="touch_target_min">48dp</dimen>
+    <dimen name="icon_size">24dp</dimen>
+</resources>

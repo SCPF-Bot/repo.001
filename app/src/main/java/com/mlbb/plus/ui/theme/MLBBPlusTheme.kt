@@ -1,10 +1,14 @@
 package com.mlbb.plus.ui.theme
 
+import android.os.Build
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Typography
 import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.dynamicDarkColorScheme
+import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
 
 // ============================================================
@@ -154,24 +158,33 @@ object AppUiColors {
 }
 
 @Composable
-fun AppUiTheme(content: @Composable () -> Unit) {
+fun AppUiTheme(
+    // Default dark to preserve current behavior: screens still read
+    // AppUiColors.* directly (315 usages). Pass
+    // darkTheme = isSystemInDarkTheme() only after screens migrate
+    // to MaterialTheme.colorScheme — see docs/ux-redesign.md §4.
+    darkTheme: Boolean = true,
+    dynamicColor: Boolean = false,
+    content: @Composable () -> Unit
+) {
+    val context = LocalContext.current
+    val colorScheme = when {
+        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
+            val dynamic = if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+            // Keep brand gold as primary so MLBB Plus stays recognizable;
+            // wallpaper tones flow through surfaces/containers only.
+            if (darkTheme) {
+                dynamic.copy(primary = AppColorTokens.Gold, onPrimary = Color(0xFF171717))
+            } else {
+                dynamic.copy(primary = AppColorTokens.GoldDeep, onPrimary = Color.White)
+            }
+        }
+        darkTheme -> AppDarkColorScheme
+        else -> AppLightColorScheme
+    }
     MaterialTheme(
-        colorScheme = darkColorScheme(
-            primary = AppUiColors.Gold,
-            onPrimary = Color(0xFF171717),
-            background = AppUiColors.GithubBg,
-            onBackground = AppUiColors.GithubText,
-            surface = AppUiColors.GithubCard,
-            onSurface = AppUiColors.GithubText,
-            surfaceVariant = AppUiColors.GithubSurface,
-            onSurfaceVariant = AppUiColors.GithubSecondary,
-            outline = AppUiColors.GithubBorder,
-            secondary = AppUiColors.Gold,
-            onSecondary = Color(0xFF171717),
-            error = AppUiColors.Red,
-            onError = Color.White
-        ),
-        typography = Typography(),
+        colorScheme = colorScheme,
+        typography = AppTypography,
         content = content
     )
 }

@@ -2,8 +2,9 @@
 
 > **One companion for every lane. Practical guidance, available when the match is happening.**
 
-**Project snapshot:** 21 November 2026  
-**Bundled game-data patch:** 2.2.23 · Original Server · Season 42  
+**Project snapshot:** 27 November 2026  
+**Bundled game-data patch:** 2.2.23 · Original Server · Season 42 (patch live 11 November 2026)  
+**Data snapshot dates:** heroes 2026-11-23 · items 2026-11-26 · patch notes 2026-11-11 · matchups 2026-11-21 · tiers 2026-11-23 · guides 2026-11-20 (Roam: 2026-11-18, still pinned to 2.2.16a)  
 **Android application ID:** `com.mlbb.plus`
 
 ## 1. What MLBB Plus is
@@ -59,7 +60,8 @@ The app should avoid assuming that every user understands game abbreviations or 
 | Heroes | Search, filters, sorting, hero cards, hero detail, skills/build/profile data, hero relationships and guide references |
 | Items | Search, filters, sorting, item details, stats/passives/actives, build relationships, heroes using an item |
 | Patch | Original Server patch summary, hero/item changes, equipment/battlefield/system notes, links to affected entities |
-| Settings | Overlay permission flow, auto-start-last-role preference, bundled-data diagnostics |
+| Settings | Overlay permission flow, auto-start-last-role preference, Help & Knowledge Base reader, bundled-data diagnostics |
+| Knowledge Base | In-app help library (`KnowledgeBase.kt`): topic list + reader with prev/next, related topics, quick-reference tables, common mistakes, and "using this in MLBB Plus" tips. Two-pane on windows ≥840dp, list → reader on phones. |
 
 ### Floating guide overlay
 
@@ -73,16 +75,31 @@ The app should avoid assuming that every user understands game abbreviations or 
 
 ### Bundled data snapshot
 
+Verified against the bundled assets on 2026-11-27 (`python3 scripts/validate_assets.py`).
+
 | Dataset | Snapshot contents |
 |---|---|
-| `heroes.json` | 133 hero records, patch metadata, matchup provenance, hero patch changes, equipment changes |
-| `items.json` | 41 item records and item patch metadata |
-| `patch_notes.json` | Patch 2.2.23 Original Server notes and change lists |
-| Five guide JSON files | 26 role/playstyle types total (6 Roam, 5 each Jungle/Mid/Gold/EXP) |
-| Hero portraits | Bundled WebP portraits under `assets/heroes/` |
-| Item portraits | 41 bundled WebP portraits under `assets/items/` (40 active, one removed legacy record; original illustrative artwork, not official game art) |
+| `heroes.json` | **133** hero records (`version 2.2.23-tier-2026-11-23`, `updated 2026-11-23`, `patchDate 2026-11-11`), tier snapshot, matchup provenance, **13** hero patch changes, **2** equipment changes. Newest roster entries: Obsidia (130), Sora (131), Marcel (132), Hirara (133). Dori (Advance Server 2.2.30) is deliberately excluded — Original Server 2.2.23 only. |
+| `items.json` | **99** item records, **all active** (`totalItems=99`, `totalActiveItems=99`; `version 2.2.23-buildtree-2026-11-23`, `updated 2026-11-26`, build tree 2026-11-23) plus **10** item patch notes. Categories: Attack 31, Magic 25, Defense 25, Movement 8, Roam 6, Jungle 3, Attack & Magic 1. Grew from the original 41 records: 66 items added 2026-11-21 (Tier 1/2 components + missing Tier 3), then legacy/duplicate entries removed 2026-11-26 (Courage Mask 4003, shop Favor 4004, Athena's Shield 3004 → Valkyrie's Shield 3015, Twilight Armor 3007). |
+| `patch_notes.json` | Patch 2.2.23 Original Server, dated **2026-11-11**, Season 42: **10** hero changes, **2** item changes, 3 battlefield, 2 system, 4 highlights, meta notes, Roam guide link. `previousPatch` records 2.2.16a (14 Oct 2026) as archived — only the latest patch is kept in the file. No `originalServer` / `advancedServer` / `nov01` blocks, so the Patch screen shows the Current tab only. |
+| Five guide JSON files | **26** role/playstyle types, **286** timed steps (6 Roam types / 66 steps; 5 each for Jungle, Mid, Gold, EXP / 55 steps each). Jungle, Mid, Gold and EXP are written for **2.2.23** (updated 2026-11-20). **`roam_guide.json` is still pinned to 2.2.16a** (updated 2026-11-18) — see the data-quality note below. |
+| Hero portraits | **133** bundled WebP portraits under `assets/heroes/`, one per hero record; all declared paths resolve. |
+| Item portraits | **99** bundled WebP portraits under `assets/items/` (`items/{id}.webp`), one per active item; all declared paths resolve. Each record also carries a remote `portrait` URL (Fandom) as provenance/fallback source, and Coil renders an initials fallback if an asset is unreadable. Artwork is original illustrative art, not official game art. |
+
+**Merged Patch view:** `JsonLoader.loadPatchNotes()` treats `heroes.json` as the authoritative hero-change manifest and merges its 13 entries with the 10 in `patch_notes.json`, de-duplicated by hero ID. The Patch screen therefore lists **13** hero changes (the 10 from `patch_notes.json` plus Lukas, Karrie and Kagura from the manifest); where both files carry the same hero, the `heroes.json` entry wins.
 
 The matchup snapshot is dated 2026-11-21, all ranks, past one day. It contains three relationship concepts: toughest matchups, favorable matchups, and best measured allies. The derivation and fallback approach are documented in [links.md](links.md#3-mlbb-game-data-and-matchup-references). These are statistical associations, not deterministic advice.
+
+The tier snapshot is dated 2026-11-23 (all ranks, all lanes): S+ 18, S 16, A 32, B 46, C 21. `isMeta` is true exactly when tier is S+. Provenance and method are in [links.md](links.md).
+
+#### Known data-quality issues (open)
+
+1. **`roam_guide.json` is stale.** It declares `meta.patch = 2.2.16a` and `meta.latest = true` while the rest of the app ships 2.2.23. The Home card and Patch coverage card correctly flag it as older; its content (hero pools, Sprint cooldown 100s → 75s, Chastise Pauldron / Antique Cuirass changes) still needs a 2.2.23 refresh. This is the top data action item.
+2. **`heroes.json.fixNotes` is partly corrupted.** The first note was split into 331 single-character array elements; the remaining four notes are intact strings. No app code reads this field, so there is no UI impact — it should be rejoined into one string before anything surfaces it.
+3. **`items.json.notes` lost five values.** The first five array entries are bare keys (`broadsword`, `portraitPattern`, `blessings`, `equipmentSource`, `portraitOverrides`) with their values missing; the last two entries are real notes. Not read by app code.
+4. **`items.json.patchChanges` (10 entries) is not surfaced anywhere.** `loadPatchNotes()` merges only `heroes.json.patchChanges` and `heroes.json.equipmentPatchChanges` (2 entries), so item removal notes and the Chastise Pauldron / Antique Cuirass / Twilight Armor details in `items.json` never reach the Patch screen. Decide whether to merge them (with de-duplication) or drop the duplicate copy in `heroes.json`.
+5. **Dangling reference.** `items.json.patchChanges` points to `items_portraits.md`, which is not in the repository.
+6. **Duplicate relationship fields.** Each hero carries both `counters`/`counteredBy`/`synergies` and `goodAgainst`/`badAgainst`/`goodWith`/`bestPartners` with identical values. The UI reads the second set. Keep one pair, or document which is canonical, before the two can drift.
 
 ## 6. Product principles
 
@@ -127,12 +144,16 @@ Roadmap status is based on code and bundled assets in this repository snapshot, 
 - [x] Objective timers and enemy battle-spell tracking in overlay.
 - [x] Patch-note integration and guide references on hero/item details.
 - [x] Matchup and synergy fields for all 133 heroes, with methodology and source notes.
-- [x] UX refinements for quick start, search/filter/sort, navigation, and settings diagnostics.nostics.
+- [x] UX refinements for quick start, search/filter/sort, navigation, and settings diagnostics.
+- [x] Asset validator (`scripts/validate_assets.py`): JSON syntax, declared totals, unique IDs, portrait paths, matchup self-links/duplicates/unresolved IDs, guide pick linking, patch-change ID ↔ roster name cross-checks, and cross-file patch-version agreement.
 
 ### Next priorities — reliability and maintainability
 
 - [ ] Establish a reproducible clean debug and release build in CI; record SDK / JDK / Gradle requirements.
-- [ ] Add automated JSON schema and referential-integrity tests for heroes, items, guides, patch notes, and image paths.
+- [ ] Wire `scripts/validate_assets.py` into CI so a bad data push cannot ship (it currently must be run by hand).
+- [ ] Refresh `roam_guide.json` from 2.2.16a to 2.2.23 (hero pools, Sprint 100s → 75s, Chastise Pauldron / Antique Cuirass, Concussive Blast vs minions) and clear its `meta.latest` flag mismatch.
+- [ ] Repair `heroes.json.fixNotes` (character-split first entry) and `items.json.notes` (five orphaned keys), and decide whether `items.json.patchChanges` should be surfaced on the Patch screen.
+- [ ] Collapse the duplicated hero relationship fields (`counters`/`counteredBy`/`synergies` vs `goodAgainst`/`badAgainst`/`goodWith`/`bestPartners`) to one canonical pair.
 - [ ] Add Kotlin unit tests for JSON parsing, guide linking, matchup resolution, and patch merging.
 - [ ] Consolidate the duplicated guide JSON parsing logic so screen summaries and overlay execution cannot silently diverge.
 - [ ] Add a visible data freshness / source details screen and a consistent stale-data warning.
@@ -165,9 +186,13 @@ These are proposals, not commitments or implemented functionality. Prioritize co
 A release should not be considered ready until:
 
 - The app assembles in both debug and release configurations.
+- `python3 scripts/validate_assets.py` passes with zero failures.
 - JSON parsing tests pass and every referenced hero/item ID resolves.
 - Every guide hero pick and core item either resolves or is explicitly documented as unlinked.
 - Matchup arrays contain no self-links or duplicate IDs, and their direction is tested.
+- Every patch-change entry's ID matches the roster ID for its name (`patch_notes.json` and `heroes.json.patchChanges`), so Patch rows link to the right hero/item.
+- `heroes.json`, `items.json`, and `patch_notes.json` agree on the bare patch number, and any version data-stamp suffix is stripped before it is compared with a guide's `meta.patch`.
+- No guide declares `meta.latest = true` while pinned to an older patch.
 - Asset paths resolve or show a designed fallback.
 - The overlay starts, updates, hides, and stops correctly; notification and permission flows work.
 - Screens remain usable with TalkBack, enlarged text, narrow phones, landscape, and larger windows.
@@ -176,9 +201,9 @@ A release should not be considered ready until:
 ## 10. Where to go next
 
 - Read [structure.md](structure.md) for the detailed file map, dependency chains, and data flow.
-- Read [links.md](links.md) for Android documentation, UX references, game-data sources, and matchup resources.
-- Read [links.md](links.md) for the matchup methodology and external source index.
+- Read [links.md](links.md) for Android documentation, UX references, game-data sources, matchup methodology, and the external source index.
 - Read [refactoring-report.md](refactoring-report.md) for the exhaustive Kotlin review and applied refactors.
+- Read [ux-redesign.md](ux-redesign.md) for the Material 3 UX audit, design system, screen-by-screen redesign, and the accessibility / QA checklists.
 
 
 ## 11. UX / UI implementation record
@@ -196,7 +221,9 @@ Implemented refinements:
 - Technical data-file diagnostics are grouped in an expandable troubleshooting section.
 - Compose toggle semantics and practical minimum touch sizes support accessibility.
 
-The refresh did not change the overlay implementation files: `WidgetOverlayService.kt`, `JetOverlay.kt`, `OverlayWidgets.kt`, and `MLBBPlusTheme.kt`.
+The refresh did not change the overlay implementation files: `WidgetOverlayService.kt`, `JetOverlay.kt`, and `OverlayWidgets.kt`.
+
+> **Correction (27 November 2026):** this section previously stated that `MLBBPlusTheme.kt` was unchanged. It has since been extended: the file holds two separate themes — `AppUiTheme` / `AppUiColors` for the main app and `MLBBPlusTheme` / `MLBBPlusColors` for the floating overlay. The Material 3 redesign pass added `darkTheme` / `dynamicColor` parameters to `AppUiTheme` and pointed it at the new `Color.kt` / `Type.kt` token files. **The overlay theme and overlay behaviour were not changed**, and `AppUiTheme` still defaults to dark because screens read `AppUiColors.*` directly. See [ux-redesign.md](ux-redesign.md).
 
 ## 12. Matchup snapshot audit summary
 
@@ -211,6 +238,23 @@ The fallback roster is: Angela, Arlott, Aulus, Aurora, Badang, Brody, Carmilla, 
 The audit is a coverage/shape check, not proof that every recommendation is strategically correct. Interpret the relationship fields using the methodology summarized in the Sources section of `links.md`; matchup associations are not guarantees.
 
 
-## 10. Refactoring snapshot (21 November 2026)
+## 13. Refactoring snapshot (21 November 2026, re-verified 27 November 2026)
 
-The latest repository refactor fixes model/UI mismatches in the item and hero screens, restores the shared `AssetImage` API expected by catalogue screens, adds item status handling, switches hero/item catalogues to adaptive grids, makes catalogue filters and sorting saveable, and validates overlay role/playstyle defaults. All item JSON image paths now resolve to local WebP files. See [refactoring-report.md](refactoring-report.md) for the complete file-by-file review and build-validation caveat.
+The latest repository refactor fixes model/UI mismatches in the item and hero screens, restores the shared `AssetImage` API expected by catalogue screens, adds item status handling, makes catalogue filters and sorting saveable, and validates overlay role/playstyle defaults. All item JSON image paths resolve to local WebP files — re-verified on 2026-11-27 for all **99** active item records and all **133** hero records. See [refactoring-report.md](refactoring-report.md) for the complete file-by-file review and build-validation caveat.
+
+> **Correction (27 November 2026):** this section previously said the refactor "switches hero/item catalogues to adaptive grids". The shipped code uses `GridCells.Fixed(5)` in both `HeroesScreen.kt` and `ItemsScreen.kt`, with an explicit comment that `Adaptive` produced three ~102dp columns on a phone. Fixed(5) is the current reality; an adaptive grid (`GridCells.Adaptive(64.dp)`, which equals five columns on a 360dp phone) is a *proposal* in [ux-redesign.md](ux-redesign.md), not implemented behaviour.
+
+## 14. Data refresh record (27 November 2026)
+
+The bundled JSON was refreshed after the 21 November documentation pass (heroes 2026-11-23, items 2026-11-26, guides 2026-11-20). The docs were out of date; they are now synced to the assets, and the refresh exposed three defects that were fixed in this pass:
+
+| Defect found in the refreshed data | User-visible effect | Fix |
+|---|---|---|
+| `patch_notes.json` listed Masha with `heroId: 87`; hero 87 is **Baxia** (Masha is 88) | Masha appeared **twice** on the Patch screen, and tapping that row opened **Baxia's** detail screen | Corrected the ID to 88 in `patch_notes.json`; the merge now de-duplicates to a single Masha row (13 hero changes total) |
+| `heroes.json.version` now carries a data stamp (`2.2.23-tier-2026-11-23`) and `displayVersion` passed it through unmodified | Patch header read "Patch 2.2.23-tier-2026-11-23"; the guide-coverage card and the **in-match overlay** labelled all five guides as "older than" the live patch, even the four written for 2.2.23 | Added `PatchNotesFile.shortVersion` (bare patch number) and used it in `PatchNotesScreen`, `OverlayWidgets`, `SettingsScreen`, `HomeScreen`, `HeroesScreen`, `ItemsScreen` — replacing three copies of the same `substringBefore("-")` expression |
+| The Patch card date came from `heroes.json.updated` (2026-11-23, the data refresh) | The patch card implied 2.2.23 landed on 23 Nov instead of **11 Nov** | `loadPatchNotes()` now prefers `heroes.json.patchDate`, falling back to `updated`, then to `patch_notes.json.date` |
+| Settings judged guide staleness as `!g.latest && patch mismatch` | `roam_guide.json` declares `latest: true` while pinned to 2.2.16a, so Settings showed a green **LATEST** badge for a genuinely stale guide | Staleness now keys off the patch number; `latest` only labels a guide that is actually current |
+
+Also added in this pass: `scripts/validate_assets.py` (referenced by `readme.md` and `refactoring-report.md` but missing from the repository) — recreated, then extended with the cross-file checks that would have caught the Masha ID bug. It passes on the current assets with one warning: the stale Roam guide.
+
+Still open (data-owner decisions, tracked in §8): refresh `roam_guide.json` to 2.2.23; repair `heroes.json.fixNotes` and `items.json.notes`; decide whether `items.json.patchChanges` should reach the Patch screen; collapse the duplicated hero relationship fields.

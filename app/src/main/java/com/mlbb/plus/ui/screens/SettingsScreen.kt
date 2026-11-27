@@ -569,7 +569,7 @@ private fun SettingsRow(title: String, subtitle: String, checked: Boolean, onChe
 @Composable
 private fun DataFilesSection() {
     val notes = GameData.patchNotes
-    val livePatch = notes.displayVersion
+    val livePatch = notes.shortVersion
     var expanded by rememberSaveable { mutableStateOf(false) }
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
         Row(
@@ -617,13 +617,17 @@ private fun DataFilesSection() {
                 if (g == null) {
                     DataRow("${role.lowercase()}_guide.json", "Not found or invalid \u2014 overlay runs without a guide", "MISSING", AppUiColors.Red)
                 } else {
-                    val older = !g.latest && g.patch.isNotBlank() && g.patch != livePatch
+                    val guidePatch = g.patch.substringBefore("-")
+                    // The patch number is the real staleness signal. `latest` is self-declared
+                    // in each guide's meta and roam_guide.json still says latest=true while
+                    // pinned to 2.2.16a, which hid a genuinely stale guide behind a LATEST badge.
+                    val older = guidePatch.isNotBlank() && guidePatch != livePatch
                     DataRow(
                         g.assetName,
                         "${g.types.size} types \u2022 ${g.stepCount} steps \u2022 patch ${g.patch.ifBlank { "?" }}" +
                             (if (g.updated.isNotBlank()) " \u2022 ${g.updated}" else "") +
                             (if (older) " \u2022 older than $livePatch" else ""),
-                        if (g.latest) "LATEST" else if (older) "OLDER" else "OK",
+                        if (older) "OLDER" else if (g.latest) "LATEST" else "OK",
                         if (older) AppUiColors.Orange else AppUiColors.Green
                     )
                 }

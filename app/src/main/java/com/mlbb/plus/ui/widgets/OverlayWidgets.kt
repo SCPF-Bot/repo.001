@@ -864,8 +864,11 @@ fun RoamGuideWidget(role: String = "Roam", roleType: String = "", onBack: () -> 
                 if (displayMode == 1) {
                     if (selectedPlan != null && currentStep != null) {
                     // V13: phase ("First Turtle") was parsed but never shown; flag a guide older than the app's patch.
-                    val livePatch = GameData.patchNotes.displayVersion
-                    val patchLabel = guide.patch.takeIf(String::isNotBlank)?.let { p ->
+                    // Compare bare patch numbers (shortVersion): displayVersion can carry a data
+                    // stamp ("2.2.23-tier-2026-11-23"), which labelled every current guide as older
+                    // in-match. A real mismatch (roam_guide.json 2.2.16a) is still flagged.
+                    val livePatch = GameData.patchNotes.shortVersion
+                    val patchLabel = guide.patch.substringBefore("-").takeIf(String::isNotBlank)?.let { p ->
                         if (p != livePatch) " · $p (older than $livePatch)" else " · $p"
                     }.orEmpty()
                     OutlinedText(

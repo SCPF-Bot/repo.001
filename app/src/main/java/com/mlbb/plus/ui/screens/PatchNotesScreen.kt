@@ -117,7 +117,7 @@ private fun PatchNotesContent(onHeroClick: (Int) -> Unit, onItemClick: (Int) -> 
     Column(Modifier.fillMaxSize().background(AppUiColors.GithubBg).verticalScroll(rememberScrollState()).padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
         val header = buildString {
             if (notes.updated.isNotBlank()) append("Updated ${notes.updated} \u2022 ")
-            append("Patch ${notes.displayVersion}")
+            append("Patch ${notes.shortVersion}")
             if (notes.originalServer.season.isNotBlank()) append(" \u2022 ${notes.originalServer.season}")
         }
         Text(header, color = AppUiColors.GithubSecondary, fontSize = 11.sp)
@@ -138,7 +138,7 @@ private fun PatchNotesContent(onHeroClick: (Int) -> Unit, onItemClick: (Int) -> 
         }
         if (tab == PatchTab.NOV01) {
             val body = buildString {
-                append("Live patch on Nov 01 was still ${notes.nov01LivePatch.ifBlank { notes.displayVersion }}.")
+                append("Live patch on Nov 01 was still ${notes.nov01LivePatch.ifBlank { notes.shortVersion }}.")
                 if (notes.nov01OriginalEvent.isNotEmpty()) {
                     append("\n")
                     append(notes.nov01OriginalEvent.joinToString("\n\u2022 ", prefix = "\u2022 "))
@@ -149,7 +149,7 @@ private fun PatchNotesContent(onHeroClick: (Int) -> Unit, onItemClick: (Int) -> 
             PatchCard(title = "Nov 01 \u2014 Original Server: Event ONLY (no balance patch)", body = body)
         }
         val cardTitle = listOf(
-            data.title.ifBlank { "Patch ${data.version.ifBlank { notes.displayVersion }}" },
+            data.title.ifBlank { "Patch ${data.version.ifBlank { notes.shortVersion }}" },
             data.server.takeIf { it.isNotBlank() },
             data.date.takeIf { it.isNotBlank() }
         ).filterNotNull().joinToString(" \u2022 ")
@@ -206,14 +206,19 @@ private fun PatchNotesContent(onHeroClick: (Int) -> Unit, onItemClick: (Int) -> 
                         if (h.hasLiveStats) "${h.name} ${"%.1f%%".format(h.winRate * 100)}" else h.name
                     }
                 }
-                PatchCard(title = "Meta heroes by lane (${notes.displayVersion})", body = body)
+                PatchCard(title = "Meta heroes by lane (${notes.shortVersion})", body = body)
             }
             // Which guide files are written for which patch.
             val coverage = GameData.guides.values
             if (coverage.isNotEmpty()) {
                 val body = coverage.joinToString("\n") { g ->
-                    val older = g.patch.isNotBlank() && g.patch != notes.displayVersion
-                    "${g.role}: ${g.types.size} types \u2022 patch ${g.patch.ifBlank { "?" }}" + if (older) " \u26A0 older than ${notes.displayVersion}" else " \u2713"
+                    // Compare bare patch numbers: guide.patch is "2.2.23" while
+                    // displayVersion can be "2.2.23-tier-2026-11-23", which made every
+                    // guide look stale. shortVersion fixes that; a genuinely older guide
+                    // (roam_guide.json at 2.2.16a) is still flagged.
+                    val guidePatch = g.patch.substringBefore("-")
+                    val older = guidePatch.isNotBlank() && guidePatch != notes.shortVersion
+                    "${g.role}: ${g.types.size} types \u2022 patch ${g.patch.ifBlank { "?" }}" + if (older) " \u26A0 older than ${notes.shortVersion}" else " \u2713"
                 }
                 PatchCard(title = "Overlay guide coverage", body = body)
             }

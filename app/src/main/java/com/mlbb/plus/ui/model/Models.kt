@@ -275,7 +275,18 @@ data class PatchNotesFile(
     val nov01LivePatch: String = ""
 ) {
     // FIX [9]: single fallback, use this everywhere.
+    // NOTE: heroes.json is the authoritative patch manifest, so `version` can carry a
+    // data-stamp suffix, e.g. "2.2.23-tier-2026-11-23". Use this for fallbacks/labels
+    // that may show the full stamp, and `shortVersion` whenever a bare patch number is
+    // meant (headers, and every guide.patch comparison).
     val displayVersion: String get() = originalServer.version.ifBlank { FALLBACK_PATCH_VERSION }
+
+    // Bare patch number: "2.2.23-tier-2026-11-23" -> "2.2.23".
+    // Consolidates the substringBefore("-") rule that HomeScreen, HeroesScreen and
+    // ItemsScreen each duplicated, and fixes the sites that compared a guide's
+    // "2.2.23" against the stamped version and therefore reported every guide as stale
+    // (PatchNotesScreen coverage card and the in-match overlay patch label).
+    val shortVersion: String get() = displayVersion.substringBefore("-").ifBlank { displayVersion }
     // NEW batch: same fallback for Advanced server. Old code hardcoded
     // "2.2.32" in SettingsScreen + PatchNotesScreen. Use this instead.
     val advancedDisplayVersion: String get() = advancedServer.version.ifBlank { FALLBACK_ADVANCED_PATCH_VERSION }
@@ -539,9 +550,14 @@ object JsonLoader {
             val mergedHeroes = (fileNotes.originalServer.heroChanges + manifestHeroes)
                 .associateBy { it.heroId }.values.toList().sortedBy { it.heroId }
             val manifestVersion = heroRoot.optStr("version").removeSuffix("-fixed")
+            // heroes.json carries both `patchDate` (when the patch went live, 2026-11-11)
+            // and `updated` (when this data snapshot was refreshed, 2026-11-23). The patch
+            // card title reads "{title} • {server} • {date}", so it must show the patch
+            // date; using `updated` implied the patch landed on the refresh date.
+            val manifestDate = heroRoot.optStr("patchDate").ifBlank { heroRoot.optStr("updated") }
             val patchBlock = fileNotes.originalServer.copy(
                 version = manifestVersion.ifBlank { fileNotes.originalServer.version },
-                date = heroRoot.optStr("updated").ifBlank { fileNotes.originalServer.date },
+                date = manifestDate.ifBlank { fileNotes.originalServer.date },
                 season = heroRoot.optStr("season").ifBlank { fileNotes.originalServer.season },
                 title = heroRoot.optStr("patchName").ifBlank { fileNotes.originalServer.title },
                 heroChanges = mergedHeroes,

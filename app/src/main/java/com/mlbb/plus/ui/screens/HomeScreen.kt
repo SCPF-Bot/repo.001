@@ -72,14 +72,12 @@ fun HomeScreen(
 ) {
     val roles = remember { RoleTypes.roles }
     val typeIds = remember(selectedRole) { RoleTypes.typesFor(selectedRole) }
-    val patch = GameData.patchNotes.displayVersion
-    // Same short-patch rule as Heroes/Items: displayVersion can be
-    // "2.2.23-matchups-2026-11-21" — that wrapped the header to 2 lines.
-    // substringBefore("-") -> "2.2.23". Also fixes the stale-guide check
-    // below: guide.patch ("2.2.23") could never equal the long version.
-    val shortPatch = patch.substringBefore("-").ifBlank { patch }
+    // Bare patch number ("2.2.23") from PatchNotesFile.shortVersion: displayVersion can
+    // carry a data stamp ("2.2.23-tier-2026-11-23"), which wrapped the header to 2 lines
+    // and made guide.patch ("2.2.23") never equal the live patch in the stale check below.
+    val shortPatch = GameData.patchNotes.shortVersion
     val guide = GameData.guides[selectedRole]
-    val guidePatch = (guide?.patch?.ifBlank { null } ?: shortPatch).substringBefore("-").ifBlank { shortPatch }
+    val guidePatch = guide?.patch?.substringBefore("-")?.ifBlank { shortPatch } ?: shortPatch
     val guideType = guide?.type(selectedRoleType) ?: guide?.types?.firstOrNull()
 
     Box(Modifier.fillMaxSize().background(AppUiColors.GithubBg)) {
@@ -205,7 +203,7 @@ private fun PatchBanner(onClick: () -> Unit) {
     val cur = notes.originalServer
     val shape = RoundedCornerShape(18.dp)
     // Title + counts come from patch_notes.json (e.g. "Patch 2.2.23 \u2014 Popol and Kupa Revamp").
-    val headline = cur.title.ifBlank { "Patch ${notes.displayVersion}" }
+    val headline = cur.title.ifBlank { "Patch ${notes.shortVersion}" }
     val counts = buildString {
         append("${GameData.liveHeroes.size} heroes")
         if (cur.heroChanges.isNotEmpty()) append(" \u2022 ${cur.heroChanges.size} hero changes")
@@ -256,7 +254,7 @@ private fun RolePanel(
     onHeroClick: (Int) -> Unit,
 ) {
     val shape = RoundedCornerShape(18.dp)
-    val livePatch = GameData.patchNotes.displayVersion.substringBefore("-").ifBlank { GameData.patchNotes.displayVersion }
+    val livePatch = GameData.patchNotes.shortVersion
     // Guide files are versioned independently of the patch notes: flag a guide that is older.
     val guideStale = guide != null && guide.patch.isNotBlank() && guide.patch != livePatch
     Column(

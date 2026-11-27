@@ -1,6 +1,6 @@
 # MLBB Plus — Project Structure and Dependency Map
 
-> **Scope:** This document describes the project as it exists in this repository snapshot (21 November 2026 / data patch 2.2.23). It is an implementation map, not a proposed architecture. Planned or absent components are called out explicitly.
+> **Scope:** This document describes the project as it exists in this repository snapshot (27 November 2026 / data patch 2.2.23; heroes data 2026-11-23, items data 2026-11-26, guides 2026-11-20). It is an implementation map, not a proposed architecture. Planned or absent components are called out explicitly.
 
 ## 1. System at a glance
 
@@ -62,14 +62,17 @@ MLBB-Plus/
 │       │   ├── mid_guide.json
 │       │   ├── gold_guide.json
 │       │   ├── exp_guide.json
-│       │   ├── heroes/*.webp
-│       │   └── items/*.webp
+│       │   ├── heroes/*.webp   (133 portraits)
+│       │   └── items/*.webp    (99 portraits)
 │       ├── java/com/mlbb/plus/ui/
 │       │   ├── MainActivity.kt
 │       │   ├── WidgetOverlayService.kt
 │       │   ├── components/UiKit.kt
+│       │   ├── components/AppComponents.kt   (Material 3 redesign components)
 │       │   ├── model/Models.kt
 │       │   ├── model/Guides.kt
+│       │   ├── model/KnowledgeBase.kt
+│       │   ├── navigation/AppRoute.kt        (routes/tabs/deep-link spec)
 │       │   ├── screens/
 │       │   │   ├── AssetImage.kt
 │       │   │   ├── HomeScreen.kt
@@ -78,18 +81,21 @@ MLBB-Plus/
 │       │   │   ├── PatchNotesScreen.kt
 │       │   │   └── SettingsScreen.kt
 │       │   ├── theme/MLBBPlusTheme.kt
+│       │   ├── theme/{Color,Type,Dimens}.kt  (Material 3 tokens)
+│       │   ├── viewmodel/AppViewModel.kt     (StateFlow root state)
 │       │   └── widgets/
 │       │       ├── JetOverlay.kt
 │       │       └── OverlayWidgets.kt
 │       └── res/
 │           ├── drawable/
 │           ├── mipmap-anydpi-v26/
-│           └── values/{colors.xml,strings.xml,themes.xml}
+│           └── values/{colors.xml,strings.xml,dimens.xml,themes.xml}
 ├── docs/
 │   ├── overview.md
 │   ├── structure.md
 │   ├── links.md
-│   └── refactoring-report.md
+│   ├── refactoring-report.md
+│   └── ux-redesign.md
 ├── scripts/
 │   └── validate_assets.py
 ├── gradle/
@@ -103,7 +109,9 @@ MLBB-Plus/
 └── readme.md
 ```
 
-`app/src/main/assets/heroes/` contains the bundled hero portraits and `app/src/main/assets/items/` contains portraits for all 41 item records (40 active, one removed legacy item). The resource directory contains launcher artwork and Android theme resources.
+`app/src/main/assets/heroes/` contains **133** bundled hero portraits and `app/src/main/assets/items/` contains **99** item portraits — one WebP per active item record (`items/{id}.webp`). Every declared local image path in both catalogues resolves; each item record additionally carries a remote `portrait` URL (Fandom) and Coil renders an initials fallback if an asset is unreadable. The resource directory contains launcher artwork and Android theme resources.
+
+`scripts/validate_assets.py` was referenced by `readme.md` and `refactoring-report.md` but was absent from the repository; it was recreated on 2026-11-27 and extended with cross-file referential checks (patch-change ID ↔ roster name, version agreement, guide staleness warnings). It currently passes with one warning: `roam_guide.json` declares `meta.latest = true` while pinned to patch 2.2.16a.
 
 ## 3. Startup and navigation chain
 
@@ -173,36 +181,43 @@ flowchart TD
 - `heroes[]` contains hero identity, roles/lanes, tier/difficulty, rates, skills, emblems, core builds, matchup IDs, descriptions/lore, tags, images, and patch notes.
 - `JsonLoader.loadHeroes()` converts each record into `Hero`, `HeroSkill`, `EmblemInfo`, `HeroStats`, and `BuildItem` values.
 - Relationship arrays (`counters`, `counteredBy`, `synergies`, `bestPartners`) contain hero IDs; the UI resolves those IDs through `GameData.heroesById`.
+- **Duplicate relationship fields:** each hero also carries `goodAgainst` / `badAgainst` / `goodWith` holding the same IDs, and the hero/item screens read *that* set (`goodAgainst`, `badAgainst`, `goodWith`) rather than `counters` / `counteredBy` / `synergies`. Both sets are currently identical for all 133 heroes (verified 2026-11-27: no self-links, no duplicates, every ID resolves). Collapsing them to one canonical pair is an open cleanup item — until then, any data edit must update both or the screens and the manifest will disagree.
+- Per-hero provenance fields travel with the data: `matchupDataSource` / `matchupDataUpdated` (2026-11-21) / `matchupDataWindow` (past 1 day) / `matchupDataRank` (all ranks) / `counteredBySource` / `counteredByUpdated`, plus `tierSource` / `tierUpdated` (2026-11-23) and `loreSource`. Root-level `matchupData`, `matchupDataset`, and `tierSnapshot` blocks carry the dataset-wide method notes.
 - `HeroImage()` in `AssetImage.kt` resolves JSON image paths / hero slugs to bundled portrait assets and renders a fallback when an image is unavailable.
 - `HeroesScreen.kt` contains the searchable/filterable hero list, hero cards, hero detail tabs, overview, and hero relationship panels.
 
 ### 4.2 Item catalogue: `items.json` → `Models.kt` → item UI
 
-- Root metadata describes the patch and item catalogue.
-- `items[]` contains item ID/name, category, tier, price, stats, passive/active descriptions, build paths, relationship IDs, recommendations, tags, and image path.
-- `JsonLoader.loadItems()` creates `Item` and `ItemStat` values.
+- Root metadata describes the patch and item catalogue: `version 2.2.23-buildtree-2026-11-23`, `updated 2026-11-26`, `patchDate 2026-11-11`, `totalItems = totalActiveItems = 99`, `source` (Fandom Equipment page), `patchChanges` (10 notes), `notes`, `schema`, and `buildTreeMetadata` (`buildsInto` is the reverse of `buildPathIds`; links resolve by stable item ID).
+- `items[]` contains item ID/name/slug, category, tier, price/sell price/price type/price note, `stats` (display strings) and `statsDetailed` (structured), passive/active descriptions, lore, `buildPath` / `buildPathIds` / `buildsInto`, relationship IDs (`goodAgainst`, `badAgainst`, `counters`, `counteredBy`, `goodAgainstHeroes` / `worksAgainstHeroes`, `badAgainstHeroes`, `goodWithHeroes` / `synergiesHeroes`), `recommendedFor`, `tags`, `status`, and image path (`image` = local WebP, `portrait` = remote URL, `fandomFile`).
+- Categories in the current file: Attack 31, Magic 25, Defense 25, Movement 8, Roam 6, Jungle 3, Attack & Magic 1. Tiers: A 34, S 20, Tier 2 19, Tier 1 16, Blessing 7, Tier 3 3. Item IDs span 1001–9103; the original 41 records kept their IDs, stats and build paths so `heroes.json` core-build references still resolve (verified: 0 unlinked core items across all 133 heroes).
+- `JsonLoader.loadItems()` creates `Item` and `ItemStat` values, defaulting `status` to `active` when absent.
 - `ItemImage()` resolves the image path and provides a fallback.
-- `GameData` builds `itemsById` and `heroesByCoreItem` indexes.
+- `GameData` builds `itemsById` and `heroesByCoreItem` indexes. Removed items stay in the model but are excluded from the active catalogue — with the 2026-11-26 cleanup, all 99 shipped records are `active`, so nothing is currently filtered out.
 - `ItemsScreen.kt` renders item search/filter/sort, item detail, item relations, and links to heroes using the item.
 
 ### 4.3 Patch notes: `patch_notes.json` + hero manifest → `PatchData`
 
-- `JsonLoader.loadPatchNotes()` reads the flat patch-note root or nested `originalServer` / `advancedServer` form.
+- `JsonLoader.loadPatchNotes()` reads the flat patch-note root or nested `originalServer` / `advancedServer` form. **The shipped file is flat**: it has no `originalServer`, `advancedServer`, or `nov01` blocks, so `PatchNotesScreen` renders the Current tab only and `PatchNotesFile.latest` comes from the root.
 - It parses hero and item changes, highlights, battlefield/system changes, warnings, and metadata.
-- It then reads `heroes.json.patchChanges` and merges those hero entries into the Original Server hero-change list by hero ID. `heroes.json.equipmentPatchChanges` is also copied into `PatchData.equipmentChanges`.
+- It then reads `heroes.json.patchChanges` and merges those hero entries into the Original Server hero-change list **by hero ID** (`associateBy { heroId }`, so the manifest entry wins for a hero present in both files), then sorts by ID. `heroes.json.equipmentPatchChanges` is also copied into `PatchData.equipmentChanges`. With the current assets that yields **13** hero rows: the 10 in `patch_notes.json` plus Lukas, Karrie and Kagura from the manifest.
+- **Version and date handling (fixed 2026-11-27):** `PatchData.version` is taken from `heroes.json.version`, which carries a data stamp (`2.2.23-tier-2026-11-23`). `PatchNotesFile.displayVersion` exposes that string for fallbacks, and `PatchNotesFile.shortVersion` exposes the bare patch number (`2.2.23`). **Always compare a guide's `meta.patch` against `shortVersion`** — comparing against the stamped version marks every guide as stale, including in the overlay. `PatchData.date` prefers `heroes.json.patchDate` (the live patch date, 2026-11-11) and falls back to `updated` (the data refresh date) then `patch_notes.json.date`.
+- **Not merged:** `items.json.patchChanges` (10 entries, including the Nov 26 legacy-item removals) is never read by `loadPatchNotes()`; only the 2 `equipmentPatchChanges` strings from `heroes.json` reach the Patch screen. Surfacing the item manifest is an open decision (see `overview.md` §5 data-quality issues).
 - `HomeScreen.kt` uses patch information for the home banner and patch movers; hero/item screens use patch badges/detail context; `PatchNotesScreen.kt` presents the full patch view.
 
 ### 4.4 Role guides: five JSON files → `GuideLoader` → Home and overlay
 
 The guide files are:
 
-| Asset | Role | Guide types in this snapshot |
-|---|---|---:|
-| `roam_guide.json` | Roam | 6 |
-| `jungle_guide.json` | Jungle | 5 |
-| `mid_guide.json` | Mid | 5 |
-| `gold_guide.json` | Gold | 5 |
-| `exp_guide.json` | EXP | 5 |
+| Asset | Role | Guide types | Timed steps | `meta.patch` | `meta.updated` |
+|---|---|---:|---:|---|---|
+| `roam_guide.json` | Roam | 6 | 66 | **2.2.16a** ⚠ stale | 2026-11-18 |
+| `jungle_guide.json` | Jungle | 5 | 55 | 2.2.23 | 2026-11-20 |
+| `mid_guide.json` | Mid | 5 | 55 | 2.2.23 | 2026-11-20 |
+| `gold_guide.json` | Gold | 5 | 55 | 2.2.23 | 2026-11-20 |
+| `exp_guide.json` | EXP | 5 | 55 | 2.2.23 | 2026-11-20 |
+
+Totals: 26 types, 286 steps. Every guide declares `meta.latest = true`, including `roam_guide.json` — which is why staleness must be judged from `meta.patch` against `PatchNotesFile.shortVersion`, not from the `latest` flag. All five declare Season 42 objective timers (first Turtle 120s, respawn 120s, max 3, auto-convert to Lord at 480s; Lord fallback 480s, respawn 180s before 18:00 and 120s after, evolves at 1080s; Lithowanderer 45s; outer turret shield ends 300s).
 
 Each asset uses a root structure with `meta`, role-specific auxiliary data (such as blessings, retribution types, or emblem guide), `roles[]`, `changelog`, `objectives`, and `battle_spells`. A guide type contains an ID/label/playstyle, hero picks, spells, emblem, core items, strengths/weaknesses, win/lose conditions, timed `steps[]`, and optional objective templates.
 
@@ -330,13 +345,20 @@ The versions above are read from `gradle/libs.versions.toml`, `app/build.gradle.
 The refactor improves the catalogue experience while preserving the floating guide's original in-match purpose.
 
 Implemented in this pass:
-- Hero and item grids use adaptive columns instead of seven fixed columns.
+- Hero and item grids use a fixed five-column grid. **Correction (2026-11-27):** an earlier revision of this section said "adaptive columns instead of seven fixed columns"; the shipped code uses `GridCells.Fixed(5)` in both `HeroesScreen.kt` and `ItemsScreen.kt`, with a comment recording that `GridCells.Adaptive` produced three ~102dp columns on a phone. An adaptive grid is proposed in [ux-redesign.md](ux-redesign.md), not implemented.
 - Search, category/role/tier filters, and sort selections use saveable state.
 - Hero and item sorting controls are visible and connected to their existing sort state.
 - Removed item entries remain available in the data model but are excluded from the active item catalogue.
 - Item detail relationship sections now use the JSON model's actual field names and semantics.
 - Item portraits exist for every item record and have a runtime fallback through Coil.
 - The overlay service validates role and playstyle IDs when starting or restoring the widget.
+
+Implemented in the 2026-11-27 redesign/data-sync pass (details in [ux-redesign.md](ux-redesign.md) and `overview.md` §14):
+- `HeroDetailScreen` and `ItemDetailScreen` now render a visible back control (`DetailBackBar`); both previously accepted an `onBack` callback and never used it.
+- Predictive back enabled (`android:enableOnBackInvokedCallback="true"`).
+- New Material 3 token files (`theme/Color.kt`, `theme/Type.kt`, `theme/Dimens.kt`), reusable components (`components/AppComponents.kt`), route/tab definitions (`navigation/AppRoute.kt`), and a lightweight `viewmodel/AppViewModel.kt`. `AppUiTheme` gained `darkTheme` / `dynamicColor` parameters but still defaults to dark, because screens read `AppUiColors.*` directly.
+- `PatchNotesFile.shortVersion` added and used wherever a bare patch number is compared or displayed (Patch screen, overlay patch label, Settings diagnostics, Home/Heroes/Items headers), replacing three duplicated `substringBefore("-")` expressions.
+- Settings guide-staleness now keys off the patch number rather than the self-declared `meta.latest` flag.
 
 The overlay continues to provide a role-aware guide, match timer, objective timing, and enemy battle-spell cooldown tracking. It remains draggable, dismissible, and touch-pass-through outside its window. The refactor does not replace it with a generic floating button or add distracting animation.
 
@@ -350,5 +372,7 @@ When hero IDs, names, or matchup arrays change, validate that:
 3. The direction of `counters` and `counteredBy` remains consistent with the documented definitions.
 4. Source date, patch, rank scope, timeframe, fallback provenance, and caveats are updated together.
 
-`scripts/validate_assets.py` checks JSON syntax, duplicate hero/item IDs, declared item counts, and every declared portrait path. It does **not** prove the accuracy or predictive power of matchup data; that requires a separate data audit.
+`scripts/validate_assets.py` (recreated and extended 2026-11-27) checks: JSON syntax for all eight assets; declared hero/item totals against actual counts; duplicate hero/item IDs; every declared local portrait path; matchup arrays for self-links, duplicates, and unresolved IDs; guide hero picks resolving by name; **patch-change IDs cross-checked against the roster name** in both `patch_notes.json` and `heroes.json.patchChanges` (this is what catches a Masha-pointing-at-Baxia style bug); cross-file agreement on the bare patch number; and a warning when a guide declares `meta.latest = true` while pinned to an older patch. Current result: **pass, 1 warning** (`roam_guide.json` at 2.2.16a).
+
+It does **not** prove the accuracy or predictive power of matchup data, does not compile Kotlin, and does not exercise the overlay; those require a data audit, a Gradle build, and device testing respectively.
 

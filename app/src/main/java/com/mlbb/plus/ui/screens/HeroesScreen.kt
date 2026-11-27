@@ -52,6 +52,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.material3.TextButton
 import com.mlbb.plus.ui.components.AppHeader
 import com.mlbb.plus.ui.components.BarDivider
+import com.mlbb.plus.ui.components.DetailBackBar
 import com.mlbb.plus.ui.components.CompactDropdown
 import com.mlbb.plus.ui.components.CompactSearchBox
 import com.mlbb.plus.ui.components.FilterBarCount
@@ -143,9 +144,9 @@ fun HeroesScreen(
         }
     }
 
-    // Short patch — displayVersion can be "2.2.23-matchups-2026-11-21",
-    // which wrapped the subtitle to 2 lines. substringBefore("-") -> "2.2.23".
-    val shortPatch = GameData.patchNotes.displayVersion.substringBefore("-").ifBlank { GameData.patchNotes.displayVersion }
+    // Short patch — displayVersion can carry a data stamp ("2.2.23-tier-2026-11-23"),
+    // which wrapped the subtitle to 2 lines. shortVersion -> "2.2.23".
+    val shortPatch = GameData.patchNotes.shortVersion
 
     Column(Modifier.fillMaxSize().background(AppUiColors.GithubBg)) {
         AppHeader("HERO EXPLORER", "Patch $shortPatch • ${filtered.size} heroes", AppIcons.Person)
@@ -299,6 +300,10 @@ fun HeroDetailScreen(
             .verticalScroll(rememberScrollState())
             .padding(12.dp)
     ) {
+        // Redesign fix: onBack was accepted but never rendered —
+        // users had to discover system Back. Visible back bar now.
+        DetailBackBar(label = hero.name, onBack = onBack)
+        Spacer(modifier = Modifier.height(12.dp))
         Row(verticalAlignment = Alignment.CenterVertically) {
             Box(
                 modifier = Modifier
