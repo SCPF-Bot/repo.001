@@ -12,11 +12,12 @@ on:
       - "settings.gradle.kts"
       - "gradle.properties"
       - ".github/workflows/release.yml"
-  # "Extract Archives" pushes its commit with GITHUB_TOKEN (and [skip ci]), which never
-  # fires `push` workflows, so chain off its completion instead. The old trigger pointed
-  # at a "Build Debug" workflow that does not exist in this repo.
+  # "Extract Archives" and "Update TTS Models" push their commits with
+  # GITHUB_TOKEN (and possibly [skip ci]), which never fires `push` workflows,
+  # so chain off their completion instead. The old trigger pointed at a
+  # "Build Debug" workflow that does not exist in this repo.
   workflow_run:
-    workflows: ["Extract Archives"]
+    workflows: ["Extract Archives", "Update TTS Models"]
     types: [completed]
     branches: [main]
 
@@ -45,6 +46,14 @@ jobs:
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
+
+      - name: Cache voice guide binaries
+        uses: actions/cache@v4
+        with:
+          path: |
+            app/libs
+            app/tts-models-cache
+          key: voice-guide-${{ hashFiles('gradle/libs.versions.toml', 'app/src/main/assets/tts/tts-models.json') }}
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew

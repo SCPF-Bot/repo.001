@@ -1,0 +1,69 @@
+name: Update TTS Models
+
+# Refreshes and verifies the bundled TTS voice packs. scripts/update_tts_models.py
+# downloads each pinned archive into app/tts-models-cache/ (gitignored), checks
+# every SHA-256 against the pins and against upstream checksum.txt, validates
+# the pack layout, and regenerates app/src/main/assets/tts/tts-models.json -
+# the manifest that compiles the voice packs into the APK. The Build Release
+# workflow is chained off this one (see its workflow_run trigger), because a
+# commit pushed with GITHUB_TOKEN never fires `push` workflows.
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Weekly drift check against the upstream tts-models release.
+    - cron: "17 3 * * 1"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-tts-models
+  cancel-in-progress: true
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Cache voice pack archives
+        uses: actions/cache@v4
+        with:
+          path: app/tts-models-cache
+          key: tts-models-${{ hashFiles('scripts/update_tts_models.py') }}
+
+      - name: Update and verify TTS model pins
+        run: python3 scripts/update_tts_models.py | tee update-tts-models.log
+
+      - name: Validate app assets
+        run: python3 scripts/validate_assets.py
+
+      - name: Commit refreshed manifest
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add app/src/main/assets/tts/tts-models.json
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "chore: refresh TTS model manifest"
+            git push origin main
+          fi
+
+      - name: Upload update log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: update-tts-models-log
+          path: update-tts-models.log
+          retention-days: 30
+          if-no-files-found: ignore
