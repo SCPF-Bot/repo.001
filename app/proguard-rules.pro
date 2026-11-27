@@ -8,6 +8,13 @@
 # JetOverlay / OverlayLifecycleOwner are created from a Service, not referenced from the manifest.
 -keep class com.mlbb.plus.ui.widgets.** { *; }
 
+# Navigation Compose @Serializable routes (used via hasRoute / toRoute under R8 minification).
+-keep,includedescriptorclasses class com.mlbb.plus.ui.navigation.** { *; }
+-keepclassmembers class com.mlbb.plus.ui.navigation.** {
+    *** Companion;
+}
+-keep class com.mlbb.plus.ui.navigation.**$*serializer { *; }
+
 # Voice Guide: sherpa-onnx reaches its Kotlin API through JNI, so the class and
 # member names must survive R8 exactly as the native side expects them.
 -keep class com.k2fsa.sherpa.onnx.** { *; }

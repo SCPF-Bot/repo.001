@@ -1,0 +1,6 @@
+{
+  "name": "MLBB Plus",
+  "description": "Offline-first Mobile Legends: Bang Bang tactical companion with hero/item catalogue, patch notes, role guides, floating overlay HUD, and neural Voice Guide.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

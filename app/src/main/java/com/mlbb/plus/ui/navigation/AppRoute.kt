@@ -2,50 +2,52 @@ package com.mlbb.plus.ui.navigation
 
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.mlbb.plus.ui.components.AppIcons
+import kotlinx.serialization.Serializable
 
-// ============================================================
-// MLBB Plus — navigation routes (type-safe, no new dependency).
-//
-// MainActivity currently uses a private `Tab` enum + nullable
-// selectedHero/selectedItem. This file formalizes the same
-// destinations as sealed routes so back behavior, deep links,
-// and state restoration have one definition. Adopt by
-// replacing MainActivity's Tab enum with AppTab (same labels
-// and icons — no visual change) and storing hero/item IDs
-// (saveable) instead of whole objects (see docs/ux-redesign.md
-// §5). Navigation Compose / Navigation 3 is NOT added:
-// with 5 destinations and no argument-heavy flows, a sealed
-// route + BackHandler is smaller and sufficient. Revisit if
-// deep links or multi-step flows are added.
-// ============================================================
-
-enum class AppTab(val label: String, val icon: ImageVector) {
-    HOME("Home", AppIcons.Home),
-    HEROES("Heroes", AppIcons.Person),
-    ITEMS("Items", AppIcons.Apps),
-    PATCH("Patch", AppIcons.History),
-    SETTINGS("Settings", AppIcons.Settings)
+/** Top-level bottom bar / navigation rail destinations. */
+enum class AppTab(val label: String, val icon: ImageVector, val testTag: String) {
+    HOME("Home", AppIcons.Home, "nav_tab_home"),
+    HEROES("Heroes", AppIcons.Person, "nav_tab_heroes"),
+    ITEMS("Items", AppIcons.Apps, "nav_tab_items"),
+    PATCH("Patch", AppIcons.History, "nav_tab_patch"),
+    SETTINGS("Settings", AppIcons.Settings, "nav_tab_settings")
 }
 
+/** Type-safe Navigation Compose destination keys. */
 sealed interface AppRoute {
-    data object Home : AppRoute
-    data object Heroes : AppRoute
-    data class HeroDetail(val heroId: Int) : AppRoute
-    data object Items : AppRoute
-    data class ItemDetail(val itemId: Int) : AppRoute
-    data object Patch : AppRoute
-    data object Settings : AppRoute
-    data object KnowledgeBase : AppRoute
+    @Serializable
+    data object HomeRoute : AppRoute
+
+    @Serializable
+    data object HeroesRoute : AppRoute
+
+    @Serializable
+    data class HeroDetailRoute(val heroId: Int) : AppRoute
+
+    @Serializable
+    data object ItemsRoute : AppRoute
+
+    @Serializable
+    data class ItemDetailRoute(val itemId: Int) : AppRoute
+
+    @Serializable
+    data object PatchRoute : AppRoute
+
+    @Serializable
+    data object SettingsRoute : AppRoute
+
+    @Serializable
+    data object KnowledgeBaseRoute : AppRoute
 }
 
-/**
- * Deep-link scheme (staged — not yet in AndroidManifest).
- * Examples: mlbbplus://hero/34, mlbbplus://item/2101,
- * mlbbplus://patch, mlbbplus://guide/Roam/initiator
- * Parse with Uri and map to AppRoute; unknown links fall
- * back to Home. Do not add VIEW intent-filters until the
- * parser + fallback are tested (see QA checklist).
- */
+fun AppTab.toRoute(): AppRoute = when (this) {
+    AppTab.HOME -> AppRoute.HomeRoute
+    AppTab.HEROES -> AppRoute.HeroesRoute
+    AppTab.ITEMS -> AppRoute.ItemsRoute
+    AppTab.PATCH -> AppRoute.PatchRoute
+    AppTab.SETTINGS -> AppRoute.SettingsRoute
+}
+
 object DeepLinks {
     const val SCHEME = "mlbbplus"
     fun hero(heroId: Int) = "$SCHEME://hero/$heroId"

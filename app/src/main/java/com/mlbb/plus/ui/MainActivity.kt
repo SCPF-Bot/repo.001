@@ -1,255 +1,305 @@
 package com.mlbb.plus.ui
 
-import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
 import androidx.activity.ComponentActivity
-import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
+import androidx.core.net.toUri
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Row
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.saveable.rememberSaveableStateHolder
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
+import androidx.compose.material3.NavigationRail
+import androidx.compose.material3.NavigationRailItem
+import androidx.compose.material3.NavigationRailItemDefaults
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavDestination.Companion.hasRoute
+import androidx.navigation.NavDestination.Companion.hierarchy
+import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.toRoute
+import com.mlbb.plus.R
 import com.mlbb.plus.ui.components.AppIcons
+import com.mlbb.plus.ui.components.EmptyState
 import com.mlbb.plus.ui.model.GameData
-import com.mlbb.plus.ui.model.Hero
-import com.mlbb.plus.ui.model.Item
-import com.mlbb.plus.ui.model.RoleTypes
-import com.mlbb.plus.ui.screens.*
-import com.mlbb.plus.ui.theme.AppUiColors
+import com.mlbb.plus.ui.model.KnowledgeActionTarget
+import com.mlbb.plus.ui.navigation.AppRoute
+import com.mlbb.plus.ui.navigation.AppTab
+import com.mlbb.plus.ui.navigation.toRoute
+import com.mlbb.plus.ui.screens.HeroDetailScreen
+import com.mlbb.plus.ui.screens.HeroesScreen
+import com.mlbb.plus.ui.screens.HomeScreen
+import com.mlbb.plus.ui.screens.ItemDetailScreen
+import com.mlbb.plus.ui.screens.ItemsScreen
+import com.mlbb.plus.ui.screens.KnowledgeBaseScreen
+import com.mlbb.plus.ui.screens.PatchNotesScreen
+import com.mlbb.plus.ui.screens.SettingsScreen
+import com.mlbb.plus.ui.theme.AppDimens
+import com.mlbb.plus.ui.theme.AppTheme
 import com.mlbb.plus.ui.theme.AppUiTheme
-
-// ============================================================
-// mlbb/ui/MainActivity.kt  ->  FIXED
-// GitHub path: app/src/main/java/com/mlbb/plus/ui/MainActivity.kt
-// ------------------------------------------------------------
-// FIXES (see bottom of file for full changelog):
-//  [1] Package unified: com.mlbb.ui -> com.mlbb.plus.ui to match
-//      GameData / screens / theme (com.mlbb.plus.*) and the
-//      namespace / applicationId in build.gradle.kts (com.mlbb.plus).
-//      Old split caused Manifest / R-class confusion.
-//  [2] launchWidget: overlay Intent now uses Uri("package:<pkg>")
-//      so it opens THIS app's overlay page, not the generic list.
-//      Uses ContextCompat.startForegroundService() (required for
-//      targetSdk 36 / Android 14+ foreground services).
-//  [3] overlayGranted / overlayRunning are now refreshed on
-//      ON_RESUME via LifecycleEventObserver, not only on tab change.
-//      Before: returning from Settings still showed "not granted"
-//      until you switched tabs.
-//  [4] Removed duplicate GameData.load() in LaunchedEffect(Unit).
-//      load() is called once in onCreate() and is idempotent.
-//      Double load = double JSON parse on every recomposition path.
-//  [5] SettingsScreen autoStartLastRole was hardcoded false with a
-//      no-op callback. Now real state backed by SharedPreferences.
-//  [6] Hero -> back navigation: added heroReturnTab so tapping a
-//      hero from Home / Items returns to that tab, instead of always
-//      dropping to the Heroes list and losing the Item detail.
-//  [7] validTypes moved to remember{} so the map is not rebuilt
-//      on every recomposition.
-//  [8] App screens use their own AppUiTheme; the floating overlay
-//      keeps the original MLBBPlusTheme and palette unchanged.
-//  [9] NEW batch: onOverlayGrantedChange no longer sets the
-//      Boolean directly. SettingsScreen only forwards ON as
-//      a request to open system settings. Setting the Boolean
-//      here would lie (Home would show READY before the user
-//      grants). ON_RESUME observer re-reads the real permission.
-// ============================================================
-
-private enum class Tab(val label: String, val icon: ImageVector) {
-    HOME("Home", AppIcons.Home),
-    HEROES("Heroes", AppIcons.Person),
-    ITEMS("Items", AppIcons.Apps),
-    PATCH("Patch", AppIcons.History),
-    SETTINGS("Settings", AppIcons.Settings)
-}
+import com.mlbb.plus.ui.viewmodel.AppViewModel
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
+    private val appViewModel: AppViewModel by viewModels()
+
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
-        // Load JSONs once - before any screen renders. GameData.load()
-        // is idempotent, so calling it here is enough.
         GameData.load(this)
-        setContent { MLBBPlusApp(onLaunchWidget = { role, roleType -> launchWidget(role, roleType) }) }
+        appViewModel.refreshDataState()
+        appViewModel.loadPreferences(this)
+        setContent {
+            MLBBPlusApp(
+                viewModel = appViewModel,
+                onLaunchWidget = { role, roleType -> launchWidget(role, roleType) }
+            )
+        }
     }
 
-    private fun launchWidget(role: String, roleType: String) {
+    private fun launchWidget(role: String, roleType: String): Boolean {
         if (!Settings.canDrawOverlays(this)) {
-            // FIX [2a]: app-specific overlay page, not the generic list.
             val intent = Intent(
                 Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-                Uri.parse("package:$packageName")
+                "package:$packageName".toUri()
             )
             startActivity(intent)
-            return
+            return false
         }
         val intent = Intent(this, WidgetOverlayService::class.java).apply {
             putExtra(WidgetOverlayService.EXTRA_ROLE, role)
             putExtra(WidgetOverlayService.EXTRA_ROLE_TYPE, roleType)
         }
-        // FIX [2b]: startForegroundService() is required on API 31+
-        // when the target is a foreground service.
         ContextCompat.startForegroundService(this, intent)
+        return true
     }
 }
 
 @Composable
-private fun MLBBPlusApp(onLaunchWidget: (String, String) -> Unit) {
-    var tab by rememberSaveable { mutableStateOf(Tab.HOME) }
-    var selectedRole by rememberSaveable { mutableStateOf("Roam") }
-    // The type is a guide type ID from <role>_guide.json ("initiator", "crit", ...), not a label.
-    var selectedRoleType by rememberSaveable { mutableStateOf(RoleTypes.defaultTypeFor("Roam")) }
-    var selectedHero by remember { mutableStateOf<Hero?>(null) }
-    var selectedItem by remember { mutableStateOf<Item?>(null) }
-    // FIX [6]: where should Back from HeroDetail go?
-    var heroReturnTab by remember { mutableStateOf<Tab?>(null) }
-
+private fun MLBBPlusApp(
+    viewModel: AppViewModel,
+    onLaunchWidget: (String, String) -> Boolean
+) {
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val ctx = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
+    val navController = rememberNavController()
+    val snackbarHostState = remember { SnackbarHostState() }
+    val coroutineScope = rememberCoroutineScope()
 
-    var overlayGranted by remember { mutableStateOf(Settings.canDrawOverlays(ctx)) }
-    var overlayRunning by remember { mutableStateOf(WidgetOverlayService.isRunning) }
+    val overlayRunningMsg = stringResource(R.string.snackbar_overlay_running)
+    val overlayPermissionMsg = stringResource(R.string.snackbar_permission_needed)
 
-    // FIX [3]: refresh overlay state when returning from Settings.
+    var autoStartTriggeredThisSession by remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        viewModel.loadPreferences(ctx)
+        snapshotFlow { WidgetOverlayService.isRunning }
+            .distinctUntilChanged()
+            .collect { running ->
+                viewModel.refreshOverlayState(
+                    granted = Settings.canDrawOverlays(ctx),
+                    running = running
+                )
+            }
+    }
+
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) {
-                overlayGranted = Settings.canDrawOverlays(ctx)
-                overlayRunning = WidgetOverlayService.isRunning
+                viewModel.refreshOverlayState(
+                    granted = Settings.canDrawOverlays(ctx),
+                    running = WidgetOverlayService.isRunning
+                )
             }
         }
         lifecycleOwner.lifecycle.addObserver(observer)
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 
-    // FIX [5]: real auto-start state, persisted.
-    var autoStartLastRole by remember { mutableStateOf(false) }
-    var preferencesLoaded by remember { mutableStateOf(false) }
-    var autoStartTriggeredThisSession by remember { mutableStateOf(false) }
-    LaunchedEffect(Unit) {
-        val prefs = ctx.getSharedPreferences("mlbb_plus_prefs", Context.MODE_PRIVATE)
-        val savedRole = prefs.getString("last_role", "Roam") ?: "Roam"
-        selectedRole = savedRole.takeIf { it in RoleTypes.roles } ?: "Roam"
-        selectedRoleType = prefs.getString("last_role_type", RoleTypes.defaultTypeFor(selectedRole))
-            ?: RoleTypes.defaultTypeFor(selectedRole)
-        autoStartLastRole = prefs.getBoolean("auto_start_last_role", false)
-        preferencesLoaded = true
-    }
-    LaunchedEffect(selectedRole, selectedRoleType, preferencesLoaded) {
-        if (preferencesLoaded) {
-            ctx.getSharedPreferences("mlbb_plus_prefs", Context.MODE_PRIVATE).edit()
-                .putString("last_role", selectedRole)
-                .putString("last_role_type", selectedRoleType)
-                .apply()
-        }
-    }
-
-    // Types come from the guide files (RoleTypes -> GameData.guides), so the dropdown, this
-    // check and the overlay can never disagree. Re-pick the first type when the role changes.
-    LaunchedEffect(selectedRole) {
-        val types = RoleTypes.typesFor(selectedRole)
-        if (selectedRoleType !in types) selectedRoleType = types.firstOrNull().orEmpty()
-    }
-
-    // Honour the startup preference once per app session. Do not attempt to start
-    // the overlay until Android's permission is actually granted.
-    LaunchedEffect(autoStartLastRole, overlayGranted, overlayRunning, selectedRole, selectedRoleType, preferencesLoaded) {
-        if (preferencesLoaded && autoStartLastRole && overlayGranted && !overlayRunning && !autoStartTriggeredThisSession) {
+    LaunchedEffect(
+        uiState.autoStartLastRole,
+        uiState.overlayGranted,
+        uiState.overlayRunning,
+        uiState.selectedRole,
+        uiState.selectedRoleType,
+        uiState.preferencesLoaded
+    ) {
+        if (uiState.preferencesLoaded &&
+            uiState.autoStartLastRole &&
+            uiState.overlayGranted &&
+            !uiState.overlayRunning &&
+            !autoStartTriggeredThisSession
+        ) {
             autoStartTriggeredThisSession = true
-            onLaunchWidget(selectedRole, selectedRoleType)
-        }
-    }
-
-    // System Back follows the visible navigation hierarchy instead of closing the app
-    // while a detail page is open.
-    BackHandler(enabled = selectedHero != null || selectedItem != null || tab != Tab.HOME) {
-        when {
-            selectedHero != null -> {
-                selectedHero = null
-                heroReturnTab?.let { tab = it }
-                heroReturnTab = null
+            val started = onLaunchWidget(uiState.selectedRole, uiState.selectedRoleType)
+            if (started) {
+                viewModel.refreshOverlayState(granted = true, running = true)
             }
-            selectedItem != null -> selectedItem = null
-            tab != Tab.HOME -> tab = Tab.HOME
         }
     }
 
-    fun selectTab(next: Tab) {
-        tab = next
-        // A direct navigation-tab tap starts that section at its list/root.
-        if (next != Tab.HEROES) { selectedHero = null; heroReturnTab = null }
-        if (next != Tab.ITEMS) selectedItem = null
+    val backStackEntry by navController.currentBackStackEntryAsState()
+    val currentDestination = backStackEntry?.destination
+    val isTopLevelDestination = currentDestination == null ||
+        currentDestination.hasRoute<AppRoute.HomeRoute>() ||
+        currentDestination.hasRoute<AppRoute.HeroesRoute>() ||
+        currentDestination.hasRoute<AppRoute.ItemsRoute>() ||
+        currentDestination.hasRoute<AppRoute.PatchRoute>() ||
+        currentDestination.hasRoute<AppRoute.SettingsRoute>()
+
+    fun navigateToTab(tab: AppTab) {
+        navController.navigate(tab.toRoute()) {
+            popUpTo(navController.graph.findStartDestination().id) {
+                saveState = true
+            }
+            launchSingleTop = true
+            restoreState = true
+        }
     }
 
-    val saveableStateHolder = rememberSaveableStateHolder()
+    fun isTabSelected(tab: AppTab): Boolean = when (tab) {
+        AppTab.HOME -> currentDestination?.hierarchy?.any { it.hasRoute<AppRoute.HomeRoute>() } == true
+        AppTab.HEROES -> currentDestination?.hierarchy?.any {
+            it.hasRoute<AppRoute.HeroesRoute>() || it.hasRoute<AppRoute.HeroDetailRoute>()
+        } == true
+        AppTab.ITEMS -> currentDestination?.hierarchy?.any {
+            it.hasRoute<AppRoute.ItemsRoute>() || it.hasRoute<AppRoute.ItemDetailRoute>()
+        } == true
+        AppTab.PATCH -> currentDestination?.hierarchy?.any { it.hasRoute<AppRoute.PatchRoute>() } == true
+        AppTab.SETTINGS -> currentDestination?.hierarchy?.any {
+            it.hasRoute<AppRoute.SettingsRoute>() || it.hasRoute<AppRoute.KnowledgeBaseRoute>()
+        } == true
+    }
 
-    // App-only theme keeps the floating overlay theme and palette unchanged.
     AppUiTheme {
         BoxWithConstraints(Modifier.fillMaxSize()) {
             val useNavigationRail = maxWidth >= 600.dp
             Row(Modifier.fillMaxSize()) {
                 if (useNavigationRail) {
                     NavigationRail(
-                        containerColor = AppUiColors.Header,
-                        contentColor = AppUiColors.Gold,
-                        header = { Spacer(Modifier.height(12.dp)) }
+                        containerColor = AppTheme.colors.headerContainer,
+                        contentColor = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.windowInsetsPadding(
+                            WindowInsets.safeDrawing.only(WindowInsetsSides.Vertical + WindowInsetsSides.Start)
+                        ),
+                        header = { Spacer(Modifier.height(AppDimens.Space12)) }
                     ) {
-                        Tab.entries.forEach { t ->
+                        AppTab.entries.forEach { tab ->
+                            val selected = isTabSelected(tab)
                             NavigationRailItem(
-                                selected = tab == t,
-                                onClick = { selectTab(t) },
-                                icon = { Icon(t.icon, contentDescription = null) },
-                                label = { Text(t.label, fontSize = 11.sp) },
+                                selected = selected,
+                                onClick = { navigateToTab(tab) },
+                                icon = { Icon(tab.icon, contentDescription = null) },
+                                label = {
+                                    Text(
+                                        text = tab.label,
+                                        style = MaterialTheme.typography.labelMedium,
+                                        maxLines = 1
+                                    )
+                                },
                                 alwaysShowLabel = true,
+                                modifier = Modifier.testTag(tab.testTag),
                                 colors = NavigationRailItemDefaults.colors(
-                                    selectedIconColor = Color(0xFF171717),
-                                    selectedTextColor = AppUiColors.Gold,
-                                    unselectedIconColor = AppUiColors.GithubSecondary,
-                                    unselectedTextColor = AppUiColors.GithubSecondary,
-                                    indicatorColor = AppUiColors.Gold
+                                    selectedIconColor = MaterialTheme.colorScheme.onPrimary,
+                                    selectedTextColor = MaterialTheme.colorScheme.primary,
+                                    unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    indicatorColor = MaterialTheme.colorScheme.primary
                                 )
                             )
                         }
                     }
                 }
+
                 Scaffold(
                     modifier = Modifier.weight(1f),
-                    containerColor = AppUiColors.GithubBg,
+                    containerColor = MaterialTheme.colorScheme.background,
+                    contentWindowInsets = if (useNavigationRail) {
+                        WindowInsets.safeDrawing.only(WindowInsetsSides.Vertical + WindowInsetsSides.End)
+                    } else {
+                        WindowInsets.safeDrawing
+                    },
+                    snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
                     bottomBar = {
-                        if (!useNavigationRail) {
+                        if (!useNavigationRail && isTopLevelDestination) {
                             NavigationBar(
-                                containerColor = AppUiColors.Header,
-                                contentColor = AppUiColors.Gold,
+                                containerColor = AppTheme.colors.headerContainer,
+                                contentColor = MaterialTheme.colorScheme.primary,
                                 tonalElevation = 3.dp
                             ) {
-                                Tab.entries.forEach { t ->
+                                AppTab.entries.forEach { tab ->
+                                    val selected = isTabSelected(tab)
                                     NavigationBarItem(
-                                        selected = tab == t,
-                                        onClick = { selectTab(t) },
-                                        icon = { Icon(t.icon, contentDescription = null) },
-                                        label = { Text(t.label, fontSize = 11.sp, maxLines = 1, fontWeight = if (tab == t) androidx.compose.ui.text.font.FontWeight.SemiBold else androidx.compose.ui.text.font.FontWeight.Medium) },
+                                        selected = selected,
+                                        onClick = { navigateToTab(tab) },
+                                        icon = { Icon(tab.icon, contentDescription = null) },
+                                        label = {
+                                            Text(
+                                                text = tab.label,
+                                                style = MaterialTheme.typography.labelMedium,
+                                                fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
+                                                maxLines = 1
+                                            )
+                                        },
                                         alwaysShowLabel = true,
+                                        modifier = Modifier.testTag(tab.testTag),
                                         colors = NavigationBarItemDefaults.colors(
-                                            selectedIconColor = Color(0xFF171717),
-                                            selectedTextColor = AppUiColors.Gold,
-                                            unselectedIconColor = AppUiColors.GithubSecondary,
-                                            unselectedTextColor = AppUiColors.GithubSecondary,
-                                            indicatorColor = AppUiColors.Gold
+                                            selectedIconColor = MaterialTheme.colorScheme.onPrimary,
+                                            selectedTextColor = MaterialTheme.colorScheme.primary,
+                                            unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                            unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                            indicatorColor = MaterialTheme.colorScheme.primary
                                         )
                                     )
                                 }
@@ -257,113 +307,172 @@ private fun MLBBPlusApp(onLaunchWidget: (String, String) -> Unit) {
                         }
                     }
                 ) { padding ->
-                    Box(Modifier.fillMaxSize().padding(padding).background(AppUiColors.GithubBg)) {
-                        val contentKey = when (tab) {
-                            Tab.HEROES -> if (selectedHero == null) "heroes-list" else "hero-detail"
-                            Tab.ITEMS -> if (selectedItem == null) "items-list" else "item-detail"
-                            else -> tab.name
+                    NavHost(
+                        navController = navController,
+                        startDestination = AppRoute.HomeRoute,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(padding)
+                            .consumeWindowInsets(padding),
+                        enterTransition = {
+                            fadeIn(animationSpec = tween(AppDimens.MotionFastMs))
+                        },
+                        exitTransition = {
+                            fadeOut(animationSpec = tween(AppDimens.MotionFastMs))
+                        },
+                        popEnterTransition = {
+                            fadeIn(animationSpec = tween(AppDimens.MotionFastMs))
+                        },
+                        popExitTransition = {
+                            fadeOut(animationSpec = tween(AppDimens.MotionFastMs))
                         }
-                        saveableStateHolder.SaveableStateProvider(contentKey) {
-                when (tab) {
-                    Tab.HOME -> HomeScreen(
-                        selectedRole = selectedRole,
-                        onRoleChange = { selectedRole = it },
-                        selectedRoleType = selectedRoleType,
-                        onRoleTypeChange = { selectedRoleType = it },
-                        overlayGranted = overlayGranted,
-                        overlayRunning = overlayRunning,
-                        onLaunchWidget = { onLaunchWidget(selectedRole, selectedRoleType) },
-                        // onOpenHeroes / onOpenItems / onOpenPatchNotes removed with the
-                        // Home Quick Actions row and CURRENT META banner (2026-11-27):
-                        // the navigation bar / rail already reaches every section.
-                        onHeroClick = { heroId ->
-                            selectedHero = GameData.heroesById[heroId]
-                            heroReturnTab = Tab.HOME
-                            tab = Tab.HEROES
-                        }
-                    )
-                    Tab.HEROES -> {
-                        val hero = selectedHero
-                        if (hero == null) {
-                            HeroesScreen(onHeroClick = {
-                                selectedHero = it
-                                heroReturnTab = Tab.HEROES
-                            })
-                        } else {
-                            HeroDetailScreen(
-                                hero = hero,
-                                onBack = {
-                                    selectedHero = null
-                                    // FIX [6]: go back to where we came from.
-                                    heroReturnTab?.let { tab = it }
-                                    heroReturnTab = null
+                    ) {
+                        composable<AppRoute.HomeRoute> {
+                            HomeScreen(
+                                selectedRole = uiState.selectedRole,
+                                onRoleChange = { viewModel.selectRole(it, ctx) },
+                                selectedRoleType = uiState.selectedRoleType,
+                                onRoleTypeChange = { viewModel.selectRoleType(it, ctx) },
+                                overlayGranted = uiState.overlayGranted,
+                                overlayRunning = uiState.overlayRunning,
+                                onLaunchWidget = {
+                                    val started = onLaunchWidget(uiState.selectedRole, uiState.selectedRoleType)
+                                    if (started) {
+                                        viewModel.refreshOverlayState(granted = true, running = true)
+                                    }
+                                    coroutineScope.launch {
+                                        snackbarHostState.showSnackbar(
+                                            if (started) overlayRunningMsg else overlayPermissionMsg
+                                        )
+                                    }
                                 },
-                                onHeroClick = { selectedHero = it }
+                                onHeroClick = { heroId ->
+                                    if (GameData.heroesById.containsKey(heroId)) {
+                                        navController.navigate(AppRoute.HeroDetailRoute(heroId))
+                                    }
+                                }
                             )
                         }
-                    }
-                    Tab.ITEMS -> {
-                        val item = selectedItem
-                        if (item == null) ItemsScreen(onItemClick = { selectedItem = it })
-                        else ItemDetailScreen(
-                            item = item,
-                            onBack = { selectedItem = null },
-                            onItemClick = { selectedItem = it },
-                            onHeroClick = {
-                                // Keep selectedItem so Back from HeroDetail
-                                // can return to this ItemDetail.
-                                selectedHero = it
-                                heroReturnTab = Tab.ITEMS
-                                tab = Tab.HEROES
-                            }
-                        )
-                    }
-                    Tab.PATCH -> PatchNotesScreen(
-                        onHeroClick = { heroId ->
-                            GameData.heroesById[heroId]?.let {
-                                selectedHero = it
-                                heroReturnTab = Tab.PATCH
-                                tab = Tab.HEROES
-                            }
-                        },
-                        onItemClick = { itemId ->
-                            GameData.itemsById[itemId]?.let {
-                                selectedItem = it
-                                tab = Tab.ITEMS
+
+                        composable<AppRoute.HeroesRoute> {
+                            HeroesScreen(
+                                onHeroClick = { hero ->
+                                    navController.navigate(AppRoute.HeroDetailRoute(hero.id))
+                                }
+                            )
+                        }
+
+                        composable<AppRoute.HeroDetailRoute> { entry ->
+                            val route = entry.toRoute<AppRoute.HeroDetailRoute>()
+                            val hero = GameData.heroesById[route.heroId]
+                            if (hero != null) {
+                                HeroDetailScreen(
+                                    hero = hero,
+                                    onBack = { navController.popBackStack() },
+                                    onHeroClick = { target ->
+                                        navController.navigate(AppRoute.HeroDetailRoute(target.id))
+                                    },
+                                    onItemClick = { item ->
+                                        navController.navigate(AppRoute.ItemDetailRoute(item.id))
+                                    }
+                                )
+                            } else {
+                                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                                    EmptyState(
+                                        icon = AppIcons.Person,
+                                        titleRes = R.string.state_empty_title,
+                                        messageRes = R.string.state_empty_message,
+                                        actionLabelRes = R.string.action_back,
+                                        onAction = { navController.popBackStack() }
+                                    )
+                                }
                             }
                         }
-                    )
-                    Tab.SETTINGS -> SettingsScreen(
-                        overlayGranted = overlayGranted,
-                        // FIX [9]: do NOT set overlayGranted = true here.
-                        // SettingsScreen only calls this with true as a
-                        // request to open system settings. The ON_RESUME
-                        // observer above re-reads the real permission
-                        // when the user returns. Setting it here would
-                        // show READY before the user grants.
-                        onOverlayGrantedChange = { wanted ->
-                            if (wanted) {
-                                ctx.startActivity(
-                                    Intent(
-                                        Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-                                        Uri.parse("package:${ctx.packageName}")
-                                    )
+
+                        composable<AppRoute.ItemsRoute> {
+                            ItemsScreen(
+                                onItemClick = { item ->
+                                    navController.navigate(AppRoute.ItemDetailRoute(item.id))
+                                }
+                            )
+                        }
+
+                        composable<AppRoute.ItemDetailRoute> { entry ->
+                            val route = entry.toRoute<AppRoute.ItemDetailRoute>()
+                            val item = GameData.itemsById[route.itemId]
+                            if (item != null) {
+                                ItemDetailScreen(
+                                    item = item,
+                                    onBack = { navController.popBackStack() },
+                                    onItemClick = { target ->
+                                        navController.navigate(AppRoute.ItemDetailRoute(target.id))
+                                    },
+                                    onHeroClick = { hero ->
+                                        navController.navigate(AppRoute.HeroDetailRoute(hero.id))
+                                    }
                                 )
+                            } else {
+                                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                                    EmptyState(
+                                        icon = AppIcons.Apps,
+                                        titleRes = R.string.state_empty_title,
+                                        messageRes = R.string.state_empty_message,
+                                        actionLabelRes = R.string.action_back,
+                                        onAction = { navController.popBackStack() }
+                                    )
+                                }
                             }
-                            // OFF is never forwarded by SettingsScreen -
-                            // system permission cannot be revoked by a Switch.
-                        },
-                        autoStartLastRole = autoStartLastRole,
-                        onAutoStartChange = { value ->
-                            autoStartLastRole = value
-                            ctx.getSharedPreferences("mlbb_plus_prefs", Context.MODE_PRIVATE)
-                                .edit().putBoolean("auto_start_last_role", value).apply()
-                        },
-                        onOpenHeroes = { selectTab(Tab.HEROES) },
-                        onOpenItems = { selectTab(Tab.ITEMS) },
-                        onOpenPatchNotes = { selectTab(Tab.PATCH) }
-                    )
-                }
+                        }
+
+                        composable<AppRoute.PatchRoute> {
+                            PatchNotesScreen(
+                                onHeroClick = { heroId ->
+                                    if (GameData.heroesById.containsKey(heroId)) {
+                                        navController.navigate(AppRoute.HeroDetailRoute(heroId))
+                                    }
+                                },
+                                onItemClick = { itemId ->
+                                    if (GameData.itemsById.containsKey(itemId)) {
+                                        navController.navigate(AppRoute.ItemDetailRoute(itemId))
+                                    }
+                                }
+                            )
+                        }
+
+                        composable<AppRoute.SettingsRoute> {
+                            SettingsScreen(
+                                overlayGranted = uiState.overlayGranted,
+                                onOverlayGrantedChange = { wanted ->
+                                    if (wanted) {
+                                        ctx.startActivity(
+                                            Intent(
+                                                Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                                                "package:${ctx.packageName}".toUri()
+                                            )
+                                        )
+                                    }
+                                },
+                                autoStartLastRole = uiState.autoStartLastRole,
+                                onAutoStartChange = { enabled ->
+                                    viewModel.setAutoStartLastRole(enabled, ctx)
+                                },
+                                onOpenKnowledgeBase = {
+                                    navController.navigate(AppRoute.KnowledgeBaseRoute)
+                                }
+                            )
+                        }
+
+                        composable<AppRoute.KnowledgeBaseRoute> {
+                            KnowledgeBaseScreen(
+                                onBack = { navController.popBackStack() },
+                                onNavigate = { target ->
+                                    when (target) {
+                                        KnowledgeActionTarget.HEROES -> navigateToTab(AppTab.HEROES)
+                                        KnowledgeActionTarget.ITEMS -> navigateToTab(AppTab.ITEMS)
+                                        KnowledgeActionTarget.PATCH -> navigateToTab(AppTab.PATCH)
+                                    }
+                                }
+                            )
                         }
                     }
                 }

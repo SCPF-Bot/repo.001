@@ -1,7 +1,7 @@
 package com.mlbb.plus.ui.screens
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -9,27 +9,25 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -39,46 +37,35 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
-import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import com.mlbb.plus.ui.components.AppHeader
+import com.mlbb.plus.R
 import com.mlbb.plus.ui.components.AppIcons
-import com.mlbb.plus.ui.components.BarDivider
-import com.mlbb.plus.ui.components.CompactDropdown
-import com.mlbb.plus.ui.components.CompactSearchBox
-import com.mlbb.plus.ui.components.DetailBackBar
-import com.mlbb.plus.ui.components.FilterBarCount
-import com.mlbb.plus.ui.components.FilterBarLabel
-import com.mlbb.plus.ui.components.OneBarFilter
-import com.mlbb.plus.ui.components.SubHeading
+import com.mlbb.plus.ui.components.AppSearchBar
+import com.mlbb.plus.ui.components.AppTextButton
+import com.mlbb.plus.ui.components.AppTopBar
+import com.mlbb.plus.ui.components.EmptyState
 import com.mlbb.plus.ui.components.TierBadge
 import com.mlbb.plus.ui.model.GameData
 import com.mlbb.plus.ui.model.Hero
-import com.mlbb.plus.ui.theme.AppUiColors
+import com.mlbb.plus.ui.theme.AppDimens
+import com.mlbb.plus.ui.theme.AppShapes
 
-private enum class HeroTab { OVERVIEW, COUNTERS, SYNERGIES }
-private enum class HeroSort { RECOMMENDED, WIN_RATE, NAME }
-
-private fun tierColor(tier: String): Color {
-    val t = tier.trim().uppercase()
-    return when {
-        t.startsWith("S") -> AppUiColors.TierS
-        t.startsWith("A") -> AppUiColors.TierA
-        t.startsWith("B") -> AppUiColors.TierB
-        else -> AppUiColors.GithubSecondary
-    }
+private enum class HeroSort(val label: String) {
+    RECOMMENDED("Recommended"),
+    WIN_RATE("Win rate"),
+    NAME("Name")
 }
 
-private fun normalizedTier(tier: String): String {
+internal fun normalizedHeroTier(tier: String): String {
     val t = tier.trim().uppercase()
     return when {
         t.startsWith("S+") -> "S+"
@@ -89,21 +76,14 @@ private fun normalizedTier(tier: String): String {
     }
 }
 
-private fun tierRank(tier: String): Int {
-    return when (normalizedTier(tier)) {
-        "S+" -> 0
-        "S" -> 1
-        "A" -> 2
-        "B" -> 3
-        else -> 4
-    }
+private fun tierRank(tier: String): Int = when (normalizedHeroTier(tier)) {
+    "S+" -> 0
+    "S" -> 1
+    "A" -> 2
+    "B" -> 3
+    else -> 4
 }
 
-// The removed `onItemClick` parameter was never read here and no caller ever supplied
-// it: the list screen renders hero cards only, and item links live in HeroDetailScreen
-// (which keeps its own onItemClick). An accepted-but-unwired callback is a silent
-// no-op trap — the same defect class as the detail screens accepting `onBack` without
-// rendering it. Flagged by detekt UnusedParameter (2026-11-27 lint scan).
 @Composable
 fun HeroesScreen(
     onHeroClick: (Hero) -> Unit = {}
@@ -112,6 +92,7 @@ fun HeroesScreen(
     var selectedRole by rememberSaveable { mutableStateOf("All") }
     var selectedTier by rememberSaveable { mutableStateOf("All") }
     var sort by rememberSaveable { mutableStateOf(HeroSort.RECOMMENDED) }
+    var sortMenuExpanded by remember { mutableStateOf(false) }
 
     val allHeroes = remember { GameData.liveHeroes }
 
@@ -136,7 +117,7 @@ fun HeroesScreen(
                 hero.role.equals(selectedRole, ignoreCase = true) ||
                 hero.secondaryRole?.equals(selectedRole, ignoreCase = true) == true
             val matchesTier = selectedTier == "All" ||
-                normalizedTier(hero.tier) == selectedTier
+                normalizedHeroTier(hero.tier) == selectedTier
             matchesQuery && matchesRole && matchesTier
         }
         when (sort) {
@@ -148,382 +129,252 @@ fun HeroesScreen(
         }
     }
 
-    // Short patch — displayVersion can carry a data stamp ("2.2.23-tier-2026-11-23"),
-    // which wrapped the subtitle to 2 lines. shortVersion -> "2.2.23".
+    val hasFilters = query.isNotBlank() || selectedRole != "All" ||
+        selectedTier != "All" || sort != HeroSort.RECOMMENDED
+
+    fun clearFilters() {
+        query = ""
+        selectedRole = "All"
+        selectedTier = "All"
+        sort = HeroSort.RECOMMENDED
+    }
+
     val shortPatch = GameData.patchNotes.shortVersion
 
-    Column(Modifier.fillMaxSize().background(AppUiColors.GithubBg)) {
-        AppHeader("HERO EXPLORER", "Patch $shortPatch • ${filtered.size} heroes", AppIcons.Person)
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+    ) {
+        AppTopBar(
+            title = "Hero Explorer",
+            subtitle = "Patch $shortPatch • ${filtered.size} heroes",
+            leadingIcon = AppIcons.Person
+        )
+
         Column(
-            Modifier.fillMaxSize().widthIn(max = 960.dp).align(Alignment.CenterHorizontally)
-                .padding(horizontal = 16.dp, vertical = 8.dp),
-            verticalArrangement = Arrangement.spacedBy(6.dp)
+            modifier = Modifier
+                .weight(1f)
+                .widthIn(max = AppDimens.MaxContentWidth)
+                .fillMaxWidth()
+                .align(Alignment.CenterHorizontally)
+                .padding(horizontal = AppDimens.Space16, vertical = AppDimens.Space12),
+            verticalArrangement = Arrangement.spacedBy(AppDimens.Space8)
         ) {
-            // ONE BAR — search | Filter by [role] [tier] | Sort by [sort]
-            // Single 52dp container from UiKit.kt (ui/components).
-            // The Row INSIDE scrolls horizontally, so on a 360dp phone the bar
-            // is wider than the screen but nothing is clipped.
-            // Was: 160dp SearchField + 3 CompactDropdowns + ✕ Box in a bare Row.
-            val hasHeroFilters = query.isNotBlank() || selectedRole != "All" ||
-                selectedTier != "All" || sort != HeroSort.RECOMMENDED
-            val sortLabels = mapOf(
-                HeroSort.RECOMMENDED to "Recommended",
-                HeroSort.WIN_RATE to "Win rate",
-                HeroSort.NAME to "Name"
+            AppSearchBar(
+                query = query,
+                onQueryChange = { query = it },
+                placeholderRes = R.string.search_heroes_hint,
+                modifier = Modifier.testTag("heroes_search_input")
             )
-            OneBarFilter {
-                    CompactSearchBox(query, { query = it }, "Search heroes")
-                    BarDivider()
-                    FilterBarLabel("Filter by")
-                    CompactDropdown(
-                        display = selectedRole,
-                        options = roles,
-                        displayFor = { it },
-                        onSelect = { selectedRole = it }
+
+            // Role FilterChips
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .horizontalScroll(rememberScrollState()),
+                horizontalArrangement = Arrangement.spacedBy(AppDimens.Space8),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                roles.forEach { role ->
+                    val selected = selectedRole == role
+                    FilterChip(
+                        selected = selected,
+                        onClick = { selectedRole = role },
+                        label = { Text(role, style = MaterialTheme.typography.labelMedium) },
+                        modifier = Modifier
+                            .heightIn(min = AppDimens.TouchTargetMin)
+                            .testTag("hero_role_chip_${role.lowercase()}"),
+                        colors = FilterChipDefaults.filterChipColors(
+                            selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                            selectedLabelColor = MaterialTheme.colorScheme.primary
+                        )
                     )
-                    CompactDropdown(
-                        display = selectedTier,
-                        options = tiers,
-                        displayFor = { it },
-                        onSelect = { selectedTier = it }
-                    )
-                    if (hasHeroFilters) {
-                        TextButton(
-                            onClick = {
-                                query = ""
-                                selectedRole = "All"
-                                selectedTier = "All"
-                                sort = HeroSort.RECOMMENDED
-                            },
-                            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp),
-                            modifier = Modifier.height(40.dp)
-                        ) {
-                            Text("Clear", color = AppUiColors.Gold, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
-                        }
-                    }
+                }
             }
+
+            // Tier FilterChips
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .horizontalScroll(rememberScrollState()),
+                horizontalArrangement = Arrangement.spacedBy(AppDimens.Space6),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                tiers.forEach { tier ->
+                    val selected = selectedTier == tier
+                    FilterChip(
+                        selected = selected,
+                        onClick = { selectedTier = tier },
+                        label = {
+                            Text(
+                                text = if (tier == "All") "All Tiers" else "Tier $tier",
+                                style = MaterialTheme.typography.labelMedium
+                            )
+                        },
+                        modifier = Modifier
+                            .heightIn(min = AppDimens.TouchTargetMin)
+                            .testTag("hero_tier_chip_${tier.lowercase()}"),
+                        colors = FilterChipDefaults.filterChipColors(
+                            selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                            selectedLabelColor = MaterialTheme.colorScheme.primary
+                        )
+                    )
+                }
+            }
+
+            // Count + Sort + Clear row
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                FilterBarCount("${filtered.size} of ${allHeroes.size} heroes")
+                Text(
+                    text = "${filtered.size} of ${allHeroes.size} heroes",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+
                 Row(
-                    horizontalArrangement = Arrangement.spacedBy(6.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(AppDimens.Space4)
                 ) {
-                    FilterBarLabel("Sort by")
-                    CompactDropdown(
-                        display = sortLabels[sort] ?: "Recommended",
-                        options = sortLabels.values.toList(),
-                        displayFor = { it },
-                        compact = true,
-                        onSelect = { label ->
-                            sort = sortLabels.entries.first { it.value == label }.key
+                    if (hasFilters) {
+                        AppTextButton(
+                            onClick = ::clearFilters,
+                            modifier = Modifier.testTag("heroes_clear_filters")
+                        ) {
+                            Text(
+                                text = stringResource(R.string.action_clear),
+                                color = MaterialTheme.colorScheme.primary
+                            )
                         }
-                    )
+                    }
+
+                    Box {
+                        AppTextButton(
+                            onClick = { sortMenuExpanded = true },
+                            modifier = Modifier.testTag("heroes_sort_button")
+                        ) {
+                            Icon(
+                                imageVector = AppIcons.Sort,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(AppDimens.IconSizeSmall)
+                            )
+                            Text(
+                                text = " ${sort.label}",
+                                style = MaterialTheme.typography.labelLarge,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
+                        DropdownMenu(
+                            expanded = sortMenuExpanded,
+                            onDismissRequest = { sortMenuExpanded = false }
+                        ) {
+                            HeroSort.entries.forEach { option ->
+                                DropdownMenuItem(
+                                    text = {
+                                        Text(
+                                            text = option.label,
+                                            fontWeight = if (sort == option) FontWeight.Bold else FontWeight.Normal,
+                                            color = if (sort == option) MaterialTheme.colorScheme.primary
+                                            else MaterialTheme.colorScheme.onSurface
+                                        )
+                                    },
+                                    onClick = {
+                                        sort = option
+                                        sortMenuExpanded = false
+                                    }
+                                )
+                            }
+                        }
+                    }
                 }
             }
 
-        // PHONE-PROOF GRID — GridCells.Fixed(5), NEVER Adaptive.
-        // Adaptive gave 3 columns -> ~102dp portraits (screenshot).
-        // Fixed(5) -> ~62dp portraits on a 360dp phone. weight(1f) gives
-        // the grid ALL remaining height after the one-bar filter.
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(5),
-            contentPadding = PaddingValues(vertical = 4.dp),
-            horizontalArrangement = Arrangement.spacedBy(4.dp),
-            verticalArrangement = Arrangement.spacedBy(6.dp),
-            modifier = Modifier.fillMaxWidth().weight(1f)
-        ) {
-            items(filtered, key = { it.id }) { hero ->
-                Column(
+            if (filtered.isEmpty()) {
+                Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable { onHeroClick(hero) },
-                    horizontalAlignment = Alignment.CenterHorizontally
+                        .weight(1f),
+                    contentAlignment = Alignment.Center
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .aspectRatio(1f)
-                            .clip(RoundedCornerShape(8.dp))
-                            .background(AppUiColors.GithubCard)
-                            .border(1.dp, AppUiColors.GithubBorder, RoundedCornerShape(8.dp))
-                    ) {
-                        AssetImage(
-                            hero = hero,
-                            modifier = Modifier.fillMaxSize(),
-                            contentScale = ContentScale.Crop,
-                            contentDescription = hero.name
-                        )
-                        TierBadge(hero.tier, Modifier.align(Alignment.TopStart).padding(4.dp))
-                    }
-                    Text(
-                        text = hero.name,
-                        color = AppUiColors.GithubText,
-                        fontSize = 10.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.padding(top = 2.dp)
+                    EmptyState(
+                        icon = AppIcons.Person,
+                        titleRes = R.string.state_no_results_title,
+                        messageRes = R.string.state_no_heroes_message,
+                        actionLabelRes = if (hasFilters) R.string.action_clear_filters else null,
+                        onAction = if (hasFilters) ::clearFilters else null
                     )
                 }
+            } else {
+                LazyVerticalGrid(
+                    columns = GridCells.Adaptive(minSize = 72.dp),
+                    contentPadding = PaddingValues(vertical = AppDimens.Space4),
+                    horizontalArrangement = Arrangement.spacedBy(AppDimens.Space8),
+                    verticalArrangement = Arrangement.spacedBy(AppDimens.Space10),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f)
+                ) {
+                    items(filtered, key = { it.id }) { hero ->
+                        HeroGridTile(hero = hero, onClick = { onHeroClick(hero) })
+                    }
+                }
             }
-        }
         }
     }
 }
 
 @Composable
-fun HeroDetailScreen(
-    hero: Hero,
-    onBack: () -> Unit = {},
-    onHeroClick: (Hero) -> Unit = {},
-    onItemClick: (com.mlbb.plus.ui.model.Item) -> Unit = {}
-) {
-    // Reset tab when hero changes
-    var selectedTab by remember(hero.id) { mutableStateOf(HeroTab.OVERVIEW) }
-
-    val counters = remember(hero.id) {
-        hero.goodAgainst.mapNotNull { GameData.heroesById[it] }
-    }
-    val badMatchups = remember(hero.id) { hero.badAgainst.mapNotNull { GameData.heroesById[it] } }
-    val synergies = remember(hero.id) {
-        hero.goodWith.mapNotNull { GameData.heroesById[it] }
-    }
-    val coreBuild = remember(hero.id, hero.coreItems) {
-        hero.coreItems.filter { buildItem -> buildItem.itemId != 0 }
-    }
-
+private fun HeroGridTile(hero: Hero, onClick: () -> Unit) {
     Column(
         modifier = Modifier
-            .fillMaxSize()
-            .background(AppUiColors.GithubBg)
-            .verticalScroll(rememberScrollState())
-            .padding(12.dp)
+            .fillMaxWidth()
+            .clip(AppShapes.Card)
+            .semantics { role = Role.Button }
+            .clickable(onClick = onClick)
+            .padding(AppDimens.Space2)
+            .testTag("hero_card_${hero.id}"),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Redesign fix: onBack was accepted but never rendered —
-        // users had to discover system Back. Visible back bar now.
-        DetailBackBar(label = hero.name, onBack = onBack)
-        Spacer(modifier = Modifier.height(12.dp))
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Box(
-                modifier = Modifier
-                    .size(72.dp)
-                    .clip(RoundedCornerShape(12.dp))
-            ) {
-                AssetImage(hero = hero, modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop, contentDescription = hero.name)
-            }
-            Spacer(modifier = Modifier.width(12.dp))
-            Column {
-                Text(hero.name, color = AppUiColors.GithubText, fontSize = 20.sp, fontWeight = FontWeight.Bold)
-                Text(hero.title, color = AppUiColors.GithubSecondary, fontSize = 13.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                Text(
-                    text = "${hero.displayRole} • ${hero.lane} • Tier ${normalizedTier(hero.tier)} • ${(hero.winRate * 100).let { "%.1f".format(it) }}% WR",
-                    color = tierColor(hero.tier),
-                    fontSize = 12.sp
-                )
-                if (hero.tierUpdated.isNotBlank()) {
-                    Text("Meta snapshot ${hero.tierUpdated}", color = AppUiColors.GithubSecondary, fontSize = 10.sp)
-                }
-            }
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            modifier = Modifier.horizontalScroll(rememberScrollState())
+        Surface(
+            modifier = Modifier
+                .fillMaxWidth()
+                .aspectRatio(1f),
+            shape = AppShapes.Card,
+            color = MaterialTheme.colorScheme.surfaceContainer,
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
         ) {
-            HeroTab.values().forEach { tab ->
-                val selected = tab == selectedTab
-                Box(
+            Box(Modifier.fillMaxSize()) {
+                AssetImage(
+                    hero = hero,
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop,
+                    contentDescription = hero.name
+                )
+                TierBadge(
+                    tier = hero.tier,
                     modifier = Modifier
-                        .semantics { role = Role.Tab; this.selected = selected }
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(if (selected) AppUiColors.GoldBg else AppUiColors.GithubCard)
-                        .clickable { selectedTab = tab }
-                        .padding(horizontal = 14.dp, vertical = 8.dp)
-                ) {
-                    Text(tab.name, color = if (selected) AppUiColors.Gold else AppUiColors.GithubText, fontSize = 13.sp, fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal)
-                }
+                        .align(Alignment.TopStart)
+                        .padding(AppDimens.Space4)
+                )
             }
         }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        when (selectedTab) {
-            HeroTab.OVERVIEW -> {
-                val loreText = hero.loreFirstParagraph.ifBlank { hero.lore }
-                if (loreText.isNotBlank()) {
-                    SubHeading("HERO LORE")
-                    Spacer(modifier = Modifier.height(6.dp))
-                    Text(loreText, color = AppUiColors.GithubText, fontSize = 12.sp, lineHeight = 18.sp)
-                    Text("Source: Mobile Legends Wiki (Fandom)", color = AppUiColors.GithubSecondary, fontSize = 10.sp)
-                    Spacer(modifier = Modifier.height(12.dp))
-                }
-                if (hero.specialty.isNotEmpty()) {
-                    SubHeading("SPECIALTY")
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .horizontalScroll(rememberScrollState())
-                            .padding(vertical = 8.dp),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        hero.specialty.forEach { s ->
-                            Box(
-                                modifier = Modifier
-                                    .clip(RoundedCornerShape(12.dp))
-                                    .background(AppUiColors.GithubCard)
-                                    .padding(horizontal = 10.dp, vertical = 6.dp)
-                            ) { Text(s, color = AppUiColors.GithubText, fontSize = 12.sp) }
-                        }
-                    }
-                }
-                if (hero.recommendedSpells.isNotEmpty()) {
-                    SubHeading("SPELLS")
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .horizontalScroll(rememberScrollState())
-                            .padding(vertical = 8.dp),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        hero.recommendedSpells.forEach { s ->
-                            Box(
-                                modifier = Modifier
-                                    .clip(RoundedCornerShape(12.dp))
-                                    .background(AppUiColors.GithubCard)
-                                    .padding(horizontal = 10.dp, vertical = 6.dp)
-                            ) { Text(s, color = AppUiColors.GithubText, fontSize = 12.sp) }
-                        }
-                    }
-                }
-                if (coreBuild.isNotEmpty()) {
-                    SubHeading("CORE BUILD")
-                    Spacer(modifier = Modifier.height(8.dp))
-                    coreBuild.forEach { build ->
-                        val item = GameData.itemsById[build.itemId]
-                            ?: GameData.items.firstOrNull { it.name.equals(build.name.trim(), ignoreCase = true) }
-                        if (item != null) {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clip(RoundedCornerShape(10.dp))
-                                    .background(AppUiColors.GithubCard)
-                                    .clickable { onItemClick(item) }
-                                    .padding(10.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Box(modifier = Modifier.size(40.dp).clip(RoundedCornerShape(8.dp))) {
-                                    AssetImage(item = item, modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop, contentDescription = item.name)
-                                }
-                                Spacer(modifier = Modifier.width(10.dp))
-                                Column {
-                                    Text(item.name, color = AppUiColors.GithubText, fontSize = 14.sp)
-                                    Text("${item.price} Gold", color = AppUiColors.Gold, fontSize = 12.sp)
-                                }
-                            }
-                            Spacer(modifier = Modifier.height(8.dp))
-                        }
-                    }
-                }
-            }
-            HeroTab.COUNTERS -> {
-                SubHeading("WORKS AGAINST")
-                Spacer(modifier = Modifier.height(8.dp))
-                if (counters.isEmpty()) {
-                    Text("No counter data in heroes.json", color = AppUiColors.GithubSecondary, fontSize = 13.sp)
-                } else {
-                    LazyRow(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                        items(counters, key = { it.id }) { counter ->
-                            Column(
-                                modifier = Modifier
-                                    .width(56.dp)
-                                    .clickable { onHeroClick(counter) },
-                                horizontalAlignment = Alignment.CenterHorizontally
-                            ) {
-                                Box(modifier = Modifier.size(52.dp).clip(RoundedCornerShape(10.dp))) {
-                                    AssetImage(hero = counter, modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop, contentDescription = counter.name)
-                                }
-                                Text(counter.name, color = AppUiColors.GithubText, fontSize = 10.sp, maxLines = 1, overflow = TextOverflow.Ellipsis, textAlign = TextAlign.Center)
-                            }
-                        }
-                    }
-                }
-                Spacer(modifier = Modifier.height(14.dp))
-                SubHeading("BAD AGAINST")
-                Spacer(modifier = Modifier.height(8.dp))
-                if (badMatchups.isEmpty()) {
-                    Text("No bad-matchup data in heroes.json", color = AppUiColors.GithubSecondary, fontSize = 13.sp)
-                } else {
-                    LazyRow(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                        items(badMatchups, key = { it.id }) { counter ->
-                            Column(modifier = Modifier.width(56.dp).clickable { onHeroClick(counter) }, horizontalAlignment = Alignment.CenterHorizontally) {
-                                Box(modifier = Modifier.size(52.dp).clip(RoundedCornerShape(10.dp))) {
-                                    AssetImage(hero = counter, modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop, contentDescription = counter.name)
-                                }
-                                Text(counter.name, color = AppUiColors.GithubText, fontSize = 10.sp, maxLines = 1, overflow = TextOverflow.Ellipsis, textAlign = TextAlign.Center)
-                            }
-                        }
-                    }
-                }
-            }
-            HeroTab.SYNERGIES -> {
-                SubHeading("BEST PARTNERS")
-                Spacer(modifier = Modifier.height(8.dp))
-                if (synergies.isNotEmpty()) {
-                    LazyRow(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                        items(synergies, key = { it.id }) { partner ->
-                            Column(
-                                modifier = Modifier
-                                    .width(56.dp)
-                                    .clickable { onHeroClick(partner) },
-                                horizontalAlignment = Alignment.CenterHorizontally
-                            ) {
-                                Box(modifier = Modifier.size(52.dp).clip(RoundedCornerShape(10.dp))) {
-                                    AssetImage(hero = partner, modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop, contentDescription = partner.name)
-                                }
-                                Text(partner.name, color = AppUiColors.GithubText, fontSize = 10.sp, maxLines = 1, overflow = TextOverflow.Ellipsis, textAlign = TextAlign.Center)
-                            }
-                        }
-                    }
-                } else if (hero.bestPartners.isNotEmpty()) {
-                    val partnerNames = hero.bestPartners.mapNotNull { partnerId ->
-                        GameData.heroesById[partnerId]?.name
-                    }
-                    if (partnerNames.isNotEmpty()) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .horizontalScroll(rememberScrollState()),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            partnerNames.forEach { partnerName ->
-                                Box(
-                                    modifier = Modifier
-                                        .clip(RoundedCornerShape(12.dp))
-                                        .background(AppUiColors.GithubCard)
-                                        .padding(horizontal = 10.dp, vertical = 6.dp)
-                                ) { Text(partnerName, color = AppUiColors.GithubText, fontSize = 12.sp) }
-                            }
-                        }
-                    } else {
-                        Text("No synergy data in heroes.json", color = AppUiColors.GithubSecondary, fontSize = 13.sp)
-                    }
-                } else {
-                    Text("No synergy data in heroes.json", color = AppUiColors.GithubSecondary, fontSize = 13.sp)
-                }
-            }
-        }
+        Text(
+            text = hero.name,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurface,
+            fontWeight = FontWeight.SemiBold,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.padding(top = AppDimens.Space4)
+        )
     }
 }
 
-
-// Keep old name as alias if other files call it
 @Composable
 fun HeroesScreenContent(onHeroClick: (Hero) -> Unit = {}) {
     HeroesScreen(onHeroClick = onHeroClick)

@@ -1,0 +1,4 @@
+/build
+/libs/*.aar
+/libs/*.part
+/tts-models-cache

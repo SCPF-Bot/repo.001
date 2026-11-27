@@ -158,7 +158,7 @@ class WidgetOverlayService : Service() {
                         RoamGuideWidget(
                             role = currentRole,
                             roleType = currentRoleType,
-                            onBack = { JetOverlay.hide() },
+                            onBack = { stopSelf() },
                             voice = voice
                         )
                     }
@@ -285,7 +285,7 @@ class WidgetOverlayService : Service() {
         const val ACTION_VOICE_TOGGLE = "com.mlbb.plus.VOICE_TOGGLE"
         const val ACTION_VOICE_STOP = "com.mlbb.plus.VOICE_STOP"
 
-        var isRunning = false
+        var isRunning by mutableStateOf(false)
             internal set
 
         var currentRole by mutableStateOf("Roam")

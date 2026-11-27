@@ -1,34 +1,34 @@
 package com.mlbb.plus.ui.theme
 
 import android.os.Build
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Typography
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
 
 // ============================================================
-// Shared overlay theme: original deep-navy surfaces, gold accent, and monospace typography.
-//
-// Property names (Github*) are kept so every existing screen,
-// the overlay widget and the back-compat aliases keep compiling;
-// only the VALUES changed.
+// Shared overlay theme: deep-navy surfaces, gold accent, and
+// monospace numerals + sans-serif prose for in-match HUD.
 // ============================================================
 
 object MLBBPlusColors {
-    val GithubBg = Color(0xFF0B0C10)          // app background
-    val GithubCard = Color(0xFF1A1B2E)        // cards / panels (navy)
-    val GithubSurface = Color(0xFF25263F)     // raised chips, inputs
-    val GithubBorder = Color(0xFF2E3049)      // hairlines
+    val GithubBg = Color(0xFF0B0C10)
+    val GithubCard = Color(0xFF1A1B2E)
+    val GithubSurface = Color(0xFF25263F)
+    val GithubBorder = Color(0xFF2E3049)
     val GithubText = Color(0xFFEDEDF7)
     val GithubSecondary = Color(0xFF8B8EAA)
     val GithubDisabled = Color(0xFF8B8EAA)
 
-    val Header = Color(0xFF181A2D)            // title bars + bottom nav
+    val Header = Color(0xFF181A2D)
 
     val Gold = Color(0xFFFFD700)
     val GoldDark = Color(0xFFD4A900)
@@ -41,23 +41,19 @@ object MLBBPlusColors {
     val Teal = Color(0xFF2DD4BF)
     val BlueOld = Blue
 
-    // --- Tier colors ---
     val TierS = Gold
     val TierA = Blue
     val TierB = Color(0xFF8B8EAA)
 
-    // --- Patch type colors ---
     val PatchBuff = Green
     val PatchNerf = Red
     val PatchRevamp = Gold
     val PatchAdjust = GithubSecondary
     val PatchReversion = Orange
 
-    // --- Advanced Server ---
     val Advanced = Orange
     val AdvancedBg = Color(0xFFF59E0B).copy(alpha = 0.15f)
 
-    // --- Hero detail badges ---
     val OP = Gold
     val Meta = Green
 }
@@ -71,15 +67,15 @@ private val MLBBPlusTypography = Typography(
     headlineLarge = BaseType.headlineLarge.copy(fontFamily = Mono),
     headlineMedium = BaseType.headlineMedium.copy(fontFamily = Mono),
     headlineSmall = BaseType.headlineSmall.copy(fontFamily = Mono),
-    titleLarge = BaseType.titleLarge.copy(fontFamily = Mono),
-    titleMedium = BaseType.titleMedium.copy(fontFamily = Mono),
-    titleSmall = BaseType.titleSmall.copy(fontFamily = Mono),
-    bodyLarge = BaseType.bodyLarge.copy(fontFamily = Mono),
-    bodyMedium = BaseType.bodyMedium.copy(fontFamily = Mono),
-    bodySmall = BaseType.bodySmall.copy(fontFamily = Mono),
-    labelLarge = BaseType.labelLarge.copy(fontFamily = Mono),
-    labelMedium = BaseType.labelMedium.copy(fontFamily = Mono),
-    labelSmall = BaseType.labelSmall.copy(fontFamily = Mono)
+    titleLarge = BaseType.titleLarge.copy(fontFamily = FontFamily.SansSerif),
+    titleMedium = BaseType.titleMedium.copy(fontFamily = FontFamily.SansSerif),
+    titleSmall = BaseType.titleSmall.copy(fontFamily = FontFamily.SansSerif),
+    bodyLarge = BaseType.bodyLarge.copy(fontFamily = FontFamily.SansSerif),
+    bodyMedium = BaseType.bodyMedium.copy(fontFamily = FontFamily.SansSerif),
+    bodySmall = BaseType.bodySmall.copy(fontFamily = FontFamily.SansSerif),
+    labelLarge = BaseType.labelLarge.copy(fontFamily = FontFamily.SansSerif),
+    labelMedium = BaseType.labelMedium.copy(fontFamily = FontFamily.SansSerif),
+    labelSmall = BaseType.labelSmall.copy(fontFamily = FontFamily.SansSerif)
 )
 
 @Composable
@@ -105,7 +101,7 @@ fun MLBBPlusTheme(content: @Composable () -> Unit) {
     )
 }
 
-// Back-compat aliases - old files still compile.
+// Back-compat aliases
 val SurfaceDark = MLBBPlusColors.GithubBg
 val SurfaceCard = MLBBPlusColors.GithubCard
 val SurfaceMid = MLBBPlusColors.GithubCard
@@ -123,8 +119,7 @@ val MLBBBlue = MLBBPlusColors.Blue
 val TierSPlus = Color(0xFFFFE55C)
 val TierAPlus = Color(0xFF79B8FF)
 
-
-/** App-screen palette. Kept separate so the floating overlay retains its existing appearance. */
+/** Legacy dark-palette aliases kept only for backwards compatibility. */
 object AppUiColors {
     val GithubBg = Color(0xFF0B0E14)
     val GithubCard = Color(0xFF151B27)
@@ -157,13 +152,16 @@ object AppUiColors {
     val Meta = Green
 }
 
+object AppTheme {
+    val colors: AppExtendedColors
+        @Composable
+        @ReadOnlyComposable
+        get() = LocalAppExtendedColors.current
+}
+
 @Composable
 fun AppUiTheme(
-    // Default dark to preserve current behavior: screens still read
-    // AppUiColors.* directly (315 usages). Pass
-    // darkTheme = isSystemInDarkTheme() only after screens migrate
-    // to MaterialTheme.colorScheme — see docs/ux-redesign.md §4.
-    darkTheme: Boolean = true,
+    darkTheme: Boolean = isSystemInDarkTheme(),
     dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
@@ -171,8 +169,6 @@ fun AppUiTheme(
     val colorScheme = when {
         dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
             val dynamic = if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-            // Keep brand gold as primary so MLBB Plus stays recognizable;
-            // wallpaper tones flow through surfaces/containers only.
             if (darkTheme) {
                 dynamic.copy(primary = AppColorTokens.Gold, onPrimary = Color(0xFF171717))
             } else {
@@ -182,9 +178,12 @@ fun AppUiTheme(
         darkTheme -> AppDarkColorScheme
         else -> AppLightColorScheme
     }
-    MaterialTheme(
-        colorScheme = colorScheme,
-        typography = AppTypography,
-        content = content
-    )
+    val extendedColors = if (darkTheme) DarkExtendedColors else LightExtendedColors
+    CompositionLocalProvider(LocalAppExtendedColors provides extendedColors) {
+        MaterialTheme(
+            colorScheme = colorScheme,
+            typography = AppTypography,
+            content = content
+        )
+    }
 }

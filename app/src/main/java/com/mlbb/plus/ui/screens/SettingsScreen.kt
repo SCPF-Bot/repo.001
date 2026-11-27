@@ -1,23 +1,39 @@
 package com.mlbb.plus.ui.screens
 
-import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.*
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -25,29 +41,31 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.mlbb.plus.tts.VoiceGuideManager
 import com.mlbb.plus.tts.VoiceGuideSettings
 import com.mlbb.plus.tts.VoiceModel
 import com.mlbb.plus.tts.VoiceModelInstaller
+import com.mlbb.plus.ui.components.AppButton
+import com.mlbb.plus.ui.components.AppCard
 import com.mlbb.plus.ui.components.AppIcons
-import com.mlbb.plus.ui.components.DetailBackBar
-import com.mlbb.plus.ui.components.ScreenTitleBar
+import com.mlbb.plus.ui.components.AppOutlinedButton
+import com.mlbb.plus.ui.components.AppStatusBadge
+import com.mlbb.plus.ui.components.AppTextButton
+import com.mlbb.plus.ui.components.AppTopBar
 import com.mlbb.plus.ui.components.SectionLabel
 import com.mlbb.plus.ui.model.GameData
-import com.mlbb.plus.ui.model.KnowledgeActionTarget
-import com.mlbb.plus.ui.model.KnowledgeBaseData
-import com.mlbb.plus.ui.model.KnowledgeEntry
-import com.mlbb.plus.ui.theme.AppUiColors
+import com.mlbb.plus.ui.model.RoleTypes
+import com.mlbb.plus.ui.theme.AppDimens
+import com.mlbb.plus.ui.theme.AppShapes
+import com.mlbb.plus.ui.theme.AppTheme
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlin.math.abs
 
 @Composable
 fun SettingsScreen(
@@ -55,34 +73,27 @@ fun SettingsScreen(
     onOverlayGrantedChange: (Boolean) -> Unit,
     autoStartLastRole: Boolean,
     onAutoStartChange: (Boolean) -> Unit,
-    onOpenHeroes: () -> Unit = {},
-    onOpenItems: () -> Unit = {},
-    onOpenPatchNotes: () -> Unit = {}
+    onOpenKnowledgeBase: () -> Unit = {}
 ) {
-    var showKnowledgeBase by rememberSaveable { mutableStateOf(false) }
-
-    if (showKnowledgeBase) {
-        KnowledgeBaseView(
-            onBack = { showKnowledgeBase = false },
-            onNavigate = { target ->
-                when (target) {
-                    KnowledgeActionTarget.HEROES -> onOpenHeroes()
-                    KnowledgeActionTarget.ITEMS -> onOpenItems()
-                    KnowledgeActionTarget.PATCH -> onOpenPatchNotes()
-                }
-            }
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+    ) {
+        AppTopBar(
+            title = "Settings",
+            subtitle = "Overlay permissions, voice coach & data health",
+            leadingIcon = AppIcons.Settings
         )
-        return
-    }
-
-    Column(Modifier.fillMaxSize().background(AppUiColors.GithubBg)) {
-        ScreenTitleBar("SETTINGS", AppIcons.Settings)
         SettingsContent(
             overlayGranted = overlayGranted,
             onOverlayGrantedChange = onOverlayGrantedChange,
             autoStartLastRole = autoStartLastRole,
             onAutoStartChange = onAutoStartChange,
-            onOpenKnowledgeBase = { showKnowledgeBase = true }
+            onOpenKnowledgeBase = onOpenKnowledgeBase,
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxWidth()
         )
     }
 }
@@ -93,484 +104,146 @@ private fun SettingsContent(
     onOverlayGrantedChange: (Boolean) -> Unit,
     autoStartLastRole: Boolean,
     onAutoStartChange: (Boolean) -> Unit,
-    onOpenKnowledgeBase: () -> Unit
+    onOpenKnowledgeBase: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
+    val ext = AppTheme.colors
     Column(
-        Modifier.fillMaxSize().background(AppUiColors.GithubBg)
-            .verticalScroll(rememberScrollState()).padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+        modifier = modifier
+            .verticalScroll(rememberScrollState())
+            .padding(AppDimens.Space16),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        SectionLabel("FLOATING GUIDE")
         Column(
-            Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp))
-                .background(AppUiColors.GithubCard)
-                .border(1.dp, AppUiColors.GithubBorder, RoundedCornerShape(16.dp)).padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            modifier = Modifier
+                .widthIn(max = AppDimens.MaxContentWidth)
+                .fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(AppDimens.Space16)
         ) {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                Box(
-                    Modifier.size(38.dp).clip(RoundedCornerShape(11.dp))
-                        .background((if (overlayGranted) AppUiColors.Green else AppUiColors.Orange).copy(alpha = 0.15f)),
-                    contentAlignment = Alignment.Center
+            SectionLabel("FLOATING GUIDE")
+            AppCard {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(AppDimens.Space12)
+                ) {
+                    val statusTint = if (overlayGranted) ext.success else ext.warning
+                    Box(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .clip(AppShapes.Card)
+                            .background(statusTint.copy(alpha = 0.16f)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = if (overlayGranted) AppIcons.CheckCircle else AppIcons.Warning,
+                            contentDescription = null,
+                            tint = statusTint
+                        )
+                    }
+                    Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(AppDimens.Space2)) {
+                        Text(
+                            text = if (overlayGranted) "Permission is enabled" else "Permission is needed",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Text(
+                            text = if (overlayGranted) {
+                                "The floating guide is allowed to appear over other apps."
+                            } else {
+                                "Android needs your permission before the guide can appear over Mobile Legends."
+                            },
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+                AppButton(
+                    onClick = { onOverlayGrantedChange(true) },
+                    modifier = Modifier.testTag("settings_overlay_permission_button")
                 ) {
                     Text(
-                        if (overlayGranted) "✓" else "!",
-                        color = if (overlayGranted) AppUiColors.Green else AppUiColors.Orange,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 18.sp
+                        text = if (overlayGranted) "Manage Android permission" else "Open Android settings",
+                        style = MaterialTheme.typography.labelLarge
                     )
                 }
-                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                    Text(
-                        if (overlayGranted) "Permission is enabled" else "Permission is needed",
-                        color = AppUiColors.GithubText,
-                        fontWeight = FontWeight.SemiBold,
-                        fontSize = 15.sp
-                    )
-                    Text(
-                        if (overlayGranted) "The floating guide is allowed to appear over other apps."
-                        else "Android needs your permission before the guide can appear over Mobile Legends.",
-                        color = AppUiColors.GithubSecondary,
-                        fontSize = 12.sp,
-                        lineHeight = 17.sp
-                    )
-                }
-            }
-            Button(
-                onClick = { onOverlayGrantedChange(true) },
-                modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = AppUiColors.Gold, contentColor = Color(0xFF171717)),
-                shape = RoundedCornerShape(12.dp)
-            ) {
-                Text(if (overlayGranted) "Manage Android permission" else "Open Android settings", fontWeight = FontWeight.Bold)
-            }
-            Text(
-                "On the next screen, find MLBB Plus and enable ‘Display over other apps’. You can return here afterward.",
-                color = AppUiColors.GithubSecondary,
-                fontSize = 11.sp,
-                lineHeight = 16.sp
-            )
-        }
-
-        SectionLabel("STARTUP")
-        SettingsRow(
-            title = "Start the guide when the app opens",
-            subtitle = "Automatically show your last selected position and playstyle when you open MLBB Plus. Requires overlay permission.",
-            checked = autoStartLastRole,
-            onChecked = onAutoStartChange
-        )
-
-        VoiceGuideSection()
-
-        SectionLabel("HELP")
-        Row(
-            Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp))
-                .background(AppUiColors.GithubCard)
-                .border(1.dp, AppUiColors.GithubBorder, RoundedCornerShape(16.dp))
-                .semantics { role = Role.Button }
-                .clickable { onOpenKnowledgeBase() }
-                .heightIn(min = 68.dp)
-                .padding(14.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Box(
-                Modifier.size(38.dp).clip(RoundedCornerShape(11.dp))
-                    .background(AppUiColors.Gold.copy(alpha = 0.15f)),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(AppIcons.Book, contentDescription = null, tint = AppUiColors.Gold, modifier = Modifier.size(20.dp))
-            }
-            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                Text("Help & Knowledge Base", color = AppUiColors.GithubText, fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
                 Text(
-                    "Meta, hero tiers, rotation, CC matrix, battle spell CDs & objective timers",
-                    color = AppUiColors.GithubSecondary,
-                    fontSize = 12.sp,
-                    lineHeight = 17.sp
+                    text = "On the next screen, find MLBB Plus and enable ‘Display over other apps’. Return here afterward.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
-            Icon(AppIcons.ChevronRight, contentDescription = null, tint = AppUiColors.Gold, modifier = Modifier.size(20.dp))
-        }
 
-        DataFilesSection()
-        Text("MLBB Plus v1.0", color = AppUiColors.GithubSecondary, fontSize = 12.sp)
-    }
-}
-
-@Composable
-private fun KnowledgeBaseView(
-    onBack: () -> Unit,
-    onNavigate: (KnowledgeActionTarget) -> Unit
-) {
-    val entries = KnowledgeBaseData.entries
-    var selectedId by rememberSaveable { mutableStateOf(entries.first().id) }
-    var mobileReading by rememberSaveable { mutableStateOf(false) }
-    val readerScroll = rememberScrollState()
-    val scope = rememberCoroutineScope()
-
-    val activeIndex = entries.indexOfFirst { it.id == selectedId }.let { if (it >= 0) it else 0 }
-    val activeEntry = entries[activeIndex]
-    val prevEntry = if (activeIndex > 0) entries[activeIndex - 1] else null
-    val nextEntry = if (activeIndex < entries.lastIndex) entries[activeIndex + 1] else null
-
-    fun selectTopic(id: String) {
-        selectedId = id
-        mobileReading = true
-        scope.launch { readerScroll.scrollTo(0) }
-    }
-
-    BoxWithConstraints(Modifier.fillMaxSize().background(AppUiColors.GithubBg)) {
-        val isWide = maxWidth >= 840.dp
-
-        BackHandler {
-            if (!isWide && mobileReading) {
-                mobileReading = false
-            } else {
-                onBack()
-            }
-        }
-
-        Column(Modifier.fillMaxSize()) {
-            DetailBackBar(
-                label = if (!isWide && mobileReading) "Glossary Topics" else "Settings • Knowledge Base",
-                onBack = {
-                    if (!isWide && mobileReading) {
-                        mobileReading = false
-                    } else {
-                        onBack()
-                    }
-                }
+            SectionLabel("STARTUP")
+            SettingsRow(
+                title = "Start the guide when the app opens",
+                subtitle = "Automatically show your last selected position and playstyle when you open MLBB Plus. Requires overlay permission.",
+                checked = autoStartLastRole,
+                onChecked = onAutoStartChange,
+                modifier = Modifier.testTag("settings_autostart_switch")
             )
 
-            Row(Modifier.weight(1f).fillMaxWidth()) {
-                if (isWide || !mobileReading) {
-                    Column(
-                        modifier = (if (isWide) Modifier.width(340.dp) else Modifier.fillMaxWidth())
-                            .fillMaxHeight()
-                            .then(
-                                if (isWide) Modifier.border(width = 1.dp, color = AppUiColors.GithubBorder)
-                                else Modifier
-                            )
-                            .background(AppUiColors.GithubBg)
-                    ) {
-                        Column(
-                            Modifier.fillMaxWidth()
-                                .padding(horizontal = 16.dp, vertical = 14.dp),
-                            verticalArrangement = Arrangement.spacedBy(2.dp)
-                        ) {
-                            Text(
-                                "Knowledge Base & Glossary",
-                                color = AppUiColors.GithubText,
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.Bold
-                            )
-                            Text(
-                                "${entries.size} reference guides for MLBB mechanics and app features",
-                                color = AppUiColors.GithubSecondary,
-                                fontSize = 12.sp
-                            )
-                        }
-                        HorizontalDivider(color = AppUiColors.GithubBorder.copy(alpha = 0.7f))
+            VoiceGuideSection()
 
-                        Column(
-                            Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(12.dp),
-                            verticalArrangement = Arrangement.spacedBy(6.dp)
-                        ) {
-                            entries.forEach { entry ->
-                                val selected = entry.id == activeEntry.id
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .clip(RoundedCornerShape(12.dp))
-                                        .background(if (selected) AppUiColors.GithubSurface else AppUiColors.GithubCard.copy(alpha = 0.7f))
-                                        .border(
-                                            1.dp,
-                                            if (selected) AppUiColors.Gold.copy(alpha = 0.5f) else Color.Transparent,
-                                            RoundedCornerShape(12.dp)
-                                        )
-                                        .clickable { selectTopic(entry.id) }
-                                        .heightIn(min = 56.dp)
-                                        .padding(12.dp),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(10.dp)
-                                ) {
-                                    Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                                        Text(
-                                            entry.categoryLabel,
-                                            color = AppUiColors.Gold.copy(alpha = 0.9f),
-                                            fontSize = 11.sp,
-                                            fontWeight = FontWeight.SemiBold
-                                        )
-                                        Text(
-                                            entry.title,
-                                            color = AppUiColors.GithubText,
-                                            fontSize = 14.sp,
-                                            fontWeight = FontWeight.SemiBold,
-                                            lineHeight = 19.sp
-                                        )
-                                        Text(
-                                            entry.summary,
-                                            color = AppUiColors.GithubSecondary,
-                                            fontSize = 12.sp,
-                                            maxLines = 1,
-                                            overflow = TextOverflow.Ellipsis
-                                        )
-                                    }
-                                    Icon(
-                                        AppIcons.ChevronRight,
-                                        contentDescription = null,
-                                        tint = if (selected) AppUiColors.Gold else AppUiColors.GithubSecondary,
-                                        modifier = Modifier.size(18.dp)
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
-
-                if (isWide || mobileReading) {
-                    Column(
+            SectionLabel("HELP")
+            AppCard(
+                onClick = onOpenKnowledgeBase,
+                modifier = Modifier.testTag("settings_knowledge_base_card")
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(min = AppDimens.TouchTargetMin),
+                    horizontalArrangement = Arrangement.spacedBy(AppDimens.Space12),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Box(
                         modifier = Modifier
-                            .weight(1f)
-                            .fillMaxHeight()
-                            .verticalScroll(readerScroll)
-                            .padding(horizontal = 20.dp, vertical = 18.dp),
-                        verticalArrangement = Arrangement.spacedBy(18.dp)
+                            .size(40.dp)
+                            .clip(AppShapes.Card)
+                            .background(MaterialTheme.colorScheme.primaryContainer),
+                        contentAlignment = Alignment.Center
                     ) {
-                        // Header
-                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                            Text(
-                                "${activeEntry.categoryLabel} · Topic ${activeIndex + 1} of ${entries.size}",
-                                color = AppUiColors.Gold,
-                                fontSize = 12.sp,
-                                fontWeight = FontWeight.SemiBold
-                            )
-                            Text(
-                                activeEntry.title,
-                                color = AppUiColors.GithubText,
-                                fontSize = 20.sp,
-                                fontWeight = FontWeight.Bold,
-                                lineHeight = 26.sp
-                            )
-                            Text(
-                                activeEntry.summary,
-                                color = AppUiColors.GithubText.copy(alpha = 0.9f),
-                                fontSize = 14.sp,
-                                lineHeight = 21.sp
-                            )
-                            activeEntry.action?.let { action ->
-                                Spacer(Modifier.height(2.dp))
-                                Button(
-                                    onClick = { onNavigate(action.target) },
-                                    colors = ButtonDefaults.buttonColors(
-                                        containerColor = AppUiColors.Gold,
-                                        contentColor = Color(0xFF171717)
-                                    ),
-                                    shape = RoundedCornerShape(12.dp),
-                                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp)
-                                ) {
-                                    Text(action.label, fontSize = 12.sp, fontWeight = FontWeight.Bold)
-                                    Spacer(Modifier.width(6.dp))
-                                    Icon(AppIcons.OpenInNew, contentDescription = null, modifier = Modifier.size(15.dp))
-                                }
-                            }
-                        }
-
-                        HorizontalDivider(color = AppUiColors.GithubBorder.copy(alpha = 0.8f))
-
-                        // How it works
-                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                            Text("How it works", color = AppUiColors.GithubText, fontSize = 14.sp, fontWeight = FontWeight.Bold)
-                            activeEntry.details.forEach { line ->
-                                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                    Text("•", color = AppUiColors.Gold, fontSize = 13.sp, fontWeight = FontWeight.Bold)
-                                    Text(line, color = AppUiColors.GithubSecondary, fontSize = 13.sp, lineHeight = 19.sp)
-                                }
-                            }
-                        }
-
-                        // Quick Reference Table
-                        activeEntry.table?.let { table ->
-                            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                                Text("Quick Reference", color = AppUiColors.GithubText, fontSize = 14.sp, fontWeight = FontWeight.Bold)
-                                Column(
-                                    Modifier.fillMaxWidth()
-                                        .clip(RoundedCornerShape(14.dp))
-                                        .background(AppUiColors.GithubCard)
-                                        .border(1.dp, AppUiColors.GithubBorder, RoundedCornerShape(14.dp))
-                                        .horizontalScroll(rememberScrollState())
-                                ) {
-                                    val colCount = table.headers.size
-                                    val colWidth = if (colCount >= 4) 130.dp else 160.dp
-                                    Row(
-                                        Modifier.border(width = 0.5.dp, color = AppUiColors.GithubBorder)
-                                            .padding(horizontal = 12.dp, vertical = 10.dp),
-                                        horizontalArrangement = Arrangement.spacedBy(12.dp)
-                                    ) {
-                                        table.headers.forEach { header ->
-                                            Text(
-                                                header,
-                                                color = AppUiColors.Gold,
-                                                fontSize = 11.sp,
-                                                fontWeight = FontWeight.Bold,
-                                                modifier = Modifier.width(colWidth)
-                                            )
-                                        }
-                                    }
-                                    table.rows.forEach { row ->
-                                        HorizontalDivider(color = AppUiColors.GithubBorder.copy(alpha = 0.6f))
-                                        Row(
-                                            Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
-                                            horizontalArrangement = Arrangement.spacedBy(12.dp)
-                                        ) {
-                                            row.forEachIndexed { cIdx, cell ->
-                                                Text(
-                                                    cell,
-                                                    color = if (cIdx == 0) AppUiColors.GithubText else AppUiColors.GithubSecondary,
-                                                    fontSize = 12.sp,
-                                                    fontWeight = if (cIdx == 0) FontWeight.SemiBold else FontWeight.Normal,
-                                                    lineHeight = 17.sp,
-                                                    modifier = Modifier.width(colWidth)
-                                                )
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-
-                        // Common mistakes
-                        if (activeEntry.mistakes.isNotEmpty()) {
-                            Column(
-                                Modifier.fillMaxWidth()
-                                    .clip(RoundedCornerShape(14.dp))
-                                    .background(AppUiColors.GithubCard)
-                                    .border(1.dp, AppUiColors.GithubBorder, RoundedCornerShape(14.dp))
-                                    .padding(14.dp),
-                                verticalArrangement = Arrangement.spacedBy(6.dp)
-                            ) {
-                                Text("COMMON MISTAKES", color = AppUiColors.Orange, fontSize = 11.sp, fontWeight = FontWeight.Bold)
-                                activeEntry.mistakes.forEach { mistake ->
-                                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                        Text("!", color = AppUiColors.Orange, fontSize = 12.sp, fontWeight = FontWeight.Bold)
-                                        Text(mistake, color = AppUiColors.GithubSecondary, fontSize = 12.sp, lineHeight = 18.sp)
-                                    }
-                                }
-                            }
-                        }
-
-                        // App tip
-                        activeEntry.appTip?.let { tip ->
-                            Column(
-                                Modifier.fillMaxWidth()
-                                    .clip(RoundedCornerShape(14.dp))
-                                    .background(AppUiColors.GithubSurface.copy(alpha = 0.7f))
-                                    .border(1.dp, AppUiColors.GithubBorder, RoundedCornerShape(14.dp))
-                                    .padding(14.dp),
-                                verticalArrangement = Arrangement.spacedBy(4.dp)
-                            ) {
-                                Text("Using this in MLBB Plus", color = AppUiColors.Gold, fontSize = 12.sp, fontWeight = FontWeight.Bold)
-                                Text(tip, color = AppUiColors.GithubText.copy(alpha = 0.9f), fontSize = 12.sp, lineHeight = 18.sp)
-                            }
-                        }
-
-                        // Related topics
-                        val related = activeEntry.relatedIds.mapNotNull { rid -> entries.firstOrNull { it.id == rid } }
-                        if (related.isNotEmpty()) {
-                            HorizontalDivider(color = AppUiColors.GithubBorder.copy(alpha = 0.7f))
-                            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                                Text("Related topics", color = AppUiColors.GithubSecondary, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
-                                related.forEach { rel ->
-                                    Row(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .clip(RoundedCornerShape(10.dp))
-                                            .background(AppUiColors.GithubCard)
-                                            .border(1.dp, AppUiColors.GithubBorder, RoundedCornerShape(10.dp))
-                                            .clickable { selectTopic(rel.id) }
-                                            .padding(horizontal = 12.dp, vertical = 10.dp),
-                                        horizontalArrangement = Arrangement.SpaceBetween,
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Text(rel.title, color = AppUiColors.GithubText, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
-                                        Icon(AppIcons.ChevronRight, contentDescription = null, tint = AppUiColors.Gold, modifier = Modifier.size(16.dp))
-                                    }
-                                }
-                            }
-                        }
-
-                        // Prev / Next navigation
-                        if (prevEntry != null || nextEntry != null) {
-                            HorizontalDivider(color = AppUiColors.GithubBorder.copy(alpha = 0.7f))
-                            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                                if (prevEntry != null) {
-                                    Row(
-                                        modifier = Modifier.weight(1f)
-                                            .clip(RoundedCornerShape(12.dp))
-                                            .background(AppUiColors.GithubCard)
-                                            .border(1.dp, AppUiColors.GithubBorder, RoundedCornerShape(12.dp))
-                                            .clickable { selectTopic(prevEntry.id) }
-                                            .padding(12.dp),
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                                    ) {
-                                        Icon(AppIcons.ArrowBack, contentDescription = null, tint = AppUiColors.Gold, modifier = Modifier.size(16.dp))
-                                        Column(Modifier.weight(1f)) {
-                                            Text("Previous", color = AppUiColors.GithubSecondary, fontSize = 10.sp)
-                                            Text(prevEntry.title, color = AppUiColors.GithubText, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                                        }
-                                    }
-                                } else {
-                                    Spacer(Modifier.weight(1f))
-                                }
-
-                                if (nextEntry != null) {
-                                    Row(
-                                        modifier = Modifier.weight(1f)
-                                            .clip(RoundedCornerShape(12.dp))
-                                            .background(AppUiColors.GithubCard)
-                                            .border(1.dp, AppUiColors.GithubBorder, RoundedCornerShape(12.dp))
-                                            .clickable { selectTopic(nextEntry.id) }
-                                            .padding(12.dp),
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                                    ) {
-                                        Column(Modifier.weight(1f), horizontalAlignment = Alignment.End) {
-                                            Text("Next", color = AppUiColors.GithubSecondary, fontSize = 10.sp)
-                                            Text(nextEntry.title, color = AppUiColors.GithubText, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                                        }
-                                        Icon(AppIcons.ArrowForward, contentDescription = null, tint = AppUiColors.Gold, modifier = Modifier.size(16.dp))
-                                    }
-                                } else {
-                                    Spacer(Modifier.weight(1f))
-                                }
-                            }
-                        }
-
-                        Spacer(Modifier.height(16.dp))
+                        Icon(
+                            imageVector = AppIcons.Book,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary
+                        )
                     }
+                    Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(AppDimens.Space2)) {
+                        Text(
+                            text = "Help & Knowledge Base",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Text(
+                            text = "Meta, hero tiers, rotation, CC matrix, battle spell CDs & objective timers",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    Icon(
+                        imageVector = AppIcons.ChevronRight,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary
+                    )
                 }
             }
+
+            DataFilesSection()
+
+            Text(
+                text = "MLBB Plus v1.0",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
     }
 }
 
-/**
- * Voice Guide settings: master switch, voice, speed, engine, auto-speak,
- * enemy-spell announcements and on-demand model storage.
- *
- * This screen owns its own [VoiceGuideManager] for previews and downloads. The
- * overlay service has a second one; both follow [VoiceGuideSettings.revision],
- * so a change made here reaches the in-game coach immediately.
- *
- * Layout follows the rest of this screen: [SettingsRow] already draws its own
- * card, so the switches stay top-level siblings and only the chips, storage and
- * buttons are grouped inside one card.
- */
 @Composable
 private fun VoiceGuideSection() {
     val context = LocalContext.current
+    val ext = AppTheme.colors
     val manager = remember { VoiceGuideManager(context) }
     DisposableEffect(Unit) {
         onDispose { manager.release() }
@@ -586,8 +259,6 @@ private fun VoiceGuideSection() {
     val announceSpells = remember(revision) { VoiceGuideSettings.announceSpells(context) }
     val installer = remember { VoiceModelInstaller(context) }
 
-    // Storage checks touch the disk, so they run off the main thread and are
-    // recomputed when a setting changes or an install finishes.
     val installedIds by produceState<Set<String>>(emptySet(), revision, state.installing, state.modelLabel) {
         value = withContext(Dispatchers.IO) {
             installer.models.filter { installer.isInstalled(it) }.map { it.id }.toSet()
@@ -600,33 +271,28 @@ private fun VoiceGuideSection() {
 
     SettingsRow(
         title = "Voice Guide",
-        subtitle = "Hear the current step through the floating guide. Nothing is spoken or " +
-            "focused until you switch this on.",
+        subtitle = "Hear the current step through the floating guide. Nothing is spoken or focused until you switch this on.",
         checked = enabled,
-        onChecked = { manager.setEnabled(it) }
+        onChecked = { manager.setEnabled(it) },
+        modifier = Modifier.testTag("settings_voice_guide_switch")
     )
 
     if (!enabled) {
         Text(
-            "Off. The floating guide behaves exactly as it did before: no voice controls, no audio focus, " +
-                "no model on disk.",
-            color = AppUiColors.GithubSecondary,
-            fontSize = 12.sp,
-            lineHeight = 17.sp
+            text = "Off. The floating guide behaves exactly as before: no voice controls, no audio focus, no model unpacked on disk.",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
         return
     }
 
-    Column(
-        Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp))
-            .background(AppUiColors.GithubCard)
-            .border(1.dp, AppUiColors.GithubBorder, RoundedCornerShape(16.dp)).padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
+    AppCard {
         VoiceSettingLabel("VOICE")
         Row(
-            Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+            modifier = Modifier
+                .fillMaxWidth()
+                .horizontalScroll(rememberScrollState()),
+            horizontalArrangement = Arrangement.spacedBy(AppDimens.Space8)
         ) {
             installer.models.forEach { model ->
                 model.speakers.keys.forEach { id ->
@@ -644,11 +310,16 @@ private fun VoiceGuideSection() {
         }
 
         VoiceSettingLabel("SPEED")
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .horizontalScroll(rememberScrollState()),
+            horizontalArrangement = Arrangement.spacedBy(AppDimens.Space8)
+        ) {
             VoiceGuideSettings.RATES.forEach { option ->
                 VoiceOptionChip(
                     label = speedLabel(option),
-                    selected = kotlin.math.abs(rate - option) < 0.001f,
+                    selected = abs(rate - option) < 0.001f,
                     trailing = null,
                     onClick = { manager.setRate(option) }
                 )
@@ -657,8 +328,10 @@ private fun VoiceGuideSection() {
 
         VoiceSettingLabel("ENGINE")
         Row(
-            Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+            modifier = Modifier
+                .fillMaxWidth()
+                .horizontalScroll(rememberScrollState()),
+            horizontalArrangement = Arrangement.spacedBy(AppDimens.Space8)
         ) {
             VoiceOptionChip(
                 label = "Automatic",
@@ -692,11 +365,9 @@ private fun VoiceGuideSection() {
         VoiceSettingLabel("VOICE MODEL ON THIS DEVICE")
         if (installedIds.isEmpty()) {
             Text(
-                "Nothing installed yet. The voice packs ship inside the APK and are unpacked into the " +
-                    "app's private folder on first use - no network needed.",
-                color = AppUiColors.GithubSecondary,
-                fontSize = 12.sp,
-                lineHeight = 17.sp
+                text = "Nothing unpacked yet. The voice packs ship inside the APK and unpack into private app storage on first use.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         } else {
             installer.models.filter { it.id in installedIds }.forEach { model ->
@@ -705,93 +376,88 @@ private fun VoiceGuideSection() {
         }
 
         if (state.installing) {
-            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Column(verticalArrangement = Arrangement.spacedBy(AppDimens.Space8)) {
                 LinearProgressIndicator(
                     progress = { state.progress },
-                    modifier = Modifier.fillMaxWidth().height(6.dp).clip(RoundedCornerShape(3.dp)),
-                    color = AppUiColors.Gold,
-                    trackColor = AppUiColors.GithubBorder
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(6.dp)
+                        .clip(RoundedCornerShape(3.dp)),
+                    color = MaterialTheme.colorScheme.primary,
+                    trackColor = MaterialTheme.colorScheme.surfaceContainerHighest
                 )
                 Text(
-                    state.progressLabel.ifBlank { "Preparing install" },
-                    color = AppUiColors.GithubSecondary,
-                    fontSize = 11.sp
+                    text = state.progressLabel.ifBlank { "Preparing install" },
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-                OutlinedButton(
+                AppOutlinedButton(
                     onClick = { manager.cancelInstall() },
-                    modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),
-                    shape = RoundedCornerShape(12.dp)
-                ) { Text("Cancel install", fontWeight = FontWeight.SemiBold) }
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Cancel install")
+                }
             }
         } else if (selectedModel != null) {
-            Button(
+            AppButton(
                 onClick = { manager.installSelectedModel() },
-                modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = AppUiColors.Gold,
-                    contentColor = Color(0xFF171717)
-                ),
-                shape = RoundedCornerShape(12.dp)
+                leadingIcon = AppIcons.Download,
+                modifier = Modifier.testTag("settings_install_voice_button")
             ) {
                 Text(
-                    if (selectedInstalled) {
-                        "Reinstall voice \u2022 ${selectedModel.sizeLabel}"
+                    text = if (selectedInstalled) {
+                        "Reinstall voice • ${selectedModel.sizeLabel}"
                     } else {
-                        "Install voice \u2022 ${selectedModel.sizeLabel}"
+                        "Install voice • ${selectedModel.sizeLabel}"
                     },
-                    fontWeight = FontWeight.Bold
+                    style = MaterialTheme.typography.labelLarge
                 )
             }
         }
 
-        Button(
+        AppOutlinedButton(
             onClick = { manager.playTestLine() },
-            modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = AppUiColors.GithubSurface,
-                contentColor = AppUiColors.GithubText
-            ),
-            shape = RoundedCornerShape(12.dp)
-        ) { Text("Play test voice", fontWeight = FontWeight.Bold) }
+            leadingIcon = AppIcons.VolumeUp,
+            modifier = Modifier
+                .fillMaxWidth()
+                .testTag("settings_test_voice_button")
+        ) {
+            Text("Play test voice", style = MaterialTheme.typography.labelLarge)
+        }
 
         if (state.message.isNotBlank()) {
             Text(
-                state.message,
-                color = if (state.phase == VoiceGuideManager.Phase.ERROR) AppUiColors.Red else AppUiColors.Green,
-                fontSize = 12.sp,
-                lineHeight = 17.sp
+                text = state.message,
+                style = MaterialTheme.typography.bodySmall,
+                color = if (state.phase == VoiceGuideManager.Phase.ERROR) MaterialTheme.colorScheme.error else ext.success
             )
         }
         if (state.engineLabel.isNotBlank()) {
             Text(
-                "Active engine: ${state.engineLabel}",
-                color = AppUiColors.GithubSecondary,
-                fontSize = 11.sp
+                text = "Active engine: ${state.engineLabel}",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
 
         Text(
-            "Voice packs ship inside the APK and unpack into the app's private folder on first use (" +
+            text = "Voice packs ship inside the APK (" +
                 installer.models.joinToString(", ") { "${it.uncompressedBytes / 1_000_000} MB" } +
-                " on disk). Synthesis is fully offline: no audio is ever sent to a server. Game audio is " +
-                "ducked, not paused, and an incoming call stops the coach.",
-            color = AppUiColors.GithubSecondary,
-            fontSize = 11.sp,
-            lineHeight = 16.sp
+                " unpacked). Synthesis runs completely offline; game audio is ducked cleanly while speaking.",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
 
     SettingsRow(
         title = "Speak automatically on each step",
-        subtitle = "Read the new step once when the guide advances. Off means the Speaker button is the only " +
-            "way to hear a step.",
+        subtitle = "Read the new step once when the guide advances. Off means the Speaker button is the only way to hear a step.",
         checked = autoSpeak,
         onChecked = { VoiceGuideSettings.setAutoSpeak(context, it) }
     )
     SettingsRow(
         title = "Announce enemy battle spells",
-        subtitle = "Say \"Enemy Flicker used\" when you tap a lane in the cooldown tracker. Off by default, " +
-            "and at most once per spell per cooldown.",
+        subtitle = "Say \"Enemy Flicker used\" when you tap a lane in the cooldown tracker. Off by default.",
         checked = announceSpells,
         onChecked = { VoiceGuideSettings.setAnnounceSpells(context, it) }
     )
@@ -800,11 +466,9 @@ private fun VoiceGuideSection() {
 @Composable
 private fun VoiceSettingLabel(text: String) {
     Text(
-        text,
-        color = AppUiColors.GithubSecondary,
-        fontSize = 11.sp,
-        fontWeight = FontWeight.Bold,
-        letterSpacing = 1.sp
+        text = text,
+        style = MaterialTheme.typography.labelSmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant
     )
 }
 
@@ -813,49 +477,66 @@ private fun VoiceOptionChip(label: String, selected: Boolean, trailing: String?,
     FilterChip(
         selected = selected,
         onClick = onClick,
-        modifier = Modifier.heightIn(min = 40.dp),
-        shape = RoundedCornerShape(10.dp),
+        modifier = Modifier.heightIn(min = AppDimens.TouchTargetMin),
+        shape = AppShapes.Chip,
         label = {
             Column {
-                Text(label, fontSize = 12.sp, fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium)
+                Text(label, style = MaterialTheme.typography.labelMedium)
                 if (!trailing.isNullOrBlank()) {
-                    Text(trailing, fontSize = 10.sp, color = AppUiColors.GithubSecondary)
+                    Text(
+                        text = trailing,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 }
             }
         },
         colors = FilterChipDefaults.filterChipColors(
-            selectedContainerColor = AppUiColors.Gold.copy(alpha = 0.18f),
-            selectedLabelColor = AppUiColors.Gold
+            selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+            selectedLabelColor = MaterialTheme.colorScheme.primary
         )
     )
 }
 
 @Composable
 private fun VoiceModelRow(model: VoiceModel, onDelete: () -> Unit) {
-    Row(
-        Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp))
-            .background(AppUiColors.GithubBg)
-            .border(1.dp, AppUiColors.GithubBorder, RoundedCornerShape(12.dp))
-            .padding(horizontal = 12.dp, vertical = 8.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(10.dp)
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = AppShapes.Card,
+        color = MaterialTheme.colorScheme.surfaceContainerLow,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
     ) {
-        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-            Text(model.label, color = AppUiColors.GithubText, fontWeight = FontWeight.SemiBold, fontSize = 13.sp)
-            Text(
-                "${model.diskLabel} \u2022 ${model.speakers.size} voice" +
-                    (if (model.speakers.size == 1) "" else "s"),
-                color = AppUiColors.GithubSecondary,
-                fontSize = 11.sp
-            )
-        }
-        TextButton(onClick = onDelete, shape = RoundedCornerShape(10.dp)) {
-            Text("Delete", color = AppUiColors.Red, fontWeight = FontWeight.SemiBold)
+        Row(
+            modifier = Modifier.padding(horizontal = AppDimens.Space12, vertical = AppDimens.Space8),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(AppDimens.Space10)
+        ) {
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(AppDimens.Space2)) {
+                Text(
+                    text = model.label,
+                    style = MaterialTheme.typography.titleSmall,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Text(
+                    text = "${model.diskLabel} • ${model.speakers.size} voice" +
+                        (if (model.speakers.size == 1) "" else "s"),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            AppTextButton(onClick = onDelete) {
+                Icon(
+                    imageVector = AppIcons.Delete,
+                    contentDescription = "Delete ${model.label}",
+                    tint = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.size(AppDimens.IconSizeSmall)
+                )
+                Text(" Delete", color = MaterialTheme.colorScheme.error)
+            }
         }
     }
 }
 
-/** Human label for a voice id, without ever exposing a raw model identifier. */
 private fun voiceLabel(id: String, model: VoiceModel): String = when (id) {
     VoiceGuideSettings.VOICE_KOKORO_FEMALE -> "Natural female"
     VoiceGuideSettings.VOICE_KOKORO_MALE -> "Natural male"
@@ -865,109 +546,165 @@ private fun voiceLabel(id: String, model: VoiceModel): String = when (id) {
 }
 
 private fun speedLabel(rate: Float): String = when {
-    rate < 0.9f -> "Relaxed 0.85\u00d7"
-    rate > 1.1f -> "Brisk 1.25\u00d7"
-    else -> "Normal 1.0\u00d7"
+    rate < 0.9f -> "Relaxed 0.85×"
+    rate > 1.1f -> "Brisk 1.25×"
+    else -> "Normal 1.0×"
 }
 
 @Composable
-private fun SettingsRow(title: String, subtitle: String, checked: Boolean, onChecked: (Boolean) -> Unit) {
-    Row(
-        Modifier.fillMaxWidth().clip(RoundedCornerShape(14.dp)).background(AppUiColors.GithubCard)
-            .border(1.dp, AppUiColors.GithubBorder, RoundedCornerShape(14.dp))
-            .toggleable(value = checked, role = Role.Switch, onValueChange = onChecked)
-            .heightIn(min = 76.dp).padding(14.dp),
-        horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically
+private fun SettingsRow(
+    title: String,
+    subtitle: String,
+    checked: Boolean,
+    onChecked: (Boolean) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(AppShapes.CardLarge)
+            .toggleable(value = checked, role = Role.Switch, onValueChange = onChecked),
+        shape = AppShapes.CardLarge,
+        color = MaterialTheme.colorScheme.surfaceContainer,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
     ) {
-        Column(Modifier.weight(1f).padding(end = 12.dp), verticalArrangement = Arrangement.spacedBy(3.dp)) {
-            Text(title, color = AppUiColors.GithubText, fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
-            Text(subtitle, color = AppUiColors.GithubSecondary, fontSize = 12.sp, lineHeight = 17.sp)
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .heightIn(min = 72.dp)
+                .padding(AppDimens.Space16),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(end = AppDimens.Space12),
+                verticalArrangement = Arrangement.spacedBy(AppDimens.Space4)
+            ) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Text(
+                    text = subtitle,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            Switch(checked = checked, onCheckedChange = null)
         }
-        Switch(
-            checked = checked,
-            onCheckedChange = null,
-            colors = SwitchDefaults.colors(checkedThumbColor = AppUiColors.Gold, checkedTrackColor = AppUiColors.Gold.copy(alpha = 0.3f))
-        )
     }
 }
 
 @Composable
 private fun DataFilesSection() {
+    val ext = AppTheme.colors
     val notes = GameData.patchNotes
     val livePatch = notes.shortVersion
     var expanded by rememberSaveable { mutableStateOf(false) }
-    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        Row(
-            Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).background(AppUiColors.GithubCard)
-                .border(1.dp, AppUiColors.GithubBorder, RoundedCornerShape(12.dp))
-                .semantics { role = Role.Button }.clickable { expanded = !expanded }
-                .heightIn(min = 56.dp).padding(horizontal = 14.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
+
+    Column(verticalArrangement = Arrangement.spacedBy(AppDimens.Space10)) {
+        AppCard(
+            onClick = { expanded = !expanded },
+            modifier = Modifier.testTag("settings_data_diagnostics_toggle")
         ) {
-            Column(Modifier.weight(1f)) {
-                Text("Data status & troubleshooting", color = AppUiColors.GithubText, fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
-                Text("Advanced details about the app's local guide files", color = AppUiColors.GithubSecondary, fontSize = 11.sp)
-            }
-            Text(if (expanded) "−" else "+", color = AppUiColors.Gold, fontSize = 22.sp, fontWeight = FontWeight.Medium)
-        }
-        if (expanded) Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            val fullProfiles = GameData.heroes.count { it.hasFullProfile }
-            DataRow(
-                "heroes.json",
-                "${GameData.liveHeroes.size} live \u2022 ${GameData.advancedHeroes.size} advanced \u2022 $fullProfiles with full profile (skills + build)",
-                if (GameData.heroes.isEmpty()) "MISSING"
-                else if (GameData.heroesLatest) "LATEST"
-                else if (fullProfiles < GameData.heroes.size) "PARTIAL"
-                else "OK",
-                if (GameData.heroes.isEmpty()) AppUiColors.Red
-                else if (!GameData.heroesLatest && fullProfiles < GameData.heroes.size) AppUiColors.Orange
-                else AppUiColors.Green
-            )
-            DataRow(
-                "items.json",
-                "${GameData.items.size} items",
-                if (GameData.items.isEmpty()) "MISSING" else if (GameData.itemsLatest) "LATEST" else "OK",
-                if (GameData.items.isEmpty()) AppUiColors.Red else AppUiColors.Green
-            )
-            val adv = if (notes.advancedServer.hasContent) " \u2022 Advanced ${notes.advancedDisplayVersion}" else " \u2022 no Advanced / Nov 01 data in file"
-            DataRow(
-                "patch_notes.json",
-                "Patch $livePatch \u2022 ${notes.originalServer.heroChanges.size} hero / ${notes.originalServer.itemChanges.size} item changes$adv",
-                if (!notes.originalServer.hasContent) "MISSING" else if (notes.latest) "LATEST" else "OK",
-                if (notes.originalServer.hasContent) AppUiColors.Green else AppUiColors.Red
-            )
-            com.mlbb.plus.ui.model.RoleTypes.roles.forEach { role ->
-                val g = GameData.guides[role]
-                if (g == null) {
-                    DataRow("${role.lowercase()}_guide.json", "Not found or invalid \u2014 overlay runs without a guide", "MISSING", AppUiColors.Red)
-                } else {
-                    val guidePatch = g.patch.substringBefore("-")
-                    // The patch number is the real staleness signal. `latest` is self-declared
-                    // in each guide's meta and roam_guide.json still says latest=true while
-                    // pinned to 2.2.16a, which hid a genuinely stale guide behind a LATEST badge.
-                    val older = guidePatch.isNotBlank() && guidePatch != livePatch
-                    DataRow(
-                        g.assetName,
-                        "${g.types.size} types \u2022 ${g.stepCount} steps \u2022 patch ${g.patch.ifBlank { "?" }}" +
-                            (if (g.updated.isNotBlank()) " \u2022 ${g.updated}" else "") +
-                            (if (older) " \u2022 older than $livePatch" else ""),
-                        when {
-                            older -> "OLDER"
-                            g.latest -> "LATEST"
-                            else -> "OK"
-                        },
-                        if (older) AppUiColors.Orange else AppUiColors.Green
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Column(Modifier.weight(1f)) {
+                    Text(
+                        text = "Data status & troubleshooting",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Text(
+                        text = "Inspect bundled JSON datasets and guide versions",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
+                Icon(
+                    imageVector = AppIcons.ExpandMore,
+                    contentDescription = if (expanded) "Collapse diagnostics" else "Expand diagnostics",
+                    tint = MaterialTheme.colorScheme.primary
+                )
             }
-            val missingPicks = GameData.unlinkedGuidePicks
-            val missingItems = GameData.unlinkedGuideItems
-            if (missingPicks.isNotEmpty()) {
-                Text("Guide picks not in heroes.json: ${missingPicks.joinToString(", ")}", color = AppUiColors.Orange, fontSize = 12.sp)
-            }
-            if (missingItems.isNotEmpty()) {
-                Text("Guide core items not in items.json: ${missingItems.joinToString(", ")}", color = AppUiColors.Orange, fontSize = 12.sp)
+        }
+
+        AnimatedVisibility(visible = expanded) {
+            Column(verticalArrangement = Arrangement.spacedBy(AppDimens.Space8)) {
+                val fullProfiles = GameData.heroes.count { it.hasFullProfile }
+                DataRow(
+                    name = "heroes.json",
+                    detail = "${GameData.liveHeroes.size} live • ${GameData.advancedHeroes.size} advanced • $fullProfiles with full profile",
+                    status = if (GameData.heroes.isEmpty()) "MISSING"
+                    else if (GameData.heroesLatest) "LATEST"
+                    else if (fullProfiles < GameData.heroes.size) "PARTIAL"
+                    else "OK",
+                    color = if (GameData.heroes.isEmpty()) MaterialTheme.colorScheme.error
+                    else if (!GameData.heroesLatest && fullProfiles < GameData.heroes.size) ext.warning
+                    else ext.success
+                )
+                DataRow(
+                    name = "items.json",
+                    detail = "${GameData.items.size} items",
+                    status = if (GameData.items.isEmpty()) "MISSING" else if (GameData.itemsLatest) "LATEST" else "OK",
+                    color = if (GameData.items.isEmpty()) MaterialTheme.colorScheme.error else ext.success
+                )
+                val adv = if (notes.advancedServer.hasContent) " • Advanced ${notes.advancedDisplayVersion}"
+                else " • no Advanced / Nov 01 data in file"
+                DataRow(
+                    name = "patch_notes.json",
+                    detail = "Patch $livePatch • ${notes.originalServer.heroChanges.size} hero / ${notes.originalServer.itemChanges.size} item changes$adv",
+                    status = if (!notes.originalServer.hasContent) "MISSING" else if (notes.latest) "LATEST" else "OK",
+                    color = if (notes.originalServer.hasContent) ext.success else MaterialTheme.colorScheme.error
+                )
+                RoleTypes.roles.forEach { role ->
+                    val g = GameData.guides[role]
+                    if (g == null) {
+                        DataRow(
+                            name = "${role.lowercase()}_guide.json",
+                            detail = "Not found or invalid — overlay runs without a guide",
+                            status = "MISSING",
+                            color = MaterialTheme.colorScheme.error
+                        )
+                    } else {
+                        val guidePatch = g.patch.substringBefore("-")
+                        val older = guidePatch.isNotBlank() && guidePatch != livePatch
+                        DataRow(
+                            name = g.assetName,
+                            detail = "${g.types.size} types • ${g.stepCount} steps • patch ${g.patch.ifBlank { "?" }}" +
+                                (if (g.updated.isNotBlank()) " • ${g.updated}" else "") +
+                                (if (older) " • older than $livePatch" else ""),
+                            status = when {
+                                older -> "OLDER"
+                                g.latest -> "LATEST"
+                                else -> "OK"
+                            },
+                            color = if (older) ext.warning else ext.success
+                        )
+                    }
+                }
+                val missingPicks = GameData.unlinkedGuidePicks
+                val missingItems = GameData.unlinkedGuideItems
+                if (missingPicks.isNotEmpty()) {
+                    Text(
+                        text = "Guide picks not in heroes.json: ${missingPicks.joinToString(", ")}",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = ext.warning
+                    )
+                }
+                if (missingItems.isNotEmpty()) {
+                    Text(
+                        text = "Guide core items not in items.json: ${missingItems.joinToString(", ")}",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = ext.warning
+                    )
+                }
             }
         }
     }
@@ -975,18 +712,25 @@ private fun DataFilesSection() {
 
 @Composable
 private fun DataRow(name: String, detail: String, status: String, color: Color) {
-    Row(
-        Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).background(AppUiColors.GithubCard)
-            .border(1.dp, AppUiColors.GithubBorder, RoundedCornerShape(12.dp)).padding(12.dp),
-        horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically
-    ) {
-        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-            Text(name, color = AppUiColors.GithubText, fontWeight = FontWeight.SemiBold, fontSize = 13.sp)
-            Text(detail, color = AppUiColors.GithubSecondary, fontSize = 11.sp, lineHeight = 15.sp)
+    AppCard(containerColor = MaterialTheme.colorScheme.surfaceContainerLow) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(AppDimens.Space10),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(AppDimens.Space2)) {
+                Text(
+                    text = name,
+                    style = MaterialTheme.typography.titleSmall,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Text(
+                    text = detail,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            AppStatusBadge(text = status, color = color)
         }
-        Box(
-            Modifier.clip(RoundedCornerShape(8.dp)).background(color.copy(alpha = 0.16f))
-                .border(1.dp, color.copy(alpha = 0.45f), RoundedCornerShape(8.dp)).padding(horizontal = 8.dp, vertical = 3.dp)
-        ) { Text(status, color = color, fontSize = 10.sp, fontWeight = FontWeight.Bold) }
     }
 }

@@ -1,33 +1,18 @@
-# Gradle / Android build output
-.gradle/
-build/
-**/build/
-local.properties
 *.iml
-.idea/
-
-# Signing material and generated packages
-*.jks
-*.keystore
-*.apk
-*.aab
-
-# Voice Guide: the sherpa-onnx AAR and the TTS voice pack archives are fetched
-# by Gradle at build time (downloadSherpaAar into app/libs, bundleTtsModels
-# into app/tts-models-cache) and compiled into the APK - checksum-verified and
-# never committed. The extracted models on a device live in filesDir/tts - these
-# patterns only stop a local experiment from being committed.
-app/libs/*.aar
-app/tts-models-cache/
-*.onnx
-*.tar.bz2
-voices.bin
-espeak-ng-data/
-lexicon-*.txt
-
-# OS/editor files
+.gradle
+.kotlin
+/local.properties
+/.idea/caches
+/.idea/libraries
+/.idea/modules.xml
+/.idea/workspace.xml
+/.idea/navEditor.xml
+/.idea/assetWizardSettings.xml
 .DS_Store
-Thumbs.db
-
-# Python bytecode from running the repo scripts
-__pycache__/
+/build
+/captures
+.externalNativeBuild
+.cxx
+local.properties
+.env
+debug.keystore
