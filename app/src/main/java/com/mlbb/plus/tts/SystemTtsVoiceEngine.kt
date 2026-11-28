@@ -4,6 +4,8 @@ import android.content.Context
 import android.media.AudioAttributes
 import android.media.AudioManager
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.speech.tts.TextToSpeech
 import android.speech.tts.UtteranceProgressListener
 import android.util.Log
@@ -18,6 +20,7 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 
 /**
  * Zero-download engine: delegates to the platform [TextToSpeech] service.
@@ -50,6 +53,13 @@ class SystemTtsVoiceEngine(private val context: Context) : VoiceEngine {
         get() = active.get()?.finished?.get() == false
 
     private val initLock = Mutex()
+    private val mainHandler = Handler(Looper.getMainLooper())
+
+    @Volatile
+    private var failure: String? = null
+
+    override val lastError: String?
+        get() = failure
 
     override suspend fun prepare(): Boolean = initLock.withLock {
         initResult.get()?.let { return@withLock it }
@@ -65,22 +75,30 @@ class SystemTtsVoiceEngine(private val context: Context) : VoiceEngine {
      * the main looper - can never fire in between and see a null reference.
      */
     private suspend fun init(): Boolean {
+        failure = null
+        // Bounded: a service that never answers must not leave the widget on "Loading" forever.
         val status = withContext(Dispatchers.Main.immediate) {
-            suspendCancellableCoroutine<Int> { cont ->
-                try {
-                    val tts = TextToSpeech(context.applicationContext) { result ->
-                        if (cont.isActive) cont.resume(result)
+            withTimeoutOrNull(INIT_TIMEOUT_MS) {
+                suspendCancellableCoroutine<Int> { cont ->
+                    try {
+                        val tts = TextToSpeech(context.applicationContext) { result ->
+                            if (cont.isActive) cont.resume(result)
+                        }
+                        ttsRef.set(tts)
+                    } catch (e: Exception) {
+                        // Missing framework TTS, restricted profile, or a dead service.
+                        Log.w(TAG, "platform TextToSpeech unavailable", e)
+                        if (cont.isActive) cont.resume(TextToSpeech.ERROR)
                     }
-                    ttsRef.set(tts)
-                } catch (e: Exception) {
-                    // Missing framework TTS, restricted profile, or a dead service.
-                    Log.w(TAG, "platform TextToSpeech unavailable", e)
-                    if (cont.isActive) cont.resume(TextToSpeech.ERROR)
                 }
+            } ?: TextToSpeech.ERROR.also {
+                // Timed out: release the half-bound engine so a later attempt starts clean.
+                ttsRef.getAndSet(null)?.let { runCatching { it.shutdown() } }
             }
         }
         if (status != TextToSpeech.SUCCESS) {
             Log.w(TAG, "platform TextToSpeech init failed with status $status")
+            failure = "Android's text-to-speech engine did not start. Check Settings > System > Languages & input > Text-to-speech."
             return false
         }
         return configure(ttsRef.get())
@@ -133,6 +151,7 @@ class SystemTtsVoiceEngine(private val context: Context) : VoiceEngine {
         }
         // Rapid Next/Prev must cancel the previous line, not queue behind it.
         stop()
+        failure = null
         suspendCancellableCoroutine<Unit> { cont ->
             val utterance = Utterance(cont, onDone)
             active.set(utterance)
@@ -148,7 +167,20 @@ class SystemTtsVoiceEngine(private val context: Context) : VoiceEngine {
             // Register cancellation before anything can fail, so a cancelled Next/Prev
             // always finishes the utterance and releases the caller.
             cont.invokeOnCancellation { utterance.finish() }
-            if (result != TextToSpeech.SUCCESS) utterance.finish()
+            if (result != TextToSpeech.SUCCESS) {
+                failure = "Android's text-to-speech engine refused the line."
+                utterance.finish()
+            } else {
+                // Watchdog: an engine that accepts the line but never starts it would
+                // otherwise hold the widget in SPEAKING with no sound. Fail it honestly.
+                mainHandler.postDelayed({
+                    if (!utterance.started.get() && !utterance.finished.get()) {
+                        Log.w(TAG, "platform TTS did not start within ${START_TIMEOUT_MS} ms")
+                        failure = "The system voice did not start. Check the text-to-speech engine and its English voice data in Android settings."
+                        utterance.finish()
+                    }
+                }, START_TIMEOUT_MS)
+            }
         }
     }
 
@@ -206,6 +238,7 @@ class SystemTtsVoiceEngine(private val context: Context) : VoiceEngine {
     ) {
         val id: String = "mlbb-vc-" + counter.incrementAndGet()
         val finished = AtomicBoolean(false)
+        val started = AtomicBoolean(false)
 
         fun finish() {
             if (!finished.compareAndSet(false, true)) return
@@ -219,7 +252,9 @@ class SystemTtsVoiceEngine(private val context: Context) : VoiceEngine {
     }
 
     private val progressListener = object : UtteranceProgressListener() {
-        override fun onStart(utteranceId: String?) = Unit
+        override fun onStart(utteranceId: String?) {
+            active.get()?.takeIf { it.id == utteranceId }?.started?.set(true)
+        }
 
         override fun onDone(utteranceId: String?) {
             active.get()?.takeIf { it.id == utteranceId }?.finish()
@@ -243,5 +278,11 @@ class SystemTtsVoiceEngine(private val context: Context) : VoiceEngine {
 
     companion object {
         private const val TAG = "SystemTtsEngine"
+
+        /** Binding the platform service normally takes well under a second. */
+        private const val INIT_TIMEOUT_MS = 5_000L
+
+        /** Time allowed between accepting a line and its first audio. */
+        private const val START_TIMEOUT_MS = 6_000L
     }
 }

@@ -297,7 +297,7 @@ timer advances / player taps Next
     SherpaOnnxVoiceEngine; on load failure → System (Auto) or an explained error (Neural)
   → TtsTextNormalizer condenses the step to the word budget and phrases the clock
   → audio focus GAIN_TRANSIENT_MAY_DUCK (game ducked, never muted) → speak
-  → VoiceUiState flows back to VoiceControlRow (label/action from VoiceGuideTransitions) and to the
+  → VoiceUiState flows back to the header On / Off control and the status line (label/action from VoiceGuideTransitions) and to the
     notification via observeVoiceForNotification()
 ```
 
@@ -320,7 +320,7 @@ Guards that matter when touching this path: TalkBack on ⇒ the coach refuses to
 | `screens/AssetImage.kt` | Coil asset model resolution, hero/item portrait rendering and fallbacks | Bundled image assets, `Hero`, `Item` |
 | `theme/MLBBPlusTheme.kt` | Separate Compose color schemes / typography for app and overlay | Main app and overlay service |
 | `widgets/JetOverlay.kt` | WindowManager overlay host and Compose lifecycle owners | `WidgetOverlayService`, Compose and lifecycle APIs |
-| `widgets/OverlayWidgets.kt` | Shared role guide overlay UI, local JSON parser, timers and spell tracker; maps the current step to a `SpokenStep`, draws `VoiceControlRow`, and tints the line being read aloud | Role guide JSON, `GameData`, overlay theme, `tts/VoiceGuideManager` |
+| `widgets/OverlayWidgets.kt` | Shared role guide overlay UI, local JSON parser, timers and spell tracker; maps the current step to a `SpokenStep`, draws the two-row guide card (header with the On / Off control and the spell tracker, then the step row), and tints the line being read aloud | Role guide JSON, `GameData`, overlay theme, `tts/VoiceGuideManager` |
 | `model/KnowledgeBase.kt` | In-app help library: 19 topics with details, quick-reference tables, common mistakes, app tips and related-topic links | Settings Knowledge Base reader |
 | `tts/TtsTextNormalizer.kt` | Pure JVM: guide text → condensed spoken English (clock phrasing, abbreviation expansion, symbol cleanup, word-budget truncation) | `tts/VoiceGuideManager`, overlay widget, unit tests |
 | `tts/VoiceGuideSettings.kt` | SharedPreferences for the feature plus a `revision` counter so the two manager instances stay in step | Settings screen, manager, overlay service |
@@ -373,7 +373,7 @@ The versions above are read from `gradle/libs.versions.toml`, `app/build.gradle.
 | Guide step text fields (`instruction`, `description`, `callout`, `phase`, `compact`, `dont`, `objective_*`) | `OverlayWidgets.toSpoken()` fallback chain, `TtsTextNormalizer` budgets and abbreviation table, `TtsTextNormalizerTest`, and a re-run over all 286 real steps |
 | Voice Guide settings or pref keys | `VoiceGuideSettings` (including which setters call `bump()`), both manager instances, `SettingsScreen.VoiceGuideSection`, `VoiceGuideManagerTest` |
 | sherpa-onnx version or a voice model | `downloadSherpaAar` sha256 + `VoiceModelInstaller` model table (`VoiceModel`) URLs/checksums/sizes, `SherpaOnnxVoiceEngine` config and thread counts, the sid ↔ voice-name mapping, and the 1.13.8 pin rationale in `docs/tts_implementation.md` §2 |
-| `VoiceGuideTransitions` decision table | Manager `compose()`/auto-speak gate, `VoiceControlRow` label + click dispatch, notification Play/Pause label, `VoiceGuideManagerTest` |
+| `VoiceGuideTransitions` decision table | Manager `compose()`/auto-speak gate, header On / Off control label + click dispatch, notification Play/Pause label, `VoiceGuideManagerTest` |
 
 ## 9. Current architectural boundaries and known maintenance risks
 

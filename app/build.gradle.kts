@@ -230,4 +230,8 @@ dependencies {
   testImplementation(libs.androidx.junit)
   testImplementation(libs.kotlinx.coroutines.test)
   testImplementation(libs.robolectric)
+  // Compose layout tests (JVM, Robolectric): measure the overlay card's real width and height.
+  testImplementation(platform(libs.compose.bom))
+  testImplementation(libs.compose.ui.test.junit4)
+  debugImplementation(libs.compose.ui.test.manifest)
 }

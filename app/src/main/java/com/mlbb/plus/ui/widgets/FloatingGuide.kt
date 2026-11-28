@@ -79,8 +79,7 @@ fun FloatingGuide(
                 role = role,
                 roleType = roleType,
                 onBack = onBack,
-                voice = voice,
-                onCollapse = { expanded = false }
+                voice = voice
             )
         }
 

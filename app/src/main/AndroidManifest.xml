@@ -10,6 +10,14 @@
          The packs go to app-specific external storage, which needs no storage permission. -->
     <uses-permission android:name="android.permission.INTERNET" />
 
+    <!-- Android 11+ package visibility. Without this query the platform TTS engine is hidden
+         from the app: TextToSpeech never reports ready, and no voice plays (system TTS included). -->
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.TTS_SERVICE" />
+        </intent>
+    </queries>
+
     <!-- Backup is disabled, and the extraction rules exclude everything, because the voice
          packs (up to ~160 MB unpacked) are re-downloaded on demand. -->
     <application

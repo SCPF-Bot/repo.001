@@ -15,7 +15,7 @@ timer advances.
 | | |
 |---|---|
 | Default state | **OFF** (`enabled = false`). With it off the overlay composes exactly what it did before: no extra row, no engine, no audio focus, no model on disk. |
-| Where it appears | One 48dp control row at the bottom of the guide overlay (Speak/Pause/Resume · Repeat · Prev · Next · Stop) plus a single status line for progress, fallback notices and errors. |
+| Where it appears | The guide overlay has no voice transport row. The header's **On / Off** button turns the coach on or off; the step line is tinted gold while it is read, and the status line shows progress, fallback notices and errors. Each step is spoken once, automatically. |
 | Notification | Two extra actions while the feature is on: **Play/Pause voice** and **Stop voice**, reusing the existing foreground-service notification (no second service). |
 | Settings | `Settings → Voice Guide`: engine (Auto / On-device neural / System), voice, speed 0.85×–1.25×, auto-speak, announce enemy spells, install voice (size + download progress + cancel), play a test line. |
 | Knowledge Base | New entry `voice-guide` — "Voice Guide: Hear Your Next Play" (19 entries total). |
@@ -133,7 +133,7 @@ vendored:
 
 Wiring into existing files (no new screens, no new service, no DI):
 
-- `ui/widgets/OverlayWidgets.kt` — `VoiceControlRow`, `GuideStep.toSpoken(planId, index)`, the
+- `ui/widgets/OverlayWidgets.kt` — `GuideStep.toSpoken(planId, index)`, the
   auto-speak `LaunchedEffect`, the gold tint on the line being read, spell announcements.
 - `ui/WidgetOverlayService.kt` — owns the manager, `ACTION_VOICE_TOGGLE` / `ACTION_VOICE_STOP`,
   `observeVoiceForNotification()`, single `NOTIFICATION_ID`.
@@ -255,8 +255,8 @@ python3 scripts/update_tts_models.py   # refresh/verify the voice pack manifest
    landscape.
 2. First use: turn Voice Guide on with no model → download progress + cancel → after the download, speaks the
    current step in under 2s on a mid-range device.
-3. Coach flow: Speak → Next (immediate, and the spoken line is tinted gold) → Repeat → Pause
-   mid-sentence → Resume continues cleanly.
+3. Coach flow: turn On → each step is read once as it begins (the line is tinted gold) → turn Off
+   stops it at once. There is no replay, pause or skip in the widget.
 4. Auto-speak: advancing to the next step, and Turtle at 2:00, each speak **once**.
 5. In-game over MLBB: game audio ducked not muted; overlay Stop and notification Stop both work;
    no crash when backgrounded.

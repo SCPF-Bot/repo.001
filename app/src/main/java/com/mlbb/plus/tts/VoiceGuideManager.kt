@@ -84,6 +84,9 @@ class VoiceGuideManager(private val context: Context) {
     private var idleJob: Job? = null
     private var installJob: Job? = null
     private var focusHeld = false
+
+    /** True when the neural voice failed for the line in hand and the system voice is speaking instead. */
+    private var neuralFellBack = false
     private var lastSpokenKey: String = ""
     private var lastStep: SpokenStep? = null
     private val spellCooldowns = HashMap<String, Long>()
@@ -427,20 +430,30 @@ class VoiceGuideManager(private val context: Context) {
             val engine = resolveEngine()
             if (engine == null) {
                 abandonFocus()
+                // Say why, in the engine's own words when it has them, instead of a generic line.
+                val reason = system?.lastError ?: sherpa?.lastError
                 state = state.copy(
                     phase = Phase.UNAVAILABLE,
                     speakingKey = "",
-                    message = UNAVAILABLE_MESSAGE
+                    progressLabel = "",
+                    message = if (reason != null) "$UNAVAILABLE_MESSAGE $reason" else UNAVAILABLE_MESSAGE
                 )
+                scheduleIdleRelease()
                 return@launch
             }
             active = engine
             if (!requestFocus()) {
-                state = state.copy(phase = Phase.ERROR, message = FOCUS_DENIED_MESSAGE)
+                // Visible in the overlay status line and in Settings; the engine stays loaded
+                // for the idle timer to release, so a retry does not reload the model.
+                Log.w(TAG, "speech skipped: audio focus denied for $key")
+                state = state.copy(phase = Phase.ERROR, speakingKey = "", message = FOCUS_DENIED_MESSAGE)
+                scheduleIdleRelease()
                 return@launch
             }
             engine.setSpeechRate(VoiceGuideSettings.rate(context))
-            val keepMessage = if (installJob?.isActive == true) state.message else ""
+            // Keep a notice that explains a fallback (neural voice failed, system voice speaks).
+            val fellBack = engine is SystemTtsVoiceEngine && neuralFellBack
+            val keepMessage = if (installJob?.isActive == true || fellBack) state.message else ""
             state = state.copy(
                 phase = Phase.SPEAKING,
                 spokenText = text,
@@ -451,7 +464,11 @@ class VoiceGuideManager(private val context: Context) {
             )
             engine.speak(text, null)
             // speak() returns once the line finished, was stopped, or failed.
-            if (state.speakingKey == key && state.phase == Phase.SPEAKING) {
+            val failure = engine.lastError
+            if (failure != null && state.speakingKey == key) {
+                // A failed line must say so: silence with no message reads as a broken app.
+                state = state.copy(phase = Phase.ERROR, speakingKey = "", message = failure)
+            } else if (state.speakingKey == key && state.phase == Phase.SPEAKING) {
                 state = state.copy(phase = Phase.IDLE, speakingKey = "")
             }
             abandonFocus()
@@ -481,6 +498,7 @@ class VoiceGuideManager(private val context: Context) {
      */
     private suspend fun resolveEngine(): VoiceEngine? {
         val preference = VoiceGuideSettings.engine(context)
+        neuralFellBack = false
         if (preference == VoiceGuideSettings.ENGINE_SYSTEM) return systemEngine()
 
         val installed = installer.models.firstOrNull { installer.isInstalled(it) }
@@ -491,7 +509,10 @@ class VoiceGuideManager(private val context: Context) {
                 consumeNotice()
                 return engine
             }
-            state = state.copy(message = MODEL_LOAD_FAILED_MESSAGE)
+            neuralFellBack = true
+            state = state.copy(
+                message = sherpa?.lastError?.let { "$it Using the system voice." } ?: MODEL_LOAD_FAILED_MESSAGE
+            )
             if (preference == VoiceGuideSettings.ENGINE_SHERPA) return null
         } else if (preference == VoiceGuideSettings.ENGINE_SHERPA) {
             state = state.copy(message = NO_MODEL_MESSAGE)
@@ -514,8 +535,9 @@ class VoiceGuideManager(private val context: Context) {
 
     private suspend fun systemEngine(): SystemTtsVoiceEngine? {
         val engine = system ?: SystemTtsVoiceEngine(context).also { system = it }
+        state = state.copy(phase = Phase.PREPARING, progressLabel = "Starting system voice")
         if (!engine.prepare()) {
-            Log.w(TAG, "platform TTS is not usable on this device")
+            Log.w(TAG, "platform TTS is not usable on this device: ${engine.lastError}")
             return null
         }
         return engine

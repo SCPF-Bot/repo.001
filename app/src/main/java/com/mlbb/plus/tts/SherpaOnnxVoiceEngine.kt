@@ -14,10 +14,16 @@ import com.k2fsa.sherpa.onnx.OfflineTtsVitsModelConfig
 import java.io.File
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.locks.ReentrantLock
+import java.util.concurrent.atomic.AtomicInteger
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.async
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 import kotlin.concurrent.withLock as withThreadLock
 
 /**
@@ -91,6 +97,24 @@ class SherpaOnnxVoiceEngine(
     private val stopRequested = AtomicBoolean(false)
     private val paused = AtomicBoolean(false)
     private val loadLock = Mutex()
+
+    /**
+     * Model loads run here, not inside [prepare]'s coroutine: a native load cannot be
+     * interrupted, so the timeout only stops us waiting for it.
+     */
+    private val loadScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
+    /**
+     * Bumped whenever a load is abandoned. A load that lands after its generation has
+     * been superseded releases what it built instead of publishing it.
+     */
+    private val loadGeneration = AtomicInteger(0)
+
+    @Volatile
+    private var failure: String? = null
+
+    override val lastError: String?
+        get() = failure
     @Volatile
     private var rate = VoiceGuideSettings.DEFAULT_RATE
 
@@ -102,6 +126,7 @@ class SherpaOnnxVoiceEngine(
      */
     override suspend fun prepare(): Boolean = loadLock.withLock {
         if (tts != null && track != null) return@withLock true
+        failure = null
         val wanted = installer.forVoice(VoiceGuideSettings.voice(context))
         val chain = if (wanted != null) installer.fallbackChain(wanted) else installer.models
         val model = chain.firstOrNull { installer.isInstalled(it) }
@@ -114,10 +139,30 @@ class SherpaOnnxVoiceEngine(
             VoiceGuideSettings.setFallbackNotice(context, notice)
             Log.w(TAG, notice)
         }
-        load(model)
+        val generation = loadGeneration.incrementAndGet()
+        val loading = loadScope.async { load(model, generation) }
+        val loaded: Boolean? = withTimeoutOrNull(LOAD_TIMEOUT_MS) {
+            try {
+                loading.await()
+            } catch (t: Throwable) {
+                if (t is CancellationException) throw t
+                Log.e(TAG, "${model.id}: load threw", t)
+                false
+            }
+        }
+        if (loaded == true) return@withLock true
+        // Abandon this generation: a load still running natively will release itself.
+        loadGeneration.incrementAndGet()
+        failure = if (loaded == null) {
+            "The ${model.label} voice took too long to load."
+        } else {
+            "The ${model.label} voice could not load on this device."
+        }
+        Log.e(TAG, "${model.id}: $failure")
+        false
     }
 
-    private suspend fun load(model: VoiceModel): Boolean = withContext(Dispatchers.IO) {
+    private suspend fun load(model: VoiceModel, generation: Int): Boolean = withContext(Dispatchers.IO) {
         releaseInternal()
         val dir = installer.modelDir(model)
         val onnx = model.resolveModelFile(dir)
@@ -175,12 +220,24 @@ class SherpaOnnxVoiceEngine(
                 Log.e(TAG, "${model.id}: no AudioTrack for ${sr} Hz, not loading")
                 return@withContext false
             }
-            synchronized(stateLock) {
-                tts = engine
-                track = player
-                loadedModel = model
-                loadedSid = sid
-                loadedSampleRate = sr
+            // A load the caller already gave up on must not publish a live engine.
+            val stale = synchronized(stateLock) {
+                if (generation != loadGeneration.get()) {
+                    true
+                } else {
+                    tts = engine
+                    track = player
+                    loadedModel = model
+                    loadedSid = sid
+                    loadedSampleRate = sr
+                    false
+                }
+            }
+            if (stale) {
+                runCatching { player.release() }
+                runCatching { engine.release() }
+                Log.w(TAG, "${model.id}: finished after the load was abandoned, discarded")
+                return@withContext false
             }
             Log.i(TAG, "loaded ${model.id}: sr=$sr speakers=$speakers sid=$sid threads=$threads")
             true
@@ -417,6 +474,9 @@ class SherpaOnnxVoiceEngine(
 
     companion object {
         private const val TAG = "SherpaVoiceEngine"
+
+        /** Kokoro loads in a few seconds on a mid-range phone; past this we use the system voice. */
+        private const val LOAD_TIMEOUT_MS = 20_000L
         private const val TRACK_BUFFER_FACTOR = 4
         private const val PAUSE_POLL_MS = 20L
 

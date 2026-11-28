@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.content.res.Configuration
 import android.graphics.PixelFormat
+import android.os.Build
 import android.provider.Settings
 import android.util.Log
 import android.view.Gravity
@@ -16,6 +17,7 @@ import android.view.WindowManager
 import android.widget.FrameLayout
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -110,6 +112,14 @@ object JetOverlay {
     private var isShowing = false
 
     /**
+     * Width of the overlay's screen in dp, for the current orientation. Read by the guide card,
+     * which is 70% of it. Taken from the window bounds (WindowMetrics on API 30+), so it follows
+     * rotation; it is set in show() and on every configuration change.
+     */
+    var screenWidthDp by mutableFloatStateOf(0f)
+        private set
+
+    /**
      * True in landscape. The floating guide opens only in landscape, so the content reads this to
      * choose between the bubble and the guide. Set in show() and updated on rotation.
      */
@@ -178,6 +188,12 @@ object JetOverlay {
             y = startY
         }
         windowParams = params
+        screenWidthDp = windowWidthDp(context, wm)
+        Log.i(
+            TAG,
+            "overlay shown: screen ${screenWidthDp}dp, guide card ${landscapeWidgetWidthDp(screenWidthDp)}dp " +
+                "(landscape=$landscape)"
+        )
 
         // ── Drag: a parent FrameLayout that takes over the gesture past the touch slop ──
         val touchSlop = ViewConfiguration.get(context).scaledTouchSlop.toFloat()
@@ -304,6 +320,7 @@ object JetOverlay {
         val root = overlayRoot ?: return
         val params = windowParams ?: return
         val wm = windowManager ?: return
+        screenWidthDp = windowWidthDp(context, wm)
         val saved = ScreenProfiles.savedBubble(prefs, landscape, dm.widthPixels, dm.heightPixels)
         val (x, y) = if (saved != null) {
             clampedOffset(saved.first, saved.second, dm.widthPixels, dm.heightPixels)
@@ -317,6 +334,17 @@ object JetOverlay {
         params.x = x
         params.y = y
         runCatching { wm.updateViewLayout(root, params) }
+    }
+
+    /** Width of the current window area in dp. WindowMetrics on API 30+, displayMetrics below. */
+    private fun windowWidthDp(context: Context, wm: WindowManager): Float {
+        val density = context.resources.displayMetrics.density
+        val widthPx = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            wm.currentWindowMetrics.bounds.width()
+        } else {
+            context.resources.displayMetrics.widthPixels
+        }
+        return widthPx / density
     }
 
     /**

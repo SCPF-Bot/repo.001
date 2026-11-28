@@ -21,6 +21,7 @@ package com.mlbb.plus.ui.widgets
 import android.content.Context
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -57,12 +58,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -96,9 +97,12 @@ private val GuideRed = MLBBPlusColors.Red
 
 // --- Widget width (landscape only; portrait shows just the bubble) ---
 // 70% of the screen width. The header holds the timer, role selector, and the five
-// spell cells, so it needs this room. Previously 52%, widened to 68% when expanded.
+// spell cells, so it needs this room. The width is the same collapsed or expanded.
+// (Earlier builds used 52%, and 68% when expanded; both are gone.)
 private const val WIDGET_WIDTH_FRACTION_LANDSCAPE = 0.70f
 private const val WIDGET_MIN_WIDTH_DP = 300f
+// Card width while the spell tracker is hidden: fits the header row, which has no spell cells.
+private const val HEADER_COMPACT_WIDTH_DP = 360f
 
 /** Card width in dp for a landscape screen of [screenWidthDp]. */
 internal fun landscapeWidgetWidthDp(screenWidthDp: Float): Float =
@@ -110,7 +114,6 @@ internal fun landscapeWidgetWidthDp(screenWidthDp: Float): Float =
 private const val IDLE_FADE_MS = 4_000L       // no touch for this long -> fade
 private const val EXPANDED_IDLE_MS = 10_000L  // longer grace when you expanded to read
 private const val IDLE_ALPHA = 0.6f           // whole-widget alpha while idle (spells + guide stay readable)
-private const val PEEK_MS = 5_000L            // how long the hidden description shows on a change
 private const val URGENT_SECONDS = 10         // objective turns gold/red + wakes at <= this
 private const val GAME_CLOCK_MAX_SECONDS = 18 * 60  // the overlay timer stops at 18:00
 
@@ -395,7 +398,7 @@ private fun computeObjective(
     // implies lordSlain > 0 — which is handled by the first branch below and never
     // needs this flag. It IS used for the slain label ("Lord slain" vs "Turtle
     // slain"). Do not add a branch here that reads it without re-checking that
-    // invariant. 
+    // invariant.
     @Suppress("UnusedParameter")
     lastSlainWasLord: Boolean = false,
     timers: ObjectiveTimers = ObjectiveTimers()
@@ -446,13 +449,19 @@ private fun computeObjective(
 }
 
 /**
- * Compact roam macro guide for use over the game screen. The content width is
- * explicitly bounded because the host overlay window is WRAP_CONTENT; relying on
- * fillMaxWidth alone made long instruction lines size/clamp unpredictably.
+ * The roam guide card, in two rows.
  *
- * Width is 70% of screen width in landscape (see WIDGET_WIDTH_FRACTION_LANDSCAPE).
- * The header card holds the timer, role selector, close controls and the spell
- * tracker; the host overlay window centres the widget horizontally.
+ * Row 1, the header: timer | role and plan (e.g. "E4") | turtle or lord timer ("T 00:23") |
+ * guide + / - | voice On / Off | x exit | > spell tracker.
+ * The spell tracker is hidden by default. Opening it widens the card sideways to 70% of the screen;
+ * it never makes the card taller.
+ *
+ * Row 2, the guide: the current step, shown while the guide is open (the + / - button).
+ *
+ * There are no voice transport controls. The coach reads each step once, automatically, when the
+ * step begins, so there is nothing to replay, pause or skip.
+ *
+ * Width comes from [screenWidthDp] (the live overlay window), not from LocalConfiguration.
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -460,17 +469,13 @@ fun RoamGuideWidget(
     role: String = "Roam",
     roleType: String = "",
     onBack: () -> Unit,
-    // Voice Guide coach. Null (the default) keeps every existing caller and
-    // preview working, and means the widget behaves exactly as before.
+    // Voice Guide coach. Null (the default) keeps previews and existing callers working,
+    // and hides the On / Off control.
     voice: VoiceGuideManager? = null,
-    // Folds the card back to the bubble. Null keeps the card without a collapse control.
-    onCollapse: (() -> Unit)? = null
+    // Width of the screen in dp. Defaults to the live overlay window (JetOverlay); tests pass a fixed value.
+    screenWidthDp: Float = JetOverlay.screenWidthDp
 ) {
     val context = LocalContext.current
-    // Width from displayMetrics (true screen), NOT LocalConfiguration.
-    // In a WRAP_CONTENT overlay window, LocalConfiguration returns the WINDOW size,
-    // so widgetWidth fed back on itself and shrank to ~35% (your screenshot).
-    // displayMetrics is the real screen, so the width fraction is the true share of it.
     // Dynamic roles: each role's JSON is parsed once and cached for the overlay's lifetime.
     val guideCache = remember { HashMap<String, GuideData>() }
     val guideFor: (String) -> GuideData = { r -> guideCache.getOrPut(r) { loadGuide(context, r) } }
@@ -492,19 +497,10 @@ fun RoamGuideWidget(
     // Selector menu: 0 = closed, 1 = role list, 2 = type list for pendingRole.
     var menuStage by remember { mutableIntStateOf(0) }
     var pendingRole by remember { mutableStateOf(startRole) }
-    // True once the user picked something in the selector, so the description peeks
-    // even before the game timer has started.
-    var selectionTouched by remember { mutableStateOf(false) }
-    // 3-state cycle, replaces detailsExpanded (bool).
-    // 0 = default: short description (2 lines)
-    // 1 = expand: full description (6 lines) + details
-    // 2 = full collapsed: even short description hidden, only header left
-    // Loop: 0 -> 1 -> 2 -> 0. Positional saveable state keeps this local to the widget.
-    var displayMode by rememberSaveable { mutableIntStateOf(0) } // default = short guide text visible
-    var helpExpanded by rememberSaveable { mutableStateOf(false) }
-    // Hide instructions DELETED. It hid the description with no way
-    // back (button lived inside expanded section, so once hidden you couldn't
-    // unhide without re-expanding). Description is now always visible.
+    // Row 2 (the guide) is open by default. The + / - button folds it.
+    var guideOpen by rememberSaveable { mutableStateOf(true) }
+    // The spell tracker is hidden by default. The > / < button opens it.
+    var spellsOpen by rememberSaveable { mutableStateOf(false) }
     var turtleSlain by rememberSaveable { mutableIntStateOf(0) }
     var lordSlain by rememberSaveable { mutableIntStateOf(0) }
     var lastSlainAt by rememberSaveable { mutableStateOf<Int?>(null) }
@@ -515,28 +511,38 @@ fun RoamGuideWidget(
     // we wake, then fade again after the idle delay. snapshotFlow reads the tick
     // outside composition so drags don't recompose the widget.
     var awake by remember { mutableStateOf(true) }
-    val displayModeNow by rememberUpdatedState(displayMode)
-    val menuOpenNow by rememberUpdatedState(menuStage != 0 || helpExpanded)
+    val guideOpenNow by rememberUpdatedState(guideOpen)
+    val menuOpenNow by rememberUpdatedState(menuStage != 0)
     LaunchedEffect(Unit) {
         snapshotFlow { JetOverlay.touchTick.longValue }.collectLatest {
             awake = true
-            delay(if (displayModeNow == 1) EXPANDED_IDLE_MS else IDLE_FADE_MS)
+            delay(if (guideOpenNow) EXPANDED_IDLE_MS else IDLE_FADE_MS)
             if (!menuOpenNow) awake = false
         }
     }
     // Menus are separate windows (touches in them never reach the overlay), so wake on
     // open and again on close to restart the idle timer.
-    LaunchedEffect(menuStage, helpExpanded) { JetOverlay.wake() }
+    LaunchedEffect(menuStage) { JetOverlay.wake() }
     val fadeAlpha by animateFloatAsState(
         targetValue = if (awake) 1f else IDLE_ALPHA,
         animationSpec = tween(durationMillis = if (awake) 150 else 900),
         label = "idleFade"
     )
-    var peek by remember { mutableStateOf(false) }
+
+    // Width: compact while the spell tracker is hidden, 70% of the screen once it is open.
+    // Only the width changes; the card height depends on the guide row alone.
+    val expandedWidth = landscapeWidgetWidthDp(screenWidthDp)
+    val compactWidth = minOf(HEADER_COMPACT_WIDTH_DP, expandedWidth)
+    val cardWidth by animateDpAsState(
+        targetValue = (if (spellsOpen) expandedWidth else compactWidth).dp,
+        animationSpec = tween(durationMillis = 180),
+        label = "cardWidth"
+    )
 
     val selectedPlan = plans.firstOrNull { it.id == selectedPlanId } ?: plans.firstOrNull()
-    val planShort = selectedPlan?.label?.substringBefore(" - ")?.trim().orEmpty()
-    val selectorLabel = (if (planShort.isNotBlank()) "$activeRole · $planShort" else activeRole) + " ▾"
+    // Plan number is 1-based within the role: "E4" is EXP, plan 4.
+    val planNumber = selectedPlan?.let { plans.indexOf(it) + 1 } ?: 1
+    val selectorLabel = "${roleLetter(activeRole)}$planNumber ▾"
     LaunchedEffect(isRunning) {
         while (isRunning) {
             delay(1_000L)
@@ -544,9 +550,8 @@ fun RoamGuideWidget(
         }
     }
 
-    // Voice Guide needs the step INDEX (Next / Prev walk the list), so the
-    // lookup is index-based. Semantics are unchanged: first step whose window
-    // contains the clock, else the last one.
+    // The step index drives both the displayed step and the auto-speak key.
+    // Semantics: first step whose window contains the clock, else the last one.
     val currentStepIndex = selectedPlan?.steps?.indexOfFirst {
         elapsedSeconds >= it.startSeconds && elapsedSeconds < it.endSeconds
     }?.takeIf { it >= 0 } ?: (selectedPlan?.steps?.lastIndex ?: -1)
@@ -554,15 +559,9 @@ fun RoamGuideWidget(
     val hasGuide = selectedPlan != null && currentStep != null
 
     // ---------------- Voice Guide (floating TTS coach) ----------------
-    // Inert unless the service handed us a manager AND the player switched the
-    // feature on, so with Voice Guide off the overlay composes exactly what it
-    // did before: no extra row, no engine, no audio focus, no download.
-    // `voice` is null until the overlay host attaches a manager (and in
-    // previews), so the flag is derived from the state alone: no manager means no
-    // state means not enabled. Note that voiceOn therefore *proves* both
-    // voiceState and voice are non-null, and K2 sees that chain - so the calls
-    // guarded by voiceOn below use plain dot access on purpose, they are not
-    // unguarded.
+    // Inert unless the service handed us a manager AND the player switched the feature on.
+    // `voice` is null until the overlay host attaches a manager (and in previews), so
+    // voiceOn proves both voiceState and voice are non-null.
     val voiceState = voice?.state
     val voiceOn = voiceState?.enabled == true
     val spokenSteps = remember(selectedPlan) {
@@ -583,12 +582,15 @@ fun RoamGuideWidget(
         voice?.setCurrentStep(step)
         if (voiceOn) voice.onStepAdvanced(step)
     }
+
     val objective = computeObjective(elapsedSeconds, turtleSlain, lordSlain, lastSlainAt, lastSlainWasLord, guide.timers)
     val isTurtle = objective.type == ObjectiveType.TURTLE
+    // "T 00:23" counts down to the turtle; "T UP" while it is alive (tap to mark it slain).
+    val objectiveLetter = if (isTurtle) "T" else "L"
     val objectiveText = if (objective.isAlive) {
-        if (isTurtle) "Turtle ${objective.count} UP" else "Lord UP"
+        "$objectiveLetter UP"
     } else {
-        "${objective.label} in ${formatGameTime(objective.secondsUntil)}"
+        "$objectiveLetter ${formatGameTime(objective.secondsUntil)}"
     }
     // muted unless the objective is up or about to be. Gold/red now MEAN something.
     val urgent = objective.isAlive || objective.secondsUntil <= URGENT_SECONDS
@@ -601,74 +603,58 @@ fun RoamGuideWidget(
     LaunchedEffect(objective.type, objective.count, urgent) {
         if (urgent) JetOverlay.wake()
     }
-    // Hidden description only 'peeks' when something actually changes.
-    LaunchedEffect(currentStep?.startSeconds, objective.type, objective.count, objective.isAlive, lastSlainAt, activeRole, selectedPlanId) {
-        if (elapsedSeconds > 0 || lastSlainAt != null || selectionTouched) {
-            peek = true
-            JetOverlay.wake()
-            delay(PEEK_MS)
-            peek = false
-        }
-    }
-    // the step's own objective_contest / objective_trade are written for that moment of the game
-    // ("Second Turtle", "First Lord"), so prefer them when the step is about the objective that is up;
-    // otherwise fall back to the role-level template. objective_trade was never shown before.
+    // The step's own objective_contest is written for that moment of the game ("Second Turtle"),
+    // so prefer it when the step is about the objective that is up. Otherwise use the role template.
     val stepAboutObjective = currentStep != null && currentStep.phase.contains(objective.label, ignoreCase = true)
     val contestText = (if (stepAboutObjective) currentStep.objectiveContest else null).takeUnless { it.isNullOrBlank() }
         ?: if (isTurtle) selectedPlan?.turtleContest.orEmpty() else selectedPlan?.lordContest.orEmpty()
-    val tradeText = (if (stepAboutObjective) currentStep.objectiveTrade else null).takeUnless { it.isNullOrBlank() }
-        ?: if (isTurtle) selectedPlan?.turtleTrade.orEmpty() else selectedPlan?.lordTrade.orEmpty()
-    val objectiveDescription = if (!hasGuide) "No guide data for $activeRole (${guideAssetFor(activeRole)} missing or invalid). Timer, objective and spells still work." else when {
+    // The slain label names the LAST slain objective, not the next one.
+    val objectiveDescription = if (!hasGuide) {
+        "No guide data for $activeRole (${guideAssetFor(activeRole)} missing or invalid). " +
+            "Timer, objective and spells still work."
+    } else when {
         objective.isAlive -> contestText
-        // The slain label names the LAST slain objective, not the next one. At 7:26 after a Turtle kill, the next is Lord.
-        // next is Lord — old said "Lord slain".
-        lastSlainAt != null -> "${if (lastSlainWasLord) "Lord" else "Turtle"} slain. Next: ${objective.label}. Push, farm, or reset." // countdown lives in the pill; no per-second text churn
+        // countdown lives in the pill; no per-second text churn
+        lastSlainAt != null -> "${if (lastSlainWasLord) "Lord" else "Turtle"} slain. " +
+            "Next: ${objective.label}. Push, farm, or reset."
         else -> currentStep.description
     }
-    // hidden mode (≡) peeks the guide's one-line `compact` text instead of the full instruction.
-    val peekText = if (objective.isAlive || lastSlainAt != null) objectiveDescription
-        else currentStep?.compact.takeUnless { it.isNullOrBlank() } ?: objectiveDescription
-    val displayMetrics = LocalResources.current.displayMetrics
-    val screenWidthDp = displayMetrics.widthPixels / displayMetrics.density
-    // Width is fixed at 70% of the true screen width (displayMetrics, not the window).
-    // It no longer depends on text length or on the expanded state, so nothing jumps.
-    val widgetWidth = landscapeWidgetWidthDp(screenWidthDp)
+    // Width is set by spellsOpen only (see cardWidth above), not by the text length.
     // Step progress for timer background. Fixed value, no fillMaxHeight.
     val stepProgress = if (currentStep != null) {
         val span = (currentStep.endSeconds - currentStep.startSeconds).coerceAtLeast(1)
         ((elapsedSeconds - currentStep.startSeconds).toFloat() / span).coerceIn(0f, 1f)
     } else 0f
-    val blessing = guide.blessings.firstOrNull {
-        it.id == selectedPlan?.blessingId ||
-            it.name.equals(selectedPlan?.blessing?.substringBefore('/')?.trim(), ignoreCase = true)
-    }
 
     // Gap between the two widgets = exactly 1 physical pixel.
     // 1.dp is NOT 1px (at 3x density 1.dp = 3px), so convert 1px -> dp.
     val onePx = with(LocalDensity.current) { 1.toDp() }
     Column(
         modifier = Modifier
-            .width(widgetWidth.dp)
+            .width(cardWidth)
             .graphicsLayer { alpha = fadeAlpha },
-        // No outer horizontal padding: the card itself is widgetWidth,
-        // so its visible edges line up exactly with the green line.
         verticalArrangement = Arrangement.spacedBy(onePx)
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
+                .testTag("overlay_card")
                 .clip(RoundedCornerShape(12.dp))
                 .background(GuideBackground)
                 .border(1.dp, GuideBorder, RoundedCornerShape(12.dp))
                 .animateContentSize(animationSpec = tween(durationMillis = 180))
-                .padding(horizontal = 8.dp, vertical = 6.dp),
-            verticalArrangement = Arrangement.spacedBy(5.dp)
+                .padding(horizontal = 8.dp, vertical = 4.dp),
+            verticalArrangement = Arrangement.spacedBy(3.dp)
         ) {
+            // ---- Row 1: the header ----
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag("overlay_header"),
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
+                // Timer: tap to start or pause the game clock.
                 val timerProgressWidth by animateFloatAsState(
                     targetValue = stepProgress,
                     animationSpec = tween(durationMillis = 250),
@@ -676,8 +662,8 @@ fun RoamGuideWidget(
                 )
                 Box(
                     modifier = Modifier
-                        .width(70.dp)
-                        .height(30.dp)
+                        .width(58.dp)
+                        .height(26.dp)
                         .clip(RoundedCornerShape(9.dp))
                         .background(GuideSurface)
                         .border(
@@ -693,7 +679,7 @@ fun RoamGuideWidget(
                     Box(
                         modifier = Modifier
                             .fillMaxWidth(timerProgressWidth)
-                            .height(30.dp)
+                            .height(26.dp)
                             .background(GuideAccent.copy(alpha = 0.28f))
                             .align(Alignment.CenterStart)
                     )
@@ -706,7 +692,9 @@ fun RoamGuideWidget(
                         maxLines = 1
                     )
                 }
-                Box(modifier = Modifier.weight(1f)) {
+
+                // Role and plan: "R1" roam plan 1, "E4" EXP plan 4. Tap to change.
+                Box(modifier = Modifier.width(62.dp)) {
                     GuideControl(
                         selectorLabel,
                         if (hasGuide) GuideAccent else GuideMuted,
@@ -715,7 +703,8 @@ fun RoamGuideWidget(
                             .testTag("overlay_role_selector"),
                         maxLines = 1,
                         fontSize = 10.sp,
-                        contentDescription = "Change role and type: $activeRole $planShort",
+                        contentDescription = "Change role and plan: $activeRole ${selectedPlan?.label.orEmpty()}",
+                        compact = true,
                         onClick = { menuStage = 1 }
                     )
                     DropdownMenu(
@@ -737,7 +726,6 @@ fun RoamGuideWidget(
                                     },
                                     onClick = {
                                         if (guideFor(r).plans.isEmpty()) {
-                                            selectionTouched = true
                                             activeRole = r
                                             selectedPlanId = ""
                                             menuStage = 0
@@ -752,7 +740,7 @@ fun RoamGuideWidget(
                             DropdownMenuItem(
                                 text = {
                                     Text(
-                                        text = "‹ $pendingRole · pick type",
+                                        text = "‹ $pendingRole · pick plan",
                                         color = GuideMuted,
                                         fontSize = 11.sp,
                                         maxLines = 1
@@ -773,7 +761,6 @@ fun RoamGuideWidget(
                                         )
                                     },
                                     onClick = {
-                                        selectionTouched = true
                                         activeRole = pendingRole
                                         selectedPlanId = plan.id
                                         menuStage = 0
@@ -783,6 +770,8 @@ fun RoamGuideWidget(
                         }
                     }
                 }
+
+                // Turtle or lord timer. Tap while it is up to mark it slain.
                 val animatedObjColor by animateColorAsState(
                     targetValue = objectiveColor,
                     animationSpec = tween(durationMillis = 220),
@@ -791,11 +780,14 @@ fun RoamGuideWidget(
                 GuideControl(
                     objectiveText,
                     animatedObjColor,
-                    modifier = Modifier.testTag("overlay_objective_button"),
+                    modifier = Modifier
+                        .width(64.dp)
+                        .testTag("overlay_objective_button"),
                     background = animatedObjColor.copy(alpha = if (objective.isAlive) 0.24f else if (urgent) 0.16f else 0.08f),
                     borderColor = animatedObjColor.copy(alpha = if (urgent) 0.72f else 0.35f),
                     fontWeight = FontWeight.Bold,
                     fontSize = 10.sp,
+                    compact = true,
                     onClick = {
                         if (objective.isAlive) {
                             previousObjective = ObjectiveSnapshot(
@@ -809,166 +801,119 @@ fun RoamGuideWidget(
                             lastSlainAt = elapsedSeconds
                         }
                     },
-                    contentDescription = if (objective.isAlive) "Mark ${objective.label} as slain" else objectiveText
+                    contentDescription = if (objective.isAlive) {
+                        "Mark ${objective.label} as slain"
+                    } else {
+                        "${objective.label} in ${formatGameTime(objective.secondsUntil)}"
+                    }
                 )
+
+                // + / -: fold or open the guide (row 2).
                 GuideControl(
-                    when (displayMode) {
-                        0 -> "+"
-                        1 -> "−"
-                        else -> "≡"
-                    },
+                    if (guideOpen) "−" else "+",
                     GuideMuted,
                     modifier = Modifier
-                        .width(30.dp)
-                        .testTag("overlay_mode_toggle"),
+                        .width(26.dp)
+                        .testTag("overlay_guide_toggle"),
                     fontSize = 14.sp,
-                    contentDescription = when (displayMode) {
-                        0 -> "Expand to full description"
-                        1 -> "Hide description completely"
-                        else -> "Back to short description"
-                    }
+                    compact = true,
+                    contentDescription = if (guideOpen) "Collapse the guide" else "Expand the guide"
                 ) {
-                    displayMode = (displayMode + 1) % 3
+                    guideOpen = !guideOpen
                 }
-                Box {
+
+                // Voice mode On / Off. Turning it on downloads the selected voice once, as before.
+                if (voice != null) {
                     GuideControl(
-                        "?",
-                        GuideMuted,
-                        modifier = Modifier
-                            .width(30.dp)
-                            .testTag("overlay_help_button"),
-                        fontSize = 14.sp,
-                        onClick = { helpExpanded = true },
-                        contentDescription = "Help and tips"
-                    )
-                    DropdownMenu(
-                        expanded = helpExpanded,
-                        onDismissRequest = { helpExpanded = false }
-                    ) {
-                        listOf(
-                            "Timer: Tap timer to start / pause",
-                            "Spell: Tap = used · Hold = change",
-                            "Spell: Tap again to cancel cooldown",
-                            "Objective: Tap Turtle / Lord when slain",
-                            "Role/Type: Tap selector, pick role, then type",
-                            "Mode: + = short · − = full · ≡ = hidden"
-                        ).forEach { tip ->
-                            DropdownMenuItem(
-                                text = { Text(tip, color = GuideText, fontSize = 11.sp) },
-                                onClick = { helpExpanded = false }
-                            )
+                        if (voiceOn) "On" else "Off",
+                        if (voiceOn) GuideAccent else GuideMuted,
+                        Modifier
+                            .width(34.dp)
+                            .testTag("overlay_voice_toggle"),
+                        fontSize = 10.sp,
+                        compact = true,
+                        contentDescription = if (voiceOn) {
+                            "Voice guide is on. Tap to turn it off."
+                        } else {
+                            "Voice guide is off. Tap to turn it on."
                         }
+                    ) {
+                        voice.setEnabled(!voiceOn)
                     }
                 }
-                if (onCollapse != null) {
-                    GuideControl(
-                        "▴",
-                        GuideMuted,
-                        modifier = Modifier
-                            .width(30.dp)
-                            .testTag("overlay_collapse_button"),
-                        fontSize = 14.sp,
-                        onClick = onCollapse,
-                        contentDescription = "Collapse roam guide to bubble"
-                    )
-                }
+
+                // x: exit the widget (stops the overlay service).
                 GuideControl(
-                    "×",
+                    "x",
                     GuideMuted,
-                    modifier = Modifier
-                        .width(30.dp)
+                    Modifier
+                        .width(26.dp)
                         .testTag("overlay_close_button"),
                     fontSize = 14.sp,
+                    compact = true,
                     onClick = onBack,
-                    contentDescription = "Close roam guide"
+                    contentDescription = "Exit the widget"
                 )
-            }
 
-            // Spell tracker sits in the same header card as the timer and selector,
-            // on its own row so each of the five cells has room for its label.
-            EnemySpellTrackerWidget(
-                elapsedSeconds = elapsedSeconds,
-                spells = guide.spells,
-                spellDefaults = guide.spellDefaults,
-                onSpellUsed = { spellName, cooldownSeconds ->
-                    if (voiceOn) voice.announceSpell(spellName, cooldownSeconds)
-                },
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            if (voiceOn) {
-                val coach = voice
-                VoiceControlRow(
-                    state = voiceState,
-                    canStep = hasGuide && spokenSteps.size > 1,
-                    onSpeak = { currentSpoken?.let { coach.speak(it) } },
-                    onPause = { coach.pause() },
-                    onResume = { coach.resume() },
-                    onRepeat = { coach.repeat() },
-                    onPrev = { coach.speakRelative(spokenSteps, currentStepIndex, -1) },
-                    onNext = { coach.speakRelative(spokenSteps, currentStepIndex, 1) },
-                    onStop = { coach.stop() },
-                    onCancelInstall = { coach.cancelInstall() }
-                )
-            }
-
-            val shownDescription = if (displayMode == 2) peekText else objectiveDescription
-            if ((displayMode != 2 || peek) && shownDescription.isNotBlank()) {
-                OutlinedText(
-                    text = shownDescription,
-                    color = if (coachIsSpeakingThisStep) GuideGold else GuideText,
-                    fontSize = 10.sp,
-                    lineHeight = 13.sp,
-                    maxLines = if (displayMode == 1) 6 else 2,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
-            if (displayMode == 1) {
-                if (selectedPlan != null && currentStep != null) {
-                    val livePatch = GameData.patchNotes.shortVersion
-                    val patchLabel = guide.patch.substringBefore("-").takeIf(String::isNotBlank)?.let { p ->
-                        if (p != livePatch) " · $p (older than $livePatch)" else " · $p"
-                    }.orEmpty()
-                    OutlinedText(
-                        "${currentStep.timeLabel.ifBlank { "${formatGameTime(currentStep.startSeconds)}–${formatGameTime(currentStep.endSeconds)}" }}" +
-                            "${currentStep.phase.takeIf(String::isNotBlank)?.let { " · $it" }.orEmpty()}$patchLabel",
-                        color = GuideMuted,
-                        fontSize = 10.sp
+                // Spell tracker. It stays composed while hidden, so its cooldowns survive
+                // the toggle; only its slot is zero-width while closed.
+                Box(
+                    modifier = (if (spellsOpen) Modifier.weight(1f) else Modifier.width(0.dp))
+                        .clipToBounds()
+                ) {
+                    EnemySpellTrackerWidget(
+                        elapsedSeconds = elapsedSeconds,
+                        spells = guide.spells,
+                        spellDefaults = guide.spellDefaults,
+                        onSpellUsed = { spellName, cooldownSeconds ->
+                            if (voiceOn) voice.announceSpell(spellName, cooldownSeconds)
+                        },
+                        modifier = Modifier.fillMaxWidth()
                     )
-                    currentStep.checklist.forEach { item ->
-                        OutlinedText("• $item", color = GuideText, fontSize = 10.sp, lineHeight = 13.sp)
-                    }
-                    if (currentStep.vision.isNotBlank()) GuideDetail("Vision", currentStep.vision)
-                    if (currentStep.decision.isNotBlank()) GuideDetail("Decision", currentStep.decision)
-                    if (currentStep.dont.isNotBlank()) GuideDetail("Avoid", currentStep.dont)
-                    if (objective.isAlive && tradeText.isNotBlank()) GuideDetail("If losing", tradeText)
-                    if (blessing != null && blessing.effect.isNotBlank() && selectedPlan.blessing.isNotBlank()) {
-                        GuideDetail(selectedPlan.blessing, blessing.effect)
-                    }
-                    if (elapsedSeconds == 0) {
-                        if (selectedPlan.winCondition.isNotBlank()) GuideDetail("Win", selectedPlan.winCondition)
-                        if (selectedPlan.loseCondition.isNotBlank()) GuideDetail("Lose", selectedPlan.loseCondition)
-                        if (selectedPlan.emblem.isNotBlank()) GuideDetail("Emblem", selectedPlan.emblem)
-                        if (selectedPlan.battleSpells.isNotEmpty()) GuideDetail("Spells", selectedPlan.battleSpells.joinToString(" · "))
-                        if (selectedPlan.coreItems.isNotEmpty()) GuideDetail("Core items", selectedPlan.coreItems.joinToString(" · "))
-                        if (guide.retributions.isNotEmpty()) {
-                            GuideDetail("Retribution", guide.retributions.joinToString(" · ") { it.name })
-                        }
-                        if (blessing != null && blessing.unlock.isNotBlank()) GuideDetail("Unlock", blessing.unlock)
-                        if (selectedPlan.heroes.isNotEmpty()) GuideDetail("Suggested heroes", selectedPlan.heroes.take(6).joinToString())
-                    } else if (guide.globalRules.isNotEmpty()) {
-                        val ruleIndex = selectedPlan.steps.indexOf(currentStep).coerceAtLeast(0)
-                        GuideDetail("Rule", guide.globalRules[ruleIndex % guide.globalRules.size])
-                    }
                 }
+
+                // > opens the spell tracker, < closes it.
+                GuideControl(
+                    if (spellsOpen) "<" else ">",
+                    GuideMuted,
+                    Modifier
+                        .width(26.dp)
+                        .testTag("overlay_spell_toggle"),
+                    fontSize = 14.sp,
+                    compact = true,
+                    contentDescription = if (spellsOpen) "Hide spell tracker" else "Show spell tracker"
+                ) {
+                    spellsOpen = !spellsOpen
+                }
+            }
+
+            // ---- Row 2: the guide (open by default; the + / - button folds it) ----
+            if (guideOpen) {
+                if (objectiveDescription.isNotBlank()) {
+                    OutlinedText(
+                        text = objectiveDescription,
+                        color = if (coachIsSpeakingThisStep) GuideGold else GuideText,
+                        fontSize = 10.sp,
+                        lineHeight = 13.sp,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .testTag("overlay_guide_text")
+                    )
+                }
+                // Clock corrections, kept small and only while the guide is open.
                 FlowRow(
                     horizontalArrangement = Arrangement.spacedBy(4.dp),
                     verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
-                    GuideControl("−10s", GuideMuted) { elapsedSeconds = (elapsedSeconds - 10).coerceAtLeast(0) }
-                    GuideControl("+10s", GuideMuted) { elapsedSeconds = (elapsedSeconds + 10).coerceAtMost(GAME_CLOCK_MAX_SECONDS) }
-                    GuideControl("Reset", GuideMuted) {
+                    GuideControl("−10s", GuideMuted, compact = true) {
+                        elapsedSeconds = (elapsedSeconds - 10).coerceAtLeast(0)
+                    }
+                    GuideControl("+10s", GuideMuted, compact = true) {
+                        elapsedSeconds = (elapsedSeconds + 10).coerceAtMost(GAME_CLOCK_MAX_SECONDS)
+                    }
+                    GuideControl("Reset", GuideMuted, compact = true) {
                         elapsedSeconds = 0
                         isRunning = false
                         turtleSlain = 0
@@ -978,7 +923,7 @@ fun RoamGuideWidget(
                         previousObjective = null
                     }
                     if (previousObjective != null) {
-                        GuideControl("Undo slain", GuideGold, onClick = {
+                        GuideControl("Undo slain", GuideGold, compact = true, onClick = {
                             previousObjective?.let { snapshot ->
                                 turtleSlain = snapshot.turtleSlain
                                 lordSlain = snapshot.lordSlain
@@ -991,8 +936,17 @@ fun RoamGuideWidget(
                 }
             }
         }
-
     }
+}
+
+/** Role letter used in the selector: R, J, M, G or E. */
+private fun roleLetter(role: String): String = when (role) {
+    "Roam" -> "R"
+    "Jungle" -> "J"
+    "Mid" -> "M"
+    "Gold" -> "G"
+    "EXP" -> "E"
+    else -> role.take(1).uppercase()
 }
 
 private val TrackerSurface = MLBBPlusColors.GithubCard.copy(alpha = 0.46f)
@@ -1025,25 +979,19 @@ private val fallbackSpells = listOf(
     TrackedSpell("Vengeance", 75)
 )
 
-// Short labels so lane + spell still fit in one spell cell (the spell row is
-// one fifth of the 70%-wide header card; see RoamGuideWidget width comment).
-private val spellAbbreviations = mapOf(
-    "Aegis" to "AEG",
-    "Arrival" to "ARR",
-    "Execute" to "EXE",
-    "Flicker" to "FLK",
-    "Flameshot" to "FLA",
-    "Inspire" to "INS",
-    "Petrify" to "PET",
-    "Purify" to "PUR",
-    "Retribution" to "RET",
-    "Revitalize" to "REV",
-    "Sprint" to "SPR",
-    "Vengeance" to "VEN"
-)
+/** The enemy lane key ("EXP", "JG", "MID", "GOLD", "ROAM") as its one-letter label. */
+private fun laneLetter(lane: String): String = when (lane) {
+    "EXP" -> "E"
+    "JG" -> "J"
+    "MID" -> "M"
+    "GOLD" -> "G"
+    "ROAM" -> "R"
+    else -> lane.take(1)
+}
 
-private fun abbreviationFor(spellName: String): String =
-    spellAbbreviations[spellName] ?: spellName.take(3).uppercase()
+/** Seconds left as a short label that fits a 26 dp cell: "42", then "1m" for a minute or more. */
+private fun shortCooldown(seconds: Int): String =
+    if (seconds >= 60) "${seconds / 60}m" else seconds.toString()
 
 private fun initialTrackedSpells(spells: List<TrackedSpell>, defaults: Map<String, String>) =
     listOf("EXP", "JG", "MID", "GOLD", "ROAM").map { lane ->
@@ -1102,7 +1050,7 @@ private fun EnemySpellTrackerWidget(
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(34.dp)
+                            .height(22.dp)
                             .clip(RoundedCornerShape(9.dp))
                             .background(if (isCoolingDown) TrackerSurfaceCooling else TrackerSurface)
                             .border(
@@ -1134,32 +1082,22 @@ private fun EnemySpellTrackerWidget(
                             .testTag("overlay_spell_${laneSpell.lane.lowercase()}"),
                         contentAlignment = Alignment.Center
                     ) {
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.spacedBy(0.dp),
+                        // One line per cell: the cooldown replaces the spell name while it runs,
+                        // so the row stays 22 dp tall and the whole header stays short.
+                        // One letter per enemy lane (E, J, M, G, R). While cooling down, the
+                        // seconds left replace the letter.
+                        OutlinedText(
+                            text = if (isCoolingDown) shortCooldown(remaining) else laneLetter(laneSpell.lane),
+                            color = if (isCoolingDown) TrackerGold.copy(alpha = 0.95f) else TrackerMuted,
+                            fontSize = 9.sp,
+                            fontWeight = FontWeight.Bold,
+                            fontFamily = if (isCoolingDown) FontFamily.Monospace else FontFamily.SansSerif,
+                            letterSpacing = 0.3.sp,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            textAlign = TextAlign.Center,
                             modifier = Modifier.padding(horizontal = 2.dp)
-                        ) {
-                            OutlinedText(
-                                text = "${laneSpell.lane} ${abbreviationFor(spell.name)}",
-                                color = if (isCoolingDown) TrackerGold.copy(alpha = 0.85f) else TrackerMuted,
-                                fontSize = if (isCoolingDown) 8.sp else 9.sp,
-                                fontWeight = FontWeight.Bold,
-                                letterSpacing = 0.3.sp,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                                textAlign = TextAlign.Center
-                            )
-                            if (isCoolingDown) OutlinedText(
-                                text = formatCooldown(remaining),
-                                color = TrackerGold.copy(alpha = 0.95f),
-                                fontSize = 11.sp,
-                                fontWeight = FontWeight.Bold,
-                                fontFamily = FontFamily.Monospace,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                                textAlign = TextAlign.Center
-                            )
-                        }
+                        )
 
                         if (isCoolingDown) {
                             Box(
@@ -1249,147 +1187,7 @@ private fun OutlinedText(
     }
 }
 
-/**
- * Voice Guide controls, shown only while the feature is enabled.
- *
- * Layout: one 48dp row (the Material minimum touch target - deliberately taller
- * than the 28dp guide controls, because these are used mid-fight without
- * looking) plus a single status line for install progress, errors and hints.
- * The row is composed only when Voice Guide is on, so a widget with the feature
- * off is unchanged down to the last pixel.
- */
-@Composable
-private fun VoiceControlRow(
-    state: VoiceGuideManager.VoiceUiState,
-    canStep: Boolean,
-    onSpeak: () -> Unit,
-    onPause: () -> Unit,
-    onResume: () -> Unit,
-    onRepeat: () -> Unit,
-    onPrev: () -> Unit,
-    onNext: () -> Unit,
-    onStop: () -> Unit,
-    onCancelInstall: () -> Unit
-) {
-    val downloading = state.phase == VoiceGuideManager.Phase.DOWNLOADING
-    val speaking = state.phase == VoiceGuideManager.Phase.SPEAKING
-    val paused = state.phase == VoiceGuideManager.Phase.PAUSED
-    val busy = state.phase == VoiceGuideManager.Phase.PREPARING
-
-    // Label and action come from the shared decision table, so the overlay, the
-    // notification and the unit tests all describe the same behaviour.
-    val primaryLabel = VoiceGuideTransitions.primaryLabel(state.phase, downloading, busy)
-    val primaryAction = VoiceGuideTransitions.primaryAction(state.phase, downloading, busy)
-    val primaryDescription = when {
-        downloading -> "Cancel the voice model install"
-        busy -> "Loading the voice model"
-        speaking -> "Pause the coach"
-        paused -> "Resume the coach"
-        else -> "Speak this step"
-    }
-    val primaryColor = when {
-        downloading || busy -> GuideMuted
-        speaking -> GuideGold
-        paused -> GuideAccent
-        else -> GuideAccent
-    }
-
-    Column(
-        modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(2.dp)
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(3.dp)
-        ) {
-            GuideControl(
-                primaryLabel,
-                primaryColor,
-                modifier = Modifier.weight(1.3f).height(VOICE_CONTROL_HEIGHT),
-                fontSize = 11.sp,
-                contentDescription = primaryDescription,
-                onClick = {
-                    when (primaryAction) {
-                        VoiceGuideTransitions.PrimaryAction.CANCEL_DOWNLOAD -> onCancelInstall()
-                        VoiceGuideTransitions.PrimaryAction.PAUSE -> onPause()
-                        VoiceGuideTransitions.PrimaryAction.RESUME -> onResume()
-                        VoiceGuideTransitions.PrimaryAction.SPEAK -> onSpeak()
-                        VoiceGuideTransitions.PrimaryAction.NONE -> Unit
-                    }
-                }
-            )
-            GuideControl(
-                "Repeat",
-                if (speaking || paused) GuideText else GuideMuted,
-                modifier = Modifier.weight(1f).height(VOICE_CONTROL_HEIGHT),
-                fontSize = 10.sp,
-                contentDescription = "Repeat this step",
-                onClick = onRepeat
-            )
-            GuideControl(
-                "Prev",
-                if (canStep) GuideText else GuideMuted,
-                modifier = Modifier.weight(0.8f).height(VOICE_CONTROL_HEIGHT),
-                fontSize = 10.sp,
-                contentDescription = "Speak the previous step",
-                onClick = { if (canStep) onPrev() }
-            )
-            GuideControl(
-                "Next",
-                if (canStep) GuideText else GuideMuted,
-                modifier = Modifier.weight(0.8f).height(VOICE_CONTROL_HEIGHT),
-                fontSize = 10.sp,
-                contentDescription = "Speak the next step",
-                onClick = { if (canStep) onNext() }
-            )
-            GuideControl(
-                "Stop",
-                GuideMuted,
-                modifier = Modifier.weight(0.8f).height(VOICE_CONTROL_HEIGHT),
-                fontSize = 10.sp,
-                contentDescription = "Stop speaking and give audio back to the game",
-                onClick = onStop
-            )
-        }
-
-        // Download progress: a 3dp bar, same visual language as the timer fill.
-        if (downloading && state.progress > 0f) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(3.dp)
-                    .clip(RoundedCornerShape(2.dp))
-                    .background(GuideSurface)
-            ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth(state.progress.coerceIn(0f, 1f))
-                        .height(3.dp)
-                        .background(GuideAccent)
-                )
-            }
-        }
-
-        // One status line: progress text, the fallback notice, the TalkBack hint
-        // or an error. Blank means the row costs nothing.
-        val note = state.progressLabel.ifBlank { state.message }
-        if (note.isNotBlank()) {
-            OutlinedText(
-                text = note,
-                color = if (state.phase == VoiceGuideManager.Phase.ERROR) GuideRed else GuideMuted,
-                fontSize = 10.sp,
-                lineHeight = 13.sp,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.fillMaxWidth()
-            )
-        }
-    }
-}
-
-/** 48dp: the Material minimum touch target, so the coach can be driven mid-fight. */
-private val VOICE_CONTROL_HEIGHT = 48.dp
-
+/** The step as the coach reads it: a stable key for auto-speak, and the text fragments. */
 private fun GuideStep.toSpoken(planId: String, index: Int): SpokenStep = SpokenStep(
     key = "$planId#$index#$startSeconds",
     startSeconds = startSeconds,
@@ -1409,16 +1207,18 @@ private fun GuideControl(
     borderColor: Color = GuideBorder,
     fontWeight: FontWeight = FontWeight.SemiBold,
     fontSize: TextUnit = 10.sp,
+    // Header controls use the 24 dp row; the expanded panel keeps the touch-friendlier 30 dp.
+    compact: Boolean = false,
     onClick: () -> Unit
 ) {
     Box(
         modifier = modifier
-            .heightIn(min = 30.dp)
+            .heightIn(min = if (compact) 24.dp else 30.dp)
             .clip(RoundedCornerShape(9.dp))
             .background(background)
             .border(1.dp, borderColor, RoundedCornerShape(9.dp))
             .clickable(onClick = onClick)
-            .padding(horizontal = 7.dp, vertical = 4.dp)
+            .padding(horizontal = if (compact) 5.dp else 7.dp, vertical = if (compact) 2.dp else 4.dp)
             .semantics { this.contentDescription = contentDescription },
         contentAlignment = Alignment.Center
     ) {
@@ -1429,29 +1229,6 @@ private fun GuideControl(
             fontWeight = fontWeight,
             maxLines = maxLines,
             overflow = TextOverflow.Ellipsis
-        )
-    }
-}
-
-@Composable
-private fun GuideDetail(label: String, text: String) {
-    Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-        OutlinedText(
-            text = "$label:",
-            color = GuideMuted,
-            fontSize = 10.sp,
-            lineHeight = 13.sp,
-            fontWeight = FontWeight.Bold,
-            maxLines = 1
-        )
-        OutlinedText(
-            text = text,
-            color = GuideText,
-            fontSize = 10.sp,
-            lineHeight = 13.sp,
-            maxLines = 3,
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.weight(1f, fill = false)
         )
     }
 }

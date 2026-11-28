@@ -71,12 +71,13 @@ The app should avoid assuming that every user understands game abbreviations or 
 - Objective timing support for Turtle and Lord.
 - Battle-spell defaults and enemy spell cooldown tracking.
 - Compact / expanded presentation and touch interaction state.
-- **Orientation modes (added 2026-11-27).** Portrait shows only a round bubble, which can be dragged. Landscape opens the bubble into the full guide with a smooth transition (tap the bubble; the ▴ control in the header folds it back). Rotating to portrait collapses the guide to the bubble again. The card keeps its clock and objective state while folded. In landscape the card is 70% of the screen width, and one header card holds the timer, role selector, close controls, and the five-cell spell tracker. Each orientation's screen size is recorded automatically on launch and on rotation (`ScreenProfiles.kt`), and each orientation keeps its own bubble position as a fraction of the screen.
+- **Orientation modes (added 2026-11-27).** Portrait shows only a round bubble, which can be dragged. Landscape opens the bubble into the full guide with a smooth transition (tap the bubble). Rotating to portrait collapses the guide to the bubble again. The card keeps its clock and objective state while folded. The guide card has **two rows**. Row 1 is the header: timer, role and plan (e.g. `E4`), turtle or lord timer (`T 00:23`, `L UP`), a + / − button that folds the guide, voice On / Off, x to exit the widget, and > to open the spell tracker. The tracker is hidden by default; opening it widens the card to 70% of the screen width without making it taller. Its five cells are one letter per enemy lane (E J M G R) and show seconds left while cooling down. Row 2 is the current step, shown while the guide is open. The coach reads each step once, automatically; there are no replay, pause or skip controls. Each orientation's screen size is recorded automatically on launch and on rotation (`ScreenProfiles.kt`), and each orientation keeps its own bubble position as a fraction of the screen.
 - Foreground notification with an explicit Stop action.
 - **Voice Guide — spoken coach (added 2026-11-27, default OFF).** Reads the step the player is on
-  in condensed spoken English and can auto-speak each new step as the match timer advances; overlay
-  controls are Speak/Pause/Resume · Repeat · Prev · Next · Stop, and the line being read aloud is
-  tinted gold. With the feature off the overlay composes exactly what it did before.
+  in condensed spoken English and auto-speaks each new step **once** as the match timer advances. The
+  widget has no voice transport controls (no replay, pause, prev or next): the header's On / Off
+  button turns the coach on or off, and the line being read aloud is tinted gold. The notification
+  keeps Play/Pause and Stop. With the feature off the overlay composes exactly what it did before.
 - **On-device voices, fully offline.** Kokoro (most natural) or the smaller/faster Piper
   voices through **sherpa-onnx 1.13.8**, with Android's own TTS as the last fallback. No cloud TTS
   is used: the selected voice pack is downloaded once, when Voice Guide is turned on, from the
@@ -85,6 +86,11 @@ The app should avoid assuming that every user understands game abbreviations or 
   rather than muted, TalkBack pauses the coach, and the notification gains Play/Pause and Stop voice
   actions. Engine choice, model URLs and checksums, the text-normalisation contract and the device
   test checklist are in [tts_implementation.md](tts_implementation.md).
+  Startup limits so the widget can never sit at "loading model" forever: the neural model has a
+  20 s load limit (a late load is discarded), the Android voice has a 5 s init limit and a 6 s
+  first-audio watchdog, and any failure is shown in the overlay status line and in Settings. The
+  app declares `<queries>` for `android.intent.action.TTS_SERVICE` (Android 11+ package visibility),
+  without which the system voice cannot initialise.
 
 ### Bundled data snapshot
 

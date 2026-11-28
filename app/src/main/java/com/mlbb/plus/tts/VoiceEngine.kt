@@ -68,6 +68,14 @@ interface VoiceEngine {
      */
     fun setSpeechRate(newRate: Float)
 
+    /**
+     * Why the last [speak] or [prepare] failed, in words a player can act on. Null when
+     * the last call worked. The manager shows it instead of leaving the widget on
+     * "Loading".
+     */
+    val lastError: String?
+        get() = null
+
     /** Frees native memory / unbinds the service. The manager calls this after
      *  [VoiceGuideManager.IDLE_RELEASE_MS] of silence and on service destroy. */
     fun release()
